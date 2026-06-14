@@ -1,14 +1,14 @@
 import express from 'express';
 import path from 'path';
 import fs from 'fs';
-import { getArangoDBSimulator } from './src/arangodb_sim.ts';
+import { getArangoDBSimulator } from './src/arangodb_sim.js';
 import { 
   getPipelineLogs, 
   isPipelineActive, 
   runPipelineExecution, 
   clearPipelineLogs,
   addPipelineLog
-} from './src/pipeline_runner.ts';
+} from './src/pipeline_runner.js';
 
 // Setup directories
 const INPUT_DIR = 'doc_pipeline/input';
@@ -35,7 +35,7 @@ async function startServer() {
         success: true,
         state: dbSim.getState()
       });
-    } catch (err: any) {
+    } catch (err) {
       res.status(500).json({ success: false, error: err.message });
     }
   });
@@ -49,7 +49,7 @@ async function startServer() {
         message: 'Database seeded with default templates successfully.',
         state: dbSim.getState()
       });
-    } catch (err: any) {
+    } catch (err) {
       res.status(500).json({ success: false, error: err.message });
     }
   });
@@ -63,7 +63,7 @@ async function startServer() {
         message: 'Database state cleared.',
         state: dbSim.getState()
       });
-    } catch (err: any) {
+    } catch (err) {
       res.status(500).json({ success: false, error: err.message });
     }
   });
@@ -79,7 +79,7 @@ async function startServer() {
         stats: result.stats,
         error: result.error
       });
-    } catch (err: any) {
+    } catch (err) {
       res.status(500).json({ success: false, error: err.message });
     }
   });
@@ -106,7 +106,7 @@ async function startServer() {
           };
         });
       res.json({ success: true, files });
-    } catch (err: any) {
+    } catch (err) {
       res.status(500).json({ success: false, error: err.message });
     }
   });
@@ -137,7 +137,7 @@ async function startServer() {
           size: `${(content?.length || 0) / 1024} KB`
         }
       });
-    } catch (err: any) {
+    } catch (err) {
       res.status(500).json({ success: false, error: err.message });
     }
   });
@@ -159,7 +159,7 @@ async function startServer() {
         success: true,
         message: 'Pipeline workflow started successfully.'
       });
-    } catch (err: any) {
+    } catch (err) {
       res.status(500).json({ success: false, error: err.message });
     }
   });
@@ -175,7 +175,7 @@ async function startServer() {
       } else {
         res.status(404).json({ success: false, error: 'File not found.' });
       }
-    } catch (err: any) {
+    } catch (err) {
       res.status(500).json({ success: false, error: err.message });
     }
   });

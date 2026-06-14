@@ -1,16 +1,10 @@
 import fs from 'fs';
 import path from 'path';
 import { GoogleGenAI } from '@google/genai';
-import { getArangoDBSimulator } from './arangodb_sim.ts';
-
-export interface PipelineLog {
-  timestamp: string;
-  level: 'info' | 'warn' | 'error' | 'success';
-  message: string;
-}
+import { getArangoDBSimulator } from './arangodb_sim.js';
 
 // Global log tracking for the active pipeline run
-let currentLogs: PipelineLog[] = [];
+let currentLogs = [];
 let isPipelineRunning = false;
 
 export function getPipelineLogs() {
@@ -26,8 +20,8 @@ export function clearPipelineLogs() {
   currentLogs = [];
 }
 
-export function addPipelineLog(level: 'info' | 'warn' | 'error' | 'success', message: string) {
-  const log: PipelineLog = {
+export function addPipelineLog(level, message) {
+  const log = {
     timestamp: new Date().toISOString(),
     level,
     message
@@ -37,7 +31,7 @@ export function addPipelineLog(level: 'info' | 'warn' | 'error' | 'success', mes
 }
 
 // Trigger standard pipeline simulation or AI-driven extraction
-export async function runPipelineExecution(aiKey?: string) {
+export async function runPipelineExecution(aiKey) {
   if (isPipelineRunning) {
     addPipelineLog('warn', 'Pipeline is already executing. Trigger ignored.');
     return;
@@ -76,7 +70,7 @@ export async function runPipelineExecution(aiKey?: string) {
     const arangoDb = getArangoDBSimulator();
 
     // Setup Gemini if key is provided
-    let ai: GoogleGenAI | null = null;
+    let ai = null;
     if (aiKey) {
       try {
         ai = new GoogleGenAI({
@@ -84,7 +78,7 @@ export async function runPipelineExecution(aiKey?: string) {
           httpOptions: { headers: { 'User-Agent': 'aistudio-build' } }
         });
         addPipelineLog('info', '🤖 Secure server-side Gemini layout model initialized.');
-      } catch (err: any) {
+      } catch (err) {
         addPipelineLog('warn', `Gemini client failed to boot (${err.message}). Defaulting to layout template simulation.`);
       }
     }
@@ -105,7 +99,7 @@ export async function runPipelineExecution(aiKey?: string) {
       const targetSubDir = path.join(rawOutputDir, filename);
       fs.mkdirSync(targetSubDir, { recursive: true });
 
-      let parsedLayoutJSON: any = null;
+      let parsedLayoutJSON = null;
 
       // Real or mocked parser content
       const fileContentPath = path.join(inputDir, filename);
@@ -120,7 +114,7 @@ export async function runPipelineExecution(aiKey?: string) {
           addPipelineLog('info', `Extracting structured elements using Gemini-3.5-Flash...`);
           parsedLayoutJSON = await generateAILayout(ai, filename, contentExcerpt, isPdf);
           addPipelineLog('success', `AI Extraction successful for ${filename}!`);
-        } catch (err: any) {
+        } catch (err) {
           addPipelineLog('warn', `AI extraction returned an error: ${err.message}. Using high-fidelity local templates.`);
           parsedLayoutJSON = generateLocalTemplateFallback(filename, isPdf);
         }
@@ -145,7 +139,7 @@ export async function runPipelineExecution(aiKey?: string) {
     
     addPipelineLog('info', '📦 Std relational arrays compiled successfully.');
 
-    // Write collections JSON onto disk matching Step 3 specs
+    // Write collections JSON onto disk matching specs
     fs.writeFileSync(path.join(collectionsDir, 'documents.json'), JSON.stringify(transformedDocs.documents, null, 2), 'utf-8');
     fs.writeFileSync(path.join(collectionsDir, 'sections.json'), JSON.stringify(transformedDocs.sections, null, 2), 'utf-8');
     fs.writeFileSync(path.join(collectionsDir, 'paragraphs.json'), JSON.stringify(transformedDocs.paragraphs, null, 2), 'utf-8');
@@ -155,16 +149,12 @@ export async function runPipelineExecution(aiKey?: string) {
     addPipelineLog('info', '🗄️ Syncing collections into ArangoDB multi-model storage...');
     await delay(800);
 
-    // clear or retain existing data? Let's retain and insert new matching records
     transformedDocs.documents.forEach(doc => {
-      // Check if document exists, if so delete original references to prevent duplicates
-      const state = arangoDb.getState();
-      
       // Soft-insert documents
       const insertedDoc = arangoDb.insertDocument({
         _key: doc.id,
         source_file: doc.source_file,
-        parser_engine: doc.parser_engine as any,
+        parser_engine: doc.parser_engine,
         title: doc.title,
         file_size: doc.file_size || '350 KB',
         upload_time: new Date().toISOString()
@@ -209,7 +199,7 @@ export async function runPipelineExecution(aiKey?: string) {
     addPipelineLog('success', `📦 Syncing complete! Standardized databases contains ${transformedDocs.documents.length} document roots, ${transformedDocs.sections.length} layout sections, ${transformedDocs.paragraphs.length} paragraphs/equations, and ${transformedDocs.tables.length} table matrices. All linked via edge records.`);
     addPipelineLog('success', '✅ Pipeline successfully completed!');
 
-  } catch (err: any) {
+  } catch (err) {
     addPipelineLog('error', `Pipeline execution crashed: ${err.message}`);
   } finally {
     isPipelineRunning = false;
@@ -217,8 +207,7 @@ export async function runPipelineExecution(aiKey?: string) {
 }
 
 // Call Gemini API to extract raw layout
-async function generateAILayout(ai: GoogleGenAI, filename: string, content: string, isPdf: boolean): Promise<any> {
-  const isImage = /\.(png|jpe?g|webp|gif|bmp)$/i.test(filename);
+async function generateAILayout(ai, filename, content, isPdf) {
   const prompt = `
 You are simulating a layout extraction worker: ${isPdf ? 'MinerU' : 'Docling'}.
 Analyze the document text or file context given below and return custom-structured elements corresponding to how these high-end parsing packages function.
@@ -275,7 +264,7 @@ ${content}
 }
 
 // Generate realistic mock data if Gemini API is disabled
-function generateLocalTemplateFallback(filename: string, isPdf: boolean): any {
+function generateLocalTemplateFallback(filename, isPdf) {
   if (isPdf) {
     // MinerU pdf output format
     return {
@@ -283,7 +272,7 @@ function generateLocalTemplateFallback(filename: string, isPdf: boolean): any {
         { "type": "title", "text": filename.replace(/\.[^/.]+$/, "").replace(/_/g, " ") },
         { "type": "heading", "text": "1. Theoretical Hypothesis Principles" },
         { "type": "text", "text": "Document segment parsed via MinerU deep OCR networks. This text models topological invariants and localized states within relativistic grids." },
-        { "type": "equation", "latex": "\\nabla \\times \\mathbf{B} = \\mu_0 \\left( \mathbf{J} + \\varepsilon_0 \\frac{\\partial \\mathbf{E}}{\\partial t} \\right)" },
+        { "type": "equation", "latex": "\\nabla \\times \\mathbf{B} = \\mu_0 \\left( \\mathbf{J} + \\varepsilon_0 \\frac{\\partial \\mathbf{E}}{\\partial t} \\right)" },
         { "type": "heading", "text": "2. Metric Convergence Trials" },
         { "type": "text", "text": "The metric measurements were evaluated under cryogenic guidelines. Please refer to Table A.1 below for precise state limits." },
         { 
@@ -319,7 +308,7 @@ function generateLocalTemplateFallback(filename: string, isPdf: boolean): any {
               ["Lodging", "$250.00 USD", "Manager Pre-approval"],
               ["Rental Vehicle", "Full Sedan Standard", "Director Override"]
             ],
-            "markdown": "| Exp Category | Permitted Daily Cap | Approvals Required |\n|---|---|---|\n| Meals | $75.00 USD | Self-certified Receipt |\n| Lodging | $250.00 USD | Manager Pre-approval |\n| Rental Vehicle | Full Sedan Standard | Director Override |"
+            "markdown": "| Exp Category | Permitted Daily Cap | Approvals Required |\n|---|---|---\n| Meals | $75.00 USD | Self-certified Receipt |\n| Lodging | $250.00 USD | Manager Pre-approval |\n| Rental Vehicle | Full Sedan Standard | Director Override |"
           }
         ]
       }
@@ -328,13 +317,8 @@ function generateLocalTemplateFallback(filename: string, isPdf: boolean): any {
 }
 
 // Emulates the transform.js logic to standardized collection mappings
-function transformRawToCollections(rawOutputDir: string) {
-  const dbCollections: {
-    documents: any[];
-    sections: any[];
-    paragraphs: any[];
-    tables: any[];
-  } = {
+function transformRawToCollections(rawOutputDir) {
+  const dbCollections = {
     documents: [],
     sections: [],
     paragraphs: [],
@@ -363,13 +347,13 @@ function transformRawToCollections(rawOutputDir: string) {
           id: docId,
           source_file: docFolder,
           parser_engine: "MinerU",
-          title: rawContent.pdf_body.find((b: any) => b.type === "title")?.text || docFolder,
+          title: rawContent.pdf_body.find(b => b.type === "title")?.text || docFolder,
           file_size: '1.2 MB'
         });
 
-        let currentSectionId: string | null = null;
+        let currentSectionId = null;
 
-        rawContent.pdf_body.forEach((block: any, blockIdx: number) => {
+        rawContent.pdf_body.forEach((block, blockIdx) => {
           const nodeId = `min_node_${blockIdx}_${Date.now()}`;
           if (block.type === "title") {
              // title resolved
@@ -409,9 +393,9 @@ function transformRawToCollections(rawOutputDir: string) {
           file_size: '480 KB'
         });
 
-        let currentSectionId: string | null = null;
+        let currentSectionId = null;
 
-        rawContent.document?.texts?.forEach((item: any, blockIdx: number) => {
+        rawContent.document?.texts?.forEach((item, blockIdx) => {
           const nodeId = `doc_node_${blockIdx}_${Date.now()}`;
           if (item.label === "heading_1" || item.label === "heading_2") {
             currentSectionId = nodeId;
@@ -431,7 +415,7 @@ function transformRawToCollections(rawOutputDir: string) {
           }
         });
 
-        rawContent.document?.tables?.forEach((table: any, tblIdx: number) => {
+        rawContent.document?.tables?.forEach((table, tblIdx) => {
           const nodeId = `doc_table_${tblIdx}_${Date.now()}`;
           dbCollections.tables.push({
             id: nodeId,
@@ -448,4 +432,4 @@ function transformRawToCollections(rawOutputDir: string) {
   return dbCollections;
 }
 
-const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
+const delay = (ms) => new Promise(res => setTimeout(res, ms));

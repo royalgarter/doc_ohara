@@ -1,47 +1,4 @@
-export interface ArangoDocument {
-  _id: string;
-  _key: string;
-  source_file: string;
-  parser_engine: 'Docling' | 'MinerU';
-  title: string;
-  file_size: string;
-  upload_time: string;
-}
-
-export interface ArangoSection {
-  _id: string;
-  _key: string;
-  document_id: string;
-  title: string;
-  level: number;
-}
-
-export interface ArangoParagraph {
-  _id: string;
-  _key: string;
-  document_id: string;
-  section_id: string | null;
-  content: string;
-  is_latex?: boolean;
-}
-
-export interface ArangoTable {
-  _id: string;
-  _key: string;
-  document_id: string;
-  section_id: string | null;
-  matrix_data: string[][];
-  markdown_representation: string;
-}
-
-export interface ArangoEdge {
-  _id: string;
-  _from: string;
-  _to: string;
-  type: 'has_section' | 'contains_paragraph' | 'contains_table' | 'belongs_to' | 'references';
-}
-
-export const sampleDocuments: ArangoDocument[] = [
+export const sampleDocuments = [
   {
     _id: "documents/quantum_paper_001",
     _key: "quantum_paper_001",
@@ -62,7 +19,7 @@ export const sampleDocuments: ArangoDocument[] = [
   }
 ];
 
-export const sampleSections: ArangoSection[] = [
+export const sampleSections = [
   // Sections for quantum gravity paper
   {
     _id: "sections/quantum_sec_1",
@@ -117,7 +74,7 @@ export const sampleSections: ArangoSection[] = [
   }
 ];
 
-export const sampleParagraphs: ArangoParagraph[] = [
+export const sampleParagraphs = [
   // Intro paragraphs for quantum paper
   {
     _id: "paragraphs/quantum_p_1",
@@ -204,7 +161,7 @@ export const sampleParagraphs: ArangoParagraph[] = [
   }
 ];
 
-export const sampleTables: ArangoTable[] = [
+export const sampleTables = [
   {
     _id: "tables/quantum_t_1",
     _key: "quantum_t_1",
@@ -220,7 +177,7 @@ export const sampleTables: ArangoTable[] = [
   },
   {
     _id: "tables/travel_t_1",
-    _key: "tables/travel_t_1",
+    _key: "travel_t_1",
     document_id: "travel_policy_002",
     section_id: "sections/travel_sec_3",
     matrix_data: [
@@ -233,8 +190,8 @@ export const sampleTables: ArangoTable[] = [
   }
 ];
 
-export function buildSampleEdges(): ArangoEdge[] {
-  const edges: ArangoEdge[] = [];
+export function buildSampleEdges() {
+  const edges = [];
 
   // Build document -> section edges (has_section)
   sampleSections.forEach(sec => {

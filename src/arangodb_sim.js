@@ -1,43 +1,29 @@
 import fs from 'fs';
 import path from 'path';
 import { 
-  ArangoDocument, 
-  ArangoSection, 
-  ArangoParagraph, 
-  ArangoTable, 
-  ArangoEdge,
   sampleDocuments,
   sampleSections,
   sampleParagraphs,
   sampleTables,
   buildSampleEdges
-} from './document_samples.ts';
+} from './document_samples.js';
 
 const STATE_FILE_PATH = 'doc_pipeline/collections/arangodb_state.json';
 
-export interface ArangoDBState {
-  documents: ArangoDocument[];
-  sections: ArangoSection[];
-  paragraphs: ArangoParagraph[];
-  tables: ArangoTable[];
-  edges: ArangoEdge[];
-}
-
 export class ArangoDBSimulator {
-  private state: ArangoDBState = {
-    documents: [],
-    sections: [],
-    paragraphs: [],
-    tables: [],
-    edges: []
-  };
-
   constructor() {
+    this.state = {
+      documents: [],
+      sections: [],
+      paragraphs: [],
+      tables: [],
+      edges: []
+    };
     this.loadState();
   }
 
   // Load database state from disk or seed initially
-  private loadState() {
+  loadState() {
     try {
       if (fs.existsSync(STATE_FILE_PATH)) {
         const raw = fs.readFileSync(STATE_FILE_PATH, 'utf-8');
@@ -58,7 +44,7 @@ export class ArangoDBSimulator {
   }
 
   // Seeding default datasets
-  public seedInitialData() {
+  seedInitialData() {
     this.state = {
       documents: [...sampleDocuments],
       sections: [...sampleSections],
@@ -70,7 +56,7 @@ export class ArangoDBSimulator {
   }
 
   // Save database state to disk
-  private saveState() {
+  saveState() {
     try {
       const dir = path.dirname(STATE_FILE_PATH);
       if (!fs.existsSync(dir)) {
@@ -82,14 +68,14 @@ export class ArangoDBSimulator {
     }
   }
 
-  public getState(): ArangoDBState {
+  getState() {
     return this.state;
   }
 
   // Database mutations
-  public insertDocument(doc: Omit<ArangoDocument, '_id'> & { _id?: string }): ArangoDocument {
+  insertDocument(doc) {
     const key = doc._key || `doc_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
-    const fullDoc: ArangoDocument = {
+    const fullDoc = {
       ...doc,
       _key: key,
       _id: `documents/${key}`
@@ -99,9 +85,9 @@ export class ArangoDBSimulator {
     return fullDoc;
   }
 
-  public insertSection(sec: Omit<ArangoSection, '_id'> & { _id?: string }): ArangoSection {
+  insertSection(sec) {
     const key = sec._key || `sec_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
-    const fullSec: ArangoSection = {
+    const fullSec = {
       ...sec,
       _key: key,
       _id: `sections/${key}`
@@ -123,9 +109,9 @@ export class ArangoDBSimulator {
     return fullSec;
   }
 
-  public insertParagraph(p: Omit<ArangoParagraph, '_id'> & { _id?: string }): ArangoParagraph {
+  insertParagraph(p) {
     const key = p._key || `p_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
-    const fullP: ArangoParagraph = {
+    const fullP = {
       ...p,
       _key: key,
       _id: `paragraphs/${key}`
@@ -133,7 +119,7 @@ export class ArangoDBSimulator {
     this.state.paragraphs.push(fullP);
     // If it has a section, link section to paragraph
     if (p.section_id) {
-      this.insertEdge({
+       this.insertEdge({
         _from: p.section_id,
         _to: `paragraphs/${key}`,
         type: 'contains_paragraph'
@@ -149,9 +135,9 @@ export class ArangoDBSimulator {
     return fullP;
   }
 
-  public insertTable(t: Omit<ArangoTable, '_id'> & { _id?: string }): ArangoTable {
+  insertTable(t) {
     const key = t._key || `tbl_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
-    const fullT: ArangoTable = {
+    const fullT = {
       ...t,
       _key: key,
       _id: `tables/${key}`
@@ -175,9 +161,9 @@ export class ArangoDBSimulator {
     return fullT;
   }
 
-  public insertEdge(edge: Omit<ArangoEdge, '_id'>): ArangoEdge {
+  insertEdge(edge) {
     const key = `${edge.type}_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
-    const fullEdge: ArangoEdge = {
+    const fullEdge = {
       ...edge,
       _id: `${edge.type}/${key}`
     };
@@ -186,7 +172,7 @@ export class ArangoDBSimulator {
     return fullEdge;
   }
 
-  public clearAllData() {
+  clearAllData() {
     this.state = {
       documents: [],
       sections: [],
@@ -198,7 +184,7 @@ export class ArangoDBSimulator {
   }
 
   // Real-time AQL Compiler / Interpreter Engine
-  public executeAQL(query: string, bindVars: Record<string, any> = {}): { results: any[]; stats: { executionTimeMs: number; fullCount: number }; error?: string } {
+  executeAQL(query, bindVars = {}) {
     const startTime = Date.now();
     try {
       const cleaned = query.replace(/\s+/g, ' ').trim();
@@ -209,7 +195,6 @@ export class ArangoDBSimulator {
       }
 
       // Check if it's a Graph Traversal Query
-      // E.g., FOR v, e IN OUTBOUND "documents/id" has_section, contains_paragraph RETURN v
       const traversalRegex = /^FOR\s+(\w+)\s*,\s*(\w+)(?:\s*,\s*\w+)?\s+IN\s+(OUTBOUND|INBOUND)\s+(["'][^"']+["']|@\w+)\s+([\w,]+)(?:\s+FILTER\s+([^LIMITSORT]+))?(?:\s+SORT\s+([^LIMIT]+))?(?:\s+LIMIT\s+(\d+\s*,\s*\d+|\d+))?\s+RETURN\s+(\w+)$/i;
       const traversalMatch = cleaned.match(traversalRegex);
 
@@ -218,7 +203,6 @@ export class ArangoDBSimulator {
       }
 
       // Standard Collection Query Parser
-      // E.g., FOR x IN documents FILTER x.parser_engine == 'MinerU' SORT x.title LIMIT 5 RETURN x
       const standardRegex = /^FOR\s+(\w+)\s+IN\s+(\w+)(?:\s+FILTER\s+([^LIMITSORT]+))?(?:\s+SORT\s+([^LIMIT]+))?(?:\s+LIMIT\s+(\d+\s*,\s*\d+|\d+))?\s+RETURN\s+(\w+|\{[^}]+\})$/i;
       const match = cleaned.match(standardRegex);
 
@@ -252,7 +236,7 @@ export class ArangoDBSimulator {
       const [_whole, varName, collectionName, filterExpr, sortExpr, limitExpr, returnExpr] = match;
 
       // Resolve collection
-      let collection: any[] = [];
+      let collection = [];
       if (collectionName === 'documents') collection = this.state.documents;
       else if (collectionName === 'sections') collection = this.state.sections;
       else if (collectionName === 'paragraphs') collection = this.state.paragraphs;
@@ -298,7 +282,7 @@ export class ArangoDBSimulator {
           fullCount
         }
       };
-    } catch (e: any) {
+    } catch (e) {
       return {
         results: [],
         stats: { executionTimeMs: Date.now() - startTime, fullCount: 0 },
@@ -308,7 +292,7 @@ export class ArangoDBSimulator {
   }
 
   // Multi-hop Graph Traversal AQL Support
-  private executeTraversal(match: RegExpMatchArray, bindVars: Record<string, any>, startTime: number): any {
+  executeTraversal(match, bindVars, startTime) {
     const [
       _whole, 
       vVar, 
@@ -340,12 +324,11 @@ export class ArangoDBSimulator {
     const edgeTypes = edgeTypesStr.split(',').map(s => s.trim().toLowerCase());
 
     // Do traversal of depth 1 or 2
-    // Resolve outbound or inbound matches
-    const traversed: Array<{ v: any; e: any }> = [];
-    const visited = new Set<string>();
+    const traversed = [];
+    const visited = new Set();
 
     const edges = this.state.edges;
-    const verticesMap = new Map<string, any>();
+    const verticesMap = new Map();
     // Pre-map vertices
     this.state.documents.forEach(d => verticesMap.set(d._id, d));
     this.state.sections.forEach(s => verticesMap.set(s._id, s));
@@ -355,7 +338,7 @@ export class ArangoDBSimulator {
     const isOutbound = direction.toUpperCase() === 'OUTBOUND';
 
     // Helper for finding edges connected to node
-    const traverseFromNode = (id: string, depth: number) => {
+    const traverseFromNode = (id, depth) => {
       if (depth > 2) return;
       edges.forEach(edge => {
         // Filter by edge types
@@ -393,7 +376,6 @@ export class ArangoDBSimulator {
       const filters = filterExpr.trim().split(/\s+AND\s+/i);
       resultsList = resultsList.filter(item => {
         return filters.every(filt => {
-          // e.g. v.level == 1
           const simpleMatch = filt.match(/(\w+)\.(\w+)\s*([=!<>]+)\s*(.*)/);
           if (!simpleMatch) return true;
           const [_, varName, property, operator, valueExpr] = simpleMatch;
@@ -409,10 +391,10 @@ export class ArangoDBSimulator {
             targVal = bindVars[targVal.slice(1)];
           } else {
             targVal = targVal.replace(/^["']|["']$/g, '');
-            if (targVal === 'true') (targVal as any) = true;
-            else if (targVal === 'false') (targVal as any) = false;
-            else if (targVal === 'null') (targVal as any) = null;
-            else if (!isNaN(Number(targVal))) (targVal as any) = Number(targVal);
+            if (targVal === 'true') targVal = true;
+            else if (targVal === 'false') targVal = false;
+            else if (targVal === 'null') targVal = null;
+            else if (!isNaN(Number(targVal))) targVal = Number(targVal);
           }
 
           if (operator === '==' || operator === '=') return rawVal == targVal;
@@ -428,22 +410,20 @@ export class ArangoDBSimulator {
     }
 
     // Apply RETURN variable mapping
-    let projected: any[] = [];
+    let projected = [];
     if (returnVar === vVar) {
       projected = resultsList.map(item => item.v);
     } else if (returnVar === eVar) {
       projected = resultsList.map(item => item.e);
     } else {
-      // Return combination
       projected = resultsList.map(item => ({ vertex: item.v, edge: item.e }));
     }
 
     // Deduplicate responses based on ID to avoid double-results
-    const uniqueMap = new Map<string, any>();
+    const uniqueMap = new Map();
     projected.forEach(item => {
       if (item && item._id) uniqueMap.set(item._id, item);
       else {
-        // Non-object fallback
         uniqueMap.set(JSON.stringify(item), item);
       }
     });
@@ -460,13 +440,11 @@ export class ArangoDBSimulator {
   }
 
   // Private helpers to compile/interpret clauses
-  private applyFilters(items: any[], varName: string, filterExpr: string, bindVars: Record<string, any>): any[] {
-    // Split filter constraints by AND (simple support, does not handle deep OR parens)
+  applyFilters(items, varName, filterExpr, bindVars) {
     const constraints = filterExpr.split(/\s+AND\s+/i);
 
     return items.filter(item => {
       return constraints.every(clause => {
-        // Supported syntax types:
         // 1. LIKE(x.content, "%text%", true)
         const likeMatch = clause.match(/LIKE\s*\(\s*(\s*\w+)\.(\w+)\s*,\s*(["'][^"']+["']|@\w+)\s*(?:,\s*(true|false))?\s*\)/i);
         if (likeMatch) {
@@ -479,7 +457,6 @@ export class ArangoDBSimulator {
             searchPattern = searchPattern.replace(/^["']|["']$/g, '');
           }
           const itemVal = String(item[prop] || '');
-          // convert % wildcard to regex
           const regexStr = searchPattern.replace(/%/g, '.*');
           const flags = caseInsensitive === 'false' ? '' : 'i';
           const reg = new RegExp(regexStr, flags);
@@ -494,13 +471,11 @@ export class ArangoDBSimulator {
 
           const actualValue = item[prop];
           let compareValueStr = valueExpr.trim();
-          let compareValue: any = compareValueStr;
+          let compareValue = compareValueStr;
 
-          // Resolve bind variable
           if (compareValueStr.startsWith('@')) {
             compareValue = bindVars[compareValueStr.slice(1)];
           } else {
-            // strip quotes, numbers, bools
             compareValueStr = compareValueStr.replace(/^["']|["']$/g, '');
             if (compareValueStr === 'true') compareValue = true;
             else if (compareValueStr === 'false') compareValue = false;
@@ -522,8 +497,7 @@ export class ArangoDBSimulator {
     });
   }
 
-  private applySorting(items: any[], varName: string, sortExpr: string): any[] {
-    // E.g. x.title DESC, x.level
+  applySorting(items, varName, sortExpr) {
     const criteria = sortExpr.split(',').map(s => s.trim());
     
     return items.sort((a, b) => {
@@ -547,7 +521,7 @@ export class ArangoDBSimulator {
     });
   }
 
-  private applyLimit(items: any[], limitExpr: string): any[] {
+  applyLimit(items, limitExpr) {
     const limits = limitExpr.split(',').map(l => parseInt(l.trim(), 10));
     if (limits.length === 2) {
       const [offset, count] = limits;
@@ -558,16 +532,15 @@ export class ArangoDBSimulator {
     return items;
   }
 
-  private applyReturn(items: any[], varName: string, returnExpr: string): any[] {
+  applyReturn(items, varName, returnExpr) {
     if (returnExpr === varName) {
       return items;
     }
 
-    // Checking if it's an object projection: RETURN { name: x.title, file: x.source_file }
     if (returnExpr.startsWith('{') && returnExpr.endsWith('}')) {
       const keysAndVals = returnExpr.slice(1, -1).split(',').map(s => s.trim());
       return items.map(item => {
-        const obj: Record<string, any> = {};
+        const obj = {};
         keysAndVals.forEach(kv => {
           const [key, valPath] = kv.split(':').map(s => s.trim());
           const cleanKey = key.replace(/^["']|["']$/g, '');
@@ -578,7 +551,6 @@ export class ArangoDBSimulator {
               obj[cleanKey] = item[prop];
             }
           } else {
-            // direct shorthand
             const shorthandPath = key.match(/(\w+)\.(\w+)/);
             if (shorthandPath) {
               obj[shorthandPath[2]] = item[shorthandPath[2]];
@@ -589,7 +561,6 @@ export class ArangoDBSimulator {
       });
     }
 
-    // Attribute projection: RETURN x.title
     const attrMatch = returnExpr.match(/(\w+)\.(\w+)/);
     if (attrMatch) {
       const [_, vName, prop] = attrMatch;
@@ -602,9 +573,8 @@ export class ArangoDBSimulator {
   }
 }
 
-// Global cached database simulated instance
-let instance: ArangoDBSimulator | null = null;
-export function getArangoDBSimulator(): ArangoDBSimulator {
+let instance = null;
+export function getArangoDBSimulator() {
   if (!instance) {
     instance = new ArangoDBSimulator();
   }
