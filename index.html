@@ -3,11 +3,916 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>My Google AI Studio App</title>
+    <title>AI Document Extraction & Graph Seeder</title>
+    <!-- Tailwind play CDN for layout positioning -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      // Configure Tailwind to ensure clean layout without heavy elements
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['system-ui', '-apple-system', 'sans-serif'],
+              mono: ['Courier New', 'Courier', 'monospace']
+            }
+          }
+        }
+      }
+    </script>
+    <!-- AlpineJS for instant reactivity -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
   </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+  <body class="bg-neutral-100 text-neutral-800 font-sans min-h-screen flex flex-col" x-data="appState()">
+
+    <!-- 1. Header Banner -->
+    <header class="bg-neutral-950 text-white border-b border-neutral-800 shrink-0">
+      <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="bg-indigo-600 px-2 py-1 text-sm font-bold tracking-widest text-white">
+            DBMS
+          </div>
+          <div>
+            <h1 class="text-sm md:text-base font-bold tracking-tight uppercase">
+              AI Document Parsing Pipeline
+            </h1>
+            <span class="text-xs font-mono text-neutral-400 block tracking-wider leading-none">
+              Layout Reproduction Engine & ArangoDB Graph Seeder
+            </span>
+          </div>
+        </div>
+
+        <!-- DB Collections Counters -->
+        <div class="hidden lg:flex gap-6 items-center px-6 border-l border-neutral-800">
+          <div class="text-xs font-mono">
+            <span class="text-neutral-500 block">DOCS</span>
+            <span class="font-bold text-indigo-400" x-text="(dbState.documents || []).length">0</span>
+          </div>
+          <div class="text-xs font-mono">
+            <span class="text-neutral-500 block">SECTIONS</span>
+            <span class="font-bold text-cyan-400" x-text="(dbState.sections || []).length">0</span>
+          </div>
+          <div class="text-xs font-mono">
+            <span class="text-neutral-500 block">LEAF CHUNKS</span>
+            <span class="font-bold text-amber-400" x-text="Number(dbState.paragraphs?.length || 0) + Number(dbState.tables?.length || 0)">0</span>
+          </div>
+          <div class="text-xs font-mono">
+            <span class="text-neutral-500 block">EDGES</span>
+            <span class="font-bold text-pink-400" x-text="(dbState.edges || []).length">0</span>
+          </div>
+        </div>
+
+        <!-- Control Action Buttons -->
+        <div class="flex gap-2">
+          <button @click="reseedDatabase()" 
+                  class="bg-neutral-800 text-white border border-neutral-700 text-xs font-bold uppercase px-3 py-1.5 transition active:bg-neutral-700">
+            Reset Seeds
+          </button>
+          <button @click="clearDatabase()" 
+                  class="bg-neutral-850 text-neutral-400 border border-neutral-700 text-xs font-bold uppercase px-3 py-1.5 transition active:bg-red-950 hover:text-red-400">
+            Wipe DB
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- 2. Main Workspace -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 grid grid-cols-1 lg:grid-cols-12 gap-4">
+      
+      <!-- LEFTCOLUMN: Staging Form and Orcherstration -->
+      <section class="lg:col-span-4 flex flex-col gap-4">
+        
+        <!-- 1. Queued Files Staging -->
+        <div class="bg-white border border-neutral-300 p-4">
+          <div class="flex items-center justify-between border-b border-neutral-200 pb-2 mb-3">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-neutral-700">
+              1. Staged Documents Form
+            </h3>
+            <button @click="showCreator = !showCreator" 
+                     class="bg-neutral-900 text-white px-2 py-1 text-xs uppercase font-bold active:bg-neutral-800">
+              <span x-text="showCreator ? 'Close Form' : 'Stage File'">Staging File</span>
+            </button>
+          </div>
+
+          <!-- Staged Presets selection -->
+          <div x-show="showCreator" class="bg-neutral-100 border border-neutral-300 p-3 mb-3">
+            <span class="text-xs font-bold text-neutral-500 uppercase block mb-1">Load Preset Quick Outline:</span>
+            <div class="flex flex-col gap-2">
+              <button @click="applyPreset('quantum')" type="button" class="bg-white border border-neutral-300 text-left text-xs p-1 font-mono active:bg-neutral-100">
+                🚀 Physics Paper (PDF -> MinerU)
+              </button>
+              <button @click="applyPreset('corporate')" type="button" class="bg-white border border-neutral-300 text-left text-xs p-1 font-mono active:bg-neutral-100">
+                🚀 Travel Directive (DOCX -> Docling)
+              </button>
+            </div>
+          </div>
+
+          <!-- Creator Input Form -->
+          <form x-show="showCreator" @submit.prevent="uploadManualFile()" class="space-y-3 mb-3 border-b border-dashed border-neutral-300 pb-3">
+            <div>
+              <label class="text-xs font-bold text-neutral-400 uppercase block mb-1">Manual Filename</label>
+              <input type="text" x-model="docName" placeholder="document_outline.pdf" required
+                     class="w-full h-8 text-sm p-2 border border-neutral-300 focus:outline-none focus:border-neutral-600 font-mono" />
+            </div>
+
+            <div>
+              <label class="text-xs font-bold text-neutral-400 uppercase block mb-1">Parser Route Type</label>
+              <select x-model="docFormat" class="w-full h-8 text-sm p-1 border border-neutral-300 bg-white font-mono">
+                <option value="pdf">PDF File (Route to MinerU Simulator)</option>
+                <option value="docx">DOCX Word Document (Docling Simulator)</option>
+                <option value="html">HTML Web Page (Docling Simulator)</option>
+                <option value="epub">EPUB Book File (Docling Simulator)</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="text-xs font-bold text-neutral-400 uppercase block mb-1">Document Body / Section Headers</label>
+              <textarea x-model="docContent" rows="4" required placeholder="Enter headings, equations, or paragraphs..."
+                        class="w-full text-xs p-2 border border-neutral-300 font-mono"></textarea>
+            </div>
+
+            <div class="flex justify-end">
+              <button type="submit" :disabled="isSubmitting"
+                      class="bg-indigo-650 text-white border border-neutral-800 text-xs uppercase font-bold px-4 py-2 hover:bg-indigo-700 active:bg-indigo-800">
+                <span x-text="isSubmitting ? 'Staging...' : 'Upload Spec File'">Upload Spec File</span>
+              </button>
+            </div>
+          </form>
+
+          <!-- Files Queue Directory table -->
+          <div class="border border-neutral-200 overflow-x-auto bg-neutral-50/50">
+            <table class="w-full text-left text-xs text-neutral-600 border-collapse">
+              <thead>
+                <tr class="bg-neutral-100 border-b border-neutral-200 font-bold h-8 text-neutral-400">
+                  <th class="p-2">Filename</th>
+                  <th class="p-2">Size</th>
+                  <th class="p-2">Engine</th>
+                  <th class="p-2 text-right">Delete</th>
+                </tr>
+              </thead>
+              <tbody>
+                <template x-if="stagedFiles.length === 0">
+                  <tr>
+                    <td colspan="4" class="p-4 text-center text-neutral-400 italic">
+                      Staging queue is empty. Choose "Stage File" above to test parser simulations.
+                    </td>
+                  </tr>
+                </template>
+                <template x-for="file in stagedFiles" :key="file.name">
+                  <tr class="border-b border-neutral-200 bg-white h-8">
+                    <td class="p-2 font-bold text-neutral-800 font-mono" x-text="file.name"></td>
+                    <td class="p-2 font-mono text-neutral-500" x-text="file.size"></td>
+                    <td class="p-2">
+                      <span class="px-1 text-xs font-bold uppercase font-mono border"
+                            :class="file.name.endsWith('.pdf') ? 'text-indigo-600 border-indigo-200 bg-indigo-50' : 'text-emerald-700 border-emerald-200 bg-emerald-50'"
+                            x-text="file.name.endsWith('.pdf') ? 'MinerU' : 'Docling'">
+                      </span>
+                    </td>
+                    <td class="p-2 text-right">
+                      <button @click="deleteStagedFile(file.name)" class="text-neutral-400 hover:text-red-500 px-2 font-bold">
+                        ✕
+                      </button>
+                    </td>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 2. Pipeline Trigger Orchestrator -->
+        <div class="bg-white border border-neutral-300 p-4">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-neutral-700 border-b border-neutral-200 pb-2 mb-3">
+            2. Pipeline Orchestration
+          </h3>
+          <p class="text-xs text-neutral-500 mb-3 leading-relaxed">
+            Execute layout parsing engines. If a <strong>GEMINI_API_KEY</strong> environment secret is present on server, it uses real Gemini-3.5-Flash extraction blocks! Otherwise, local high-fidelity layout templates are executed.
+          </p>
+
+          <button @click="runExtractionPipeline()" :disabled="pipelineActive"
+                  class="w-full bg-indigo-600 text-white font-bold text-xs uppercase tracking-wider py-2.5 border border-black active:bg-indigo-700 transition disabled:bg-neutral-300 disabled:border-neutral-400">
+            <template x-if="pipelineActive">
+              <span class="animate-pulse">⌛ Extraction Workers Executing...</span>
+            </template>
+            <template x-if="!pipelineActive">
+              <span>Run Layout Extraction Pipeline (run_pipeline.sh)</span>
+            </template>
+          </button>
+        </div>
+
+        <!-- 3. Orchestration Output Logs Console -->
+        <div class="bg-black text-neutral-200 p-4 border border-neutral-800">
+          <div class="flex items-center justify-between text-xs font-mono text-neutral-400 pb-2 border-b border-neutral-900 mb-2">
+            <span class="font-bold text-neutral-200">Terminal Log Output</span>
+            <div class="h-2 w-2 bg-emerald-500 rounded-full" :class="pipelineActive ? 'animate-ping' : ''"></div>
+          </div>
+          <div class="h-64 overflow-y-auto font-mono text-xs space-y-1 scrollbar-thin overflow-x-hidden" id="log-console-container">
+            <template x-if="pipelineLogs.length === 0">
+              <div class="text-neutral-600 italic py-12 text-center select-none">
+                [SYSTEM IDLE] Trigger pipeline to print real-time standard output console streams.
+              </div>
+            </template>
+            <template x-for="log in pipelineLogs">
+              <div class="flex gap-2 items-start leading-tight">
+                <span class="text-neutral-600 select-none" x-text="log.timestamp.slice(11, 19)"></span>
+                <span class="font-bold shrink-0" 
+                      :class="log.level === 'info' ? 'text-blue-400' :
+                              log.level === 'warn' ? 'text-amber-500' :
+                              log.level === 'error' ? 'text-red-500' : 'text-emerald-400'"
+                      x-text="'[' + log.level.toUpperCase() + ']'">
+                </span>
+                <span class="text-neutral-350 select-text break-words" x-text="log.message"></span>
+              </div>
+            </template>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- RIGHTCOLUMN: Playgrounds & Interactive Database Explorations -->
+      <section class="lg:col-span-8 flex flex-col gap-4">
+        
+        <!-- MODULE 1: Responsive SVG layout mapping -->
+        <div class="bg-white border border-neutral-300 p-4 flex flex-col">
+          <div class="border-b border-neutral-200 pb-2 mb-3">
+            <h2 class="text-xs font-bold uppercase tracking-widest text-neutral-700">
+              🌐 Multimodal Node &amp; Edge Graph Map (SVG Stage)
+            </h2>
+            <span class="text-xs text-neutral-500">
+              Relational layout mapping. Click any parsed vertex to review internal AQL schema documents.
+            </span>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-12 gap-3 min-h-[400px]">
+            <!-- Interactive Canvas -->
+            <div class="md:col-span-8 border border-neutral-300 bg-neutral-50 relative overflow-hidden min-h-[300px]">
+              
+              <!-- Simple legend tracker -->
+              <div class="absolute top-2 left-2 z-10 flex gap-2 text-xs font-mono bg-white border border-neutral-200 p-1">
+                <span class="text-indigo-600">■ Documents</span>
+                <span class="text-cyan-500">■ Chapters</span>
+                <span class="text-amber-500">■ Text/Math</span>
+                <span class="text-pink-500">■ Tables</span>
+              </div>
+
+              <!-- SVG Nodes Rendering -->
+              <svg class="w-full h-full min-h-[380px]" viewBox="0 0 800 500" style="background-image: radial-gradient(#e5e7eb 1px, transparent 1px); background-size: 16px 16px;">
+                <!-- Arrows Definitions -->
+                <defs>
+                  <marker id="arrow-link" viewBox="0 0 10 10" refX="15" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                    <path d="M 0 0 L 10 5 L 0 10 z" fill="#d4d4d8" />
+                  </marker>
+                </defs>
+
+                <!-- Draw Lines -->
+                <template x-for="edge in graphData.edges" :key="edge._id">
+                  <line :x1="edge.sourceNode.x" :y1="edge.sourceNode.y"
+                        :x2="edge.targetNode.x" :y2="edge.targetNode.y"
+                        stroke="#d4d4d8" stroke-width="1.5"
+                        marker-end="url(#arrow-link)" />
+                </template>
+
+                <!-- Draw Nodes -->
+                <template x-for="node in graphData.nodes" :key="node.id">
+                  <g class="cursor-pointer" @click="selectedNode = node">
+                    <!-- Outer Selection highlight node representation context -->
+                    <rect :x="node.x - 45" :y="node.y - 12" width="90" height="24"
+                          :fill="selectedNode && selectedNode.id === node.id ? '#171717' : '#ffffff'"
+                          :stroke="node.type === 'document' ? '#4f46e5' :
+                                   node.type === 'section' ? '#0ea5e9' :
+                                   node.type === 'paragraph' ? '#f59e0b' : '#ec4899'"
+                          stroke-width="1.5" />
+                    <!-- Inside text layout details -->
+                    <text :x="node.x" :y="node.y + 4" text-anchor="middle" class="font-mono text-xs"
+                          :class="selectedNode && selectedNode.id === node.id ? 'fill-white' : 'fill-neutral-800'"
+                          x-text="node.label.slice(0, 10) + (node.label.length > 10 ? '..' : '')">
+                    </text>
+                  </g>
+                </template>
+              </svg>
+
+            </div>
+
+            <!-- Inspector Pane element -->
+            <div class="md:col-span-4 border border-neutral-300 bg-neutral-50 p-4">
+              <h4 class="text-xs font-bold uppercase tracking-wider text-neutral-500 mb-2 border-b border-neutral-200 pb-1">
+                AQL Target Review
+              </h4>
+              <template x-if="!selectedNode">
+                <div class="h-64 flex flex-col justify-center items-center text-center text-xs text-neutral-400 font-mono">
+                  <span>[Empty Selection]</span>
+                  <span class="mt-2 text-neutral-500">Select any layout node in the left SVG pathways map to audit collections.</span>
+                </div>
+              </template>
+              <template x-if="selectedNode">
+                <div class="space-y-4 font-mono text-xs">
+                  <div>
+                    <span class="text-neutral-400 block font-bold uppercase">COLLECTION TYPE</span>
+                    <span class="px-2 py-0.5 border bg-white font-bold" x-text="selectedNode.type"></span>
+                  </div>
+
+                  <div>
+                    <span class="text-neutral-400 block font-bold uppercase">KEY VALUE</span>
+                    <pre class="bg-white border p-1 text-neutral-700 whitespace-pre overflow-x-auto select-all" x-text="selectedNode.originalData._key"></pre>
+                  </div>
+
+                  <div>
+                    <span class="text-neutral-400 block font-bold uppercase">SYSTEM ID (_id)</span>
+                    <pre class="bg-white border p-1 text-neutral-700 whitespace-pre overflow-x-auto select-all" x-text="selectedNode.originalData._id"></pre>
+                  </div>
+
+                  <!-- Conditionally render text -->
+                  <template x-if="selectedNode.type === 'document'">
+                    <div>
+                      <span class="text-neutral-400 block font-bold uppercase">Source Engine</span>
+                      <pre class="bg-white border p-1 text-neutral-700" x-text="selectedNode.originalData.parser_engine"></pre>
+                    </div>
+                  </template>
+
+                  <template x-if="selectedNode.type === 'section'">
+                    <div>
+                      <span class="text-neutral-400 block font-bold uppercase">Title & Level</span>
+                      <pre class="bg-white border p-1 text-neutral-700 whitespace-pre-wrap" x-text="'h' + selectedNode.originalData.level + ': ' + selectedNode.originalData.title"></pre>
+                    </div>
+                  </template>
+
+                  <template x-if="selectedNode.type === 'paragraph'">
+                    <div>
+                      <span class="text-neutral-400 block font-bold uppercase">Markup Body</span>
+                      <pre class="bg-white border p-1 text-neutral-700 whitespace-pre-wrap select-all max-h-48 overflow-y-auto" x-text="selectedNode.originalData.content"></pre>
+                    </div>
+                  </template>
+
+                  <template x-if="selectedNode.type === 'table'">
+                    <div>
+                      <span class="text-neutral-400 block font-bold uppercase">Markdown Table</span>
+                      <pre class="bg-white border p-1 text-neutral-700 whitespace-pre overflow-x-auto max-h-40" x-text="selectedNode.originalData.markdown_representation"></pre>
+                    </div>
+                  </template>
+                </div>
+              </template>
+            </div>
+          </div>
+        </div>
+
+        <!-- MODULE 2: Query Terminal console & Collections browser spreadsheet -->
+        <div class="bg-white border border-neutral-300">
+          
+          <div class="flex border-b border-neutral-300 bg-neutral-100">
+            <button @click="activeTab = 'playground'"
+                    class="px-4 py-3 text-xs font-bold uppercase tracking-wider transition border-r border-neutral-300"
+                    :class="activeTab === 'playground' ? 'bg-white text-neutral-900 border-t-2 border-t-indigo-600' : 'text-neutral-500 hover:text-neutral-800'">
+              AQL Play Terminal
+            </button>
+            <button @click="activeTab = 'explorer'"
+                    class="px-4 py-3 text-xs font-bold uppercase tracking-wider transition border-r border-neutral-300"
+                    :class="activeTab === 'explorer' ? 'bg-white text-neutral-900 border-t-2 border-t-indigo-600' : 'text-neutral-500 hover:text-neutral-800'">
+              Collections Spreadsheet (Explorer)
+            </button>
+          </div>
+
+          <!-- TAB 1: Play Terminal -->
+          <div x-show="activeTab === 'playground'" class="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+            
+            <!-- Editor block -->
+            <div class="space-y-3 flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between mb-2 col">
+                  <span class="text-xs font-bold text-neutral-400 uppercase">Write AQL Query Statement</span>
+                  
+                  <select @change="aqlQuery = $event.target.value" class="text-xs border p-1 border-neutral-300 bg-white font-mono">
+                    <option value="">⚙️ Statement Presets...</option>
+                    <option value="FOR doc IN documents SORT doc.title RETURN doc">📁 Catalog: Get Document metadata</option>
+                    <option value="FOR p IN paragraphs FILTER p.is_latex == true RETURN { id: p._id, content: p.content }">🧬 Mathematics: LaTeX equations only</option>
+                    <option value="FOR sec IN sections SORT sec.level ASC RETURN sec">📑 Chapters: Structure heading levels</option>
+                    <option value="FOR t IN tables RETURN { size: LENGTH(t.matrix_data), text: t.markdown_representation }">📊 Tables: Render matrices markdown</option>
+                    <option value="FOR v, e IN OUTBOUND &quot;documents/quantum_paper_001&quot; has_section RETURN v">🕸️ Traverse: Section hubs connected to paper</option>
+                  </select>
+                </div>
+
+                <div class="border border-neutral-300 font-mono">
+                  <div class="bg-neutral-100 px-3 py-1 text-xs font-bold text-neutral-500 border-b border-neutral-200 uppercase">AQL EDITOR</div>
+                  <textarea x-model="aqlQuery" rows="6" class="w-full text-xs p-3 font-mono text-neutral-800 bg-white focus:outline-none focus:border-neutral-500 resize-none leading-relaxed"></textarea>
+                </div>
+              </div>
+
+              <div class="flex justify-end pt-2 border-t border-neutral-100">
+                <button @click="executeAqlQuery()" :disabled="isExecuting"
+                        class="bg-neutral-900 text-white font-bold text-xs uppercase px-4 py-2 border border-black active:bg-neutral-800">
+                  <span x-text="isExecuting ? '⌛ Executing...' : 'Execute AQL Query'">Execute AQL Query</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Response console -->
+            <div class="flex flex-col border border-neutral-300 bg-neutral-950 text-emerald-400 p-4">
+              <div class="flex items-center justify-between border-b border-neutral-900 pb-2 mb-2">
+                <span class="text-xs font-mono font-bold uppercase text-neutral-400">Execution Output</span>
+                <span class="text-neutral-600 text-xs font-mono" x-show="queryStats" x-text="'Scan: ' + queryStats?.fullCount + ' rows'"></span>
+              </div>
+              <div class="flex-1 font-mono text-xs min-h-[160px] max-h-64 overflow-y-auto select-all">
+                <!-- If Error -->
+                <template x-if="queryError">
+                  <div class="text-red-400 whitespace-pre-wrap leading-tight" x-text="queryError"></div>
+                </template>
+                <!-- If Success -->
+                <template x-if="!queryError && queryResults !== null">
+                  <pre class="text-xs text-emerald-300 break-all whitespace-pre-wrap leading-tight" x-text="JSON.stringify(queryResults, null, 2)"></pre>
+                </template>
+                <template x-if="queryResults === null && !queryError">
+                  <div class="text-neutral-600 italic py-10 text-center select-none">
+                    Write valid ArangoDB Multi-Model expressions, then click Execute.
+                  </div>
+                </template>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- TAB 2: Spreadsheet Collection Explorer -->
+          <div x-show="activeTab === 'explorer'" class="p-4 space-y-3">
+            
+            <div class="flex flex-wrap gap-2 items-center justify-between">
+              <!-- Select Collection -->
+              <div class="flex gap-1">
+                <button @click="selectedCollection = 'documents'" class="px-2 py-1 text-xs font-mono uppercase border" :class="selectedCollection === 'documents' ? 'bg-neutral-900 text-white' : 'bg-white text-neutral-500'"></button>
+                <button @click="selectedCollection = 'sections'" class="px-2 py-1 text-xs font-mono uppercase border" :class="selectedCollection === 'sections' ? 'bg-neutral-900 text-white' : 'bg-white text-neutral-500'"></button>
+                <button @click="selectedCollection = 'paragraphs'" class="px-2 py-1 text-xs font-mono uppercase border" :class="selectedCollection === 'paragraphs' ? 'bg-neutral-900 text-white' : 'bg-white text-neutral-500'"></button>
+                <button @click="selectedCollection = 'tables'" class="px-2 py-1 text-xs font-mono uppercase border" :class="selectedCollection === 'tables' ? 'bg-neutral-900 text-white' : 'bg-white text-neutral-500'"></button>
+                <button @click="selectedCollection = 'edges'" class="px-2 py-1 text-xs font-mono uppercase border" :class="selectedCollection === 'edges' ? 'bg-neutral-900 text-white' : 'bg-white text-neutral-500'"></button>
+              </div>
+
+              <!-- Search filter input -->
+              <input type="text" x-model="searchText" placeholder="Filter rows..."
+                     class="w-full sm:w-48 h-8 text-xs px-2 border border-neutral-300 font-mono focus:outline-none" />
+            </div>
+
+            <!-- Spreadsheet table -->
+            <div class="border border-neutral-200 overflow-x-auto bg-white max-h-72 overflow-y-auto">
+              <table class="w-full text-left text-xs font-mono text-neutral-700 border-collapse">
+                <thead>
+                  <tr class="bg-neutral-50 border-b border-neutral-200 text-neutral-500 font-bold height-8">
+                    <th class="p-2 border-r border-neutral-200">_id</th>
+                    <!-- Documents Columns -->
+                    <template x-if="selectedCollection === 'documents'">
+                      <th class="p-2">Title</th>
+                    </template>
+                    <template x-if="selectedCollection === 'documents'">
+                      <th class="p-2">Parser Engine</th>
+                    </template>
+                    <!-- Sections Columns -->
+                    <template x-if="selectedCollection === 'sections'">
+                      <th class="p-2">Level</th>
+                    </template>
+                    <template x-if="selectedCollection === 'sections'">
+                      <th class="p-2">Section Title</th>
+                    </template>
+                    <!-- Paragraphs Columns -->
+                    <template x-if="selectedCollection === 'paragraphs'">
+                      <th class="p-2">Content Text (Formulas/Equations)</th>
+                    </template>
+                    <template x-if="selectedCollection === 'paragraphs'">
+                      <th class="p-2">LaTeX</th>
+                    </template>
+                    <!-- Tables Columns -->
+                    <template x-if="selectedCollection === 'tables'">
+                      <th class="p-2">Markdown Represent</th>
+                    </template>
+                    <!-- Edges Columns -->
+                    <template x-if="selectedCollection === 'edges'">
+                      <th class="p-2">Relationship Type</th>
+                    </template>
+                    <template x-if="selectedCollection === 'edges'">
+                      <th class="p-2">_from Source Node</th>
+                    </template>
+                    <template x-if="selectedCollection === 'edges'">
+                      <th class="p-2">_to Destination Node</th>
+                    </template>
+                  </tr>
+                </thead>
+                <tbody>
+                  <template x-for="row in filteredExplorerRows()" :key="row._id">
+                    <tr class="border-b border-neutral-100 hover:bg-neutral-50 h-8">
+                      <td class="p-2 border-r border-neutral-200 text-neutral-400 font-mono select-all" x-text="row._id"></td>
+                      
+                      <!-- Col 1 -->
+                      <template x-if="selectedCollection === 'documents'">
+                        <td class="p-2 font-bold text-neutral-800" x-text="row.title"></td>
+                      </template>
+                      <template x-if="selectedCollection === 'documents'">
+                        <td class="p-2" x-text="row.parser_engine"></td>
+                      </template>
+
+                      <!-- Col 2 -->
+                      <template x-if="selectedCollection === 'sections'">
+                        <td class="p-2 font-bold" x-text="'h' + row.level"></td>
+                      </template>
+                      <template x-if="selectedCollection === 'sections'">
+                        <td class="p-2" x-text="row.title"></td>
+                      </template>
+
+                      <!-- Col 3 -->
+                      <template x-if="selectedCollection === 'paragraphs'">
+                        <td class="p-2 break-all max-w-sm truncate" x-text="row.content"></td>
+                      </template>
+                      <template x-if="selectedCollection === 'paragraphs'">
+                        <td class="p-2" x-text="row.is_latex ? 'True' : 'False'"></td>
+                      </template>
+
+                      <!-- Col 4 -->
+                      <template x-if="selectedCollection === 'tables'">
+                        <td class="p-2 truncate break-all max-w-md select-all font-mono" x-text="row.markdown_representation"></td>
+                      </template>
+
+                      <!-- Col 5 -->
+                      <template x-if="selectedCollection === 'edges'">
+                        <td class="p-2 uppercase font-bold text-neutral-500" x-text="row.type"></td>
+                      </template>
+                      <template x-if="selectedCollection === 'edges'">
+                        <td class="p-2 text-neutral-500" x-text="row._from"></td>
+                      </template>
+                      <template x-if="selectedCollection === 'edges'">
+                        <td class="p-2 text-neutral-500" x-text="row._to"></td>
+                      </template>
+                    </tr>
+                  </template>
+                </tbody>
+              </table>
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+    </main>
+
+    <!-- 3. Dynamic Quick Toast Popups -->
+    <div x-show="globalMessage"
+         class="fixed bottom-4 right-4 z-40 bg-neutral-900 border border-neutral-800 text-neutral-100 p-3 h-12 flex items-center justify-between gap-4 font-mono text-xs">
+      <span class="font-bold text-indigo-400">DBMS Status:</span>
+      <span x-text="globalMessage?.text"></span>
+    </div>
+
+    <!-- 4. Pure Monospaced Flat Footer -->
+    <footer class="bg-neutral-900 text-neutral-500 border-t border-neutral-850 h-10 mt-auto flex items-center justify-between px-6 font-mono text-xs select-none">
+      <span>AI Layout Parser Frontend</span>
+      <span>UTF-8 • Direct Node.js Execution • Simulated ArangoDB Engine</span>
+    </footer>
+
+    <!-- 5. Core Alpine Interactive State Script Definition -->
+    <script>
+      function appState() {
+        return {
+          dbState: {
+            documents: [],
+            sections: [],
+            paragraphs: [],
+            tables: [],
+            edges: []
+          },
+          stagedFiles: [],
+          pipelineActive: false,
+          pipelineLogs: [],
+          globalMessage: null,
+
+          // Staging attributes
+          showCreator: false,
+          docName: '',
+          docFormat: 'pdf',
+          docContent: '',
+          isSubmitting: false,
+
+          // AQL state attributes
+          aqlQuery: 'FOR doc IN documents SORT doc.title RETURN doc',
+          queryResults: null,
+          queryStats: null,
+          queryError: null,
+          isExecuting: false,
+
+          // Collections spreadsheet navigation
+          activeTab: 'playground',
+          selectedCollection: 'documents',
+          searchText: '',
+          selectedNode: null,
+
+          // Boot up logic
+          init() {
+            this.fetchDatabaseState();
+            this.fetchStagedFiles();
+            this.fetchPipelineStatus();
+
+            // Slower background logging polling for snappy execution
+            setInterval(() => {
+              this.fetchPipelineStatus();
+            }, 1500);
+          },
+
+          // Quick notifier toast loop
+          notify(text) {
+            this.globalMessage = { text };
+            setTimeout(() => {
+              this.globalMessage = null;
+            }, 3000);
+          },
+
+          // Fetch simulated collections states in JSON
+          async fetchDatabaseState() {
+            try {
+              const res = await fetch('/api/database/state');
+              const data = await res.json();
+              if (data.success) {
+                this.dbState = data.state;
+              }
+            } catch (err) {
+              console.error('State fetching aborted:', err);
+            }
+          },
+
+          // Fetch disk uploaded pipeline input representations
+          async fetchStagedFiles() {
+            try {
+              const res = await fetch('/api/pipeline/input-files');
+              const data = await res.json();
+              if (data.success) {
+                this.stagedFiles = data.files || [];
+              }
+            } catch (err) {
+              console.error('Queue list loading failure:', err);
+            }
+          },
+
+          // Fetch active running task logs
+          async fetchPipelineStatus() {
+            try {
+              const res = await fetch('/api/pipeline/status');
+              const data = await res.json();
+              const wasRunning = this.pipelineActive;
+              this.pipelineActive = data.active;
+              this.pipelineLogs = data.logs || [];
+
+              // Handle clean completion trigger
+              if (wasRunning && !data.active) {
+                this.fetchDatabaseState();
+                this.notify('Pipeline thread complete. ArangoDB collections cataloged!');
+              }
+
+              // auto snap container scroll down
+              const c = document.getElementById('log-console-container');
+              if (c) c.scrollTop = c.scrollHeight;
+            } catch (err) {
+              console.error('Poll logs failed:', err);
+            }
+          },
+
+          // Quick presets loader values
+          applyPreset(type) {
+            if (type === 'quantum') {
+              this.docName = 'quantum_physics_core.pdf';
+              this.docFormat = 'pdf';
+              this.docContent = 'Title: Multi-Loop Quantum Gravity Invariant Convergence\n\n- 1. Topological manifolds in Spin grids\nMany unified mathematical attempts face dimension anomalies.\n\n- 2. Einstein Hilbert partition metric integrals\nUsing cryogenic fluid measures, we formulate localized boundary states.';
+            } else {
+              this.docName = 'operational_claim_handbook.docx';
+              this.docFormat = 'docx';
+              this.docContent = 'Title: Operational Directives for Class Ticketing & Approvals\n\n- Section A: Standard Traveling Codes\nThis document mandates flight and dinner limits.\n\n- Section B: Flight Class Upgrades\nDomestic travel under 6 hours requires Economy Class.';
+            }
+            this.notify('Outline templates applied.');
+          },
+
+          // Upload manual user input file specs
+          async uploadManualFile() {
+            if (!this.docName.trim()) return;
+            this.isSubmitting = true;
+            try {
+              const res = await fetch('/api/pipeline/upload', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  filename: this.docName,
+                  content: this.docContent,
+                  format: this.docFormat
+                })
+              });
+              const data = await res.json();
+              if (data.success) {
+                this.docName = '';
+                this.docContent = '';
+                this.showCreator = false;
+                this.fetchStagedFiles();
+                this.notify('Spec queued in documents folder!');
+              } else {
+                alert(data.error || 'Failed upload spec');
+              }
+            } catch (err) {
+              alert('Error compiling document upload');
+            } finally {
+              this.isSubmitting = false;
+            }
+          },
+
+          // Delete/Exclude staged input file in staging queue
+          async deleteStagedFile(name) {
+            try {
+              const res = await fetch(`/api/pipeline/input-files/${name}`, {
+                method: 'DELETE'
+              });
+              const data = await res.json();
+              if (data.success) {
+                this.fetchStagedFiles();
+                this.notify(`Staging clean: ${name}`);
+              }
+            } catch (err) {
+              console.error('Delete staged file failed:', err);
+            }
+          },
+
+          // Active orchestration triggering wrapper
+          async runExtractionPipeline() {
+            if (this.pipelineActive) return;
+            this.pipelineLogs = [];
+            this.pipelineActive = true;
+            try {
+              const res = await fetch('/api/pipeline/run', { method: 'POST' });
+              const data = await res.json();
+              if (data.success) {
+                this.notify('Parser orchestration workers running...');
+              } else {
+                this.pipelineActive = false;
+                alert(data.error || 'Pipeline run aborted.');
+              }
+            } catch (err) {
+              this.pipelineActive = false;
+              alert('Worker network instantiation issue.');
+            }
+          },
+
+          // Compile AQL queries directly via interpreter simulator
+          async executeAqlQuery() {
+            if (!this.aqlQuery.trim()) return;
+            this.isExecuting = true;
+            this.queryError = null;
+            this.queryResults = null;
+            try {
+              const res = await fetch('/api/database/query', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ query: this.aqlQuery })
+              });
+              const data = await res.json();
+              if (data.success) {
+                this.queryResults = data.results;
+                this.queryStats = data.stats;
+              } else {
+                this.queryError = data.error || 'Interpreter crashed.';
+              }
+            } catch (err) {
+              this.queryError = 'AQL Compiler: network query issue.';
+            } finally {
+              this.isExecuting = false;
+            }
+          },
+
+          // Re-seed DB collections template samples
+          async reseedDatabase() {
+            try {
+              const res = await fetch('/api/database/seed', { method: 'POST' });
+              const data = await res.json();
+              if (data.success) {
+                this.dbState = data.state;
+                this.selectedNode = null;
+                this.notify('ArangoDB seeded.');
+              }
+            } catch (err) {
+              console.error(err);
+            }
+          },
+
+          // Drops simulated database state completely
+          async clearDatabase() {
+            if (!confirm("Are you sure? This completely empties all collections in ArangoDB.")) return;
+            try {
+              const res = await fetch('/api/database/clear', { method: 'POST' });
+              const data = await res.json();
+              if (data.success) {
+                this.dbState = data.state;
+                this.selectedNode = null;
+                this.notify('All database collections dropped.');
+              }
+            } catch (err) {
+              console.error(err);
+            }
+          },
+
+          // Computed selector graph coordinates mapping
+          get graphData() {
+            const documents = this.dbState.documents || [];
+            const sections = this.dbState.sections || [];
+            const paragraphs = this.dbState.paragraphs || [];
+            const tables = this.dbState.tables || [];
+            const edges = this.dbState.edges || [];
+
+            const nodesList = [];
+
+            documents.forEach(d => {
+              nodesList.push({
+                id: d._id,
+                label: d.title || 'Document Outline',
+                type: 'document',
+                originalData: d
+              });
+            });
+
+            sections.forEach(s => {
+              nodesList.push({
+                id: s._id,
+                label: s.title || 'Section Head',
+                type: 'section',
+                originalData: s
+              });
+            });
+
+            paragraphs.slice(0, 10).forEach(p => {
+              nodesList.push({
+                id: p._id,
+                label: p.content,
+                type: 'paragraph',
+                originalData: p
+              });
+            });
+
+            tables.slice(0, 3).forEach(t => {
+              nodesList.push({
+                id: t._id,
+                label: 'Table',
+                type: 'table',
+                originalData: t
+              });
+            });
+
+            const visibleNodeIds = new Set(nodesList.map(n => n.id));
+            
+            // Layout algorithm to position nodes cleanly in SVG grid coordinates
+            const positionedNodes = nodesList.map(node => {
+              let x = 400;
+              let y = 250;
+
+              if (node.type === 'document') {
+                const docIdx = documents.findIndex(d => d._id === node.id);
+                const count = documents.length || 1;
+                x = 100;
+                y = count > 1 ? 100 + (docIdx * 140) : 240;
+              } else if (node.type === 'section') {
+                const secIdx = sections.findIndex(s => s._id === node.id);
+                const count = sections.length || 1;
+                x = 350;
+                y = count > 1 ? 80 + (secIdx * (350 / (count - 1 || 1))) : 240;
+              } else if (node.type === 'paragraph' || node.type === 'table') {
+                const isTable = node.type === 'table';
+                const list = isTable ? tables : paragraphs;
+                const idx = list.findIndex(item => item._id === node.id);
+                x = 600;
+                y = isTable ? 360 + (idx * 50) : 60 + (idx * 40);
+              }
+
+              return { ...node, x, y };
+            });
+
+            const positionedMap = new Map();
+            positionedNodes.forEach(node => positionedMap.set(node.id, node));
+
+            // Populate edges coordinate structures
+            const finalEdges = [];
+            edges.forEach(e => {
+              const src = positionedMap.get(e._from);
+              const tgt = positionedMap.get(e._to);
+              if (src && tgt) {
+                finalEdges.push({
+                  _id: e._id,
+                  sourceNode: src,
+                  targetNode: tgt
+                });
+              }
+            });
+
+            return {
+              nodes: positionedNodes,
+              edges: finalEdges
+            };
+          },
+
+          // Simple search matches filter on selected rows browser
+          filteredExplorerRows() {
+            const list = this.dbState[this.selectedCollection] || [];
+            if (!this.searchText) return list;
+            const term = this.searchText.toLowerCase();
+            return list.filter(item => {
+              return Object.values(item).some(val => 
+                String(val).toLowerCase().includes(term)
+              );
+            });
+          }
+        }
+      }
+    </script>
   </body>
 </html>
-

@@ -11,7 +11,7 @@ import {
   sampleParagraphs,
   sampleTables,
   buildSampleEdges
-} from './document_samples.js';
+} from './document_samples.ts';
 
 const STATE_FILE_PATH = 'doc_pipeline/collections/arangodb_state.json';
 

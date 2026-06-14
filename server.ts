@@ -1,15 +1,14 @@
 import express from 'express';
 import path from 'path';
 import fs from 'fs';
-import { createServer as createViteServer } from 'vite';
-import { getArangoDBSimulator } from './src/arangodb_sim.js';
+import { getArangoDBSimulator } from './src/arangodb_sim.ts';
 import { 
   getPipelineLogs, 
   isPipelineActive, 
   runPipelineExecution, 
   clearPipelineLogs,
   addPipelineLog
-} from './src/pipeline_runner.js';
+} from './src/pipeline_runner.ts';
 
 // Setup directories
 const INPUT_DIR = 'doc_pipeline/input';
@@ -181,24 +180,19 @@ async function startServer() {
     }
   });
 
-  // Mounting Vite Dev Server or Production Static Handlers
-  if (process.env.NODE_ENV !== 'production') {
-    const vite = await createViteServer({
-      server: { middlewareMode: true },
-      appType: 'spa',
-    });
-    app.use(vite.middlewares);
-  } else {
-    const distPath = path.join(process.cwd(), 'dist');
-    app.use(express.static(distPath));
-    // SPA fallback
-    app.get('*', (req, res) => {
-      res.sendFile(path.join(distPath, 'index.html'));
-    });
-  }
+  // Mount clean, direct static handlers (No Vite build, serve everything from root folder instantly)
+  app.use(express.static(path.join(process.cwd(), '.')));
+
+  app.get('/', (req, res) => {
+    res.sendFile(path.join(process.cwd(), 'index.html'));
+  });
+
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(process.cwd(), 'index.html'));
+  });
 
   app.listen(PORT, '0.0.0.0', () => {
-    console.log(`[Server] Document Pipeline listening on http://localhost:${PORT} in ${process.env.NODE_ENV || 'development'} mode.`);
+    console.log(`[Server] Document Pipeline listening on http://localhost:${PORT} in direct vanilla static mode.`);
   });
 }
 

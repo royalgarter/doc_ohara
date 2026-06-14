@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { GoogleGenAI } from '@google/genai';
-import { getArangoDBSimulator } from './arangodb_sim.js';
+import { getArangoDBSimulator } from './arangodb_sim.ts';
 
 export interface PipelineLog {
   timestamp: string;
