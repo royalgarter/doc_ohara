@@ -213,14 +213,14 @@
             </template>
             <template x-for="log in pipelineLogs">
               <div class="flex gap-2 items-start leading-tight">
-                <span class="text-neutral-600 select-none" x-text="log.timestamp.slice(11, 19)"></span>
+                <span class="text-neutral-600 select-none" x-text="log && log.timestamp ? log.timestamp.slice(11, 19) : ''"></span>
                 <span class="font-bold shrink-0" 
-                      :class="log.level === 'info' ? 'text-blue-400' :
-                              log.level === 'warn' ? 'text-amber-500' :
-                              log.level === 'error' ? 'text-red-500' : 'text-emerald-400'"
-                      x-text="'[' + log.level.toUpperCase() + ']'">
+                      :class="log && log.level === 'info' ? 'text-blue-400' :
+                              log && log.level === 'warn' ? 'text-amber-500' :
+                              log && log.level === 'error' ? 'text-red-500' : 'text-emerald-400'"
+                      x-text="log && log.level ? '[' + log.level.toUpperCase() + ']' : ''">
                 </span>
-                <span class="text-neutral-350 select-text break-words" x-text="log.message"></span>
+                <span class="text-neutral-350 select-text break-words" x-text="log ? log.message : ''"></span>
               </div>
             </template>
           </div>
@@ -284,7 +284,7 @@
                     <!-- Inside text layout details -->
                     <text :x="node.x" :y="node.y + 4" text-anchor="middle" class="font-mono text-xs"
                           :class="selectedNode && selectedNode.id === node.id ? 'fill-white' : 'fill-neutral-800'"
-                          x-text="node.label.slice(0, 10) + (node.label.length > 10 ? '..' : '')">
+                          x-text="node && node.label ? (String(node.label).slice(0, 10) + (String(node.label).length > 10 ? '..' : '')) : ''">
                     </text>
                   </g>
                 </template>
@@ -312,40 +312,40 @@
 
                   <div>
                     <span class="text-neutral-400 block font-bold uppercase">KEY VALUE</span>
-                    <pre class="bg-white border p-1 text-neutral-700 whitespace-pre overflow-x-auto select-all" x-text="selectedNode.originalData._key"></pre>
+                    <pre class="bg-white border p-1 text-neutral-700 whitespace-pre overflow-x-auto select-all" x-text="selectedNode && selectedNode.originalData ? selectedNode.originalData._key : ''"></pre>
                   </div>
 
                   <div>
                     <span class="text-neutral-400 block font-bold uppercase">SYSTEM ID (_id)</span>
-                    <pre class="bg-white border p-1 text-neutral-700 whitespace-pre overflow-x-auto select-all" x-text="selectedNode.originalData._id"></pre>
+                    <pre class="bg-white border p-1 text-neutral-700 whitespace-pre overflow-x-auto select-all" x-text="selectedNode && selectedNode.originalData ? selectedNode.originalData._id : ''"></pre>
                   </div>
 
                   <!-- Conditionally render text -->
-                  <template x-if="selectedNode.type === 'document'">
+                  <template x-if="selectedNode.type === 'document' && selectedNode.originalData">
                     <div>
                       <span class="text-neutral-400 block font-bold uppercase">Source Engine</span>
-                      <pre class="bg-white border p-1 text-neutral-700" x-text="selectedNode.originalData.parser_engine"></pre>
+                      <pre class="bg-white border p-1 text-neutral-700" x-text="selectedNode.originalData.parser_engine || ''"></pre>
                     </div>
                   </template>
 
-                  <template x-if="selectedNode.type === 'section'">
+                  <template x-if="selectedNode.type === 'section' && selectedNode.originalData">
                     <div>
                       <span class="text-neutral-400 block font-bold uppercase">Title & Level</span>
-                      <pre class="bg-white border p-1 text-neutral-700 whitespace-pre-wrap" x-text="'h' + selectedNode.originalData.level + ': ' + selectedNode.originalData.title"></pre>
+                      <pre class="bg-white border p-1 text-neutral-700 whitespace-pre-wrap" x-text="'h' + (selectedNode.originalData.level || '') + ': ' + (selectedNode.originalData.title || '')"></pre>
                     </div>
                   </template>
 
-                  <template x-if="selectedNode.type === 'paragraph'">
+                  <template x-if="selectedNode.type === 'paragraph' && selectedNode.originalData">
                     <div>
                       <span class="text-neutral-400 block font-bold uppercase">Markup Body</span>
-                      <pre class="bg-white border p-1 text-neutral-700 whitespace-pre-wrap select-all max-h-48 overflow-y-auto" x-text="selectedNode.originalData.content"></pre>
+                      <pre class="bg-white border p-1 text-neutral-700 whitespace-pre-wrap select-all max-h-48 overflow-y-auto" x-text="selectedNode.originalData.content || ''"></pre>
                     </div>
                   </template>
 
-                  <template x-if="selectedNode.type === 'table'">
+                  <template x-if="selectedNode.type === 'table' && selectedNode.originalData">
                     <div>
                       <span class="text-neutral-400 block font-bold uppercase">Markdown Table</span>
-                      <pre class="bg-white border p-1 text-neutral-700 whitespace-pre overflow-x-auto max-h-40" x-text="selectedNode.originalData.markdown_representation"></pre>
+                      <pre class="bg-white border p-1 text-neutral-700 whitespace-pre overflow-x-auto max-h-40" x-text="selectedNode.originalData.markdown_representation || ''"></pre>
                     </div>
                   </template>
                 </div>
@@ -434,11 +434,11 @@
             <div class="flex flex-wrap gap-2 items-center justify-between">
               <!-- Select Collection -->
               <div class="flex gap-1">
-                <button @click="selectedCollection = 'documents'" class="px-2 py-1 text-xs font-mono uppercase border" :class="selectedCollection === 'documents' ? 'bg-neutral-900 text-white' : 'bg-white text-neutral-500'"></button>
-                <button @click="selectedCollection = 'sections'" class="px-2 py-1 text-xs font-mono uppercase border" :class="selectedCollection === 'sections' ? 'bg-neutral-900 text-white' : 'bg-white text-neutral-500'"></button>
-                <button @click="selectedCollection = 'paragraphs'" class="px-2 py-1 text-xs font-mono uppercase border" :class="selectedCollection === 'paragraphs' ? 'bg-neutral-900 text-white' : 'bg-white text-neutral-500'"></button>
-                <button @click="selectedCollection = 'tables'" class="px-2 py-1 text-xs font-mono uppercase border" :class="selectedCollection === 'tables' ? 'bg-neutral-900 text-white' : 'bg-white text-neutral-500'"></button>
-                <button @click="selectedCollection = 'edges'" class="px-2 py-1 text-xs font-mono uppercase border" :class="selectedCollection === 'edges' ? 'bg-neutral-900 text-white' : 'bg-white text-neutral-500'"></button>
+                <button @click="selectedCollection = 'documents'" class="px-2 py-1 text-xs font-mono uppercase border" :class="selectedCollection === 'documents' ? 'bg-neutral-900 text-white' : 'bg-white text-neutral-500'">Documents</button>
+                <button @click="selectedCollection = 'sections'" class="px-2 py-1 text-xs font-mono uppercase border" :class="selectedCollection === 'sections' ? 'bg-neutral-900 text-white' : 'bg-white text-neutral-500'">Sections</button>
+                <button @click="selectedCollection = 'paragraphs'" class="px-2 py-1 text-xs font-mono uppercase border" :class="selectedCollection === 'paragraphs' ? 'bg-neutral-900 text-white' : 'bg-white text-neutral-500'">Paragraphs</button>
+                <button @click="selectedCollection = 'tables'" class="px-2 py-1 text-xs font-mono uppercase border" :class="selectedCollection === 'tables' ? 'bg-neutral-900 text-white' : 'bg-white text-neutral-500'">Tables</button>
+                <button @click="selectedCollection = 'edges'" class="px-2 py-1 text-xs font-mono uppercase border" :class="selectedCollection === 'edges' ? 'bg-neutral-900 text-white' : 'bg-white text-neutral-500'">Edges</button>
               </div>
 
               <!-- Search filter input -->
