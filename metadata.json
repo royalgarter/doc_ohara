@@ -1,0 +1,8 @@
+{
+  "name": "AI Document Extraction Pipeline",
+  "description": "An interactive playground that processes academic or business documents via Docling and MinerU pipelines, standardizing them into relational collections and storing them in an ArangoDB graph database with AQL querying.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
