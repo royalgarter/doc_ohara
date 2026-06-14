@@ -230,3 +230,75 @@ After processing completes, open the ./collections/ directory. You will find fou
 
 Would you like to extend this script to generate vector embeddings using Gemini’s text-embedding-004 model for each paragraph before saving them to disk? This will make your database fully ready for AI-powered semantic search.
 
+---
+
+Building a universal document ingestion and parsing engine requires a layered, decoupled system architecture. You cannot rely on a single parsing tool because PDFs, Word documents (.docx), Ebooks (.epub), and Markdown files store data in completely fundamentally different formats. [1, 2]
+To convert any file into a deeply structured, queryable knowledge base containing chapters, headings, paragraphs, tables, and tag metadata, you must implement the following pipeline. [3]
+------------------------------
+## 🌐 System Architecture Pipeline
+
+  📥 Any Document     ───►   📦 Ingestion Layer   ───►   🧠 Parsing Engine
+ (PDF, DOCX, EPUB)          (Express / FastAPI)         (Unstructured / Apache Tika)
+                                                                 │
+                                                                 ▼
+  🗄️ Query / Retrieval ◄───   📂 Storage Layer     ◄───   🏷️ Structural Schema
+(PostgreSQL + PgVector)     (Relational + Graph)        (DoCO/SKOS/JSON Standard)
+
+------------------------------
+## 1. The Engineering Blueprint: Step-by-Step## Step 1: Standardized Ingestion [4]
+Your backend api accepts multi-part form uploads. You must first extract the file extension and MIME type to dynamically route the file to its appropriate worker pipeline. [5]
+## Step 2: Structural Extraction (The Core Engine)
+Instead of writing native code to parse binary PDFs or zip-compressed EPUB xml layouts, deploy a highly optimized open-source extraction engine:
+
+* Unstructured.io (Highly Recommended): The current industry standard for AI applications. It accepts almost any file format and automatically strips out structural elements, returning a clean array of elements labeled as Title, Header, NarrativeText (Paragraph), ListItem, or Table. [6, 7, 8, 9, 10]
+* Apache Tika: A bulletproof, Java-based enterprise tool that detects and extracts metadata and text from over a thousand different file types. [11, 12]
+
+## Step 3: Semantic Normalization
+Map the raw engine output into a uniform structural JSON object based on the DoCO (Document Components Ontology) principles we discussed. Every document must end up inside the database looking exactly like this unified schema:
+
+{
+  "document_id": "doc_2026_9981",
+  "metadata": {
+    "title": "Advanced Quantum Architecture",
+    "author": "Dr. Sarah Jenkins",
+    "tags": ["Quantum Computing", "Physics"]
+  },
+  "structure": {
+    "toc": [
+      {"label": "Chapter 1", "target_node": "node_ch_1"},
+      {"label": "Section 1.1", "target_node": "node_sec_1_1"}
+    ],
+    "alphabet_index": [
+      {"keyword": "Qubit", "references": ["node_para_112", "node_para_115"]}
+    ]
+  },
+  "nodes": [
+    {
+      "id": "node_ch_1",
+      "type": "Chapter",
+      "title": "Chapter 1: The Quantum Landscape",
+      "parent_id": null
+    },
+    {
+      "id": "node_sec_1_1",
+      "type": "Section",
+      "title": "1.1 Superposition Principles",
+      "parent_id": "node_ch_1"
+    },
+    {
+      "id": "node_para_112",
+      "type": "Paragraph",
+      "text": "Superposition allows a quantum system to be in multiple states simultaneously...",
+      "parent_id": "node_sec_1_1",
+      "vector_embedding_stored": true
+    }
+  ]
+}
+
+## Step 4: Storage & Indexing Strategy
+To enable both precise logical filtering and AI-powered semantic search, use a hybrid storage approach: [13]
+
+* Relational Database (PostgreSQL): Create a hierarchical self-referencing table (nodes) with columns for id, document_id, type, content, and parent_id.
+* Vector Extension (pgvector): Generate and store vector embeddings for every single text node (Paragraph). This allows users to semantic-search down to the exact section or paragraph across millions of documents. [14, 15, 16, 17, 18]
+
+------------------------------
