@@ -1,106 +1,98 @@
-# AI Document Extraction Pipeline 🚀
+# Doc Ohara: Space-Time Graph for Advanced Context Retrieval 🌌
 
-An interactive playground that processes academic or business documents via simulated **MinerU** and **Docling** pipelines, standardizing them into relational collections and storing them in an ArangoDB graph database with full **AQL (ArangoDB Query Language)** querying capability.
-
-This project is built from the ground up to be fully **Node.js-native**, leveraging standard JavaScript ES modules (`type: "module"`) and requiring no heavyweight transpiles or compilation steps.
+**Doc Ohara** is a high-efficiency document transformation and retrieval engine. It converts unstructured documents into a multi-dimensional **Space-Time Graph** to solve the "lost in the middle" and context-window limitations of traditional RAG (Retrieval-Augmented Generation).
 
 ---
 
-## 🌟 Key Features
-
-- **Double-Engine Layout Extraction**:
-  - **MinerU Sim**: Models layout parsing for complex PDF academic papers, breaking contents into standard title blocks, section structures, tabular data, and raw LaTeX mathematical equations.
-  - **Docling Sim**: Models operational document layouts (docx/txt), producing clean nested text headers, structural bullet lists, and standard business table matrices.
-- **Server-Side Gemini Integration**: Optionally powered by `gemini-3.5-flash` via the `@google/genai` Node.js SDK to digest uploaded text documents and organize them dynamically into layout collections.
-- **ArangoDB Graph Database Simulator**: Includes a realistic, disk-buffered in-memory ArangoDB multi-model instance.
-  - Generates relational edge linkages (`has_section`, `contains_paragraph`, `contains_table`, `belongs_to`) automatically.
-  - Custom data mutation handlers (`insertDocument`, `insertSection`, `insertParagraph`, `insertTable`, `insertEdge`).
-- **AQL Compiler & Interpreter**: Features a client-server executable engine with support for standard FOR loops, projections, filter conditions, sorting, limit structures, and Graph Traversals matching outbound/inbound multi-hop schemas.
-- **Rich Interactive UI**: High-fidelity dashboard visualizing:
-  - Real-time pipeline processing queue status and console streams.
-  - Live graph visualization displaying document and section node connections.
-  - Interactive collection browser with full searching, paging, and custom AQL input consoles.
+## 🎯 Mission
+Standard RAG relies on flat vector similarity which loses structural intent and chronological context. Doc Ohara implements the **Open Knowledge Format (OKF)** and **DoCO (Document Components Ontology)** to treat documents as living graphs where every paragraph, section, and entity is a vertex connected by semantic, structural, and temporal edges.
 
 ---
 
-## 🛠️ Installation & Setup
+## 🏗️ Core Architecture: The Space-Time Graph
 
-Install all necessary production and development dependencies using:
+Powered by **ArangoDB Multi-Model**, the system tracks:
+- **Structural Flow**: Parent-child (Chapters → Sections → Paragraphs) and sequential siblings.
+- **Semantic Web**: Entities, concepts, and cross-document citations.
+- **Bi-Temporal Versioning**: Tracking when information was valid vs. when it was extracted.
+- **Geo-Spatial Metadata**: Mapping document content to physical coordinates or layout boxes.
 
+### Schema (OKF + DoCO)
+- `okf_documents`: Metadata root for document ownership and licensing.
+- `okf_nodes`: Vertices containing content, layout coordinates, and vector embeddings.
+- `okf_edges`: Strongly typed relations (`HAS_CHILD`, `NEXT_SIBLING`, `REFERENCES`, `SUCCEEDS`).
+
+---
+
+## ⚡ Two-Step Retrieval Engine
+
+Doc Ohara bypasses flat search bottlenecks with a bifurcated retrieval strategy:
+
+### Phase 1: Shallow Context (The "Breadth" Search)
+Hybrid scoring combining:
+1. **Vector Proximity**: Cosine similarity on `text-embedding-3-small`.
+2. **Text Density**: BM25 full-text search via ArangoSearch.
+3. **Tag Overlap**: Taxonomic intersection scoring.
+*Output: Highly relevant seed nodes with "expandable directions".*
+
+### Phase 2: Deep Context (The "Depth" Traversal)
+Graph-based expansion from seed nodes:
+- **Structural**: Fetching parent headers for context or child paragraphs for detail.
+- **Sequential**: Walking the `NEXT_SIBLING` chain for narrative continuity.
+- **Semantic**: Following citations and shared concept nodes across documents.
+
+---
+
+## 🛠️ Interactive Playground & Simulation
+
+This repository includes a Node.js-native playground to test these concepts:
+- **Double-Engine Extraction**: Simulated **MinerU** (academic/LaTeX) and **Docling** (business/docx) pipelines.
+- **ArangoDB Simulator**: Disk-buffered in-memory graph instance with **AQL (ArangoDB Query Language)** support.
+- **Gemini Integration**: Live partitioning of docs via `@google/genai`.
+- **Visualization**: Live graph dashboard for real-time traversal monitoring.
+
+---
+
+## 🚀 Getting Started
+
+### Installation
 ```bash
-npm run install
+npm install
 ```
 
-### Environment Variables
-
-To activate the real-time AI document partitioner, set up your server-side Gemini API key. Rename `.env.example` to `.env` or set it in your system's environment variables:
-
+### Setup Environment
+Create `.env` with your API key:
 ```env
-GEMINI_API_KEY=your_gemini_api_key_here
+GEMINI_API_KEY=your_key_here
 ```
 
-*Note: If no API key is specified, the pipeline will automatically fall back to high-fidelity simulated layouts.*
-
----
-
-## 🚀 Running the App
-
-### Development Mode
-
-Start the Node.js backend server with hot-reload monitoring:
-
+### Run
 ```bash
 npm run dev
 ```
-
-### Production Start
-
-Serve the application in the optimized production configuration:
-
-```bash
-npm start
-```
-
-Once running, the application will be active and listening on **http://localhost:3000**.
+Access at **http://localhost:3000**.
 
 ---
 
 ## 📁 Repository Structure
 
 ```text
-├── doc_pipeline/           # Database state & pipeline workspace
-│   ├── collections/        # Standardized database output storage JSONs
-│   ├── input/              # Staged input files for parsing
-│   └── raw_output/         # Raw visual layouts parsed from files
-├── src/                    # Backend modular simulation components
-│   ├── arangodb_sim.js     # ArangoDB Simulator & AQL Query Interpreter
-│   ├── document_samples.js # Default seeded structures
-│   └── pipeline_runner.js  # Main doc extract execution engine
-├── index.html              # Alpine.js-powered interactive front-end
-├── server.js               # Node.js/Express main entry point
-├── package.json            # Node scripts & dependencies metadata
-└── tsconfig.json           # Type configurations
+├── src/
+│   ├── arangodb_sim.js     # Multi-model Graph + AQL Interpreter
+│   └── pipeline_runner.js  # Extraction engine logic
+├── doc_pipeline/           # Pipeline workspace & state
+├── DESIGN.md               # Detailed Schema & Retrieval Architecture
+└── index.html              # Dashboard UI
 ```
 
 ---
 
-## ⚡ AQL Query Cheatsheet
-
-### 1. View All Document Nodes
+## ⚡ AQL Example: Multi-Hop Retrieval
 ```aql
-FOR doc IN documents 
-  RETURN doc
-```
-
-### 2. Find Academic Equations in Papers
-```aql
-FOR p IN paragraphs 
-  FILTER p.is_latex == true 
-  RETURN p
-```
-
-### 3. Outbound Graph Traversal (Find sections associated with document)
-```aql
-FOR v, e IN OUTBOUND "documents/quantum_paper_001" has_section, belongs_to 
-  RETURN v
+// Find sibling paragraphs of a section containing "Quantum"
+FOR start IN okf_nodes
+  FILTER start.type == "Section" AND CONTAINS(start.title, "Quantum")
+  FOR v, e IN 1..2 OUTBOUND start okf_edges
+    FILTER e.relation == "NEXT_SIBLING"
+    RETURN v.content
 ```
