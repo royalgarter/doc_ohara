@@ -1,6 +1,6 @@
 # Doc Ohara: Space-Time Graph for Advanced Context Retrieval 🌌
 
-**Doc Ohara** is a high-efficiency document transformation and retrieval engine. It converts unstructured documents into a multi-dimensional **Space-Time Graph** to solve the "lost in the middle" and context-window limitations of traditional RAG (Retrieval-Augmented Generation).
+Doc Ohara is a high-efficiency document transformation and retrieval engine. It converts unstructured documents into a multi-dimensional **Space-Time Graph** to solve the "lost in the middle" and context-window limitations of traditional RAG (Retrieval-Augmented Generation). This document serves as the master technical specification, defining the Space-Time Graph schema, multi-stage ingestion pipelines, LLM orchestration strategies, and the hybrid retrieval architecture.
 
 ---
 
@@ -11,35 +11,312 @@ Standard RAG relies on flat vector similarity which loses structural intent and 
 
 ## 🏗️ Core Architecture: The Space-Time Graph
 
+Doc Ohara transforms unstructured documents into a multi-dimensional knowledge web. The system is designed to be engine-agnostic, supporting both local extraction (MinerU/Docling) and cloud-native workflows (Gemini 1.5 Pro).
+
 Powered by **ArangoDB Multi-Model**, the system tracks:
 - **Structural Flow**: Parent-child (Chapters → Sections → Paragraphs) and sequential siblings.
 - **Semantic Web**: Entities, concepts, and cross-document citations.
 - **Bi-Temporal Versioning**: Tracking when information was valid vs. when it was extracted.
 - **Geo-Spatial Metadata**: Mapping document content to physical coordinates or layout boxes.
 
+### 🛰️ The Space-Time Pipeline
+1.  **Ingestion**: Distributed task queue (e.g., BullMQ, Temporal) routing raw files to parsers.
+2.  **Structural Decomposition (DocsRay)**: LLM-driven **Pseudo-TOC Generation** for semantic partitioning (replaces fixed-size chunking).
+3.  **Semantic Enrichment**: Generating multi-vector embeddings and tags.
+4.  **Relational Synthesis**: Building the graph with strict outbound directionality.
+5.  **Persistence**: ACID transactions in ArangoDB to ensure graph integrity.
+
+#### 📍 Pseudo-TOC (DocsRay Implementation)
+Doc Ohara integrates the **DocsRay** algorithm to transform unstructured text into semantically coherent hierarchies:
+- **Phase 1: Boundary Detection**: LLM analyzes text junctions to identify topic shifts.
+- **Phase 2: Adaptive Merging**: Small segments are merged based on embedding similarity to maintain a minimum section size.
+- **Phase 3: Automatic Titling**: LLM generates concise, descriptive titles for the resulting sections.
+
+This approach reduces retrieval complexity from $O(N)$ to $O(S + k_1 \cdot N_s)$, improving speed by up to 45%.
+
 ### Schema (OKF + DoCO)
+We utilize ArangoDB to model the **Open Knowledge Format (OKF)** and **DoCO (Document Components Ontology)**. This provides engine-level validation for structural, temporal, and spatial metadata.
+
 - `okf_documents`: Metadata root for document ownership and licensing.
 - `okf_nodes`: Vertices containing content, layout coordinates, and vector embeddings.
-- `okf_edges`: Strongly typed relations (`HAS_CHILD`, `NEXT_SIBLING`, `REFERENCES`, `SUCCEEDS`).
+- `okf_edges`: Strongly typed relations (`HAS_CHILD`, `NEXT_SIBLING`, `REFERENCES`, `SUCCEEDS`). **Strict Outbound Directionality** (e.g., `NEXT_SIBLING` always points forward).
+
+#### Schema Definition (`setup_okf_schema.js`)
+```javascript
+/**
+ * Doc_Ohara: ArangoDB Multi-Model Schema Definition (OKF + DoCO)
+ * Implements persistent indexing for tags, geo-spatial metadata, and bitemporal ranges.
+ */
+import { Database } from 'arangojs';
+
+const db = new Database({
+  url: "http://localhost:8529",
+  databaseName: "doc_ohara_knowledge_base",
+  auth: { username: "root", password: "password" }
+});
+
+// JSON Validation Schema for 'okf_nodes'
+const nodeSchema = {
+  rule: {
+    type: "object",
+    required: ["type", "doc_id", "temporal"],
+    properties: {
+      type: {
+        type: "string",
+        enum: ["Chapter", "Section", "Subsection", "Paragraph", "Table", "ListItem", "Figure", "Concept", "Tag", "AlphabetIndexItem"]
+      },
+      doc_id: { type: "string" },
+      content: { type: "string" },
+      spatial: {
+        type: "object",
+        properties: {
+          layout_box: { type: "object" },
+          geo_json: { type: "object" }
+        }
+      },
+      temporal: {
+        type: "object",
+        required: ["extracted_at", "valid_from"],
+        properties: {
+          extracted_at: { type: "string", format: "date-time" },
+          valid_from: { type: "string", format: "date-time" }
+        }
+      },
+      tags: { type: "array", items: { type: "string" } },
+      vector_embedding: { type: "array", items: { type: "number" } }
+    }
+  }
+};
+
+// JSON Validation Schema for 'okf_edges'
+const edgeSchema = {
+  rule: {
+    type: "object",
+    required: ["_from", "_to", "relation"],
+    properties: {
+      relation: {
+        type: "string",
+        enum: ["HAS_CHILD", "NEXT_SIBLING", "HAS_TAG", "INDEXED_UNDER", "REFERENCES", "SUCCEEDS"]
+      },
+      confidence: { type: "number", minimum: 0, maximum: 1 }
+    }
+  }
+};
+
+// (Index configuration and collection creation logic omitted for brevity)
+```
+
+---
+
+## 3. Ingestion & Transformation Lifecycle
+
+The ingestion process bridges the gap between raw binary formats and our graph schema.
+
+### 3.1 The 5-Stage Transformation Flow
+
+| Stage | Activity | Output |
+| :--- | :--- | :--- |
+| **1. Normalization** | Frontmatter parsing, line-break sanitization | Sanitized Body + Metadata |
+| **2. Decomposition** | Deterministic AST (remark-parse) mapping | Hierarchy of Nodes |
+| **3. Enrichment** | Multi-Vector Indexing + Semantic Tagging | Vector-ready Nodes |
+| **4. Synthesis** | Relational edge generation (ACID Transaction) | Space-Time Graph |
+| **5. Persistence** | Atomic ArangoDB Batch Insert | Persistent Graph Records |
+
+---
+
+## 4. Extraction Engines: Local vs. Cloud
+
+### 4.1 Robust Orchestration
+For high-volume processing, we replace brittle shell scripts with a distributed task queue (e.g., **BullMQ** or **Temporal**). This provides retries, timeout handling for OOM errors, and proper state tracking.
+
+**Worker Definition**:
+```javascript
+// Example worker orchestration
+const worker = new Worker('ingestion_queue', async job => {
+  const { filePath, docId } = job.data;
+  // 1. Route to MinerU/Docling parser
+  // 2. Deterministic OKF/DoCO mapping
+  // 3. Multi-Vector Enrichment
+  // 4. Atomic Graph Persistence
+});
+```
+
+**`transform.js`**:
+Standardizes the disparate outputs of MinerU and Docling into the unified OKF/DoCO format using deterministic relational mapping.
+
+### 4.2 Cloud-Native Extraction (Gemini 1.5 Pro)
+Leveraging Gemini's 2M context window for instant "Zero-GPU" extraction using Structured Outputs.
+
+```javascript
+// Gemini Response Schema mapping directly to DoCO
+const docoResponseSchema = {
+    type: Type.OBJECT,
+    properties: {
+        title: { type: Type.STRING },
+        sections: { type: Type.ARRAY, items: { ... } },
+        paragraphs: { type: Type.ARRAY, items: { ... } }
+    }
+};
+```
+
+---
+
+## 5. LLM Orchestration & Prompt Engineering
+
+The LLM acts as the **Semantic Orchestrator**, responsible for structural architecting and relationship inference. All system instructions are managed in the `prompts/` directory for deterministic versioning.
+
+### 5.1 Prompt Library
+| Prompt | Purpose |
+| :--- | :--- |
+| `ingest_document.md` | Structural decomposition into Chapter, Section, Paragraph nodes. |
+| `extract_toc.md` | Mapping the document's hierarchical skeleton (P-TOC). |
+| `extract_tags.md` | Generating semantic tags for Phase 0 expansion. |
+| `extract_entities.md` | Named Entity Recognition (NER) for the Semantic Web layer. |
+| `boundary_detection.md` | Identifying topic shifts in the DocsRay pipeline. |
+| `generate_section_title.md` | Extracting concise titles for pseudo-TOC sections. |
+
+### 5.2 The "Multi-Vector" Context Strategy
+Standard "Contextual Headers" (prepending metadata to text) can dilute vector density. We recommend **Multi-Vector Indexing**:
+*   **Primary Vector**: The pure paragraph content.
+*   **Secondary Vector**: The parent section's summary or structural context.
+*   **Graph Context**: Fetching parent/sibling metadata *after* retrieval via AQL to provide context without inflating token usage during vectorization.
+
+*Legacy Contextual Header Example*: "In the context of Results for Method B Testing... [Paragraph Content]" (Caution: Use sparingly to avoid noise).
+
+---
+
+## 6. Deterministic Integrity & Transactional Guarantees
+
+Instead of relying on LLMs to "heal" broken graphs, Doc Ohara enforces structural integrity at the point of ingestion.
+
+1.  **Schema Enforcement**: Strict validation against `DESIGN.md` rules using ArangoDB JSON Schema.
+2.  **ACID Transactions**: Every document is inserted as a single transaction. If one edge fails, the entire document rolls back, preventing orphaned nodes.
+3.  **Semantic De-duplication**: Use deterministic hashing and entity matching to merge redundant concepts across sections.
+
+**Automated Integrity Check**:
+```javascript
+// Ensure strict sequence continuity
+const result = await db.query(aql`
+  FOR n IN okf_nodes
+    FILTER n.type == "Paragraph"
+    LET sib = FIRST(FOR v, e IN 1..1 OUTBOUND n okf_edges FILTER e.relation == "NEXT_SIBLING" RETURN v)
+    FILTER sib == null AND n.has_next == true // Flagged for manual review
+    RETURN n._id
+`);
+```
 
 ---
 
 ## ⚡ Two-Step Retrieval Engine
 
-Doc Ohara bypasses flat search bottlenecks with a bifurcated retrieval strategy:
+Doc Ohara bypasses flat search bottlenecks with a bifurcated retrieval strategy.
 
-### Phase 1: Shallow Context (The "Breadth" Search)
-Hybrid scoring combining:
-1. **Vector Proximity**: Cosine similarity on `text-embedding-3-small`.
-2. **Text Density**: BM25 full-text search via ArangoSearch.
-3. **Tag Overlap**: Taxonomic intersection scoring.
-*Output: Highly relevant seed nodes with "expandable directions".*
+### 7.1 Retrieval Architecture Overview
 
-### Phase 2: Deep Context (The "Depth" Traversal)
-Graph-based expansion from seed nodes:
-- **Structural**: Fetching parent headers for context or child paragraphs for detail.
-- **Sequential**: Walking the `NEXT_SIBLING` chain for narrative continuity.
-- **Semantic**: Following citations and shared concept nodes across documents.
+```
+   [ User Input String ]
+             │
+             ▼
+┌───────────────────────────────────────────┐
+│     Phase 0: Input Parsing & Expansion    │
+│  - Local NLP: sub-50ms NER & Keywords    │
+│  - Tag Expansion: Map query to system tags│
+│  - Compute: Query Vector Embedding       │
+└───────────────────────────────────────────┘
+             │
+             ▼
+┌───────────────────────────────────────────┐
+│        Phase 1: Shallow Context           │
+│  - ArangoSearch: BM25 + Exact Tag Match  │
+│  - Native ANN: Fast Vector Search        │
+│  - Hybrid: Dynamic Scoring (Vector+Text) │
+└───────────────────────────────────────────┘
+             │
+             ▼  (User/Agent choice of direction)
+┌───────────────────────────────────────────┐
+│         Phase 2: Deep Context             │
+│  - Target node-specific graph expansion   │
+│  - High-depth traversals (Up/Down/Sibs)    │
+│  - Geo-spatial bounding box filtering     │
+└───────────────────────────────────────────┘
+```
+
+### 7.2 Phase 1: Shallow Context (Breadth Search)
+Combines **ArangoSearch (BM25)** and **Native Vector Search**. We avoid `CONTAINS` and `FILTER` for text, instead routing all text queries through ArangoSearch Views for performance.
+
+**Tag Expansion Strategy**:
+Instead of fuzzy vector search on tags, we use Phase 0 to map the user query to exact system tags (e.g., "Healthcare" -> `["Medical", "Compliance"]`) and then perform high-speed exact matching in AQL.
+
+### 7.3 Phase 2: Deep Context (Depth Traversal)
+Executes targeted AQL multi-hop traversals. Strict outbound directionality ensures sequential walking (e.g., `NEXT_SIBLING` chain) is deterministic and fast.
+
+### 7.4 Node.js Implementation: `RetrievalEngine.js`
+
+```javascript
+/**
+ * Doc_Ohara: Optimized Hybrid Retrieval Engine
+ */
+
+export class RetrievalEngine {
+  /**
+   * Phase 0: Preprocessing with Local NLP
+   */
+  async preprocessInput(rawInput) {
+    // 1. Local NER & Keyword extraction (e.g., via spaCy/ONNX)
+    const extraction = await localNlp.parse(rawInput); // < 50ms
+
+    // 2. Semantic Tag Expansion (Healthcare -> Medical)
+    const expandedTags = await tagTaxonomy.expand(extraction.tags);
+
+    return {
+      vector: await computeEmbedding(rawInput),
+      tags: expandedTags,
+      keywords: extraction.keywords
+    };
+  }
+
+  /**
+   * Phase 1: Shallow Context using ArangoSearch
+   */
+  async getShallowContext(processedQuery, options = {}) {
+    const query = aql`
+      FOR doc IN okf_search_view
+        SEARCH 
+          ANALYZER(doc.content IN TOKENS(${processedQuery.keywords.join(" ")}, "text_en"), "text_en")
+          OR doc.tags ANY IN ${processedQuery.tags}
+
+        // Native Vector Search (ANN)
+        LET vectorScore = COSINE_SIMILARITY(doc.vector_embedding, ${processedQuery.vector})
+        LET textScore = BM25(doc)
+        
+        // Dynamic weight adjustment
+        LET compositeScore = (vectorScore * 0.6) + (textScore * 0.4)
+        
+        SORT compositeScore DESC
+        LIMIT 10
+        RETURN doc
+    `;
+    // ... execution logic
+  }
+}
+```
+
+### 7.5 Execution Example: Multi-Hop Retrieval
+
+```javascript
+// Example Usage Execution Block
+async function runDemo() {
+  const userInput = "Show me quantum superposition and how it connects to qubits in Dr. Jenkins' lab.";
+  const processedQuery = await engine.preprocessInput(userInput);
+  const shallowResults = await engine.getShallowContext(processedQuery, { limit: 3 });
+  
+  if (shallowResults.length > 0) {
+    const targetNodeId = shallowResults[0].node.id;
+    const deepResults = await engine.getDeepContext(targetNodeId, 'semantic_web', { depth: 2 });
+    console.dir(deepResults, { depth: null });
+  }
+}
+```
 
 ---
 
@@ -78,20 +355,29 @@ Access at **http://localhost:3000**.
 
 ```text
 ├── src/
-│   ├── arangodb_sim.js     # Multi-model Graph + AQL Interpreter
-│   └── pipeline_runner.js  # Extraction engine logic
-├── doc_pipeline/           # Pipeline workspace & state
-├── DESIGN.md               # Detailed Schema & Retrieval Architecture
-└── index.html              # Dashboard UI
+│   ├── arangodb_sim.js         # Multi-model Graph + AQL Interpreter
+│   ├── pipeline_runner.js      # Extraction engine logic
+│   └── pseudo_toc_generator.js # DocsRay Pseudo-TOC implementation
+├── prompts/                    # LLM System Instructions
+│   ├── ingest_document.md      # Structural decomposition
+│   ├── extract_toc.md          # TOC skeleton extraction
+│   ├── extract_tags.md         # Semantic tagging
+│   ├── extract_entities.md     # Relationship discovery
+│   ├── boundary_detection.md   # Topic boundary analysis
+│   └── generate_section_title.md # TOC-ready title generation
+├── doc_pipeline/               # Pipeline workspace & state
+└── index.html                  # Dashboard UI
 ```
 
 ---
 
-## ⚡ AQL Example: Multi-Hop Retrieval
+## ⚡ AQL Example: Optimized Multi-Hop Retrieval
 ```aql
 // Find sibling paragraphs of a section containing "Quantum"
-FOR start IN okf_nodes
-  FILTER start.type == "Section" AND CONTAINS(start.title, "Quantum")
+// Optimized using ArangoSearch and graph traversal
+FOR start IN okf_search_view
+  SEARCH ANALYZER(start.title IN TOKENS("Quantum", "text_en"), "text_en")
+  FILTER start.type == "Section"
   FOR v, e IN 1..2 OUTBOUND start okf_edges
     FILTER e.relation == "NEXT_SIBLING"
     RETURN v.content
