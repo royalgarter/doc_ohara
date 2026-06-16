@@ -1,11 +1,20 @@
 # Doc Ohara: Space-Time Graph for Advanced Context Retrieval 🌌
 
-Doc Ohara is a high-efficiency document transformation and retrieval engine. It converts unstructured documents into a multi-dimensional **Space-Time Graph** to solve the "lost in the middle" and context-window limitations of traditional RAG (Retrieval-Augmented Generation). This document serves as the master technical specification, defining the Space-Time Graph schema, multi-stage ingestion pipelines, LLM orchestration strategies, and the hybrid retrieval architecture.
+Doc Ohara is a high-efficiency document transformation and retrieval engine. It converts unstructured documents into a multi-dimensional **Space-Time Graph** to solve the "lost in the middle" and context-window limitations of traditional RAG.
+
+> **TL;DR**: Doc Ohara doesn't just "chunk" text; it mimics how humans read (scanning & referencing). It builds a hierarchical **Pseudo-TOC** to enable sub-second retrieval from millions of tokens by navigating a structured graph instead of scanning flat lists.
 
 ---
 
 ## 🎯 Mission
-Standard RAG relies on flat vector similarity which loses structural intent and chronological context. Doc Ohara implements the **Open Knowledge Format (OKF)** and **DoCO (Document Components Ontology)** to treat documents as living graphs where every paragraph, section, and entity is a vertex connected by semantic, structural, and temporal edges.
+Standard RAG relies on flat vector similarity which loses structural intent. Doc Ohara implements the **Open Knowledge Format (OKF)** to treat documents as living graphs. 
+
+**Our Philosophy: Human-Centric Retrieval**
+Humans read using the "Layer Cake" and "F-Pattern"—scanning headings and jumping to references rather than reading cover-to-cover. Doc Ohara's architecture is built to mirror this:
+- **Scanning**: Our **Pseudo-TOC** provides the "headings" for AI to scan.
+- **Referencing**: Graph edges allow targeted "Ctrl+F" style jumps between concepts.
+- **Priming**: Sequential traversals provide the context needed to "prime" the LLM for accurate answers.
+
 
 ---
 
@@ -332,22 +341,33 @@ This repository includes a Node.js-native playground to test these concepts:
 
 ## 🚀 Getting Started
 
-### Installation
+### 1. Installation
 ```bash
 npm install
 ```
 
-### Setup Environment
-Create `.env` with your API key:
+### 2. Configure Environment
+Create a `.env` file:
 ```env
 GEMINI_API_KEY=your_key_here
 ```
 
-### Run
+### 3. Quick Start: Ingest & Retrieve
+Professional readers often start with code. Here is how you use Doc Ohara in **3 lines**:
+
+```javascript
+import { DocOhara } from './src/pipeline_runner.js';
+
+const ohara = new DocOhara();
+await ohara.ingest('path/to/my_dense_doc.pdf'); // Ingests into Space-Time Graph
+const results = await ohara.query('Find quantum gravity metrics'); // Hierarchical search
+```
+
+### 4. Run the Dashboard
+Access the visualization tool at **http://localhost:3000**.
 ```bash
 npm run dev
 ```
-Access at **http://localhost:3000**.
 
 ---
 
@@ -368,6 +388,17 @@ Access at **http://localhost:3000**.
 ├── doc_pipeline/               # Pipeline workspace & state
 └── index.html                  # Dashboard UI
 ```
+
+---
+
+## 📚 Reference & API
+
+For targeted technical details, refer to the following core components:
+
+- **Graph Schema**: See `setup_okf_schema.js` in the Codebase for ArangoDB collection and index definitions.
+- **Pseudo-TOC Logic**: See `src/pseudo_toc_generator.js` for the implementation of the DocsRay boundary detection and merging algorithm.
+- **Retrieval Engine**: See `RetrievalEngine.js` (logic described in Section 7) for hybrid search and multi-hop traversal implementation.
+- **Prompt Library**: Explore the `prompts/` directory for all LLM system instructions.
 
 ---
 
