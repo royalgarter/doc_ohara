@@ -15,6 +15,12 @@ Humans read using the "Layer Cake" and "F-Pattern"—scanning headings and jumpi
 - **Referencing**: Graph edges allow targeted "Ctrl+F" style jumps between concepts.
 - **Priming**: Sequential traversals provide the context needed to "prime" the LLM for accurate answers.
 
+**The Intelligent Archivist**
+Doc Ohara evolves beyond traditional RAG and static wikis by acting as an **Intelligent Archivist**. It doesn't just store information; it dynamically refines it:
+- **Thematic Clustering**: Uses ArangoDB's graph algorithms to discover cross-document themes.
+- **Incremental Growth**: Never re-processes what it already knows.
+- **Trust via Audit**: Flags its own low-confidence extractions for human review, ensuring the knowledge base remains a "Source of Truth."
+
 
 ---
 
@@ -29,11 +35,15 @@ Powered by **ArangoDB Multi-Model**, the system tracks:
 - **Geo-Spatial Metadata**: Mapping document content to physical coordinates or layout boxes.
 
 ### 🛰️ The Space-Time Pipeline
-1.  **Ingestion**: Distributed task queue (e.g., BullMQ, Temporal) routing raw files to parsers.
-2.  **Structural Decomposition (DocsRay)**: LLM-driven **Pseudo-TOC Generation** for semantic partitioning (replaces fixed-size chunking).
-3.  **Semantic Enrichment**: Generating multi-vector embeddings and tags.
-4.  **Relational Synthesis**: Building the graph with strict outbound directionality.
-5.  **Persistence**: ACID transactions in ArangoDB to ensure graph integrity.
+Doc Ohara's pipeline is designed for **incremental growth** and **deterministic accuracy**, bridging the gap between automated libraries and high-fidelity cartography.
+
+1.  **Smart Ingestion**: Uses SHA256 hashing to detect changes. Only modified pages are re-processed, drastically reducing token costs.
+2.  **Structural Decomposition (DocsRay)**: LLM-driven **Pseudo-TOC Generation** for semantic partitioning.
+3.  **Semantic Enrichment**: Generating multi-vector embeddings, semantic tags, and entity discovery.
+4.  **Relational Synthesis**: Building the graph with strict outbound directionality and temporal metadata.
+5.  **The Refinery (Refinement)**: Automatic thematic clustering (Louvain) and cross-document "surprising connection" discovery.
+6.  **Persistence**: ACID transactions in ArangoDB with integrated **Confidence Scoring**.
+7.  **Human-in-the-Loop Audit**: AI-flagged low-confidence nodes/edges are queued for expert verification.
 
 #### 📍 Pseudo-TOC (DocsRay Implementation)
 Doc Ohara integrates the **DocsRay** algorithm to transform unstructured text into semantically coherent hierarchies:
@@ -44,11 +54,14 @@ Doc Ohara integrates the **DocsRay** algorithm to transform unstructured text in
 This approach reduces retrieval complexity from $O(N)$ to $O(S + k_1 \cdot N_s)$, improving speed by up to 45%.
 
 ### Schema (OKF + DoCO)
-We utilize ArangoDB to model the **Open Knowledge Format (OKF)** and **DoCO (Document Components Ontology)**. This provides engine-level validation for structural, temporal, and spatial metadata.
+We utilize ArangoDB to model the **Open Knowledge Format (OKF)** and **DoCO (Document Components Ontology)**.
 
 - `okf_documents`: Metadata root for document ownership and licensing.
-- `okf_nodes`: Vertices containing content, layout coordinates, and vector embeddings.
-- `okf_edges`: Strongly typed relations (`HAS_CHILD`, `NEXT_SIBLING`, `REFERENCES`, `SUCCEEDS`). **Strict Outbound Directionality** (e.g., `NEXT_SIBLING` always points forward).
+- `okf_nodes`: Vertices containing content, layout coordinates, vector embeddings, and `content_hash`.
+- `okf_edges`: Strongly typed relations (`HAS_CHILD`, `NEXT_SIBLING`, `HAS_TAG`, `INDEXED_UNDER`, `REFERENCES`, `SUCCEEDS`).
+  - `confidence`: Reliability score (0-1).
+  - `requires_review`: Flag for human-in-the-loop audit.
+  - **Strict Outbound Directionality**: Ensures deterministic graph traversals.
 
 #### Schema Definition (`setup_okf_schema.js`)
 ```javascript
@@ -121,15 +134,17 @@ const edgeSchema = {
 
 The ingestion process bridges the gap between raw binary formats and our graph schema.
 
-### 3.1 The 5-Stage Transformation Flow
+### 3.1 The 7-Stage Transformation Flow
 
 | Stage | Activity | Output |
 | :--- | :--- | :--- |
-| **1. Normalization** | Frontmatter parsing, line-break sanitization | Sanitized Body + Metadata |
-| **2. Decomposition** | Deterministic AST (remark-parse) mapping | Hierarchy of Nodes |
-| **3. Enrichment** | Multi-Vector Indexing + Semantic Tagging | Vector-ready Nodes |
-| **4. Synthesis** | Relational edge generation (ACID Transaction) | Space-Time Graph |
-| **5. Persistence** | Atomic ArangoDB Batch Insert | Persistent Graph Records |
+| **1. Smart Ingestion** | SHA256 hashing & Change Detection | Modified Content Only |
+| **2. Normalization** | Frontmatter parsing, line-break sanitization | Sanitized Body + Metadata |
+| **3. Decomposition** | DocsRay Pseudo-TOC partitioning | Hierarchy of Nodes |
+| **4. Enrichment** | Multi-Vector Indexing + Semantic Tagging | Vector-ready Nodes |
+| **5. The Refinery** | Louvain Clustering & Link Discovery | Thematic Hubs |
+| **6. Synthesis** | Relational edge generation (ACID) | Space-Time Graph |
+| **7. Persistence** | Atomic Insert with Confidence Scoring | Persistent Audit Records |
 
 ---
 
