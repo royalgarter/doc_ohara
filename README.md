@@ -168,7 +168,7 @@ const worker = new Worker('ingestion_queue', async job => {
 **`transform.js`**:
 Standardizes the disparate outputs of MinerU and Docling into the unified OKF/DoCO format using deterministic relational mapping.
 
-### 4.2 Cloud-Native Extraction (Gemini 1.5 Pro)
+### 4.2 Cloud-Native Extraction (Gemini Flash Lite)
 Leveraging Gemini's 2M context window for instant "Zero-GPU" extraction using Structured Outputs.
 
 ```javascript
