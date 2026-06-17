@@ -2,6 +2,7 @@ import express from 'express';
 import path from 'path';
 import fs from 'fs';
 import { getArangoDBSimulator } from './src/arangodb_sim.js';
+import { QuartzExporter } from './src/quartz_exporter.js';
 import { 
   getPipelineLogs, 
   isPipelineActive, 
@@ -158,6 +159,21 @@ async function startServer() {
       res.json({
         success: true,
         message: 'Pipeline workflow started successfully.'
+      });
+    } catch (err) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
+  // API: Trigger Quartz Wiki Export
+  app.post('/api/quartz/export', async (req, res) => {
+    try {
+      const exporter = new QuartzExporter(dbSim, 'wiki');
+      await exporter.export();
+      res.json({
+        success: true,
+        message: 'Quartz wiki export completed successfully.',
+        path: path.join(process.cwd(), 'wiki')
       });
     } catch (err) {
       res.status(500).json({ success: false, error: err.message });

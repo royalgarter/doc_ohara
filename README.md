@@ -339,6 +339,24 @@ This repository includes a Node.js-native playground to test these concepts:
 
 ---
 
+## 🏛️ Wiki & Encyclopedia Interface
+
+Doc Ohara supports exporting its entire Space-Time Graph into a **Quartz-compatible Digital Garden**. This allows you to browse your document knowledge base as an interconnected Wiki.
+
+### 📤 Exporting to Quartz
+You can generate the Markdown wiki by running:
+```bash
+npm run export-wiki
+```
+This will create a `./wiki` folder with:
+- `index.md`: Home page with all document links.
+- `documents/`: Organized folders per document containing sections as individual pages.
+- **Wikilinks**: Automated `[[link]]` connections between related sections and documents.
+
+To view the wiki, you can point a [Quartz](https://quartz.jzhao.xyz/) installation to the `./wiki` directory or use any Markdown bower like **Obsidian**.
+
+---
+
 ## 🚀 Getting Started
 
 ### 1. Installation

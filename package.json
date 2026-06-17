@@ -8,7 +8,8 @@
     "build": "echo 'No build step required'",
     "start": "node server.js",
     "lint": "echo 'No lint required'",
-    "install": "npm install"
+    "install": "npm install",
+    "export-wiki": "node scripts/export_quartz.js"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",
