@@ -3,13 +3,23 @@ import path from 'path';
 import fs from 'fs';
 import { getArangoDBSimulator } from './src/arangodb_sim.js';
 import { QuartzExporter } from './src/quartz_exporter.js';
-import { 
-  getPipelineLogs, 
-  isPipelineActive, 
-  runPipelineExecution, 
+import { RetrievalEngine } from './src/retrieval_engine.js';
+import { getIngestionQueue } from './src/queue.js';
+import { runWorkerOnce, startWorkerLoop } from './src/worker.js';
+import {
+  getPipelineLogs,
+  isPipelineActive,
+  runPipelineExecution,
   clearPipelineLogs,
   addPipelineLog
 } from './src/pipeline_runner.js';
+
+// Tool catalog shared between /tools discovery and the MCP server (bin/ohara-mcp.js)
+const AGENT_TOOLS = [
+  { name: 'ingest', description: 'Queue a document at a filesystem path for ingestion into the Space-Time Graph', input: { path: 'string' } },
+  { name: 'query', description: 'Run a hybrid (shallow + deep) search against the Space-Time Graph', input: { text: 'string', depth: 'number?' } },
+  { name: 'get_graph_context', description: 'Fetch the deep graph neighborhood of a given node id', input: { node_id: 'string', depth: 'number?' } }
+];
 
 // Setup directories
 const INPUT_DIR = 'doc_pipeline/input';
@@ -22,12 +32,24 @@ fs.mkdirSync(FINAL_OUT_DIR, { recursive: true });
 
 async function startServer() {
   const app = express();
-  const PORT = 3000;
+  const PORT = 6000;
 
   app.use(express.json({ limit: '10mb' }));
 
+  // CORS: allow agent/MCP clients running from other origins to call the API
+  app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET,POST,DELETE,OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type');
+    if (req.method === 'OPTIONS') return res.sendStatus(204);
+    next();
+  });
+
   // Initialize DB
   const dbSim = getArangoDBSimulator();
+  const retrievalEngine = new RetrievalEngine(dbSim);
+  const ingestionQueue = getIngestionQueue();
+  startWorkerLoop(process.env.GEMINI_API_KEY);
 
   // API: Get current ArangoDB simulated collections and graph structures
   app.get('/api/database/state', (req, res) => {
@@ -165,6 +187,69 @@ async function startServer() {
     }
   });
 
+  // API: Two-Step Hybrid Retrieval (Shallow + Deep context)
+  app.post('/api/retrieval/query', (req, res) => {
+    try {
+      const { query, depth, limit } = req.body;
+      if (!query) {
+        return res.status(400).json({ success: false, error: 'Query is required.' });
+      }
+      const result = retrievalEngine.query(query, { depth, limit });
+      res.json({ success: true, ...result });
+    } catch (err) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
+  // API: Agent tool discovery (mirrors the MCP tool catalog in bin/ohara-mcp.js)
+  app.get('/tools', (req, res) => {
+    res.json({ success: true, tools: AGENT_TOOLS });
+  });
+
+  // API: Queue a single document for background ingestion (used by CLI `ohara ingest` and agents)
+  app.post('/api/queue/ingest', (req, res) => {
+    try {
+      const { filename } = req.body;
+      if (!filename || !fs.existsSync(path.join(INPUT_DIR, filename))) {
+        return res.status(400).json({ success: false, error: `File not staged in input dir: ${filename}` });
+      }
+      const job = ingestionQueue.add('ingestion', { filename });
+      res.json({ success: true, job });
+    } catch (err) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
+  // API: Queue / worker status for the Agent Dashboard
+  app.get('/api/queue/jobs', (req, res) => {
+    res.json({ success: true, jobs: ingestionQueue.list(), stats: ingestionQueue.stats() });
+  });
+
+  // API: Deep graph context for a node (backs the agent's "Focus on Node X" view)
+  app.get('/api/retrieval/context/:nodeId', (req, res) => {
+    try {
+      const nodeId = decodeURIComponent(req.params.nodeId);
+      const depth = parseInt(req.query.depth, 10) || 2;
+      const context = retrievalEngine.getDeepContext(nodeId, undefined, { depth });
+      res.json({ success: true, nodeId, context });
+    } catch (err) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
+  // API: Generates a system-prompt snippet summarizing current graph state for Claude
+  app.get('/api/agent/system-prompt', (req, res) => {
+    const state = dbSim.getState();
+    const stats = ingestionQueue.stats();
+    const prompt = [
+      `You have access to the Doc Ohara Space-Time Graph via MCP tools (ingest, query, get_graph_context).`,
+      `Current graph: ${state.documents.length} document(s), ${state.sections.length} section(s), ${state.paragraphs.length} paragraph(s), ${state.tables.length} table(s), ${state.edges.length} edge(s).`,
+      `Ingestion queue: waiting=${stats.waiting} active=${stats.active} completed=${stats.completed} failed=${stats.failed}.`,
+      `Documents: ${state.documents.map(d => d.title).join('; ') || '(none yet)'}.`
+    ].join('\n');
+    res.json({ success: true, prompt });
+  });
+
   // API: Trigger Quartz Wiki Export
   app.post('/api/quartz/export', async (req, res) => {
     try {
@@ -198,6 +283,11 @@ async function startServer() {
 
   // Mount clean, direct static handlers (No Vite build, serve everything from root folder instantly)
   app.use(express.static(path.join(process.cwd(), '.')));
+
+  // Agentic Command Center dashboard
+  app.get('/agent', (req, res) => {
+    res.sendFile(path.join(process.cwd(), 'agent.html'));
+  });
 
   app.get('/', (req, res) => {
     res.sendFile(path.join(process.cwd(), 'index.html'));

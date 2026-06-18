@@ -1,0 +1,58 @@
+{
+  "pdf_body": [
+    {
+      "type": "title",
+      "text": "Mastering Bitcoin 2nd"
+    },
+    {
+      "type": "heading",
+      "text": "1. Theoretical Hypothesis Principles"
+    },
+    {
+      "type": "text",
+      "text": "Document segment parsed via MinerU deep OCR networks. This text models topological invariants and localized states within relativistic grids."
+    },
+    {
+      "type": "equation",
+      "latex": "\\nabla \\times \\mathbf{B} = \\mu_0 \\left( \\mathbf{J} + \\varepsilon_0 \\frac{\\partial \\mathbf{E}}{\\partial t} \\right)"
+    },
+    {
+      "type": "heading",
+      "text": "2. Metric Convergence Trials"
+    },
+    {
+      "type": "text",
+      "text": "The metric measurements were evaluated under cryogenic guidelines. Please refer to Table A.1 below for precise state limits."
+    },
+    {
+      "type": "table",
+      "table_cells": [
+        [
+          "Trial Vector",
+          "Temperature",
+          "Resistance",
+          "Superfluid Stage"
+        ],
+        [
+          "Vector A",
+          "2.1 Kelvin",
+          "0.041 Ohm",
+          "Active Phase"
+        ],
+        [
+          "Vector B",
+          "1.4 Kelvin",
+          "0.002 Ohm",
+          "Super-conducting"
+        ],
+        [
+          "Vector C",
+          "0.8 Kelvin",
+          "0.000 Ohm",
+          "Zero Friction"
+        ]
+      ],
+      "markdown": "| Trial Vector | Temperature | Resistance | Superfluid Stage |\n|---|---|---|---|\n| Vector A | 2.1 Kelvin | 0.041 Ohm | Active Phase |\n| Vector B | 1.4 Kelvin | 0.002 Ohm | Super-conducting |\n| Vector C | 0.8 Kelvin | 0.000 Ohm | Zero Friction |"
+    }
+  ]
+}

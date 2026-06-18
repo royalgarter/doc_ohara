@@ -433,3 +433,135 @@ function transformRawToCollections(rawOutputDir) {
 }
 
 const delay = (ms) => new Promise(res => setTimeout(res, ms));
+
+// Single-document ingestion used by the queue worker (src/worker.js).
+// Mirrors the per-file body of runPipelineExecution but reports progress via callback
+// and classifies OOM / Gemini rate-limit errors so the worker can decide whether to retry.
+export async function ingestSingleFile(filename, aiKey, onProgress = () => {}) {
+  const inputDir = 'doc_pipeline/input';
+  const rawOutputDir = 'doc_pipeline/raw_output';
+  const collectionsDir = 'doc_pipeline/collections';
+  fs.mkdirSync(inputDir, { recursive: true });
+  fs.mkdirSync(rawOutputDir, { recursive: true });
+  fs.mkdirSync(collectionsDir, { recursive: true });
+
+  const ext = path.extname(filename).toLowerCase().replace('.', '') || 'txt';
+  const filenameNoExt = path.basename(filename, path.extname(filename));
+  const isPdf = ext === 'pdf';
+  const engineName = isPdf ? 'MinerU' : 'Docling';
+
+  onProgress(5, `Routing ${filename} to ${engineName} engine...`);
+
+  const targetSubDir = path.join(rawOutputDir, filename);
+  fs.mkdirSync(targetSubDir, { recursive: true });
+
+  const fileContentPath = path.join(inputDir, filename);
+  const isRealFile = fs.existsSync(fileContentPath);
+
+  let contentExcerpt;
+  try {
+    contentExcerpt = isRealFile
+      ? fs.readFileSync(fileContentPath, 'utf-8').slice(0, 1500)
+      : 'Standard document content for layout extraction.';
+  } catch (err) {
+    // Large/binary files (e.g. real PDFs) can blow up a naive utf-8 read on constrained workers.
+    const oomError = new Error(`OOM_DURING_PARSE: failed to buffer "${filename}" for parsing (${err.message})`);
+    oomError.code = 'OOM';
+    throw oomError;
+  }
+
+  onProgress(20, `Parsing ${ext.toUpperCase()}...`);
+
+  let ai = null;
+  if (aiKey) {
+    try {
+      ai = new GoogleGenAI({
+        apiKey: aiKey,
+        httpOptions: { headers: { 'User-Agent': 'aistudio-build' } }
+      });
+    } catch {
+      ai = null;
+    }
+  }
+
+  let parsedLayoutJSON;
+  if (ai) {
+    try {
+      onProgress(40, 'Extracting structured elements via Gemini...');
+      parsedLayoutJSON = await generateAILayout(ai, filename, contentExcerpt, isPdf);
+    } catch (err) {
+      if (/429|rate.?limit|quota/i.test(err.message || '')) {
+        const rateLimitError = new Error(`RATE_LIMIT: Gemini API rate limit hit (${err.message})`);
+        rateLimitError.code = 'RATE_LIMIT';
+        throw rateLimitError;
+      }
+      parsedLayoutJSON = generateLocalTemplateFallback(filename, isPdf);
+    }
+  } else {
+    await delay(300);
+    parsedLayoutJSON = generateLocalTemplateFallback(filename, isPdf);
+  }
+
+  onProgress(60, 'Writing raw layout output...');
+  const rawJsonPath = path.join(targetSubDir, `${filenameNoExt}.json`);
+  fs.writeFileSync(rawJsonPath, JSON.stringify(parsedLayoutJSON, null, 2), 'utf-8');
+
+  onProgress(75, 'Transforming into OKF/DoCO collections...');
+  const transformedDocs = transformRawToCollections(rawOutputDir);
+  const docsForThisFile = transformedDocs.documents.filter(d => d.source_file === filename);
+
+  const arangoDb = getArangoDBSimulator();
+  let nodeCount = 0;
+  const totalDocs = docsForThisFile.length || 1;
+
+  docsForThisFile.forEach((doc, i) => {
+    const insertedDoc = arangoDb.insertDocument({
+      _key: doc.id,
+      source_file: doc.source_file,
+      parser_engine: doc.parser_engine,
+      title: doc.title,
+      file_size: doc.file_size || '350 KB',
+      upload_time: new Date().toISOString()
+    });
+
+    const docsSections = transformedDocs.sections.filter(s => s.document_id === doc.id);
+    docsSections.forEach(sec => {
+      arangoDb.insertSection({ _key: sec.id, document_id: insertedDoc._key, title: sec.title, level: sec.level });
+      nodeCount += 1;
+    });
+
+    const docsParagraphs = transformedDocs.paragraphs.filter(p => p.document_id === doc.id);
+    docsParagraphs.forEach(p => {
+      arangoDb.insertParagraph({
+        _key: p.id,
+        document_id: insertedDoc._key,
+        section_id: p.section_id ? `sections/${p.section_id}` : null,
+        content: p.content,
+        is_latex: p.content.includes('\\') || p.content.includes('^') || p.content.includes('_')
+      });
+      nodeCount += 1;
+    });
+
+    const docsTables = transformedDocs.tables.filter(t => t.document_id === doc.id);
+    docsTables.forEach(t => {
+      arangoDb.insertTable({
+        _key: t.id,
+        document_id: insertedDoc._key,
+        section_id: t.section_id ? `sections/${t.section_id}` : null,
+        matrix_data: t.matrix_data || [],
+        markdown_representation: t.markdown_representation || ''
+      });
+      nodeCount += 1;
+    });
+
+    onProgress(75 + Math.round(((i + 1) / totalDocs) * 20), `Extracting Nodes ${nodeCount}...`);
+  });
+
+  onProgress(100, `Completed ingestion of ${filename} (${nodeCount} nodes).`);
+
+  return {
+    filename,
+    documents: docsForThisFile.length,
+    nodes: nodeCount
+  };
+}
