@@ -1,0 +1,23 @@
+[
+  {
+    "id": "job_1781790236064_wmeve4",
+    "queue": "ingestion",
+    "type": "ingestion",
+    "data": {
+      "filename": "Mastering Bitcoin 2nd.pdf"
+    },
+    "status": "completed",
+    "progress": 100,
+    "progressMessage": "Completed ingestion of Mastering Bitcoin 2nd.pdf (6 nodes).",
+    "attempts": 0,
+    "maxAttempts": 3,
+    "createdAt": "2026-06-18T13:43:56.064Z",
+    "updatedAt": "2026-06-18T13:43:56.494Z",
+    "result": {
+      "filename": "Mastering Bitcoin 2nd.pdf",
+      "documents": 1,
+      "nodes": 6
+    },
+    "error": null
+  }
+]

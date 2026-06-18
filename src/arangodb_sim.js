@@ -172,6 +172,34 @@ export class ArangoDBSimulator {
     return fullEdge;
   }
 
+  // Delete a document and every section/paragraph/table/edge that references it
+  deleteDocument(docKey) {
+    const docId = `documents/${docKey}`;
+    const before = this.state.documents.length;
+    this.state.documents = this.state.documents.filter(d => d._key !== docKey);
+    if (this.state.documents.length === before) {
+      return false;
+    }
+
+    const sectionKeys = new Set(
+      this.state.sections.filter(s => s.document_id === docKey).map(s => s._key)
+    );
+    const sectionIds = new Set([...sectionKeys].map(k => `sections/${k}`));
+
+    this.state.sections = this.state.sections.filter(s => s.document_id !== docKey);
+    this.state.paragraphs = this.state.paragraphs.filter(p => p.document_id !== docKey);
+    this.state.tables = this.state.tables.filter(t => t.document_id !== docKey);
+
+    this.state.edges = this.state.edges.filter(e => {
+      const touchesDoc = e._from === docId || e._to === docId;
+      const touchesSection = sectionIds.has(e._from) || sectionIds.has(e._to);
+      return !touchesDoc && !touchesSection;
+    });
+
+    this.saveState();
+    return true;
+  }
+
   clearAllData() {
     this.state = {
       documents: [],
