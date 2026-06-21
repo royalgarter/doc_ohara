@@ -316,6 +316,43 @@ function attemptLiteParse(sourcePath, outMdPath) {
   }
 }
 
+// Helper: attempt to extract a JSON object from noisy LLM text outputs
+function safeParseJsonFromText(text) {
+  const t = String(text || '').trim();
+  // try direct parse first
+  try {
+    return JSON.parse(t);
+  } catch (e) {}
+
+  // strip common triple-backtick fences
+  let s = t.replace(/^```json\s*/i, '').replace(/```$/i, '').trim();
+  // try extract a JSON block via regex
+  const jsonBlockMatch = s.match(/\{[\s\S]*\}/m);
+  if (jsonBlockMatch) {
+    const candidate = jsonBlockMatch[0];
+    try {
+      return JSON.parse(candidate);
+    } catch (e) {
+      // attempt minor fixes: replace trailing commas
+      const fixed = candidate.replace(/,\s*([}\]])/g, '$1');
+      try { return JSON.parse(fixed); } catch (_) {}
+    }
+  }
+
+  // as a last resort, try to find a code block labelled json
+  const codeJson = s.match(/```json([\s\S]*?)```/i);
+  if (codeJson && codeJson[1]) {
+    const candidate = codeJson[1].trim();
+    try { return JSON.parse(candidate); } catch (e) {
+      const fixed = candidate.replace(/,\s*([}\]])/g, '$1');
+      try { return JSON.parse(fixed); } catch (_) {}
+    }
+  }
+
+  // give up
+  throw new Error('Unable to extract valid JSON from LLM output');
+}
+
 // Use AI + system prompt to transform Markdown into structured JSON nodes
 async function generateFromMarkdown(ai, mdContent, filename) {
   try {
@@ -324,7 +361,7 @@ async function generateFromMarkdown(ai, mdContent, filename) {
     const result = await ai.models.generateContent({ model: 'gemini-3.5-flash', contents: prompt });
     const parsedText = result.text?.trim() || '{}';
     const cleanJson = parsedText.replace(/^```json/gi, '').replace(/^```/gi, '').replace(/```$/gi, '').trim();
-    return JSON.parse(cleanJson);
+    return safeParseJsonFromText(cleanJson);
   } catch (err) {
     // Bubble up error to allow upstream fallback handling
     throw err;
@@ -418,7 +455,15 @@ async function structureMarkdownWithRetries(ai, filename, mdContent) {
         const resp = await ai.models.generateContent({ model: modelId, contents: prompt });
         const parsedText = resp.text?.trim() || '{}';
         const cleanJson = parsedText.replace(/^```json/gi, '').replace(/^```/gi, '').replace(/```$/gi, '').trim();
-        const parsed = JSON.parse(cleanJson);
+        let parsed;
+        try {
+          parsed = safeParseJsonFromText(cleanJson);
+        } catch (parseErr) {
+          addPipelineLog('warn', `Failed to parse LLM output for chunk ${chunk.id}: ${parseErr.message}`);
+          // include raw output in cache to aid debugging
+          writeCache(key, { parsed_json: null, raw: parsedText, meta: { modelId, cached_at: new Date().toISOString(), parse_error: parseErr.message } });
+          throw parseErr;
+        }
         // write cache
         writeCache(key, { parsed_json: parsed, raw: parsedText, meta: { modelId, cached_at: new Date().toISOString() } });
         return parsed;
