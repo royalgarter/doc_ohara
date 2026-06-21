@@ -43,7 +43,24 @@ export function readCacheSync(key) {
 export async function readCacheAsync(key) {
   // check disk first
   const disk = readCacheSync(key);
-  if (disk) return disk;
+  if (disk) {
+    // ensure DB copy exists for disk cache
+    if (process.env.ARANGO_URL) {
+      try {
+        await arangoClient.initArangoClient();
+        const db = (await arangoClient.initArangoClient());
+        const coll = db.collection('llm_cache');
+        // upsert disk cache into DB for future reads
+        const doc = { _key: key, ...disk };
+        await coll.replace(key, doc).catch(async (err) => {
+          await coll.save(doc).catch(() => {});
+        });
+      } catch (err) {
+        // ignore DB cache errors
+      }
+    }
+    return disk;
+  }
 
   // check DB if configured
   if (process.env.ARANGO_URL) {
