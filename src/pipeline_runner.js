@@ -7,6 +7,7 @@ import { getArangoDBSimulator } from './arangodb_sim.js';
 import { cacheKeyFor, readCacheAsync, writeCache, readCacheSync, hasCache, credFingerprint, getCacheDir } from './llm_cache.js';
 import { chunkMarkdown, readMarkdownFile } from './markdown_chunker.js';
 import * as arangoClient from './arango_client.js';
+import { validateTags } from './sumo_index.js';
 
 // Global log tracking for the active pipeline run
 let currentLogs = [];
@@ -470,6 +471,26 @@ async function structureMarkdownWithRetries(ai, filename, mdContent) {
       err.code = 'INVALID_SCHEMA';
       throw err;
     }
+  }
+
+  // Validate SUMO candidate tags for each node and promote to sumo_tags
+  try {
+    for (const node of mergedNodes) {
+      if (node && Array.isArray(node.sumo_candidate_tags)) {
+        const { valid, invalid } = validateTags(node.sumo_candidate_tags);
+        node.sumo_tags = valid;
+        // remove candidate list to keep stored documents clean
+        delete node.sumo_candidate_tags;
+        if (invalid && invalid.length > 0) {
+          addPipelineLog('warn', `Node validation removed invalid SUMO tags: ${invalid.join(', ')}`);
+        }
+      }
+    }
+  } catch (e) {
+    addPipelineLog('error', `SUMO tag validation failed: ${e.message}`);
+    const err = new Error('SUMO_VALIDATION_FAILED');
+    err.code = 'SUMO_VALIDATION_FAILED';
+    throw err;
   }
 
   return { nodes: mergedNodes };
