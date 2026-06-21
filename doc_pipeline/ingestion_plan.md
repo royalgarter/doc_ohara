@@ -111,6 +111,11 @@ Estimated effort
 - 1 day: pipeline integration and preflight checks + worker retry behavior
 - 0.5 day: testing with real documents and instrumentation
 
+Database cleanup (2026-06-21)
+-------------------------
+- During recent testing an existing "edges" collection was found to be a document collection. For a clean start it was renamed to a backup collection (edges_old_<timestamp>) and a proper ArangoDB edge collection named "edges" was created.
+- All edges_old_* collections have now been dropped to ensure a clean database state. An admin script scripts/drop_edges_old.js was added and committed to perform this action when needed.
+
 Approval
 --------
 Proceed with implementation? If yes, confirm desired concurrency and cache directory location (defaults will be used otherwise).
