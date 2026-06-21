@@ -39,10 +39,26 @@ export async function initArangoClient() {
     }
   }
 
-  // Edge collection: create as an edge collection
+  // Edge collection: ensure it's an edge collection. If an existing 'edges' collection is a document collection,
+  // rename it to preserve old data and create a proper edge collection named 'edges'.
   const edgeColl = db.collection('edges');
   const edgeExists = await edgeColl.exists().catch(() => false);
-  if (!edgeExists) {
+  if (edgeExists) {
+    // inspect type
+    const info = await edgeColl.get();
+    // In arangojs, collection type 3 == edge collection
+    if (info.type !== 3) {
+      const backupName = `edges_old_${Date.now()}`;
+      try {
+        await edgeColl.rename(backupName);
+        // create new edge collection
+        await db.createEdgeCollection('edges');
+        console.warn(`Renamed existing 'edges' collection to '${backupName}' and created new edge collection 'edges'.`);
+      } catch (err) {
+        throw new Error(`Failed to migrate existing 'edges' collection to edge collection: ${err.message}`);
+      }
+    }
+  } else {
     await db.createEdgeCollection('edges').catch(err => { throw err; });
   }
 

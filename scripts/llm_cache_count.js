@@ -1,0 +1,3 @@
+import dotenv from 'dotenv'; dotenv.config();
+import { Database } from 'arangojs';
+(async ()=>{ try{ const u=new URL(process.env.ARANGO_URL); const base=u.protocol+'//'+u.hostname+(u.port?':'+u.port:''); const dbName=(u.pathname && u.pathname!='/')?u.pathname.replace(/^\/+/, ''):undefined; const db=new Database({url:base,databaseName:dbName}); if(u.username) db.useBasicAuth(u.username,u.password); const cur = await db.query('RETURN LENGTH(FOR c IN llm_cache LIMIT 1000 RETURN 1)'); const c = await cur.all(); console.log('llm_cache_count', c[0]); } catch(e){ console.error('ERR', e.message); process.exit(1);} })();
