@@ -793,48 +793,57 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}) {
   let nodeCount = 0;
   const totalDocs = docsForThisFile.length || 1;
 
-  docsForThisFile.forEach((doc, i) => {
-    const insertedDoc = arangoDb.insertDocument({
-      _key: doc.id,
-      source_file: doc.source_file,
-      parser_engine: doc.parser_engine,
-      title: doc.title,
-      file_size: doc.file_size || '350 KB',
-      upload_time: new Date().toISOString()
-    });
+  for (let i = 0; i < docsForThisFile.length; i++) {
+    const doc = docsForThisFile[i];
+    if (process.env.ARANGO_URL) {
+      // persist to real ArangoDB
+      try {
+        await arangoClient.initArangoClient();
+        const inserted = await arangoClient.insertDocument({
+          source_file: doc.source_file,
+          parser_engine: doc.parser_engine,
+          title: doc.title,
+          file_size: doc.file_size || '350 KB',
+          upload_time: new Date().toISOString()
+        });
 
-    const docsSections = transformedDocs.sections.filter(s => s.document_id === doc.id);
-    docsSections.forEach(sec => {
-      arangoDb.insertSection({ _key: sec.id, document_id: insertedDoc._key, title: sec.title, level: sec.level });
-      nodeCount += 1;
-    });
+        const docsSections = transformedDocs.sections.filter(s => s.document_id === doc.id);
+        for (const sec of docsSections) {
+          await arangoClient.insertSection({ document_id: inserted._key, title: sec.title, level: sec.level });
+          nodeCount += 1;
+        }
 
-    const docsParagraphs = transformedDocs.paragraphs.filter(p => p.document_id === doc.id);
-    docsParagraphs.forEach(p => {
-      arangoDb.insertParagraph({
-        _key: p.id,
-        document_id: insertedDoc._key,
-        section_id: p.section_id ? `sections/${p.section_id}` : null,
-        content: p.content,
-        is_latex: p.content.includes('\\') || p.content.includes('^') || p.content.includes('_')
-      });
-      nodeCount += 1;
-    });
+        const docsParagraphs = transformedDocs.paragraphs.filter(p => p.document_id === doc.id);
+        for (const p of docsParagraphs) {
+          await arangoClient.insertParagraph({ document_id: inserted._key, section_id: p.section_id ? `sections/${p.section_id}` : null, content: p.content, is_latex: p.content.includes('\\') || p.content.includes('^') || p.content.includes('_') });
+          nodeCount += 1;
+        }
 
-    const docsTables = transformedDocs.tables.filter(t => t.document_id === doc.id);
-    docsTables.forEach(t => {
-      arangoDb.insertTable({
-        _key: t.id,
-        document_id: insertedDoc._key,
-        section_id: t.section_id ? `sections/${t.section_id}` : null,
-        matrix_data: t.matrix_data || [],
-        markdown_representation: t.markdown_representation || ''
-      });
-      nodeCount += 1;
-    });
+        const docsTables = transformedDocs.tables.filter(t => t.document_id === doc.id);
+        for (const t of docsTables) {
+          await arangoClient.insertTable({ document_id: inserted._key, section_id: t.section_id ? `sections/${t.section_id}` : null, matrix_data: t.matrix_data || [], markdown_representation: t.markdown_representation || '' });
+          nodeCount += 1;
+        }
+
+      } catch (err) {
+        addPipelineLog('error', `ArangoDB persistence failed for ${doc.source_file}: ${err.message}`);
+        throw err;
+      }
+    } else {
+      const insertedDoc = arangoDb.insertDocument({ _key: doc.id, source_file: doc.source_file, parser_engine: doc.parser_engine, title: doc.title, file_size: doc.file_size || '350 KB', upload_time: new Date().toISOString() });
+
+      const docsSections = transformedDocs.sections.filter(s => s.document_id === doc.id);
+      docsSections.forEach(sec => { arangoDb.insertSection({ _key: sec.id, document_id: insertedDoc._key, title: sec.title, level: sec.level }); nodeCount += 1; });
+
+      const docsParagraphs = transformedDocs.paragraphs.filter(p => p.document_id === doc.id);
+      docsParagraphs.forEach(p => { arangoDb.insertParagraph({ _key: p.id, document_id: insertedDoc._key, section_id: p.section_id ? `sections/${p.section_id}` : null, content: p.content, is_latex: p.content.includes('\\') || p.content.includes('^') || p.content.includes('_') }); nodeCount += 1; });
+
+      const docsTables = transformedDocs.tables.filter(t => t.document_id === doc.id);
+      docsTables.forEach(t => { arangoDb.insertTable({ _key: t.id, document_id: insertedDoc._key, section_id: t.section_id ? `sections/${t.section_id}` : null, matrix_data: t.matrix_data || [], markdown_representation: t.markdown_representation || '' }); nodeCount += 1; });
+    }
 
     onProgress(75 + Math.round(((i + 1) / totalDocs) * 20), `Extracting Nodes ${nodeCount}...`);
-  });
+  }
 
   onProgress(100, `Completed ingestion of ${filename} (${nodeCount} nodes).`);
 
