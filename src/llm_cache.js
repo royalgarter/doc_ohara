@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
+import * as arangoClient from './arango_client.js';
 
 const DEFAULT_DIR = '.ohara_llm_cache';
 
@@ -28,7 +29,7 @@ export function hasCache(key) {
   return fs.existsSync(getCachePath(key));
 }
 
-export function readCache(key) {
+export function readCacheSync(key) {
   const p = getCachePath(key);
   if (!fs.existsSync(p)) return null;
   try {
@@ -39,13 +40,64 @@ export function readCache(key) {
   }
 }
 
-export function writeCache(key, value) {
+export async function readCacheAsync(key) {
+  // check disk first
+  const disk = readCacheSync(key);
+  if (disk) return disk;
+
+  // check DB if configured
+  if (process.env.ARANGO_URL) {
+    try {
+      await arangoClient.initArangoClient();
+      const db = (await arangoClient.initArangoClient());
+      const coll = db.collection('llm_cache');
+      const cursor = await db.query('FOR c IN llm_cache FILTER c._key == @k LIMIT 1 RETURN c', { k: key });
+      const rows = await cursor.all();
+      if (rows && rows.length > 0) return rows[0];
+    } catch (err) {
+      // ignore DB cache errors and fall back to disk-only
+      return null;
+    }
+  }
+  return null;
+}
+
+export function writeCacheSync(key, value) {
   const dir = getCacheDir();
   ensureDir(dir);
   const p = getCachePath(key);
   const tmp = `${p}.tmp`;
   fs.writeFileSync(tmp, JSON.stringify(value, null, 2), 'utf-8');
   fs.renameSync(tmp, p);
+}
+
+export async function writeCacheAsync(key, value) {
+  // write to disk first
+  writeCacheSync(key, value);
+
+  // also persist to ArangoDB if available (non-blocking)
+  if (process.env.ARANGO_URL) {
+    try {
+      await arangoClient.initArangoClient();
+      const db = (await arangoClient.initArangoClient());
+      const coll = db.collection('llm_cache');
+      // include key in document
+      const doc = { _key: key, ...value };
+      // upsert behavior: replace
+      await coll.replace(key, doc).catch(async (err) => {
+        // if not found, save
+        await coll.save(doc).catch(() => {});
+      });
+    } catch (err) {
+      // ignore db cache errors
+    }
+  }
+}
+
+export function writeCache(key, value) {
+  // synchronous wrapper used by pipeline; fire-and-forget async DB write
+  writeCacheSync(key, value);
+  writeCacheAsync(key, value).catch(() => {});
 }
 
 export function credFingerprint() {

@@ -399,12 +399,11 @@ async function structureMarkdownWithRetries(ai, filename, mdContent) {
     const key = cacheKeyFor([promptNorm, chunk.text, modelId, credFp]);
 
     // Check cache
-    if (hasCache(key)) {
-      const cached = readCache(key);
-      if (cached && cached.parsed_json) {
-        addPipelineLog('info', `Cache hit for chunk ${chunk.id}`);
-        return cached.parsed_json;
-      }
+    // attempt to read cache from disk or DB
+    const cached = await readCacheAsync(key);
+    if (cached && cached.parsed_json) {
+      addPipelineLog('info', `Cache hit for chunk ${chunk.id}`);
+      return cached.parsed_json;
     }
 
     // not cached -> call LLM with retries

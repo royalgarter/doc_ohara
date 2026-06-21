@@ -5,21 +5,45 @@ let initialized = false;
 
 export async function initArangoClient() {
   if (initialized) return db;
-  const url = process.env.ARANGO_URL;
-  if (!url) throw new Error('ARANGO_URL not set in environment');
+  const raw = process.env.ARANGO_URL;
+  if (!raw) throw new Error('ARANGO_URL not set in environment');
+
+  // Parse URL to extract credentials and database name if embedded
+  let baseUrl = raw;
+  let dbName = undefined;
+  try {
+    const u = new URL(raw);
+    baseUrl = `${u.protocol}//${u.hostname}${u.port ? ':' + u.port : ''}`;
+    dbName = (u.pathname && u.pathname !== '/') ? u.pathname.replace(/^\/+/, '') : undefined;
+    // prefer creds from URL if present
+    if (u.username) process.env.ARANGO_USER = process.env.ARANGO_USER || u.username;
+    if (u.password) process.env.ARANGO_PASSWORD = process.env.ARANGO_PASSWORD || u.password;
+  } catch (e) {
+    // If URL parsing fails, fall back to raw
+    baseUrl = raw;
+  }
+
   const username = process.env.ARANGO_USER || process.env.ARANGO_USERNAME || '';
   const password = process.env.ARANGO_PASSWORD || '';
 
-  db = new Database({ url });
+  db = new Database({ url: baseUrl, databaseName: dbName });
   if (username) db.useBasicAuth(username, password);
 
   // ensure collections exist
-  const collections = ['documents', 'sections', 'paragraphs', 'tables', 'edges'];
-  for (const name of collections) {
-    const exists = await db.collection(name).exists().catch(() => false);
+  const docCollections = ['documents', 'sections', 'paragraphs', 'tables', 'llm_cache'];
+  for (const name of docCollections) {
+    const coll = db.collection(name);
+    const exists = await coll.exists().catch(() => false);
     if (!exists) {
       await db.createCollection(name).catch(err => { throw err; });
     }
+  }
+
+  // Edge collection: create as an edge collection
+  const edgeColl = db.collection('edges');
+  const edgeExists = await edgeColl.exists().catch(() => false);
+  if (!edgeExists) {
+    await db.createEdgeCollection('edges').catch(err => { throw err; });
   }
 
   initialized = true;
