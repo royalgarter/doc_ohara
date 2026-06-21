@@ -6,6 +6,7 @@ import { GoogleGenAI } from '@google/genai';
 import { getArangoDBSimulator } from './arangodb_sim.js';
 import { cacheKeyFor, readCache, writeCache, hasCache, credFingerprint, getCacheDir } from './llm_cache.js';
 import { chunkMarkdown, readMarkdownFile } from './markdown_chunker.js';
+import * as arangoClient from './arango_client.js';
 
 // Global log tracking for the active pipeline run
 let currentLogs = [];
@@ -141,52 +142,99 @@ export async function runPipelineExecution(aiKey) {
     addPipelineLog('info', '🗄️ Syncing collections into ArangoDB multi-model storage...');
     await delay(800);
 
-    transformedDocs.documents.forEach(doc => {
-      // Soft-insert documents
-      const insertedDoc = arangoDb.insertDocument({
-        _key: doc.id,
-        source_file: doc.source_file,
-        parser_engine: doc.parser_engine,
-        title: doc.title,
-        file_size: doc.file_size || '350 KB',
-        upload_time: new Date().toISOString()
-      });
+    for (const doc of transformedDocs.documents) {
+      // Insert into real ArangoDB when ARANGO_URL present, otherwise simulator
+      if (process.env.ARANGO_URL) {
+        try {
+          await arangoClient.initArangoClient();
+          const inserted = await arangoClient.insertDocument({
+            source_file: doc.source_file,
+            parser_engine: doc.parser_engine,
+            title: doc.title,
+            file_size: doc.file_size || '350 KB',
+            upload_time: new Date().toISOString()
+          });
 
-      // Filter sections belonging to this doc
-      const docsSections = transformedDocs.sections.filter(s => s.document_id === doc.id);
-      docsSections.forEach(sec => {
-        arangoDb.insertSection({
-          _key: sec.id,
-          document_id: insertedDoc._key,
-          title: sec.title,
-          level: sec.level
-        });
-      });
+          const docsSections = transformedDocs.sections.filter(s => s.document_id === doc.id);
+          for (const sec of docsSections) {
+            await arangoClient.insertSection({
+              document_id: inserted._key,
+              title: sec.title,
+              level: sec.level
+            });
+          }
 
-      // Insert paragraphs
-      const docsParagraphs = transformedDocs.paragraphs.filter(p => p.document_id === doc.id);
-      docsParagraphs.forEach(p => {
-        arangoDb.insertParagraph({
-          _key: p.id,
-          document_id: insertedDoc._key,
-          section_id: p.section_id ? `sections/${p.section_id}` : null,
-          content: p.content,
-          is_latex: p.content.includes('\\') || p.content.includes('^') || p.content.includes('_')
-        });
-      });
+          const docsParagraphs = transformedDocs.paragraphs.filter(p => p.document_id === doc.id);
+          for (const p of docsParagraphs) {
+            await arangoClient.insertParagraph({
+              document_id: inserted._key,
+              section_id: p.section_id ? `sections/${p.section_id}` : null,
+              content: p.content,
+              is_latex: p.content.includes('\\') || p.content.includes('^') || p.content.includes('_')
+            });
+          }
 
-      // Insert tables
-      const docsTables = transformedDocs.tables.filter(t => t.document_id === doc.id);
-      docsTables.forEach(t => {
-        arangoDb.insertTable({
-          _key: t.id,
-          document_id: insertedDoc._key,
-          section_id: t.section_id ? `sections/${t.section_id}` : null,
-          matrix_data: t.matrix_data || [],
-          markdown_representation: t.markdown_representation || ''
+          const docsTables = transformedDocs.tables.filter(t => t.document_id === doc.id);
+          for (const t of docsTables) {
+            await arangoClient.insertTable({
+              document_id: inserted._key,
+              section_id: t.section_id ? `sections/${t.section_id}` : null,
+              matrix_data: t.matrix_data || [],
+              markdown_representation: t.markdown_representation || ''
+            });
+          }
+
+        } catch (err) {
+          addPipelineLog('error', `ArangoDB persistence failed for ${doc.source_file}: ${err.message}`);
+          throw err;
+        }
+      } else {
+        // simulator path
+        const insertedDoc = arangoDb.insertDocument({
+          _key: doc.id,
+          source_file: doc.source_file,
+          parser_engine: doc.parser_engine,
+          title: doc.title,
+          file_size: doc.file_size || '350 KB',
+          upload_time: new Date().toISOString()
         });
-      });
-    });
+
+        // Filter sections belonging to this doc
+        const docsSections = transformedDocs.sections.filter(s => s.document_id === doc.id);
+        docsSections.forEach(sec => {
+          arangoDb.insertSection({
+            _key: sec.id,
+            document_id: insertedDoc._key,
+            title: sec.title,
+            level: sec.level
+          });
+        });
+
+        // Insert paragraphs
+        const docsParagraphs = transformedDocs.paragraphs.filter(p => p.document_id === doc.id);
+        docsParagraphs.forEach(p => {
+          arangoDb.insertParagraph({
+            _key: p.id,
+            document_id: insertedDoc._key,
+            section_id: p.section_id ? `sections/${p.section_id}` : null,
+            content: p.content,
+            is_latex: p.content.includes('\\') || p.content.includes('^') || p.content.includes('_')
+          });
+        });
+
+        // Insert tables
+        const docsTables = transformedDocs.tables.filter(t => t.document_id === doc.id);
+        docsTables.forEach(t => {
+          arangoDb.insertTable({
+            _key: t.id,
+            document_id: insertedDoc._key,
+            section_id: t.section_id ? `sections/${t.section_id}` : null,
+            matrix_data: t.matrix_data || [],
+            markdown_representation: t.markdown_representation || ''
+          });
+        });
+      }
+    }
 
     addPipelineLog('success', `📦 Syncing complete! Standardized databases contains ${transformedDocs.documents.length} document roots, ${transformedDocs.sections.length} layout sections, ${transformedDocs.paragraphs.length} paragraphs/equations, and ${transformedDocs.tables.length} table matrices. All linked via edge records.`);
     addPipelineLog('success', '✅ Pipeline successfully completed!');
