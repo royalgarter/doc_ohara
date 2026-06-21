@@ -1,0 +1,60 @@
+{
+  "parsed_json": {
+    "nodes": [
+      {
+        "type": "Section",
+        "title": "Bitcoin Mining",
+        "content": "Bitcoin Mining",
+        "metadata": {
+          "page": 26,
+          "level": 1
+        }
+      },
+      {
+        "type": "Paragraph",
+        "content": "The transaction is now propagated on the bitcoin network. It does not become part of the shared ledger (the blockchain) until it is verified and included in a block by a process called mining. See \"Introduction\" on page 177 for a detailed explanation. The bitcoin system of trust is based on computation. Transactions are bundled into *blocks, which require an enormous amount of computation to prove, but only a small* amount of computation to verify as proven. This process is called mining and serves two purposes in bitcoin:",
+        "metadata": {
+          "page": 26,
+          "level": 2
+        }
+      },
+      {
+        "type": "ListItem",
+        "content": "Mining creates new bitcoins in each block, almost like a central bank printing new money. The amount of bitcoin created per block is fixed and diminishes with time.",
+        "metadata": {
+          "page": 27,
+          "level": 2
+        }
+      },
+      {
+        "type": "ListItem",
+        "content": "Mining creates trust by ensuring that transactions are only confirmed if enough computational power was devoted to the block that contains them. More blocks mean more computation which means more trust.",
+        "metadata": {
+          "page": 27,
+          "level": 2
+        }
+      },
+      {
+        "type": "Paragraph",
+        "content": "A good way to describe mining is like a giant competitive game of sudoku that resets every time someone finds a solution and whose difficulty automatically adjusts so that it takes approximately 10 minutes to find a solution. Imagine a giant sudoku puzzle, several thousand rows and columns in size. If I show you a completed puzzle you can verify it quite quickly. However, if the puzzle has a few squares filled and the rest is empty, it takes a lot of work to solve! The difficulty of the sudoku can be adjusted by changing its size (more or fewer rows and columns), but it can still be verified quite easily even if it is very large. The \"puzzle\" used in bitcoin is based on a cryptographic hash and exhibits similar characteristics: it is asymmetrically hard to solve but easy to verify, and its difficulty can be adjusted.",
+        "metadata": {
+          "page": 27,
+          "level": 2
+        }
+      },
+      {
+        "type": "Paragraph",
+        "content": "In \"Bitcoin Uses, Users and Their Stories\" on page 4 we introduced Jing, a computer engineering student in Shanghai. Jing is participating in the bitcoin network as a miner. Every 10 minutes or so, Jing joins thousands of other miners in a global race to find a solution to a block of transactions. Finding such a solution, the so-called \"Proof-of- Work\", requires quadrillions of hashing operations per second across the entire bitcoin network. The algorithm for \"Proof-of-Work\" involves repeatedly hashing the header of the block and a random number with the SHA256 cryptographic algorithm until a solution matching a pre-determined pattern emerges. The first miner to find such a solution wins the round of competition and publishes that block into the blockchain. Jing started mining in 2010 using a very fast desktop computer to find a suitable Proofof-Work for new blocks. As more miners started joining the bitcoin network, the difficulty of the problem increased rapidly. Soon, Jing and other miners upgraded to more specialized hardware, such as Graphical Processing Units (GPUs), as used in gaming desktops or consoles. As this book is written, by 2014, the difficulty is so high that it is only profitable to mine with Application Specific Integrated Circuits (ASIC), essentially hundreds of mining algorithms printed in hardware, running in parallel on a single silicon chip. Jing also joined a \"mining pool\", which much like a lottery-pool allows several participants to share their efforts and the rewards. Jing now runs two USBconnected ASIC machines to mine for bitcoin 24 hours a day. He pays his electricity costs by selling the bitcoin he is able to generate from mining, creating some income from the profits. His computer runs a copy of bitcoind, the reference bitcoin client, as a back-end to his specialized mining software.",
+        "metadata": {
+          "page": 27,
+          "level": 2
+        }
+      }
+    ]
+  },
+  "raw": "```json\n{\n  \"nodes\": [\n    {\n      \"type\": \"Section\",\n      \"title\": \"Bitcoin Mining\",\n      \"content\": \"Bitcoin Mining\",\n      \"metadata\": {\n        \"page\": 26,\n        \"level\": 1\n      }\n    },\n    {\n      \"type\": \"Paragraph\",\n      \"content\": \"The transaction is now propagated on the bitcoin network. It does not become part of the shared ledger (the blockchain) until it is verified and included in a block by a process called mining. See \\\"Introduction\\\" on page 177 for a detailed explanation. The bitcoin system of trust is based on computation. Transactions are bundled into *blocks, which require an enormous amount of computation to prove, but only a small* amount of computation to verify as proven. This process is called mining and serves two purposes in bitcoin:\",\n      \"metadata\": {\n        \"page\": 26,\n        \"level\": 2\n      }\n    },\n    {\n      \"type\": \"ListItem\",\n      \"content\": \"Mining creates new bitcoins in each block, almost like a central bank printing new money. The amount of bitcoin created per block is fixed and diminishes with time.\",\n      \"metadata\": {\n        \"page\": 27,\n        \"level\": 2\n      }\n    },\n    {\n      \"type\": \"ListItem\",\n      \"content\": \"Mining creates trust by ensuring that transactions are only confirmed if enough computational power was devoted to the block that contains them. More blocks mean more computation which means more trust.\",\n      \"metadata\": {\n        \"page\": 27,\n        \"level\": 2\n      }\n    },\n    {\n      \"type\": \"Paragraph\",\n      \"content\": \"A good way to describe mining is like a giant competitive game of sudoku that resets every time someone finds a solution and whose difficulty automatically adjusts so that it takes approximately 10 minutes to find a solution. Imagine a giant sudoku puzzle, several thousand rows and columns in size. If I show you a completed puzzle you can verify it quite quickly. However, if the puzzle has a few squares filled and the rest is empty, it takes a lot of work to solve! The difficulty of the sudoku can be adjusted by changing its size (more or fewer rows and columns), but it can still be verified quite easily even if it is very large. The \\\"puzzle\\\" used in bitcoin is based on a cryptographic hash and exhibits similar characteristics: it is asymmetrically hard to solve but easy to verify, and its difficulty can be adjusted.\",\n      \"metadata\": {\n        \"page\": 27,\n        \"level\": 2\n      }\n    },\n    {\n      \"type\": \"Paragraph\",\n      \"content\": \"In \\\"Bitcoin Uses, Users and Their Stories\\\" on page 4 we introduced Jing, a computer engineering student in Shanghai. Jing is participating in the bitcoin network as a miner. Every 10 minutes or so, Jing joins thousands of other miners in a global race to find a solution to a block of transactions. Finding such a solution, the so-called \\\"Proof-of- Work\\\", requires quadrillions of hashing operations per second across the entire bitcoin network. The algorithm for \\\"Proof-of-Work\\\" involves repeatedly hashing the header of the block and a random number with the SHA256 cryptographic algorithm until a solution matching a pre-determined pattern emerges. The first miner to find such a solution wins the round of competition and publishes that block into the blockchain. Jing started mining in 2010 using a very fast desktop computer to find a suitable Proofof-Work for new blocks. As more miners started joining the bitcoin network, the difficulty of the problem increased rapidly. Soon, Jing and other miners upgraded to more specialized hardware, such as Graphical Processing Units (GPUs), as used in gaming desktops or consoles. As this book is written, by 2014, the difficulty is so high that it is only profitable to mine with Application Specific Integrated Circuits (ASIC), essentially hundreds of mining algorithms printed in hardware, running in parallel on a single silicon chip. Jing also joined a \\\"mining pool\\\", which much like a lottery-pool allows several participants to share their efforts and the rewards. Jing now runs two USBconnected ASIC machines to mine for bitcoin 24 hours a day. He pays his electricity costs by selling the bitcoin he is able to generate from mining, creating some income from the profits. His computer runs a copy of bitcoind, the reference bitcoin client, as a back-end to his specialized mining software.\",\n      \"metadata\": {\n        \"page\": 27,\n        \"level\": 2\n      }\n    }\n  ]\n}\n```",
+  "meta": {
+    "modelId": "gemini-3.5-flash",
+    "cached_at": "2026-06-21T12:33:50.018Z"
+  }
+}

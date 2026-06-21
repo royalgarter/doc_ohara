@@ -1,0 +1,479 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "DoCO Document",
+  "description": "JSON Schema representation of a Document based on the Document Components Ontology (DoCO).",
+  "type": "object",
+  "properties": {
+    "front_matter": { "$ref": "#/$defs/FrontMatter" },
+    "body_matter": { "$ref": "#/$defs/BodyMatter" },
+    "back_matter": { "$ref": "#/$defs/BackMatter" }
+  },
+  "required": ["front_matter", "body_matter", "back_matter"],
+  "$defs": {
+    "Abstract": {
+      "type": "object",
+      "description": "A brief summary of a publication.",
+      "properties": {
+        "type": { "type": "string", "const": "abstract" },
+        "elements": { "type": "array", "items": { "$ref": "#/$defs/DiscourseElement" } }
+      },
+      "required": ["type"]
+    },
+    "Afterword": {
+      "type": "object",
+      "description": "A literary device found at the end of a piece of literature.",
+      "properties": {
+        "type": { "type": "string", "const": "afterword" },
+        "title": { "$ref": "#/$defs/Title" },
+        "elements": { "type": "array", "items": { "$ref": "#/$defs/DiscourseElement" } }
+      },
+      "required": ["type"]
+    },
+    "Appendix": {
+      "type": "object",
+      "description": "A supplemental addition to the main work.",
+      "properties": {
+        "type": { "type": "string", "const": "appendix" },
+        "label": { "$ref": "#/$defs/Label" },
+        "title": { "$ref": "#/$defs/Title" },
+        "elements": { "type": "array", "items": { "$ref": "#/$defs/DiscourseElement" } }
+      },
+      "required": ["type"]
+    },
+    "BackMatter": {
+      "type": "object",
+      "description": "The final principle part of a document.",
+      "properties": {
+        "bibliography": { "$ref": "#/$defs/Bibliography" },
+        "appendixes": { "type": "array", "items": { "$ref": "#/$defs/Appendix" } },
+        "glossary": { "$ref": "#/$defs/Glossary" },
+        "index": { "$ref": "#/$defs/Index" },
+        "afterword": { "$ref": "#/$defs/Afterword" },
+        "colophon": { "$ref": "#/$defs/Colophon" },
+        "list_of_figures": { "$ref": "#/$defs/ListOfFigures" },
+        "list_of_tables": { "$ref": "#/$defs/ListOfTables" },
+        "table_of_contents": { "$ref": "#/$defs/TableOfContents" }
+      }
+    },
+    "BibliographicReferenceList": {
+      "type": "object",
+      "description": "A list of all the references within the citing document.",
+      "properties": {
+        "type": { "type": "string", "const": "bibliographic_reference_list" },
+        "references": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["type", "references"]
+    },
+    "Bibliography": {
+      "type": "object",
+      "description": "A document section containing a list of bibliographic references.",
+      "properties": {
+        "type": { "type": "string", "const": "bibliography" },
+        "title": { "$ref": "#/$defs/Title" },
+        "reference_list": { "$ref": "#/$defs/BibliographicReferenceList" }
+      },
+      "required": ["type"]
+    },
+    "BlockQuotation": {
+      "type": "object",
+      "description": "A quotation set off from the main text as a container for distinct paragraphs.",
+      "properties": {
+        "type": { "type": "string", "const": "block_quotation" },
+        "elements": { "type": "array", "items": { "$ref": "#/$defs/DiscourseElement" } }
+      },
+      "required": ["type", "elements"]
+    },
+    "BodyMatter": {
+      "type": "object",
+      "description": "The central principle part of a document.",
+      "properties": {
+        "parts": { "type": "array", "items": { "$ref": "#/$defs/Part" } },
+        "chapters": { "type": "array", "items": { "$ref": "#/$defs/Chapter" } },
+        "sections": { "type": "array", "items": { "$ref": "#/$defs/Section" } },
+        "elements": { "type": "array", "items": { "$ref": "#/$defs/DiscourseElement" } }
+      }
+    },
+    "CaptionedBox": {
+      "type": "object",
+      "description": "A rectangle space within a page that contains an object and its related caption.",
+      "properties": {
+        "type": { "type": "string", "const": "captioned_box" },
+        "caption": { "type": "string" },
+        "content": { "$ref": "#/$defs/DiscourseElement" }
+      },
+      "required": ["type"]
+    },
+    "Chapter": {
+      "type": "object",
+      "description": "A principle division of the body matter of a large document.",
+      "properties": {
+        "type": { "type": "string", "const": "chapter" },
+        "chapter_label": { "$ref": "#/$defs/ChapterLabel" },
+        "chapter_title": { "$ref": "#/$defs/ChapterTitle" },
+        "chapter_subtitle": { "$ref": "#/$defs/ChapterSubtitle" },
+        "sections": { "type": "array", "items": { "$ref": "#/$defs/Section" } },
+        "elements": { "type": "array", "items": { "$ref": "#/$defs/DiscourseElement" } }
+      },
+      "required": ["type"]
+    },
+    "ChapterLabel": { "type": "string", "description": "A block containing a label for the chapter." },
+    "ChapterSubtitle": { "type": "string", "description": "The subtitle of a chapter." },
+    "ChapterTitle": { "type": "string", "description": "The title of a chapter." },
+    "Colophon": {
+      "type": "object",
+      "description": "A brief description of publication or production notes.",
+      "properties": {
+        "type": { "type": "string", "const": "colophon" },
+        "elements": { "type": "array", "items": { "$ref": "#/$defs/DiscourseElement" } }
+      },
+      "required": ["type"]
+    },
+    "ComplexRunInQuotation": {
+      "type": "object",
+      "description": "A quotation with a complex structure, included inline.",
+      "properties": {
+        "type": { "type": "string", "const": "complex_run_in_quotation" },
+        "elements": { "type": "array", "items": { "$ref": "#/$defs/DiscourseElement" } }
+      },
+      "required": ["type", "elements"]
+    },
+    "DiscourseElement": {
+      "description": "A polymorphic discourse element.",
+      "oneOf": [
+        { "$ref": "#/$defs/Paragraph" },
+        { "$ref": "#/$defs/List" },
+        { "$ref": "#/$defs/ListOfAgents" },
+        { "$ref": "#/$defs/ListOfReferences" },
+        { "$ref": "#/$defs/BibliographicReferenceList" },
+        { "$ref": "#/$defs/CaptionedBox" },
+        { "$ref": "#/$defs/FigureBox" },
+        { "$ref": "#/$defs/TableBox" },
+        { "$ref": "#/$defs/FormulaBox" },
+        { "$ref": "#/$defs/BlockQuotation" },
+        { "$ref": "#/$defs/TextBox" },
+        { "$ref": "#/$defs/Stanza" },
+        { "$ref": "#/$defs/Footnote" },
+        { "$ref": "#/$defs/Figure" },
+        { "$ref": "#/$defs/Table" },
+        { "$ref": "#/$defs/Formula" }
+      ]
+    },
+    "Figure": {
+      "type": "object",
+      "description": "A communication object comprising graphics, drawings, or images.",
+      "properties": {
+        "type": { "type": "string", "const": "figure" },
+        "url": { "type": "string", "format": "uri" },
+        "description": { "type": "string" }
+      },
+      "required": ["type"]
+    },
+    "FigureBox": {
+      "type": "object",
+      "description": "A space within a document that contains a figure and its caption.",
+      "properties": {
+        "type": { "type": "string", "const": "figure_box" },
+        "figure_label": { "$ref": "#/$defs/FigureLabel" },
+        "figure": { "$ref": "#/$defs/Figure" },
+        "caption": { "type": "string" }
+      },
+      "required": ["type", "figure"]
+    },
+    "FigureLabel": { "type": "string", "description": "A block containing a label for the figure box." },
+    "Footnote": {
+      "type": "object",
+      "description": "A structure within a sentence permitting a comment or citation.",
+      "properties": {
+        "type": { "type": "string", "const": "footnote" },
+        "label": { "type": "string" },
+        "elements": { "type": "array", "items": { "$ref": "#/$defs/DiscourseElement" } }
+      },
+      "required": ["type", "elements"]
+    },
+    "Foreword": {
+      "type": "object",
+      "description": "A section usually written by someone other than the author.",
+      "properties": {
+        "type": { "type": "string", "const": "foreword" },
+        "title": { "$ref": "#/$defs/Title" },
+        "elements": { "type": "array", "items": { "$ref": "#/$defs/DiscourseElement" } }
+      },
+      "required": ["type"]
+    },
+    "Formula": {
+      "type": "object",
+      "description": "A unit of information expressed in mathematical, chemical or logical symbols.",
+      "properties": {
+        "type": { "type": "string", "const": "formula" },
+        "content": { "type": "string" }
+      },
+      "required": ["type", "content"]
+    },
+    "FormulaBox": {
+      "type": "object",
+      "description": "A space within a document that contains one or more formulae.",
+      "properties": {
+        "type": { "type": "string", "const": "formula_box" },
+        "formulae": { "type": "array", "items": { "$ref": "#/$defs/Formula" } }
+      },
+      "required": ["type", "formulae"]
+    },
+    "FrontMatter": {
+      "type": "object",
+      "description": "The initial principle part of a document.",
+      "properties": {
+        "title": { "$ref": "#/$defs/Title" },
+        "subtitle": { "$ref": "#/$defs/Subtitle" },
+        "agents": { "type": "array", "items": { "$ref": "#/$defs/ListOfAgents" } },
+        "abstract": { "$ref": "#/$defs/Abstract" },
+        "preface": { "$ref": "#/$defs/Preface" },
+        "foreword": { "$ref": "#/$defs/Foreword" },
+        "table_of_contents": { "$ref": "#/$defs/TableOfContents" },
+        "list_of_figures": { "$ref": "#/$defs/ListOfFigures" },
+        "list_of_tables": { "$ref": "#/$defs/ListOfTables" },
+        "colophon": { "$ref": "#/$defs/Colophon" },
+        "glossary": { "$ref": "#/$defs/Glossary" }
+      }
+    },
+    "Glossary": {
+      "type": "object",
+      "description": "A set of definitions of words or phrases of importance.",
+      "properties": {
+        "type": { "type": "string", "const": "glossary" },
+        "title": { "$ref": "#/$defs/Title" },
+        "elements": { "type": "array", "items": { "$ref": "#/$defs/DiscourseElement" } }
+      },
+      "required": ["type"]
+    },
+    "Header": {
+      "description": "Equivalent to FrontMatter.",
+      "$ref": "#/$defs/FrontMatter"
+    },
+    "Index": {
+      "type": "object",
+      "description": "A section containing a list of references to information on the named topic.",
+      "properties": {
+        "type": { "type": "string", "const": "index" },
+        "title": { "$ref": "#/$defs/Title" },
+        "reference_list": { "$ref": "#/$defs/ListOfReferences" }
+      },
+      "required": ["type"]
+    },
+    "Label": { "type": "string", "description": "A block containing text, that may include a number." },
+    "Line": {
+      "type": "object",
+      "description": "A line in poetry.",
+      "properties": {
+        "type": { "type": "string", "const": "line" },
+        "text": { "type": "string" }
+      },
+      "required": ["type", "text"]
+    },
+    "List": {
+      "type": "object",
+      "description": "An enumeration of items.",
+      "properties": {
+        "type": { "type": "string", "const": "list" },
+        "items": { "type": "array", "items": { "$ref": "#/$defs/DiscourseElement" } }
+      },
+      "required": ["type", "items"]
+    },
+    "ListOfAgents": {
+      "description": "A list of items each denoting an agent.",
+      "oneOf": [
+        { "$ref": "#/$defs/ListOfAuthors" },
+        { "$ref": "#/$defs/ListOfContributors" },
+        { "$ref": "#/$defs/ListOfOrganizations" }
+      ]
+    },
+    "ListOfAuthors": {
+      "type": "object",
+      "properties": {
+        "type": { "type": "string", "const": "list_of_authors" },
+        "items": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["type", "items"]
+    },
+    "ListOfContributors": {
+      "type": "object",
+      "properties": {
+        "type": { "type": "string", "const": "list_of_contributors" },
+        "items": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["type", "items"]
+    },
+    "ListOfFigures": {
+      "type": "object",
+      "description": "A section of the document listing all the figures.",
+      "properties": {
+        "type": { "type": "string", "const": "list_of_figures" },
+        "title": { "$ref": "#/$defs/Title" },
+        "reference_list": { "$ref": "#/$defs/ListOfReferences" }
+      },
+      "required": ["type"]
+    },
+    "ListOfOrganizations": {
+      "type": "object",
+      "properties": {
+        "type": { "type": "string", "const": "list_of_organizations" },
+        "items": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["type", "items"]
+    },
+    "ListOfReferences": {
+      "type": "object",
+      "description": "A list of items each representing a reference.",
+      "properties": {
+        "type": { "type": "string", "const": "list_of_references" },
+        "references": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["type", "references"]
+    },
+    "ListOfTables": {
+      "type": "object",
+      "description": "A section of the document listing all the tables.",
+      "properties": {
+        "type": { "type": "string", "const": "list_of_tables" },
+        "title": { "$ref": "#/$defs/Title" },
+        "reference_list": { "$ref": "#/$defs/ListOfReferences" }
+      },
+      "required": ["type"]
+    },
+    "Paragraph": {
+      "type": "object",
+      "description": "A self-contained unit of discourse.",
+      "properties": {
+        "type": { "type": "string", "const": "paragraph" },
+        "sentences": { "type": "array", "items": { "$ref": "#/$defs/Sentence" } }
+      },
+      "required": ["type"]
+    },
+    "Part": {
+      "type": "object",
+      "description": "A container of a semantic subdivision of a document.",
+      "properties": {
+        "type": { "type": "string", "const": "part" },
+        "label": { "$ref": "#/$defs/Label" },
+        "title": { "$ref": "#/$defs/Title" },
+        "chapters": { "type": "array", "items": { "$ref": "#/$defs/Chapter" } }
+      },
+      "required": ["type"]
+    },
+    "Preface": {
+      "type": "object",
+      "description": "A section describing how the document came into being.",
+      "properties": {
+        "type": { "type": "string", "const": "preface" },
+        "title": { "$ref": "#/$defs/Title" },
+        "elements": { "type": "array", "items": { "$ref": "#/$defs/DiscourseElement" } }
+      },
+      "required": ["type"]
+    },
+    "Section": {
+      "type": "object",
+      "description": "A logical division of the text.",
+      "properties": {
+        "type": { "type": "string", "const": "section" },
+        "section_label": { "$ref": "#/$defs/SectionLabel" },
+        "section_title": { "$ref": "#/$defs/SectionTitle" },
+        "section_subtitle": { "$ref": "#/$defs/SectionSubtitle" },
+        "subsections": { "type": "array", "items": { "$ref": "#/$defs/Section" } },
+        "elements": { "type": "array", "items": { "$ref": "#/$defs/DiscourseElement" } }
+      },
+      "required": ["type"]
+    },
+    "SectionLabel": { "type": "string", "description": "A block containing a label for the section." },
+    "SectionSubtitle": { "type": "string", "description": "The subtitle of a section." },
+    "SectionTitle": { "type": "string", "description": "The title of a section." },
+    "Sentence": {
+      "type": "object",
+      "description": "An expression in natural language forming a single grammatical unit.",
+      "properties": {
+        "type": { "type": "string", "const": "sentence" },
+        "content": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              { "type": "string" },
+              { "$ref": "#/$defs/TextChunk" },
+              { "$ref": "#/$defs/SimpleRunInQuotation" },
+              { "$ref": "#/$defs/ComplexRunInQuotation" },
+              { "$ref": "#/$defs/Footnote" }
+            ]
+          }
+        }
+      },
+      "required": ["type", "content"]
+    },
+    "SimpleRunInQuotation": {
+      "type": "object",
+      "description": "A textual quotation that is included inline.",
+      "properties": {
+        "type": { "type": "string", "const": "simple_run_in_quotation" },
+        "text": { "type": "string" }
+      },
+      "required": ["type", "text"]
+    },
+    "Stanza": {
+      "type": "object",
+      "description": "A unit within a larger poem.",
+      "properties": {
+        "type": { "type": "string", "const": "stanza" },
+        "lines": { "type": "array", "items": { "$ref": "#/$defs/Line" } }
+      },
+      "required": ["type", "lines"]
+    },
+    "Subtitle": { "type": "string", "description": "An explanatory or alternative title of a publication." },
+    "Table": {
+      "type": "object",
+      "description": "A set of data arranged in cells within rows and columns.",
+      "properties": {
+        "type": { "type": "string", "const": "table" },
+        "headers": { "type": "array", "items": { "type": "string" } },
+        "rows": { "type": "array", "items": { "type": "array", "items": { "type": "string" } } }
+      },
+      "required": ["type"]
+    },
+    "TableBox": {
+      "type": "object",
+      "description": "A space within a document that contains a table and its caption.",
+      "properties": {
+        "type": { "type": "string", "const": "table_box" },
+        "table_label": { "$ref": "#/$defs/TableLabel" },
+        "table": { "$ref": "#/$defs/Table" },
+        "caption": { "type": "string" }
+      },
+      "required": ["type", "table"]
+    },
+    "TableLabel": { "type": "string", "description": "A block containing a label for the table box." },
+    "TableOfContents": {
+      "type": "object",
+      "description": "A section of the document listing all the chapters and sections.",
+      "properties": {
+        "type": { "type": "string", "const": "table_of_contents" },
+        "title": { "$ref": "#/$defs/Title" },
+        "reference_list": { "$ref": "#/$defs/ListOfReferences" }
+      },
+      "required": ["type"]
+    },
+    "TextBox": {
+      "type": "object",
+      "description": "A space within a document that contains textual content relating to the main text.",
+      "properties": {
+        "type": { "type": "string", "const": "text_box" },
+        "elements": { "type": "array", "items": { "$ref": "#/$defs/DiscourseElement" } }
+      },
+      "required": ["type", "elements"]
+    },
+    "TextChunk": {
+      "type": "object",
+      "description": "A piece of text defined by a start point and an end point.",
+      "properties": {
+        "type": { "type": "string", "const": "text_chunk" },
+        "text": { "type": "string" }
+      },
+      "required": ["type", "text"]
+    },
+    "Title": { "type": "string", "description": "A word, phrase or sentence that precedes and indicates the subject." }
+  }
+}

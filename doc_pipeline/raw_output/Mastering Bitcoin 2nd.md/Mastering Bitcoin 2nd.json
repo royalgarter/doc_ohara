@@ -1,0 +1,160 @@
+{
+  "nodes": [
+    {
+      "type": "Section",
+      "title": "Cover",
+      "content": "Mastering Bitcoin\n\nMastering\n\nBitcoin\n\nUNLOCKING DIGITAL CRYPTO-CURRENCIES",
+      "metadata": {
+        "page": null,
+        "level": 1
+      }
+    },
+    {
+      "type": "Section",
+      "title": "Title Page",
+      "content": "Mastering Bitcoin\n\nAndreas M. Antonopoulos\n\nBeijing Cambridge Farnham Koln Sebastopol Tokyo",
+      "metadata": {
+        "page": null,
+        "level": 1
+      }
+    },
+    {
+      "type": "Paragraph",
+      "content": "Mastering Bitcoin\n\nby Andreas M. Antonopoulos Copyright © 2010 Andreas M. Antonopoulos LLC.. All rights reserved. Printed in the United States of America. Published by O'Reilly Media, Inc., 1005 Gravenstein Highway North, Sebastopol, CA 95472. O'Reilly books may be purchased for educational, business, or sales promotional use. Online editions are also available for most titles (http://safaribooksonline.com). For more information, contact our corporate/ institutional sales department: 800-998-9938 or corporate@oreilly.com.\n\nEditors: Mike Loukides and Allyson MacDonald Indexer: FIXME FIXME",
+      "metadata": {
+        "page": null,
+        "level": 2
+      }
+    },
+    {
+      "type": "Table",
+      "content": "| Production Editor: Melanie Yarbrough | Cover Designer: Karen Montgomery |\n|---|---|\n| Copyeditor: FIXME FIXME | Interior Designer: David Futato |\n| Proofreader: FIX ME! | Illustrator: Rebecca Demarest |",
+      "metadata": {
+        "page": null,
+        "level": 2
+      }
+    },
+    {
+      "type": "Paragraph",
+      "content": "December 2014: First Edition\n\nRevision History for the First Edition:\n\n2014-04-07: Early release revision 1\n2014-06-02: Early release revision 2\n2014-06-27: Early release revision 3\n2014-07-30: Early release revision 4\n2014-09-16: Early release revision 5\n2014-10-07: Early release revision 6\nSee http://oreilly.com/catalog/errata.csp?isbn=9781449374044 for release details.\n\nNutshell Handbook, the Nutshell Handbook logo, and the O'Reilly logo are registered trademarks of O'Reilly Media, Inc. !!FILL THIS IN!! and related trade dress are trademarks of O'Reilly Media, Inc. Many of the designations used by manufacturers and sellers to distinguish their products are claimed as trademarks. Where those designations appear in this book, and O'Reilly Media, Inc. was aware of a trademark claim, the designations have been printed in caps or initial caps. While every precaution has been taken in the preparation of this book, the publisher and authors assume no responsibility for errors or omissions, or for damages resulting from the use of the information contained herein.\n\nISBN: 978-1-449-37404-4 [?]",
+      "metadata": {
+        "page": null,
+        "level": 2
+      }
+    },
+    {
+      "type": "Chapter",
+      "title": "Table of Contents",
+      "content": "Table of Contents",
+      "metadata": {
+        "page": 3,
+        "level": 1
+      }
+    },
+    {
+      "type": "Section",
+      "title": "Table of Contents - Page iii",
+      "content": "Preface. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ix\n\n1. Introduction. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 1\n\nWhat is Bitcoin?\nHistory of Bitcoin\nBitcoin Uses, Users and Their Stories\nGetting Started\nQuick Start\nGetting your first bitcoins\nSending and receiving bitcoins\n\n2. How Bitcoin Works. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 15\n\nTransactions, Blocks, Mining, and the Blockchain\nBitcoin Overview\nBuying a cup of coffee\nBitcoin Transactions\nCommon Transaction Forms\nConstructing a Transaction\nGetting the right inputs\nCreating the outputs\nAdding the transaction to the ledger\nBitcoin Mining\nMining transactions in blocks\nSpending the transaction\n\n3. The Bitcoin Client. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 31\n\nBitcoin Core - The reference implementation\nRunning Bitcoin Core for the first time\nCompiling Bitcoin Core from the source code",
+      "metadata": {
+        "page": 3,
+        "level": 2
+      }
+    },
+    {
+      "type": "Section",
+      "title": "Table of Contents - Page iv",
+      "content": "Using Bitcoin Core's JSON-RPC API from the command line\nGetting information on the Bitcoin Core client status\nWallet setup and encryption\nWallet backup, plain-text dump and restore\nWallet addresses and receiving transactions\nExploring and decoding transactions\nExploring blocks\nCreating, signing and submitting transactions based on unspent outputs\nAlternative clients, libraries and toolkits\nLibbitcoin and sx tools\npycoin\nbtcd\n\n4. Keys, Addresses, Wallets. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 61\n\nIntroduction\nPublic key cryptography and crypto-currency\nPrivate and Public Keys\nPrivate Keys\nPublic Keys\nElliptic Curve Cryptography Explained\nGenerating a public key\nBitcoin Addresses\nBase58 and Base58Check Encoding\nKey Formats\nImplementing Keys and Addresses in Python\nWallets\nNon-Deterministic (Random) Wallets\nDeterministic (Seeded) Wallets\nMnemonic Code Words\nHierarchical Deterministic Wallets (BIP0032/BIP0044)\nAdvanced Keys and Addresses\nEncrypted Private Keys (BIP0038)\nPay To Script Hash (P2SH) and Multi-Sig Addresses\nVanity Addresses\nPaper Wallets\n\n5. Transactions. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 111\n\nIntroduction\nTransaction Lifecycle\nCreating Transactions\nBroadcasting Transactions to the Bitcoin Network\nPropagating Transactions on the Bitcoin Network",
+      "metadata": {
+        "page": 4,
+        "level": 2
+      }
+    },
+    {
+      "type": "Section",
+      "title": "Table of Contents - Page v",
+      "content": "Transaction Structure\nTransaction Outputs and Inputs\nTransaction Outputs\nTransaction Inputs\nTransaction Fees\nAdding Fees to Transactions\nTransaction Chaining and Orphan Transactions\nTransaction Scripts and Script Language\nScript Construction (Lock + Unlock)\nScripting Language\nTuring Incompleteness\nStateless Verification\nStandard Transactions\nPay to Public Key Hash (P2PKH)\nPay-to-Public-Key\nMulti-Signature\nData Output (OP_RETURN)\nPay to Script Hash (P2SH)\n\n6. The Bitcoin Network. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 139\n\nPeer-to-Peer Network Architecture\nNodes Types and Roles\nThe Extended Bitcoin Network\nNetwork Discovery\nFull Nodes\nExchanging \"Inventory\"\nSimplified Payment Verification (SPV) Nodes\nBloom Filters\nBloom Filters and Inventory Updates\nTransaction Pools\nAlert Messages\n\n7. The Blockchain. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 163\n\nIntroduction\nStructure of a Block\nBlock Header\nBlock Identifiers - Block Header Hash and Block Height\nThe Genesis Block\nLinking Blocks in the Blockchain\nMerkle Trees\nMerkle Trees and Simplified Payment Verification (SPV)",
+      "metadata": {
+        "page": 5,
+        "level": 2
+      }
+    },
+    {
+      "type": "Section",
+      "title": "Table of Contents - Page vi",
+      "content": "8. Mining and Consensus. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 181\n\nIntroduction\nBitcoin Economics and Currency Creation\nDe-centralized Consensus\nIndependent Verification of Transactions\nMining Nodes\nAggregating Transactions into Blocks\nTransaction Age, Fees, and Priority\nThe Generation Transaction\nCoinbase Reward and Fees\nStructure of the Generation Transaction\nCoinbase Data\nConstructing the Block Header\nMining the Block\nProof-of-Work Algorithm\nDifficulty Representation\nDifficulty Target and Re-Targeting\nSuccessfully Mining the Block\nValidating a New Block\nAssembling and Selecting Chains of Blocks\nBlockchain Forks\nMining and the Hashing Race\nThe Extra Nonce Solution\nMining Pools\nConsensus Attacks\n\n9. Alternative Chains, Currencies, and Applications. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 219\n\nA taxonomy of alternative currencies and chains\nMeta-Coin Platforms\nColored Coins\nMastercoin\nCounterparty\nAlt-coins\nEvaluating an alt-coin\nMonetary Parameter Alternatives: Litecoin, Dogecoin, Freicoin\nConsensus Innovation: Peercoin, Myriad, Blackcoin, Vericoin, NXT\nDual-Purpose Mining Innovation: Primecoin, Curecoin, Gridcoin\nAnonymity-Focused Alt-Coins: CryptoNote, Bytecoin, Monero, Zerocash/ Zerocoin, Darkcoin\nNon-currency alt-chains\nNamecoin\nBitmessage",
+      "metadata": {
+        "page": 6,
+        "level": 2
+      }
+    },
+    {
+      "type": "Section",
+      "title": "Table of Contents - Page vii",
+      "content": "Ethereum\nFuture of Currencies\n\n10. Bitcoin Security. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 235\n\nSecurity principles\nDeveloping Bitcoin Systems Securely\nThe Root of Trust\nUser Security Best Practices\nPhysical Bitcoin Storage\nHardware Wallets\nBalancing Risk (loss vs. theft)\nDiversifying Risk\nMulti-sig and Governance\nSurvivability\nConclusion\n\nA. Appendix: Available commands with sx tools. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 241\nB. Appendix - pycoin, ku and tx.. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 247\nC. Appendix: Transaction Script Language Operators, Constants and Symbols. . . . . . . . . 255\nD. Appendix - Bitcoin Improvement Proposals. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 259",
+      "metadata": {
+        "page": 7,
+        "level": 2
+      }
+    },
+    {
+      "type": "Chapter",
+      "title": "Preface",
+      "content": "Preface",
+      "metadata": {
+        "page": 9,
+        "level": 1
+      }
+    },
+    {
+      "type": "Section",
+      "title": "Writing the Bitcoin Book",
+      "content": "Writing the Bitcoin Book",
+      "metadata": {
+        "page": 9,
+        "level": 2
+      }
+    },
+    {
+      "type": "Paragraph",
+      "content": "I first stumbled upon bitcoin in mid-2011. My immediate reaction was more or less \"Pfft! Nerd money!\" and I ignored it for another 6 months, failing to grasp its importance. This is a reaction which I have seen repeated among many of the smartest people I know, which gives me some consolation. The second time I came across bitcoin in a mailing list discussion, I decided to read the white paper written by Satoshi Nakamoto, to study the authoritative source and see what it was all about. I still remember the moment I finished reading those 9 pages, when I realized that bitcoin was not simply a digital currency, but a network of trust that could also provide the basis for so much more than just currencies. That realization: \"This isn't money, it's a de-centralized trust network,\" started me on a four month journey to devour every scrap of information about bitcoin I could find. I became obsessed and enthralled, spending twelve or more hours each day glued to a screen, reading, writing, coding and learning as much as I could. I emerged from this state of fugue, more than 20 lbs lighter from lack of consistent meals, determined to dedicate myself to working on bitcoin. Two years later, after creating a number of small startups to explore various bitcoinrelated services and products, I decided that it was time to write my first book. Bitcoin was the topic that had driven me into a frenzy of creativity, consumed my thoughts and was the most exciting technology I had encountered since the Internet. It was now time to share my passion about this amazing technology with a broader audience.",
+      "metadata": {
+        "page": 9,
+        "level": 3
+      }
+    },
+    {
+      "type": "Section",
+      "title": "Intended Audience",
+      "content": "Intended Audience",
+      "metadata": {
+        "page": 9,
+        "level": 2
+      }
+    },
+    {
+      "type": "Paragraph",
+      "content": "This book is mostly intended for coders. If you can use a programming language, this book will teach you how cryptographic currencies work, how to use them and how to develop software that works with them. The first few chapters are also suitable as an indepth introduction to bitcoin for non-coders - those trying to understand the inner workings of bitcoin and crypto-currencies.",
+      "metadata": {
+        "page": 9,
+        "level": 3
+      }
+    },
+    {
+      "type": "Section",
+      "title": "Why Are There Bugs On The Cover?",
+      "content": "Why Are There Bugs On The Cover?",
+      "metadata": {
+        "page": 10,
+        "level": 2
+      }
+    },
+    {
+      "type": "Paragraph",
+      "content": "The Leafcutter Ant is a species that exhibits highly complex behavior in a colony superorganism, but each individual ant operates on a set of simple rules driven by social interaction and the exchange of chemical scents (pheromones). Per Wikipedia: \"Next to humans, leafcutter ants form the largest and most complex animal societies on Earth.\" Leafcutter ants don't actually eat leaves, but rather use them to farm a fungus, which is the central food source for the colony. Get that? These ants are farming! While ants form a caste-based society and have a queen for producing offspring, there is no central authority or leader in an ant colony. The highly intelligent and sophisticated behavior exhibited by a multi-million member colony is an emergent property from the interaction of the individuals in a social network. Nature demonstrates that de-centralized systems can be resilient and can produce emergent complexity and incredible sophistication without the need for a central authority, hierarchy or complex parts. Bitcoin is a highly sophisticated de-centralized trust network that can support a myriad of financial processes. Yet, each node in the bitcoin network follows a few simple mathematical rules. The interaction between many nodes is what leads to the emergence of the sophisticated behavior, not any inherent complexity or trust in any single node. Like an ant colony, the bitcoin network is a resilient network of simple nodes following simple rules that together can do amazing things without any central coordination.",
+      "metadata": {
+        "page": 10,
+        "level": 3
+      }
+    }
+  ]
+}

@@ -2,57 +2,57 @@
   "pdf_body": [
     {
       "type": "title",
-      "text": "Mastering Bitcoin 2nd"
+      "text": "Mastering Bitcoin"
     },
     {
       "type": "heading",
-      "text": "1. Theoretical Hypothesis Principles"
+      "text": "Chapter 1: What Is Bitcoin?"
     },
     {
       "type": "text",
-      "text": "Document segment parsed via MinerU deep OCR networks. This text models topological invariants and localized states within relativistic grids."
+      "text": "Bitcoin is a collection of concepts and technologies that form the base of a digital money ecosystem. Units of currency called bitcoins are used to store and transmit value among participants in the bitcoin network. Bitcoin users communicate with each other using the bitcoin protocol primarily via the internet, although other transport networks can also be used."
+    },
+    {
+      "type": "heading",
+      "text": "Cryptographic Keys"
+    },
+    {
+      "type": "text",
+      "text": "Ownership of bitcoin is established through digital keys, bitcoin addresses, and digital signatures. The elliptic curve cryptography used in Bitcoin is based on the secp256k1 curve, defined by the following mathematical equation over a finite field:"
     },
     {
       "type": "equation",
-      "latex": "\\nabla \\times \\mathbf{B} = \\mu_0 \\left( \\mathbf{J} + \\varepsilon_0 \\frac{\\partial \\mathbf{E}}{\\partial t} \\right)"
+      "latex": "y^2 \\equiv x^3 + 7 \\pmod{p}"
     },
     {
       "type": "heading",
-      "text": "2. Metric Convergence Trials"
-    },
-    {
-      "type": "text",
-      "text": "The metric measurements were evaluated under cryogenic guidelines. Please refer to Table A.1 below for precise state limits."
+      "text": "Comparison of Systems"
     },
     {
       "type": "table",
       "table_cells": [
         [
-          "Trial Vector",
-          "Temperature",
-          "Resistance",
-          "Superfluid Stage"
+          "Feature",
+          "Traditional Fiat",
+          "Bitcoin"
         ],
         [
-          "Vector A",
-          "2.1 Kelvin",
-          "0.041 Ohm",
-          "Active Phase"
+          "Control",
+          "Centralized",
+          "Decentralized consensus"
         ],
         [
-          "Vector B",
-          "1.4 Kelvin",
-          "0.002 Ohm",
-          "Super-conducting"
+          "Supply Limit",
+          "Discretionary / No limit",
+          "Fixed at 21,000,000 BTC"
         ],
         [
-          "Vector C",
-          "0.8 Kelvin",
-          "0.000 Ohm",
-          "Zero Friction"
+          "Transaction Validation",
+          "Clearinghouses / Banks",
+          "Miners (Proof of Work)"
         ]
       ],
-      "markdown": "| Trial Vector | Temperature | Resistance | Superfluid Stage |\n|---|---|---|---|\n| Vector A | 2.1 Kelvin | 0.041 Ohm | Active Phase |\n| Vector B | 1.4 Kelvin | 0.002 Ohm | Super-conducting |\n| Vector C | 0.8 Kelvin | 0.000 Ohm | Zero Friction |"
+      "markdown": "| Feature | Traditional Fiat | Bitcoin |\n|---|---|---|\n| Control | Centralized | Decentralized consensus |\n| Supply Limit | Discretionary / No limit | Fixed at 21,000,000 BTC |\n| Transaction Validation | Clearinghouses / Banks | Miners (Proof of Work) |"
     }
   ]
 }

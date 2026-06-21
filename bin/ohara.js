@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 // Doc_Ohara CLI (ohara 2.0) — multi-action front-end over the Space-Time Graph.
+import dotenv from 'dotenv';
+dotenv.config();
 import { Command } from 'commander';
 import chalk from 'chalk';
 import fs from 'fs';

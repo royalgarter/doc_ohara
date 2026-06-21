@@ -1,0 +1,185 @@
+{
+  "parsed_json": {
+    "nodes": [
+      {
+        "type": "Chapter",
+        "title": "CHAPTER 2: How Bitcoin Works",
+        "content": "CHAPTER 2\n\nHow Bitcoin Works",
+        "metadata": {
+          "page": 15,
+          "level": 1
+        }
+      },
+      {
+        "type": "Section",
+        "title": "Transactions, Blocks, Mining, and the Blockchain",
+        "content": "Transactions, Blocks, Mining, and the Blockchain",
+        "metadata": {
+          "page": 15,
+          "level": 2
+        }
+      },
+      {
+        "type": "Paragraph",
+        "content": "The bitcoin system, unlike traditional banking and payment systems, is based on decentralized trust. Instead of a central trusted authority, in bitcoin, trust is achieved as an emergent property from the interactions of different participants in the bitcoin system. In this chapter we will examine bitcoin from a high-level by tracking a single transaction through the bitcoin system and watch as it becomes \"trusted\" and accepted by the bitcoin mechanism of distributed consensus and is finally recorded on the blockchain, the distributed ledger of all transactions. Each example below is based upon an actual transaction made on the bitcoin network, simulating the interactions between the users (Joe, Alice and Bob) by sending funds from one wallet to another. While tracking a transaction through the bitcoin network and blockchain, we will use a blockchain explorer site to visualize each step. A blockchain explorer is a web application that operates as a bitcoin search engine, in that it allows you to search for addresses, transactions and blocks and see the relationships and flows between them. Popular blockchain explorers include:",
+        "metadata": {
+          "page": 15,
+          "level": 3
+        }
+      },
+      {
+        "type": "ListItem",
+        "content": "blockchain.info",
+        "metadata": {
+          "page": 15,
+          "level": 4
+        }
+      },
+      {
+        "type": "ListItem",
+        "content": "blockexplorer.com",
+        "metadata": {
+          "page": 15,
+          "level": 4
+        }
+      },
+      {
+        "type": "ListItem",
+        "content": "insight.bitpay.com",
+        "metadata": {
+          "page": 15,
+          "level": 4
+        }
+      },
+      {
+        "type": "ListItem",
+        "content": "blockr.io Each of these has a search function that can take an address, transaction hash or block number and find the equivalent data on the bitcoin network and blockchain. With each example, we will provide a URL that takes you directly to the relevant entry, so you can study it in detail.",
+        "metadata": {
+          "page": 15,
+          "level": 4
+        }
+      },
+      {
+        "type": "Subsection",
+        "title": "Bitcoin Overview",
+        "content": "Bitcoin Overview",
+        "metadata": {
+          "page": 15,
+          "level": 3
+        }
+      },
+      {
+        "type": "Paragraph",
+        "content": "In the overview diagram below, we see that the bitcoin system consists of users with wallets containing keys, transactions which are propagated across the network and miners who produce (through competitive computation) the consensus blockchain, the authoritative ledger of all transactions. In this chapter, we will trace a single transaction as it travels across the network and examine the interactions between each part of the bitcoin system, at a high level. Subsequent chapters will delve into the technology behind wallets, mining and merchant systems.",
+        "metadata": {
+          "page": 15,
+          "level": 4
+        }
+      },
+      {
+        "type": "Figure",
+        "title": "Figure 2-1. Bitcoin Overview",
+        "content": "![](image_p35_0.png)\n\n*Figure 2-1. Bitcoin Overview*",
+        "metadata": {
+          "page": 15,
+          "level": 4
+        }
+      },
+      {
+        "type": "Subsection",
+        "title": "Buying a cup of coffee",
+        "content": "Buying a cup of coffee",
+        "metadata": {
+          "page": 15,
+          "level": 3
+        }
+      },
+      {
+        "type": "Paragraph",
+        "content": "Alice, introduced in the previous chapter, is a new user who has just acquired her first bitcoin. In \"Getting your first bitcoins\" on page 9, Alice met with her friend Joe to exchange some cash for bitcoin. The transaction created by Joe, funded Alice's wallet with 0.10 BTC. Now Alice will make her first retail transaction, buying a cup of coffee at Bob's coffee shop in Palo Alto, California. Bob's coffee shop recently started accepting bitcoin payments, by adding a bitcoin option to his point-of-sale system. The prices at Bob's Cafe are listed in the local currency (US dollars) but at the register, customers have the option of paying in either dollars or bitcoin. Alice places her order for a cup of coffee and Bob enters the transaction at the register. The point-of-sale system will convert the total price from US dollars to bitcoins at the prevailing market rate and display the prices in both currencies, as well as showing a QR code containing a payment request for this transaction:",
+        "metadata": {
+          "page": 15,
+          "level": 4
+        }
+      },
+      {
+        "type": "Paragraph",
+        "content": "Displayed on Bob's cash register.",
+        "metadata": {
+          "page": 16,
+          "level": 4
+        }
+      },
+      {
+        "type": "Paragraph",
+        "content": "Total:\n$1.50 USD\n0.015 BTC",
+        "metadata": {
+          "page": 16,
+          "level": 4
+        }
+      },
+      {
+        "type": "Figure",
+        "title": "Figure 2-2. Payment Request QR Code - Hint: Try to scan this!",
+        "content": "![](image_p36_0.png)\n\n*Figure 2-2. Payment Request QR Code - Hint: Try to scan this!*",
+        "metadata": {
+          "page": 16,
+          "level": 4
+        }
+      },
+      {
+        "type": "Paragraph",
+        "content": "The payment request QR code above encodes the following URL, defined in BIP0021.\n\n```\nbitcoin:1GdK9UzpHBzqzX2A9JFP3Di4weBwqgmoQA?\\\namount=0.015&\\\nlabel=Bob%27s%20Cafe&\\\nmessage=Purchase%20at%20Bob%27s%20Cafe\nComponents of the URL\nA bitcoin address: \"1GdK9UzpHBzqzX2A9JFP3Di4weBwqgmoQA\"\nThe payment amount: \"0.015\"\nA label for the recipient address: \"Bob's Cafe\"\nA description for the payment: \"Purchase at Bob's Cafe\"\n```",
+        "metadata": {
+          "page": 16,
+          "level": 4
+        }
+      },
+      {
+        "type": "Figure",
+        "content": "![](image_p36_1.png)",
+        "metadata": {
+          "page": 16,
+          "level": 4
+        }
+      },
+      {
+        "type": "Paragraph",
+        "content": "Unlike a QR code that simply contains a destination bitcoin address, a \"payment request\" is a QR encoded URL that contains a destination address, a payment amount and a generic description such as \"Bob's Cafe\". This allows a bitcoin wallet application to pre-fill the information used to send the payment while showing a humanreadable description to the user. You can scan the QR code above with a bitcoin wallet application to see what Alice would see.",
+        "metadata": {
+          "page": 16,
+          "level": 4
+        }
+      },
+      {
+        "type": "Paragraph",
+        "content": "Bob says \"That's one-dollar-fifty, or fifteen milliBits\".",
+        "metadata": {
+          "page": 16,
+          "level": 4
+        }
+      },
+      {
+        "type": "Paragraph",
+        "content": "Alice uses her smartphone to scan the barcode on display. Her smartphone shows a payment of 0.0150 BTC to Bob's Cafe and she selects Send to authorize the payment. Within a few seconds (about the same time as a credit card authorization), Bob would see the transaction on the register, completing the transaction. In the following sections we will examine this transaction in more detail, see how Alice's wallet constructed it, how it was propagated across the network, how it was verified and finally how Bob, the owner of the cafe, can spend that amount in subsequent transactions.",
+        "metadata": {
+          "page": 17,
+          "level": 4
+        }
+      },
+      {
+        "type": "Paragraph",
+        "content": "The bitcoin network can transact in fractional values, e.g. from milli-\n\n![](image_p37_0.png)\n\nbitcoins (1/1000th of a bitcoin) down to 1/100,000,000th of a bitcoin, which is known as a Satoshi. Throughout this book we'll use the term \"bitcoins\" to refer to any quantity of bitcoin currency, from the smallest unit (1 Satoshi) to the total number (21,000,000) of all bitcoins that will ever be mined.",
+        "metadata": {
+          "page": 17,
+          "level": 4
+        }
+      }
+    ]
+  },
+  "raw": "```json\n{\n  \"nodes\": [\n    {\n      \"type\": \"Chapter\",\n      \"title\": \"CHAPTER 2: How Bitcoin Works\",\n      \"content\": \"CHAPTER 2\\n\\nHow Bitcoin Works\",\n      \"metadata\": {\n        \"page\": 15,\n        \"level\": 1\n      }\n    },\n    {\n      \"type\": \"Section\",\n      \"title\": \"Transactions, Blocks, Mining, and the Blockchain\",\n      \"content\": \"Transactions, Blocks, Mining, and the Blockchain\",\n      \"metadata\": {\n        \"page\": 15,\n        \"level\": 2\n      }\n    },\n    {\n      \"type\": \"Paragraph\",\n      \"content\": \"The bitcoin system, unlike traditional banking and payment systems, is based on decentralized trust. Instead of a central trusted authority, in bitcoin, trust is achieved as an emergent property from the interactions of different participants in the bitcoin system. In this chapter we will examine bitcoin from a high-level by tracking a single transaction through the bitcoin system and watch as it becomes \\\"trusted\\\" and accepted by the bitcoin mechanism of distributed consensus and is finally recorded on the blockchain, the distributed ledger of all transactions. Each example below is based upon an actual transaction made on the bitcoin network, simulating the interactions between the users (Joe, Alice and Bob) by sending funds from one wallet to another. While tracking a transaction through the bitcoin network and blockchain, we will use a blockchain explorer site to visualize each step. A blockchain explorer is a web application that operates as a bitcoin search engine, in that it allows you to search for addresses, transactions and blocks and see the relationships and flows between them. Popular blockchain explorers include:\",\n      \"metadata\": {\n        \"page\": 15,\n        \"level\": 3\n      }\n    },\n    {\n      \"type\": \"ListItem\",\n      \"content\": \"blockchain.info\",\n      \"metadata\": {\n        \"page\": 15,\n        \"level\": 4\n      }\n    },\n    {\n      \"type\": \"ListItem\",\n      \"content\": \"blockexplorer.com\",\n      \"metadata\": {\n        \"page\": 15,\n        \"level\": 4\n      }\n    },\n    {\n      \"type\": \"ListItem\",\n      \"content\": \"insight.bitpay.com\",\n      \"metadata\": {\n        \"page\": 15,\n        \"level\": 4\n      }\n    },\n    {\n      \"type\": \"ListItem\",\n      \"content\": \"blockr.io Each of these has a search function that can take an address, transaction hash or block number and find the equivalent data on the bitcoin network and blockchain. With each example, we will provide a URL that takes you directly to the relevant entry, so you can study it in detail.\",\n      \"metadata\": {\n        \"page\": 15,\n        \"level\": 4\n      }\n    },\n    {\n      \"type\": \"Subsection\",\n      \"title\": \"Bitcoin Overview\",\n      \"content\": \"Bitcoin Overview\",\n      \"metadata\": {\n        \"page\": 15,\n        \"level\": 3\n      }\n    },\n    {\n      \"type\": \"Paragraph\",\n      \"content\": \"In the overview diagram below, we see that the bitcoin system consists of users with wallets containing keys, transactions which are propagated across the network and miners who produce (through competitive computation) the consensus blockchain, the authoritative ledger of all transactions. In this chapter, we will trace a single transaction as it travels across the network and examine the interactions between each part of the bitcoin system, at a high level. Subsequent chapters will delve into the technology behind wallets, mining and merchant systems.\",\n      \"metadata\": {\n        \"page\": 15,\n        \"level\": 4\n      }\n    },\n    {\n      \"type\": \"Figure\",\n      \"title\": \"Figure 2-1. Bitcoin Overview\",\n      \"content\": \"![](image_p35_0.png)\\n\\n*Figure 2-1. Bitcoin Overview*\",\n      \"metadata\": {\n        \"page\": 15,\n        \"level\": 4\n      }\n    },\n    {\n      \"type\": \"Subsection\",\n      \"title\": \"Buying a cup of coffee\",\n      \"content\": \"Buying a cup of coffee\",\n      \"metadata\": {\n        \"page\": 15,\n        \"level\": 3\n      }\n    },\n    {\n      \"type\": \"Paragraph\",\n      \"content\": \"Alice, introduced in the previous chapter, is a new user who has just acquired her first bitcoin. In \\\"Getting your first bitcoins\\\" on page 9, Alice met with her friend Joe to exchange some cash for bitcoin. The transaction created by Joe, funded Alice's wallet with 0.10 BTC. Now Alice will make her first retail transaction, buying a cup of coffee at Bob's coffee shop in Palo Alto, California. Bob's coffee shop recently started accepting bitcoin payments, by adding a bitcoin option to his point-of-sale system. The prices at Bob's Cafe are listed in the local currency (US dollars) but at the register, customers have the option of paying in either dollars or bitcoin. Alice places her order for a cup of coffee and Bob enters the transaction at the register. The point-of-sale system will convert the total price from US dollars to bitcoins at the prevailing market rate and display the prices in both currencies, as well as showing a QR code containing a payment request for this transaction:\",\n      \"metadata\": {\n        \"page\": 15,\n        \"level\": 4\n      }\n    },\n    {\n      \"type\": \"Paragraph\",\n      \"content\": \"Displayed on Bob's cash register.\",\n      \"metadata\": {\n        \"page\": 16,\n        \"level\": 4\n      }\n    },\n    {\n      \"type\": \"Paragraph\",\n      \"content\": \"Total:\\n$1.50 USD\\n0.015 BTC\",\n      \"metadata\": {\n        \"page\": 16,\n        \"level\": 4\n      }\n    },\n    {\n      \"type\": \"Figure\",\n      \"title\": \"Figure 2-2. Payment Request QR Code - Hint: Try to scan this!\",\n      \"content\": \"![](image_p36_0.png)\\n\\n*Figure 2-2. Payment Request QR Code - Hint: Try to scan this!*\",\n      \"metadata\": {\n        \"page\": 16,\n        \"level\": 4\n      }\n    },\n    {\n      \"type\": \"Paragraph\",\n      \"content\": \"The payment request QR code above encodes the following URL, defined in BIP0021.\\n\\n```\\nbitcoin:1GdK9UzpHBzqzX2A9JFP3Di4weBwqgmoQA?\\\\\\namount=0.015&\\\\\\nlabel=Bob%27s%20Cafe&\\\\\\nmessage=Purchase%20at%20Bob%27s%20Cafe\\nComponents of the URL\\nA bitcoin address: \\\"1GdK9UzpHBzqzX2A9JFP3Di4weBwqgmoQA\\\"\\nThe payment amount: \\\"0.015\\\"\\nA label for the recipient address: \\\"Bob's Cafe\\\"\\nA description for the payment: \\\"Purchase at Bob's Cafe\\\"\\n```\",\n      \"metadata\": {\n        \"page\": 16,\n        \"level\": 4\n      }\n    },\n    {\n      \"type\": \"Figure\",\n      \"content\": \"![](image_p36_1.png)\",\n      \"metadata\": {\n        \"page\": 16,\n        \"level\": 4\n      }\n    },\n    {\n      \"type\": \"Paragraph\",\n      \"content\": \"Unlike a QR code that simply contains a destination bitcoin address, a \\\"payment request\\\" is a QR encoded URL that contains a destination address, a payment amount and a generic description such as \\\"Bob's Cafe\\\". This allows a bitcoin wallet application to pre-fill the information used to send the payment while showing a humanreadable description to the user. You can scan the QR code above with a bitcoin wallet application to see what Alice would see.\",\n      \"metadata\": {\n        \"page\": 16,\n        \"level\": 4\n      }\n    },\n    {\n      \"type\": \"Paragraph\",\n      \"content\": \"Bob says \\\"That's one-dollar-fifty, or fifteen milliBits\\\".\",\n      \"metadata\": {\n        \"page\": 16,\n        \"level\": 4\n      }\n    },\n    {\n      \"type\": \"Paragraph\",\n      \"content\": \"Alice uses her smartphone to scan the barcode on display. Her smartphone shows a payment of 0.0150 BTC to Bob's Cafe and she selects Send to authorize the payment. Within a few seconds (about the same time as a credit card authorization), Bob would see the transaction on the register, completing the transaction. In the following sections we will examine this transaction in more detail, see how Alice's wallet constructed it, how it was propagated across the network, how it was verified and finally how Bob, the owner of the cafe, can spend that amount in subsequent transactions.\",\n      \"metadata\": {\n        \"page\": 17,\n        \"level\": 4\n      }\n    },\n    {\n      \"type\": \"Paragraph\",\n      \"content\": \"The bitcoin network can transact in fractional values, e.g. from milli-\\n\\n![](image_p37_0.png)\\n\\nbitcoins (1/1000th of a bitcoin) down to 1/100,000,000th of a bitcoin, which is known as a Satoshi. Throughout this book we'll use the term \\\"bitcoins\\\" to refer to any quantity of bitcoin currency, from the smallest unit (1 Satoshi) to the total number (21,000,000) of all bitcoins that will ever be mined.\",\n      \"metadata\": {\n        \"page\": 17,\n        \"level\": 4\n      }\n    }\n  ]\n}\n```",
+  "meta": {
+    "modelId": "gemini-3.5-flash",
+    "cached_at": "2026-06-21T12:33:11.208Z"
+  }
+}

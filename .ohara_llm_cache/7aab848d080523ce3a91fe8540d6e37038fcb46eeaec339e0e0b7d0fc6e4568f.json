@@ -1,0 +1,143 @@
+{
+  "parsed_json": {
+    "nodes": [
+      {
+        "type": "Section",
+        "title": "Conventions Used in This Book",
+        "content": "Conventions Used in This Book",
+        "metadata": {
+          "page": 10,
+          "level": 2
+        }
+      },
+      {
+        "type": "Paragraph",
+        "content": "The following typographical conventions are used in this book: *Italic*",
+        "metadata": {
+          "page": 10,
+          "level": 3
+        }
+      },
+      {
+        "type": "Paragraph",
+        "content": "Indicates new terms, URLs, email addresses, filenames, and file extensions.",
+        "metadata": {
+          "page": 10,
+          "level": 3
+        }
+      },
+      {
+        "type": "Paragraph",
+        "content": "Constant width\nUsed for program listings, as well as within paragraphs to refer to program elements such as variable or function names, databases, data types, environment variables, statements, and keywords.",
+        "metadata": {
+          "page": 10,
+          "level": 3
+        }
+      },
+      {
+        "type": "Paragraph",
+        "content": "Constant width bold\nShows commands or other text that should be typed literally by the user.",
+        "metadata": {
+          "page": 10,
+          "level": 3
+        }
+      },
+      {
+        "type": "Paragraph",
+        "content": "Constant width italic\nShows text that should be replaced with user-supplied values or by values determined by context.",
+        "metadata": {
+          "page": 10,
+          "level": 3
+        }
+      },
+      {
+        "type": "Figure",
+        "content": "image_p12_0.png",
+        "metadata": {
+          "page": 10,
+          "level": 3
+        }
+      },
+      {
+        "type": "Paragraph",
+        "content": "This icon signifies a tip, suggestion, or general note.",
+        "metadata": {
+          "page": 10,
+          "level": 3
+        }
+      },
+      {
+        "type": "Paragraph",
+        "content": "This icon indicates a warning or caution.",
+        "metadata": {
+          "page": 10,
+          "level": 3
+        }
+      },
+      {
+        "type": "Figure",
+        "content": "image_p12_1.png",
+        "metadata": {
+          "page": 10,
+          "level": 3
+        }
+      },
+      {
+        "type": "Section",
+        "title": "Github Source Code",
+        "content": "Github Source Code",
+        "metadata": {
+          "page": 10,
+          "level": 2
+        }
+      },
+      {
+        "type": "Paragraph",
+        "content": "This book is available on Github, as a repository that contains the text, images and code: [*https://github.com/aantonop/bitcoinbook*](https://github.com/aantonop/bitcoinbook) Fork the book code, try the code examples, or submit corrections via Github.",
+        "metadata": {
+          "page": 10,
+          "level": 3
+        }
+      },
+      {
+        "type": "Section",
+        "title": "Code Examples",
+        "content": "Code Examples",
+        "metadata": {
+          "page": 10,
+          "level": 2
+        }
+      },
+      {
+        "type": "Paragraph",
+        "content": "The examples are illustrated in Python, C++ and using the command-line of a Unixlike operating system such as Linux or Mac OSX. All code snippets are available in the Github repository and can be accessed online at https://github.com/aantonop/bitcoin *book in the code subdirectory of the main repository.* All the code snippets can be replicated on most operating systems with a minimal installation of compilers and interpreters for the corresponding languages. Where necessary, we provide basic installation instructions and step-by-step examples of the output of those instructions. Some of the code snippets and code output have been re-formatted for print. In all such cases, the lines have been split by a backslash \"\\\\\" character, followed by a newline character. When transcribing the examples, remove those two characters and join the lines again and you should see identical results as shown in the example. All the code snippets use real values and calculations where possible, so that you can build from example to example and see the same results in any code you write to calculate the same values. For example, the private keys and corresponding public keys and addresses are all real. The sample transactions, blocks and blockchain references have all been introduced in the actual bitcoin blockchain and are part of the public ledger, so you can review them on any bitcoin system.",
+        "metadata": {
+          "page": 10,
+          "level": 3
+        }
+      },
+      {
+        "type": "Section",
+        "title": "Using Code Examples",
+        "content": "Using Code Examples",
+        "metadata": {
+          "page": 11,
+          "level": 2
+        }
+      },
+      {
+        "type": "Paragraph",
+        "content": "This book is here to help you get your job done. In general, if example code is offered with this book, you may use it in your programs and documentation. You do not need to contact us for permission unless you're reproducing a significant portion of the code. For example, writing a program that uses several chunks of code from this book does not require permission. Selling or distributing a CD-ROM of examples from O'Reilly books does require permission. Answering a question by citing this book and quoting example code does not require permission. Incorporating a significant amount of example code from this book into your product's documentation does require permission. We appreciate, but do not require, attribution. An attribution usually includes the title, author, publisher, and ISBN. For example: \"Mastering Bitcoin by Andreas M. Antonopoulos (O'Reilly). Copyright 2014 Andreas M. Antonopoulos, 978-1449374044.\" Some editions of this books are offered under an open source license, such as CC-BY- NC (creativecommons.org) in which case the terms of that licenses apply. If you feel your use of code examples falls outside fair use or the permission given above, [feel free to contact us at permissions@oreilly.com.](mailto:permissions@oreilly.com)",
+        "metadata": {
+          "page": 11,
+          "level": 3
+        }
+      }
+    ]
+  },
+  "raw": "```json\n{\n  \"nodes\": [\n    {\n      \"type\": \"Section\",\n      \"title\": \"Conventions Used in This Book\",\n      \"content\": \"Conventions Used in This Book\",\n      \"metadata\": {\n        \"page\": 10,\n        \"level\": 2\n      }\n    },\n    {\n      \"type\": \"Paragraph\",\n      \"content\": \"The following typographical conventions are used in this book: *Italic*\",\n      \"metadata\": {\n        \"page\": 10,\n        \"level\": 3\n      }\n    },\n    {\n      \"type\": \"Paragraph\",\n      \"content\": \"Indicates new terms, URLs, email addresses, filenames, and file extensions.\",\n      \"metadata\": {\n        \"page\": 10,\n        \"level\": 3\n      }\n    },\n    {\n      \"type\": \"Paragraph\",\n      \"content\": \"Constant width\\nUsed for program listings, as well as within paragraphs to refer to program elements such as variable or function names, databases, data types, environment variables, statements, and keywords.\",\n      \"metadata\": {\n        \"page\": 10,\n        \"level\": 3\n      }\n    },\n    {\n      \"type\": \"Paragraph\",\n      \"content\": \"Constant width bold\\nShows commands or other text that should be typed literally by the user.\",\n      \"metadata\": {\n        \"page\": 10,\n        \"level\": 3\n      }\n    },\n    {\n      \"type\": \"Paragraph\",\n      \"content\": \"Constant width italic\\nShows text that should be replaced with user-supplied values or by values determined by context.\",\n      \"metadata\": {\n        \"page\": 10,\n        \"level\": 3\n      }\n    },\n    {\n      \"type\": \"Figure\",\n      \"content\": \"image_p12_0.png\",\n      \"metadata\": {\n        \"page\": 10,\n        \"level\": 3\n      }\n    },\n    {\n      \"type\": \"Paragraph\",\n      \"content\": \"This icon signifies a tip, suggestion, or general note.\",\n      \"metadata\": {\n        \"page\": 10,\n        \"level\": 3\n      }\n    },\n    {\n      \"type\": \"Paragraph\",\n      \"content\": \"This icon indicates a warning or caution.\",\n      \"metadata\": {\n        \"page\": 10,\n        \"level\": 3\n      }\n    },\n    {\n      \"type\": \"Figure\",\n      \"content\": \"image_p12_1.png\",\n      \"metadata\": {\n        \"page\": 10,\n        \"level\": 3\n      }\n    },\n    {\n      \"type\": \"Section\",\n      \"title\": \"Github Source Code\",\n      \"content\": \"Github Source Code\",\n      \"metadata\": {\n        \"page\": 10,\n        \"level\": 2\n      }\n    },\n    {\n      \"type\": \"Paragraph\",\n      \"content\": \"This book is available on Github, as a repository that contains the text, images and code: [*https://github.com/aantonop/bitcoinbook*](https://github.com/aantonop/bitcoinbook) Fork the book code, try the code examples, or submit corrections via Github.\",\n      \"metadata\": {\n        \"page\": 10,\n        \"level\": 3\n      }\n    },\n    {\n      \"type\": \"Section\",\n      \"title\": \"Code Examples\",\n      \"content\": \"Code Examples\",\n      \"metadata\": {\n        \"page\": 10,\n        \"level\": 2\n      }\n    },\n    {\n      \"type\": \"Paragraph\",\n      \"content\": \"The examples are illustrated in Python, C++ and using the command-line of a Unixlike operating system such as Linux or Mac OSX. All code snippets are available in the Github repository and can be accessed online at https://github.com/aantonop/bitcoin *book in the code subdirectory of the main repository.* All the code snippets can be replicated on most operating systems with a minimal installation of compilers and interpreters for the corresponding languages. Where necessary, we provide basic installation instructions and step-by-step examples of the output of those instructions. Some of the code snippets and code output have been re-formatted for print. In all such cases, the lines have been split by a backslash \\\"\\\\\\\\\\\" character, followed by a newline character. When transcribing the examples, remove those two characters and join the lines again and you should see identical results as shown in the example. All the code snippets use real values and calculations where possible, so that you can build from example to example and see the same results in any code you write to calculate the same values. For example, the private keys and corresponding public keys and addresses are all real. The sample transactions, blocks and blockchain references have all been introduced in the actual bitcoin blockchain and are part of the public ledger, so you can review them on any bitcoin system.\",\n      \"metadata\": {\n        \"page\": 10,\n        \"level\": 3\n      }\n    },\n    {\n      \"type\": \"Section\",\n      \"title\": \"Using Code Examples\",\n      \"content\": \"Using Code Examples\",\n      \"metadata\": {\n        \"page\": 11,\n        \"level\": 2\n      }\n    },\n    {\n      \"type\": \"Paragraph\",\n      \"content\": \"This book is here to help you get your job done. In general, if example code is offered with this book, you may use it in your programs and documentation. You do not need to contact us for permission unless you're reproducing a significant portion of the code. For example, writing a program that uses several chunks of code from this book does not require permission. Selling or distributing a CD-ROM of examples from O'Reilly books does require permission. Answering a question by citing this book and quoting example code does not require permission. Incorporating a significant amount of example code from this book into your product's documentation does require permission. We appreciate, but do not require, attribution. An attribution usually includes the title, author, publisher, and ISBN. For example: \\\"Mastering Bitcoin by Andreas M. Antonopoulos (O'Reilly). Copyright 2014 Andreas M. Antonopoulos, 978-1449374044.\\\" Some editions of this books are offered under an open source license, such as CC-BY- NC (creativecommons.org) in which case the terms of that licenses apply. If you feel your use of code examples falls outside fair use or the permission given above, [feel free to contact us at permissions@oreilly.com.](mailto:permissions@oreilly.com)\",\n      \"metadata\": {\n        \"page\": 11,\n        \"level\": 3\n      }\n    }\n  ]\n}\n```",
+  "meta": {
+    "modelId": "gemini-3.5-flash",
+    "cached_at": "2026-06-21T12:32:11.982Z"
+  }
+}

@@ -134,13 +134,15 @@ const edgeSchema = {
 
 The ingestion process bridges the gap between raw binary formats and our graph schema.
 
+For straightforward implementation, documents are first converted to Markdown using LiteParse (https://github.com/run-llama/liteparse) during the ingestion phase. All downstream decomposition and extraction operate on the parsed Markdown files — DocsRay and subsequent extractors run against the Markdown representation.
+
 ### 3.1 The 7-Stage Transformation Flow
 
 | Stage | Activity | Output |
 | :--- | :--- | :--- |
-| **1. Smart Ingestion** | SHA256 hashing & Change Detection | Modified Content Only |
-| **2. Normalization** | Frontmatter parsing, line-break sanitization | Sanitized Body + Metadata |
-| **3. Decomposition** | DocsRay Pseudo-TOC partitioning | Hierarchy of Nodes |
+| **1. Smart Ingestion** | LiteParse conversion to Markdown + SHA256 hashing & Change Detection | Modified Markdown Content |
+| **2. Normalization** | Frontmatter parsing, line-break sanitization on Markdown | Sanitized Markdown + Metadata |
+| **3. Decomposition** | DocsRay Pseudo-TOC partitioning applied to the parsed Markdown | Hierarchy of Nodes |
 | **4. Enrichment** | Multi-Vector Indexing + Semantic Tagging | Vector-ready Nodes |
 | **5. The Refinery** | Louvain Clustering & Link Discovery | Thematic Hubs |
 | **6. Synthesis** | Relational edge generation (ACID) | Space-Time Graph |
@@ -158,15 +160,15 @@ For high-volume processing, we replace brittle shell scripts with a distributed 
 // Example worker orchestration
 const worker = new Worker('ingestion_queue', async job => {
   const { filePath, docId } = job.data;
-  // 1. Route to MinerU/Docling parser
-  // 2. Deterministic OKF/DoCO mapping
+  // 1. Convert source to Markdown via LiteParse
+  // 2. Run DocsRay / decomposition on parsed Markdown and perform deterministic OKF/DoCO mapping
   // 3. Multi-Vector Enrichment
   // 4. Atomic Graph Persistence
 });
 ```
 
 **`transform.js`**:
-Standardizes the disparate outputs of MinerU and Docling into the unified OKF/DoCO format using deterministic relational mapping.
+Standardizes the parsed Markdown (produced by LiteParse) into the unified OKF/DoCO format using deterministic relational mapping.
 
 ### 4.2 Cloud-Native Extraction (Gemini Flash Lite)
 Leveraging Gemini's 2M context window for instant "Zero-GPU" extraction using Structured Outputs.

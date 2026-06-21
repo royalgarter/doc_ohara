@@ -1,7 +1,11 @@
 import fs from 'fs';
 import path from 'path';
+import { execSync } from 'child_process';
+import crypto from 'crypto';
 import { GoogleGenAI } from '@google/genai';
 import { getArangoDBSimulator } from './arangodb_sim.js';
+import { cacheKeyFor, readCache, writeCache, hasCache, credFingerprint, getCacheDir } from './llm_cache.js';
+import { chunkMarkdown, readMarkdownFile } from './markdown_chunker.js';
 
 // Global log tracking for the active pipeline run
 let currentLogs = [];
@@ -108,21 +112,9 @@ export async function runPipelineExecution(aiKey) {
         ? fs.readFileSync(fileContentPath, 'utf-8').slice(0, 1500)
         : "Standard document content for layout extraction.";
 
-      if (ai) {
-        // AI processing
-        try {
-          addPipelineLog('info', `Extracting structured elements using Gemini-3.5-Flash...`);
-          parsedLayoutJSON = await generateAILayout(ai, filename, contentExcerpt, isPdf);
-          addPipelineLog('success', `AI Extraction successful for ${filename}!`);
-        } catch (err) {
-          addPipelineLog('warn', `AI extraction returned an error: ${err.message}. Using high-fidelity local templates.`);
-          parsedLayoutJSON = generateLocalTemplateFallback(filename, isPdf);
-        }
-      } else {
-        // Fallback simulation
-        await delay(1200); // realistic processing overhead
-        parsedLayoutJSON = generateLocalTemplateFallback(filename, isPdf);
-      }
+      // Attempt parsing: prefer LiteParse -> structure Markdown via system prompt -> fallback to AI layout or local templates
+      parsedLayoutJSON = await performParsing(ai, filename, fileContentPath, isPdf, targetSubDir);
+      addPipelineLog('info', `Parser produced output for ${filename}.`);
 
       // Save raw output JSON file
       const rawJsonPath = path.join(targetSubDir, `${filenameNoExt}.json`);
@@ -263,6 +255,179 @@ ${content}
   return JSON.parse(cleanJson);
 }
 
+// Attempt to run LiteParse CLI to convert source to Markdown
+function attemptLiteParse(sourcePath, outMdPath) {
+  try {
+    // sample command: lit parse sample/Mastering\ Bitcoin\ 2nd.pdf --format markdown -o mastering_bitcoin_2nd.md
+    const cmd = `lit parse "${sourcePath}" --format markdown -o "${outMdPath}"`;
+    execSync(cmd, { stdio: 'ignore' });
+    return fs.existsSync(outMdPath);
+  } catch (err) {
+    return false;
+  }
+}
+
+// Use AI + system prompt to transform Markdown into structured JSON nodes
+async function generateFromMarkdown(ai, mdContent, filename) {
+  try {
+    const promptTemplate = fs.readFileSync(path.join('prompts', 'ingest_document.md'), 'utf-8');
+    const prompt = `${promptTemplate}\n\nDOCUMENT_MARKDOWN:\n\n${mdContent}`;
+    const result = await ai.models.generateContent({ model: 'gemini-3.5-flash', contents: prompt });
+    const parsedText = result.text?.trim() || '{}';
+    const cleanJson = parsedText.replace(/^```json/gi, '').replace(/^```/gi, '').replace(/```$/gi, '').trim();
+    return JSON.parse(cleanJson);
+  } catch (err) {
+    // Bubble up error to allow upstream fallback handling
+    throw err;
+  }
+}
+
+// Perform parsing: strict LiteParse-first -> structure Markdown via system prompt with retries and cache.
+// No synthetic fallbacks allowed. On persistent failure, throw an error so the job can be retried/failed upstream.
+async function performParsing(ai, filename, fileContentPath, isPdf, targetSubDir) {
+  const filenameNoExt = path.basename(filename, path.extname(filename));
+  const mdOutPath = path.join(targetSubDir, `${filenameNoExt}.md`);
+
+  // If input is already Markdown, skip LiteParse and use it directly
+  const ext = path.extname(filename).toLowerCase();
+  const isMarkdown = ext === '.md' || ext === '.markdown' || fileContentPath.endsWith('.md');
+
+  if (isMarkdown) {
+    // read and chunk
+    const mdContent = fs.readFileSync(fileContentPath, 'utf-8');
+    return await structureMarkdownWithRetries(ai, filename, mdContent);
+  }
+
+  // Try LiteParse CLI with retries
+  let attempt = 0;
+  const maxAttempts = 3;
+  while (attempt < maxAttempts) {
+    attempt += 1;
+    addPipelineLog('info', `Attempt ${attempt}/${maxAttempts}: running LiteParse for ${filename}`);
+    const ok = attemptLiteParse(fileContentPath, mdOutPath);
+    if (ok && fs.existsSync(mdOutPath)) {
+      const mdContent = fs.readFileSync(mdOutPath, 'utf-8');
+      return await structureMarkdownWithRetries(ai, filename, mdContent);
+    }
+    if (attempt < maxAttempts) {
+      addPipelineLog('warn', `LiteParse failed for ${filename}, retrying in 30s...`);
+      await delay(30000);
+    }
+  }
+
+  // All attempts failed
+  const err = new Error(`LiteParse failed after ${maxAttempts} attempts for ${filename}`);
+  err.code = 'LITEPARSE_FAILED';
+  throw err;
+}
+
+// Structure markdown using chunking + LLM with cache and retries
+async function structureMarkdownWithRetries(ai, filename, mdContent) {
+  if (!ai) {
+    const err = new Error('No LLM client available for structuring Markdown. GEMINI_API_KEY must be set.');
+    err.code = 'NO_LLM_CREDENTIAL';
+    throw err;
+  }
+
+  let chunks = chunkMarkdown(mdContent, { maxChars: 12000 });
+  // test override: limit number of chunks processed when OHARA_TEST_CHUNKS_LIMIT is set
+  const testLimit = parseInt(process.env.OHARA_TEST_CHUNKS_LIMIT || '0', 10) || 0;
+  if (testLimit > 0) {
+    addPipelineLog('info', `OHARA_TEST_CHUNKS_LIMIT set: trimming to ${testLimit} chunk(s)`);
+    chunks = chunks.slice(0, testLimit);
+  }
+  addPipelineLog('info', `Markdown split into ${chunks.length} chunk(s) for ${filename}`);
+
+  // parallel pool
+  const concurrency = parseInt(process.env.OHARA_INGEST_CONCURRENCY || '4', 10) || 4;
+  const results = [];
+
+  let idx = 0;
+  async function worker(chunk) {
+    const systemPrompt = fs.readFileSync(path.join('prompts', 'ingest_document.md'), 'utf-8');
+    const promptNorm = systemPrompt.trim();
+    const modelId = 'gemini-3.5-flash';
+    const credFp = credFingerprint();
+    const key = cacheKeyFor([promptNorm, chunk.text, modelId, credFp]);
+
+    // Check cache
+    if (hasCache(key)) {
+      const cached = readCache(key);
+      if (cached && cached.parsed_json) {
+        addPipelineLog('info', `Cache hit for chunk ${chunk.id}`);
+        return cached.parsed_json;
+      }
+    }
+
+    // not cached -> call LLM with retries
+    const maxAttempts = 3;
+    let attempt = 0;
+    while (attempt < maxAttempts) {
+      attempt += 1;
+      try {
+        addPipelineLog('info', `LLM structuring chunk ${chunk.id} (attempt ${attempt}/${maxAttempts})`);
+        const prompt = `${promptNorm}\n\nDOCUMENT_CHUNK_HEADING:${chunk.heading || ''}\n\n${chunk.text}`;
+        const resp = await ai.models.generateContent({ model: modelId, contents: prompt });
+        const parsedText = resp.text?.trim() || '{}';
+        const cleanJson = parsedText.replace(/^```json/gi, '').replace(/^```/gi, '').replace(/```$/gi, '').trim();
+        const parsed = JSON.parse(cleanJson);
+        // write cache
+        writeCache(key, { parsed_json: parsed, raw: parsedText, meta: { modelId, cached_at: new Date().toISOString() } });
+        return parsed;
+      } catch (err) {
+        addPipelineLog('warn', `LLM error on chunk ${chunk.id}: ${err.message}`);
+        if (attempt < maxAttempts) {
+          addPipelineLog('info', `Retrying chunk ${chunk.id} in 30s...`);
+          await delay(30000);
+          continue;
+        }
+        const e = new Error(`LLM structuring failed for chunk ${chunk.id} after ${maxAttempts} attempts: ${err.message}`);
+        e.code = 'LLM_FAILED';
+        throw e;
+      }
+    }
+  }
+
+  // process chunks in batches with fixed concurrency
+  const resultsArr = [];
+  for (let i = 0; i < chunks.length; i += concurrency) {
+    const batch = chunks.slice(i, i + concurrency);
+    const promises = batch.map(async (chunk) => {
+      const res = await worker(chunk);
+      return { chunk, res };
+    });
+    const batchResults = await Promise.all(promises);
+    resultsArr.push(...batchResults);
+  }
+
+  // merge results preserving chunk order
+  const mergedNodes = [];
+  const chunkIdToIndex = new Map();
+  chunks.forEach((c, i) => chunkIdToIndex.set(c.id, i));
+  const ordered = resultsArr.sort((a, b) => chunkIdToIndex.get(a.chunk.id) - chunkIdToIndex.get(b.chunk.id));
+
+  for (const entry of ordered) {
+    const parsed = entry.res;
+    if (!parsed) {
+      const err = new Error(`Empty parsed output for chunk ${entry.chunk.id}`);
+      err.code = 'EMPTY_CHUNK_PARSE';
+      throw err;
+    }
+    // Expect parsed to be { nodes: [...] } or { document: { texts: [...] } }
+    if (parsed.nodes) {
+      mergedNodes.push(...parsed.nodes);
+    } else if (parsed.document && Array.isArray(parsed.document.texts)) {
+      parsed.document.texts.forEach(t => mergedNodes.push({ type: t.label === 'paragraph' ? 'Paragraph' : 'Paragraph', content: t.text, title: t.label && t.label.startsWith('heading') ? t.text : undefined }));
+    } else {
+      const err = new Error('Unexpected parsed schema from LLM; aborting ingestion');
+      err.code = 'INVALID_SCHEMA';
+      throw err;
+    }
+  }
+
+  return { nodes: mergedNodes };
+}
+
 // Generate realistic mock data if Gemini API is disabled
 function generateLocalTemplateFallback(filename, isPdf) {
   if (isPdf) {
@@ -316,6 +481,33 @@ function generateLocalTemplateFallback(filename, isPdf) {
   }
 }
 
+// Preflight checks: ensure credentials and tools are available before ingestion
+function preflightChecks(filename) {
+  const required = [];
+  if (!process.env.GEMINI_API_KEY) required.push('GEMINI_API_KEY');
+  if (!process.env.ARANGO_URL) required.push('ARANGO_URL');
+  // If input is not markdown, ensure LiteParse CLI is available
+  const ext = path.extname(filename).toLowerCase();
+  if (!['.md', '.markdown'].includes(ext)) {
+    try {
+      execSync('which lit', { stdio: 'ignore' });
+    } catch (err) {
+      // if lit not found and env not provided for LITEPARSE_CLI_PATH, error
+      if (!process.env.LITEPARSE_CLI_PATH) {
+        required.push('lit (LiteParse CLI) on PATH or set LITEPARSE_CLI_PATH');
+      }
+    }
+  }
+
+  if (required.length > 0) {
+    const msg = `Missing required environment or tools: ${required.join(', ')}`;
+    addPipelineLog('error', msg);
+    const e = new Error(msg);
+    e.code = 'PREFLIGHT_FAILED';
+    throw e;
+  }
+}
+
 // Emulates the transform.js logic to standardized collection mappings
 function transformRawToCollections(rawOutputDir) {
   const dbCollections = {
@@ -338,6 +530,52 @@ function transformRawToCollections(rawOutputDir) {
     files.forEach(file => {
       if (!file.endsWith('.json')) return;
       const rawContent = JSON.parse(fs.readFileSync(path.join(fullPath, file), 'utf-8'));
+
+      // Support OKF-style nodes produced by the Markdown -> system prompt flow
+      const isOkfNodes = !!rawContent.nodes;
+      if (isOkfNodes) {
+        dbCollections.documents.push({
+          id: docId,
+          source_file: docFolder,
+          parser_engine: "LiteParse",
+          title: rawContent.title || docFolder,
+          file_size: '1.0 MB'
+        });
+
+        let currentSectionId = null;
+        rawContent.nodes.forEach((node, blockIdx) => {
+          const nodeId = `okf_node_${blockIdx}_${Date.now()}`;
+          const ntype = node.type || (node.metadata && node.metadata.type) || 'Paragraph';
+
+          if (['Chapter', 'Section', 'Subsection'].includes(ntype)) {
+            currentSectionId = nodeId;
+            dbCollections.sections.push({
+              id: nodeId,
+              document_id: docId,
+              title: node.title || node.content?.split('\n')[0] || '',
+              level: node.metadata?.level || 1
+            });
+          } else if (['Paragraph', 'ListItem'].includes(ntype)) {
+            dbCollections.paragraphs.push({
+              id: nodeId,
+              document_id: docId,
+              section_id: currentSectionId,
+              content: node.content || node.text || ''
+            });
+          } else if (ntype === 'Table') {
+            dbCollections.tables.push({
+              id: nodeId,
+              document_id: docId,
+              section_id: currentSectionId,
+              matrix_data: node.metadata?.table_cells || node.table || [],
+              markdown_representation: node.markdown || node.metadata?.markdown || ''
+            });
+          }
+        });
+
+        // Done processing this raw JSON file
+        return;
+      }
 
       const isMinerU = !!rawContent.pdf_body;
 
@@ -438,6 +676,9 @@ const delay = (ms) => new Promise(res => setTimeout(res, ms));
 // Mirrors the per-file body of runPipelineExecution but reports progress via callback
 // and classifies OOM / Gemini rate-limit errors so the worker can decide whether to retry.
 export async function ingestSingleFile(filename, aiKey, onProgress = () => {}) {
+  // Preflight: ensure env credentials & tools
+  preflightChecks(filename);
+
   const inputDir = 'doc_pipeline/input';
   const rawOutputDir = 'doc_pipeline/raw_output';
   const collectionsDir = 'doc_pipeline/collections';
@@ -462,9 +703,8 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}) {
   try {
     contentExcerpt = isRealFile
       ? fs.readFileSync(fileContentPath, 'utf-8').slice(0, 1500)
-      : 'Standard document content for layout extraction.';
+      : '';
   } catch (err) {
-    // Large/binary files (e.g. real PDFs) can blow up a naive utf-8 read on constrained workers.
     const oomError = new Error(`OOM_DURING_PARSE: failed to buffer "${filename}" for parsing (${err.message})`);
     oomError.code = 'OOM';
     throw oomError;
@@ -484,22 +724,13 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}) {
     }
   }
 
-  let parsedLayoutJSON;
-  if (ai) {
-    try {
-      onProgress(40, 'Extracting structured elements via Gemini...');
-      parsedLayoutJSON = await generateAILayout(ai, filename, contentExcerpt, isPdf);
-    } catch (err) {
-      if (/429|rate.?limit|quota/i.test(err.message || '')) {
-        const rateLimitError = new Error(`RATE_LIMIT: Gemini API rate limit hit (${err.message})`);
-        rateLimitError.code = 'RATE_LIMIT';
-        throw rateLimitError;
-      }
-      parsedLayoutJSON = generateLocalTemplateFallback(filename, isPdf);
-    }
-  } else {
-    await delay(300);
-    parsedLayoutJSON = generateLocalTemplateFallback(filename, isPdf);
+  // Try LiteParse + system prompt structuring first, otherwise fall back to AI/local templates
+  let parsedLayoutJSON = await performParsing(ai, filename, fileContentPath, isPdf, targetSubDir);
+  // If AI rate-limited error bubbled up, keep semantics for worker retries
+  if (!parsedLayoutJSON && ai) {
+    const rateLimitError = new Error(`RATE_LIMIT: Gemini API rate limit or parsing failed`);
+    rateLimitError.code = 'RATE_LIMIT';
+    throw rateLimitError;
   }
 
   onProgress(60, 'Writing raw layout output...');

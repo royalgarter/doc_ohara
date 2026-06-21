@@ -1,0 +1,381 @@
+{
+  "parsed_json": {
+    "nodes": [
+      {
+        "type": "Section",
+        "title": "Early Release Draft (Github Contributions)",
+        "content": "Early Release Draft (Github Contributions)",
+        "metadata": {
+          "page": 15,
+          "level": 1
+        }
+      },
+      {
+        "type": "Paragraph",
+        "content": "Many contributors offered comments, corrections and additions to the early-release draft on Github. Thank you all for your contributions to this book. Notable contributors included the following:",
+        "metadata": {
+          "page": 15,
+          "level": 2
+        }
+      },
+      {
+        "type": "Paragraph",
+        "content": "(Name - Github ID)",
+        "metadata": {
+          "page": 16,
+          "level": 2
+        }
+      },
+      {
+        "type": "ListItem",
+        "content": "Minh T. Nguyen - enderminh: Github contribution editor",
+        "metadata": {
+          "page": 16,
+          "level": 3
+        }
+      },
+      {
+        "type": "ListItem",
+        "content": "Ed Eykholt - edeykholt",
+        "metadata": {
+          "page": 16,
+          "level": 3
+        }
+      },
+      {
+        "type": "ListItem",
+        "content": "Michalis Kargakis - kargakis",
+        "metadata": {
+          "page": 16,
+          "level": 3
+        }
+      },
+      {
+        "type": "ListItem",
+        "content": "Erik Wahlström - erikwam",
+        "metadata": {
+          "page": 16,
+          "level": 3
+        }
+      },
+      {
+        "type": "ListItem",
+        "content": "Richard Kiss - richardkiss",
+        "metadata": {
+          "page": 16,
+          "level": 3
+        }
+      },
+      {
+        "type": "ListItem",
+        "content": "Eric Winchell - winchell",
+        "metadata": {
+          "page": 16,
+          "level": 3
+        }
+      },
+      {
+        "type": "ListItem",
+        "content": "Sergej Kotliar - ziggamon",
+        "metadata": {
+          "page": 16,
+          "level": 3
+        }
+      },
+      {
+        "type": "ListItem",
+        "content": "Nagaraj Hubli - nagarajhubli",
+        "metadata": {
+          "page": 16,
+          "level": 3
+        }
+      },
+      {
+        "type": "ListItem",
+        "content": "ethers",
+        "metadata": {
+          "page": 16,
+          "level": 3
+        }
+      },
+      {
+        "type": "ListItem",
+        "content": "Alex Waters - alexwaters",
+        "metadata": {
+          "page": 16,
+          "level": 3
+        }
+      },
+      {
+        "type": "ListItem",
+        "content": "Mihail Russu - MihailRussu",
+        "metadata": {
+          "page": 16,
+          "level": 3
+        }
+      },
+      {
+        "type": "ListItem",
+        "content": "Ish Ot Jr. - ishotjr",
+        "metadata": {
+          "page": 16,
+          "level": 3
+        }
+      },
+      {
+        "type": "ListItem",
+        "content": "James Addison - jayaddison",
+        "metadata": {
+          "page": 16,
+          "level": 3
+        }
+      },
+      {
+        "type": "ListItem",
+        "content": "Nekomata - nekomata-3",
+        "metadata": {
+          "page": 16,
+          "level": 3
+        }
+      },
+      {
+        "type": "ListItem",
+        "content": "Simon de la Rouviere - simondlr",
+        "metadata": {
+          "page": 16,
+          "level": 3
+        }
+      },
+      {
+        "type": "ListItem",
+        "content": "Chapman Shoop - belovachap",
+        "metadata": {
+          "page": 16,
+          "level": 3
+        }
+      },
+      {
+        "type": "ListItem",
+        "content": "Holger Schinzel - schinzelh",
+        "metadata": {
+          "page": 16,
+          "level": 3
+        }
+      },
+      {
+        "type": "ListItem",
+        "content": "effectsToCause - vericoin",
+        "metadata": {
+          "page": 16,
+          "level": 3
+        }
+      },
+      {
+        "type": "ListItem",
+        "content": "Stephan Oeste - Emzy",
+        "metadata": {
+          "page": 16,
+          "level": 3
+        }
+      },
+      {
+        "type": "ListItem",
+        "content": "Joe Bauers - joebauers",
+        "metadata": {
+          "page": 16,
+          "level": 3
+        }
+      },
+      {
+        "type": "ListItem",
+        "content": "Jason Bisterfeldt - jbisterfeldt",
+        "metadata": {
+          "page": 16,
+          "level": 3
+        }
+      },
+      {
+        "type": "ListItem",
+        "content": "Ed Leafe - EdLeafe",
+        "metadata": {
+          "page": 16,
+          "level": 3
+        }
+      },
+      {
+        "type": "Section",
+        "title": "Quick Glossary",
+        "content": "Quick Glossary",
+        "metadata": {
+          "page": 17,
+          "level": 1
+        }
+      },
+      {
+        "type": "Paragraph",
+        "content": "This quick glossary contains many of the terms used in relation to bitcoin. These terms are used throughout the book, so bookmark this for a quick reference and clarification.",
+        "metadata": {
+          "page": 17,
+          "level": 2
+        }
+      },
+      {
+        "type": "Paragraph",
+        "content": "*address (aka public key)*\n\nA bitcoin address looks like 1DSrfJdB2AnWaFNgSbv3MZC2m74996JafV - they consist of a string of letters and numbers starting with a \"1\" (number one). Just like you ask others to send an email to your email address, you would ask others to send you bitcoin to your bitcoin address.",
+        "metadata": {
+          "page": 17,
+          "level": 2
+        }
+      },
+      {
+        "type": "Paragraph",
+        "content": "*bip*\n\nBitcoin Improvement Proposals. A set of proposals that members of the bitcoin community have submitted to improve bitcoin. For example BIP0021 is a proposal to improve the bitcoin URI scheme.",
+        "metadata": {
+          "page": 17,
+          "level": 2
+        }
+      },
+      {
+        "type": "Paragraph",
+        "content": "*bitcoin*\n\nThe name of the currency unit (the coin), the network and the software",
+        "metadata": {
+          "page": 17,
+          "level": 2
+        }
+      },
+      {
+        "type": "Paragraph",
+        "content": "*block*\n\nA grouping of transactions, marked with a timestamp, and a fingerprint of the previous block. The block header is hashed to find a proof-of-work, thereby validating the transactions. Valid blocks are added to the main blockchain by network consensus.",
+        "metadata": {
+          "page": 17,
+          "level": 2
+        }
+      },
+      {
+        "type": "Paragraph",
+        "content": "*blockchain*\n\nA list of validated blocks, each linking to its predecessor all the way to the genesis block.",
+        "metadata": {
+          "page": 17,
+          "level": 2
+        }
+      },
+      {
+        "type": "Paragraph",
+        "content": "*confirmations*\n\nOnce a transaction is included in a block, it has \"one confirmation\". As soon as another block is mined on the same blockchain, the transaction has two confirmations etc. Six or more confirmations is considered sufficient proof that a transaction cannot be reversed.",
+        "metadata": {
+          "page": 17,
+          "level": 2
+        }
+      },
+      {
+        "type": "Paragraph",
+        "content": "*difficulty*\n\nA network-wide setting that controls how much computation is required to find a proof-of-work.",
+        "metadata": {
+          "page": 17,
+          "level": 2
+        }
+      },
+      {
+        "type": "Paragraph",
+        "content": "*difficulty target*\n\nA difficulty at which all the computation in the network will find blocks approximately every 10 minutes.",
+        "metadata": {
+          "page": 17,
+          "level": 2
+        }
+      },
+      {
+        "type": "Paragraph",
+        "content": "*difficulty re-targeting*\n\nA network-wide re-calculation of the difficulty which occurs once every 2106 blocks and considers the hashing power of the previous 2106 blocks.",
+        "metadata": {
+          "page": 17,
+          "level": 2
+        }
+      },
+      {
+        "type": "Paragraph",
+        "content": "*fees*\n\nThe sender of a transaction often includes a fee to the network for processing their requested transaction. Most transactions require a minimum fee of 0.5mBTC.",
+        "metadata": {
+          "page": 18,
+          "level": 2
+        }
+      },
+      {
+        "type": "Paragraph",
+        "content": "*hash*\n\nA digital fingerprint of some binary input.",
+        "metadata": {
+          "page": 18,
+          "level": 2
+        }
+      },
+      {
+        "type": "Paragraph",
+        "content": "*genesis block*\n\nThe first block in the blockchain, used to initialize the crypto-currency",
+        "metadata": {
+          "page": 18,
+          "level": 2
+        }
+      },
+      {
+        "type": "Paragraph",
+        "content": "*miner*\n\nA network node that finds valid proof-of-work for new blocks, by repeated hashing",
+        "metadata": {
+          "page": 18,
+          "level": 2
+        }
+      },
+      {
+        "type": "Paragraph",
+        "content": "*network*\n\nA peer-to-peer network that propagates transactions and blocks to every bitcoin node on the network.",
+        "metadata": {
+          "page": 18,
+          "level": 2
+        }
+      },
+      {
+        "type": "Paragraph",
+        "content": "*proof-of-work*\n\nA piece of data that requires significant computation to find. In bitcoin, miners must find a numeric solution to the SHA256 algorithm that meets a network wide target, the difficulty target.",
+        "metadata": {
+          "page": 18,
+          "level": 2
+        }
+      },
+      {
+        "type": "Paragraph",
+        "content": "*reward*\n\nAn amount included in each new block as a reward by the network to the miner who found the proof-of-work solution. It is currently 25BTC per block.",
+        "metadata": {
+          "page": 18,
+          "level": 2
+        }
+      },
+      {
+        "type": "Paragraph",
+        "content": "*secret key (aka private key)*\n\nThe secret number that unlocks bitcoins sent to the corresponding address. A secret key looks like 5J76sF8L5jTtzE96r66Sf8cka9y44wdpJjMwCxR3tzLh3ibVPxh",
+        "metadata": {
+          "page": 18,
+          "level": 2
+        }
+      },
+      {
+        "type": "Paragraph",
+        "content": "*transaction*\n\nIn simple terms, a transfer of bitcoins from one address to another. More precisely, a transaction is a signed data structure expressing a transfer of value. Transactions are transmitted over the bitcoin network, collected by miners and included into blocks, made permanent on the blockchain.",
+        "metadata": {
+          "page": 18,
+          "level": 2
+        }
+      },
+      {
+        "type": "Paragraph",
+        "content": "*wallet*\n\nSoftware that holds all your bitcoin addresses and secret keys. Use it to send, receive and store your bitcoin.",
+        "metadata": {
+          "page": 18,
+          "level": 2
+        }
+      }
+    ]
+  },
+  "raw": "{\n  \"nodes\": [\n    {\n      \"type\": \"Section\",\n      \"title\": \"Early Release Draft (Github Contributions)\",\n      \"content\": \"Early Release Draft (Github Contributions)\",\n      \"metadata\": {\n        \"page\": 15,\n        \"level\": 1\n      }\n    },\n    {\n      \"type\": \"Paragraph\",\n      \"content\": \"Many contributors offered comments, corrections and additions to the early-release draft on Github. Thank you all for your contributions to this book. Notable contributors included the following:\",\n      \"metadata\": {\n        \"page\": 15,\n        \"level\": 2\n      }\n    },\n    {\n      \"type\": \"Paragraph\",\n      \"content\": \"(Name - Github ID)\",\n      \"metadata\": {\n        \"page\": 16,\n        \"level\": 2\n      }\n    },\n    {\n      \"type\": \"ListItem\",\n      \"content\": \"Minh T. Nguyen - enderminh: Github contribution editor\",\n      \"metadata\": {\n        \"page\": 16,\n        \"level\": 3\n      }\n    },\n    {\n      \"type\": \"ListItem\",\n      \"content\": \"Ed Eykholt - edeykholt\",\n      \"metadata\": {\n        \"page\": 16,\n        \"level\": 3\n      }\n    },\n    {\n      \"type\": \"ListItem\",\n      \"content\": \"Michalis Kargakis - kargakis\",\n      \"metadata\": {\n        \"page\": 16,\n        \"level\": 3\n      }\n    },\n    {\n      \"type\": \"ListItem\",\n      \"content\": \"Erik Wahlström - erikwam\",\n      \"metadata\": {\n        \"page\": 16,\n        \"level\": 3\n      }\n    },\n    {\n      \"type\": \"ListItem\",\n      \"content\": \"Richard Kiss - richardkiss\",\n      \"metadata\": {\n        \"page\": 16,\n        \"level\": 3\n      }\n    },\n    {\n      \"type\": \"ListItem\",\n      \"content\": \"Eric Winchell - winchell\",\n      \"metadata\": {\n        \"page\": 16,\n        \"level\": 3\n      }\n    },\n    {\n      \"type\": \"ListItem\",\n      \"content\": \"Sergej Kotliar - ziggamon\",\n      \"metadata\": {\n        \"page\": 16,\n        \"level\": 3\n      }\n    },\n    {\n      \"type\": \"ListItem\",\n      \"content\": \"Nagaraj Hubli - nagarajhubli\",\n      \"metadata\": {\n        \"page\": 16,\n        \"level\": 3\n      }\n    },\n    {\n      \"type\": \"ListItem\",\n      \"content\": \"ethers\",\n      \"metadata\": {\n        \"page\": 16,\n        \"level\": 3\n      }\n    },\n    {\n      \"type\": \"ListItem\",\n      \"content\": \"Alex Waters - alexwaters\",\n      \"metadata\": {\n        \"page\": 16,\n        \"level\": 3\n      }\n    },\n    {\n      \"type\": \"ListItem\",\n      \"content\": \"Mihail Russu - MihailRussu\",\n      \"metadata\": {\n        \"page\": 16,\n        \"level\": 3\n      }\n    },\n    {\n      \"type\": \"ListItem\",\n      \"content\": \"Ish Ot Jr. - ishotjr\",\n      \"metadata\": {\n        \"page\": 16,\n        \"level\": 3\n      }\n    },\n    {\n      \"type\": \"ListItem\",\n      \"content\": \"James Addison - jayaddison\",\n      \"metadata\": {\n        \"page\": 16,\n        \"level\": 3\n      }\n    },\n    {\n      \"type\": \"ListItem\",\n      \"content\": \"Nekomata - nekomata-3\",\n      \"metadata\": {\n        \"page\": 16,\n        \"level\": 3\n      }\n    },\n    {\n      \"type\": \"ListItem\",\n      \"content\": \"Simon de la Rouviere - simondlr\",\n      \"metadata\": {\n        \"page\": 16,\n        \"level\": 3\n      }\n    },\n    {\n      \"type\": \"ListItem\",\n      \"content\": \"Chapman Shoop - belovachap\",\n      \"metadata\": {\n        \"page\": 16,\n        \"level\": 3\n      }\n    },\n    {\n      \"type\": \"ListItem\",\n      \"content\": \"Holger Schinzel - schinzelh\",\n      \"metadata\": {\n        \"page\": 16,\n        \"level\": 3\n      }\n    },\n    {\n      \"type\": \"ListItem\",\n      \"content\": \"effectsToCause - vericoin\",\n      \"metadata\": {\n        \"page\": 16,\n        \"level\": 3\n      }\n    },\n    {\n      \"type\": \"ListItem\",\n      \"content\": \"Stephan Oeste - Emzy\",\n      \"metadata\": {\n        \"page\": 16,\n        \"level\": 3\n      }\n    },\n    {\n      \"type\": \"ListItem\",\n      \"content\": \"Joe Bauers - joebauers\",\n      \"metadata\": {\n        \"page\": 16,\n        \"level\": 3\n      }\n    },\n    {\n      \"type\": \"ListItem\",\n      \"content\": \"Jason Bisterfeldt - jbisterfeldt\",\n      \"metadata\": {\n        \"page\": 16,\n        \"level\": 3\n      }\n    },\n    {\n      \"type\": \"ListItem\",\n      \"content\": \"Ed Leafe - EdLeafe\",\n      \"metadata\": {\n        \"page\": 16,\n        \"level\": 3\n      }\n    },\n    {\n      \"type\": \"Section\",\n      \"title\": \"Quick Glossary\",\n      \"content\": \"Quick Glossary\",\n      \"metadata\": {\n        \"page\": 17,\n        \"level\": 1\n      }\n    },\n    {\n      \"type\": \"Paragraph\",\n      \"content\": \"This quick glossary contains many of the terms used in relation to bitcoin. These terms are used throughout the book, so bookmark this for a quick reference and clarification.\",\n      \"metadata\": {\n        \"page\": 17,\n        \"level\": 2\n      }\n    },\n    {\n      \"type\": \"Paragraph\",\n      \"content\": \"*address (aka public key)*\\n\\nA bitcoin address looks like 1DSrfJdB2AnWaFNgSbv3MZC2m74996JafV - they consist of a string of letters and numbers starting with a \\\"1\\\" (number one). Just like you ask others to send an email to your email address, you would ask others to send you bitcoin to your bitcoin address.\",\n      \"metadata\": {\n        \"page\": 17,\n        \"level\": 2\n      }\n    },\n    {\n      \"type\": \"Paragraph\",\n      \"content\": \"*bip*\\n\\nBitcoin Improvement Proposals. A set of proposals that members of the bitcoin community have submitted to improve bitcoin. For example BIP0021 is a proposal to improve the bitcoin URI scheme.\",\n      \"metadata\": {\n        \"page\": 17,\n        \"level\": 2\n      }\n    },\n    {\n      \"type\": \"Paragraph\",\n      \"content\": \"*bitcoin*\\n\\nThe name of the currency unit (the coin), the network and the software\",\n      \"metadata\": {\n        \"page\": 17,\n        \"level\": 2\n      }\n    },\n    {\n      \"type\": \"Paragraph\",\n      \"content\": \"*block*\\n\\nA grouping of transactions, marked with a timestamp, and a fingerprint of the previous block. The block header is hashed to find a proof-of-work, thereby validating the transactions. Valid blocks are added to the main blockchain by network consensus.\",\n      \"metadata\": {\n        \"page\": 17,\n        \"level\": 2\n      }\n    },\n    {\n      \"type\": \"Paragraph\",\n      \"content\": \"*blockchain*\\n\\nA list of validated blocks, each linking to its predecessor all the way to the genesis block.\",\n      \"metadata\": {\n        \"page\": 17,\n        \"level\": 2\n      }\n    },\n    {\n      \"type\": \"Paragraph\",\n      \"content\": \"*confirmations*\\n\\nOnce a transaction is included in a block, it has \\\"one confirmation\\\". As soon as another block is mined on the same blockchain, the transaction has two confirmations etc. Six or more confirmations is considered sufficient proof that a transaction cannot be reversed.\",\n      \"metadata\": {\n        \"page\": 17,\n        \"level\": 2\n      }\n    },\n    {\n      \"type\": \"Paragraph\",\n      \"content\": \"*difficulty*\\n\\nA network-wide setting that controls how much computation is required to find a proof-of-work.\",\n      \"metadata\": {\n        \"page\": 17,\n        \"level\": 2\n      }\n    },\n    {\n      \"type\": \"Paragraph\",\n      \"content\": \"*difficulty target*\\n\\nA difficulty at which all the computation in the network will find blocks approximately every 10 minutes.\",\n      \"metadata\": {\n        \"page\": 17,\n        \"level\": 2\n      }\n    },\n    {\n      \"type\": \"Paragraph\",\n      \"content\": \"*difficulty re-targeting*\\n\\nA network-wide re-calculation of the difficulty which occurs once every 2106 blocks and considers the hashing power of the previous 2106 blocks.\",\n      \"metadata\": {\n        \"page\": 17,\n        \"level\": 2\n      }\n    },\n    {\n      \"type\": \"Paragraph\",\n      \"content\": \"*fees*\\n\\nThe sender of a transaction often includes a fee to the network for processing their requested transaction. Most transactions require a minimum fee of 0.5mBTC.\",\n      \"metadata\": {\n        \"page\": 18,\n        \"level\": 2\n      }\n    },\n    {\n      \"type\": \"Paragraph\",\n      \"content\": \"*hash*\\n\\nA digital fingerprint of some binary input.\",\n      \"metadata\": {\n        \"page\": 18,\n        \"level\": 2\n      }\n    },\n    {\n      \"type\": \"Paragraph\",\n      \"content\": \"*genesis block*\\n\\nThe first block in the blockchain, used to initialize the crypto-currency\",\n      \"metadata\": {\n        \"page\": 18,\n        \"level\": 2\n      }\n    },\n    {\n      \"type\": \"Paragraph\",\n      \"content\": \"*miner*\\n\\nA network node that finds valid proof-of-work for new blocks, by repeated hashing\",\n      \"metadata\": {\n        \"page\": 18,\n        \"level\": 2\n      }\n    },\n    {\n      \"type\": \"Paragraph\",\n      \"content\": \"*network*\\n\\nA peer-to-peer network that propagates transactions and blocks to every bitcoin node on the network.\",\n      \"metadata\": {\n        \"page\": 18,\n        \"level\": 2\n      }\n    },\n    {\n      \"type\": \"Paragraph\",\n      \"content\": \"*proof-of-work*\\n\\nA piece of data that requires significant computation to find. In bitcoin, miners must find a numeric solution to the SHA256 algorithm that meets a network wide target, the difficulty target.\",\n      \"metadata\": {\n        \"page\": 18,\n        \"level\": 2\n      }\n    },\n    {\n      \"type\": \"Paragraph\",\n      \"content\": \"*reward*\\n\\nAn amount included in each new block as a reward by the network to the miner who found the proof-of-work solution. It is currently 25BTC per block.\",\n      \"metadata\": {\n        \"page\": 18,\n        \"level\": 2\n      }\n    },\n    {\n      \"type\": \"Paragraph\",\n      \"content\": \"*secret key (aka private key)*\\n\\nThe secret number that unlocks bitcoins sent to the corresponding address. A secret key looks like 5J76sF8L5jTtzE96r66Sf8cka9y44wdpJjMwCxR3tzLh3ibVPxh\",\n      \"metadata\": {\n        \"page\": 18,\n        \"level\": 2\n      }\n    },\n    {\n      \"type\": \"Paragraph\",\n      \"content\": \"*transaction*\\n\\nIn simple terms, a transfer of bitcoins from one address to another. More precisely, a transaction is a signed data structure expressing a transfer of value. Transactions are transmitted over the bitcoin network, collected by miners and included into blocks, made permanent on the blockchain.\",\n      \"metadata\": {\n        \"page\": 18,\n        \"level\": 2\n      }\n    },\n    {\n      \"type\": \"Paragraph\",\n      \"content\": \"*wallet*\\n\\nSoftware that holds all your bitcoin addresses and secret keys. Use it to send, receive and store your bitcoin.\",\n      \"metadata\": {\n        \"page\": 18,\n        \"level\": 2\n      }\n    }\n  ]\n}",
+  "meta": {
+    "modelId": "gemini-3.5-flash",
+    "cached_at": "2026-06-21T12:32:45.850Z"
+  }
+}
