@@ -74,6 +74,22 @@ parser.on('end', () => {
   fs.writeFileSync('sumo_nodes.json', JSON.stringify(nodeArray, null, 2));
   fs.writeFileSync('sumo_edges.json', JSON.stringify(edges, null, 2));
 
+  // Build a lightweight SUMO index for quick validation/lookups
+  try {
+    const sumoIndex = nodeArray.map(n => ({ localName: n._key, uri: n.uri, label: n.label || n._key }));
+    // deduplicate by localName
+    const byName = new Map();
+    for (const s of sumoIndex) {
+      if (!byName.has(s.localName)) byName.set(s.localName, s);
+    }
+    const indexArr = Array.from(byName.values());
+    const refsPath = new URL('../refs/sumo_index.json', import.meta.url).pathname;
+    fs.writeFileSync(refsPath, JSON.stringify(indexArr, null, 2));
+    console.log(`Wrote SUMO index to refs/sumo_index.json (${indexArr.length} entries)`);
+  } catch (err) {
+    console.error('Failed to write SUMO index:', err.message);
+  }
+
   console.log(`Extraction complete!`);
   console.log(`Generated: ${nodeArray.length} nodes and ${edges.length} edges.`);
 });
