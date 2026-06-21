@@ -116,6 +116,46 @@ Database cleanup (2026-06-21)
 - During recent testing an existing "edges" collection was found to be a document collection. For a clean start it was renamed to a backup collection (edges_old_<timestamp>) and a proper ArangoDB edge collection named "edges" was created.
 - All edges_old_* collections have now been dropped to ensure a clean database state. An admin script scripts/drop_edges_old.js was added and committed to perform this action when needed.
 
+SUMO tagging & DoCO schema integration
+-------------------------------------
+- The ingestion pipeline MUST produce parsed output that conforms to the DoCO schema (refs/doco_schema.json). The LLM system prompt (prompts/ingest_document.md) must instruct the LLM to output only DoCO-compliant JSON for each chunk.
+- Additionally, each Document / Chapter / Section node produced by the DoCO extraction MUST be annotated with SUMO concept tags derived from the SUMO ontology (refs/SUMO.owl and refs/doco_schema.json). Tagging rules:
+  - Use the local SUMO concept name (local name after '#' or last '/') as the tag value.
+  - For each node (Document, Chapter, Section), include an array field `sumo_tags` containing zero or more SUMO concept local names judged relevant by the LLM.
+  - The LLM should be given a short extract of SUMO (or critical concept list) as part of the system prompt or a compact look-up table; large ontology lookups must be avoided in prompt body, so instead supply a small representative list or require the LLM to return candidate tags which are then validated against SUMO offline.
+- Validation step: after LLM returns candidate SUMO tags, perform a verification pass that each tag exists in the SUMO ontology (match by local name). Invalid tags should be removed and logged.
+
+Implementation details (changes/additions)
+-----------------------------------------
+- Prompting:
+  - Update prompts/ingest_document.md to require DoCO JSON output and to request `sumo_candidate_tags` for each node (the LLM may return candidate tag names). Example additions:
+    - "For each node output 'sumo_candidate_tags': [ ... ] — these will be validated and converted to 'sumo_tags' after validation."
+  - Keep system prompt minimal; attach a lightweight SUMO concept index file (refs/sumo_index.json) if needed for local lookups.
+
+- SUMO index and validation:
+  - Create a small precomputed index script scripts/build_sumo_index.js that reads refs/SUMO.owl and emits refs/sumo_index.json containing an array of { localName, uri, label } for quick validation and optional lookups.
+  - During ingest, load refs/sumo_index.json once and use it to validate/normalize candidate tags.
+
+- Mapping to DoCO collections:
+  - transformRawToCollections must map LLM node types to DoCO types exactly. Document/Chapter/Section nodes must include `sumo_tags` (post-validated) in the persisted document records.
+  - Persisted ArangoDB documents should include fields:
+    - doc: { _key, title, source_file, doc_type: 'Document', sumo_tags: [..], checksum }
+    - section/chapter: { _key, document_id, title, level, start_offset, end_offset, sumo_tags: [..], checksum }
+
+- LLM cache & tagging:
+  - Cache keys MUST include whether SUMO tagging was requested (so cache key differs if tagging option changes).
+  - If the LLM returns candidate tags, store them in the cache along with parsed DoCO JSON to avoid re-validating identical outputs.
+
+- Parallelism & validation:
+  - Tag validation is fast (local lookup) and should be performed in parallel after LLM outputs are available for each chunk.
+  - Any chunk whose parsed JSON fails DoCO schema validation or whose tag list cannot be validated should fail the job (no fallback).
+
+- Tests & verification:
+  - Add an integration test that runs ingestion on a sample document and asserts:
+    - resulting persisted document + sections include `sumo_tags` arrays
+    - tags are present in refs/sumo_index.json
+  - Unit test for scripts/build_sumo_index.js to verify expected index structure.
+
 Approval
 --------
 Proceed with implementation? If yes, confirm desired concurrency and cache directory location (defaults will be used otherwise).
