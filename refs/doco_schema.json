@@ -1,0 +1,252 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "DoCO Document",
+  "description": "An ontology-aligned JSON Schema representation of a Document based on the Document Components Ontology (DoCO), incorporating semantic web principles.",
+  "type": "object",
+  "properties": {
+    "@id": { "type": "string", "format": "uri", "description": "Unique URI for the Document graph." },
+    "metadata": { "$ref": "#/$defs/DocumentMetadata" },
+    "front_matter": { "$ref": "#/$defs/FrontMatter" },
+    "body_matter": { "$ref": "#/$defs/BodyMatter" },
+    "back_matter": { "$ref": "#/$defs/BackMatter" }
+  },
+  "required": ["front_matter", "body_matter", "back_matter"],
+  "$defs": {
+    
+    "DocumentMetadata": {
+      "type": "object",
+      "description": "Standard semantic web annotation properties (Dublin Core / DoCO).",
+      "properties": {
+        "creator": { "type": "array", "items": { "$ref": "#/$defs/Agent" } },
+        "date": { "type": "string", "format": "date" },
+        "description": { "type": "string" },
+        "rights": { "type": "string" },
+        "publisher": { "$ref": "#/$defs/Agent" },
+        "isbn": { "type": "string" }
+      }
+    },
+
+    "Agent": {
+      "type": "object",
+      "description": "An agent (Person or Organization).",
+      "properties": {
+        "@id": { "type": "string", "format": "uri" },
+        "name": { "type": "string" },
+        "type": { "type": "string", "enum": ["person", "organization"] }
+      },
+      "required": ["name"]
+    },
+
+    "BibliographicReference": {
+      "type": "object",
+      "description": "A semantic representation of a bibliographic reference.",
+      "properties": {
+        "@id": { "type": "string", "format": "uri" },
+        "citation_text": { "type": "string" },
+        "doi": { "type": "string" },
+        "url": { "type": "string", "format": "uri" }
+      },
+      "required": ["citation_text"]
+    },
+
+    "Title": { 
+      "type": "object", 
+      "properties": { "text": { "type": "string" } },
+      "required": ["text"],
+      "description": "A word, phrase or sentence that precedes and indicates the subject." 
+    },
+    "ChapterTitle": { "allOf": [{ "$ref": "#/$defs/Title" }], "description": "The title of a chapter." },
+    "SectionTitle": { "allOf": [{ "$ref": "#/$defs/Title" }], "description": "The title of a section." },
+    
+    "Label": { 
+      "type": "object", 
+      "properties": { "text": { "type": "string" } },
+      "required": ["text"],
+      "description": "A block containing text, that may include a number." 
+    },
+    "ChapterLabel": { "allOf": [{ "$ref": "#/$defs/Label" }], "description": "A block containing a label for the chapter." },
+    "SectionLabel": { "allOf": [{ "$ref": "#/$defs/Label" }], "description": "A block containing a label for the section." },
+
+    "CaptionedBox": {
+      "type": "object",
+      "description": "A rectangle space within a page that contains an object and its related caption.",
+      "properties": {
+        "@id": { "type": "string", "format": "uri" },
+        "type": { "type": "string", "enum": ["captioned_box", "figure_box", "table_box"] },
+        "caption": { "type": "string" }
+      },
+      "required": ["type"]
+    },
+
+    "FigureBox": {
+      "allOf": [
+        { "$ref": "#/$defs/CaptionedBox" },
+        {
+          "properties": {
+            "type": { "const": "figure_box" },
+            "figure_label": { "$ref": "#/$defs/Label" },
+            "figure": { "$ref": "#/$defs/Figure" }
+          },
+          "required": ["figure"]
+        }
+      ]
+    },
+
+    "TableBox": {
+      "allOf": [
+        { "$ref": "#/$defs/CaptionedBox" },
+        {
+          "properties": {
+            "type": { "const": "table_box" },
+            "table_label": { "$ref": "#/$defs/Label" },
+            "table": { "$ref": "#/$defs/Table" }
+          },
+          "required": ["table"]
+        }
+      ]
+    },
+
+    "FrontMatter": {
+      "type": "object",
+      "description": "The initial principle part of a document.",
+      "properties": {
+        "@id": { "type": "string", "format": "uri" },
+        "title": { "$ref": "#/$defs/Title" },
+        "subtitle": { "$ref": "#/$defs/Title" },
+        "agents": { "type": "array", "items": { "$ref": "#/$defs/ListOfAgents" } },
+        "abstract": { "$ref": "#/$defs/Abstract" },
+        "preface": { "$ref": "#/$defs/Preface" },
+        "foreword": { "$ref": "#/$defs/Foreword" }
+      }
+    },
+
+    "BodyMatter": {
+      "type": "object",
+      "properties": {
+        "@id": { "type": "string", "format": "uri" },
+        "parts": { "type": "array", "items": { "$ref": "#/$defs/Part" } },
+        "chapters": { "type": "array", "items": { "$ref": "#/$defs/Chapter" } },
+        "sections": { "type": "array", "items": { "$ref": "#/$defs/Section" } },
+        "elements": { "type": "array", "items": { "$ref": "#/$defs/DiscourseElement" } }
+      }
+    },
+
+    "BackMatter": {
+      "type": "object",
+      "properties": {
+        "@id": { "type": "string", "format": "uri" },
+        "bibliography": { "$ref": "#/$defs/Bibliography" },
+        "appendixes": { "type": "array", "items": { "$ref": "#/$defs/Appendix" } },
+        "glossary": { "$ref": "#/$defs/Glossary" },
+        "index": { "$ref": "#/$defs/Index" }
+      }
+    },
+
+    "Chapter": {
+      "type": "object",
+      "properties": {
+        "@id": { "type": "string", "format": "uri" },
+        "type": { "type": "string", "const": "chapter" },
+        "chapter_label": { "$ref": "#/$defs/ChapterLabel" },
+        "chapter_title": { "$ref": "#/$defs/ChapterTitle" },
+        "sections": { "type": "array", "items": { "$ref": "#/$defs/Section" } },
+        "elements": { "type": "array", "items": { "$ref": "#/$defs/DiscourseElement" } }
+      },
+      "required": ["type"]
+    },
+
+    "Section": {
+      "type": "object",
+      "properties": {
+        "@id": { "type": "string", "format": "uri" },
+        "type": { "type": "string", "const": "section" },
+        "section_label": { "$ref": "#/$defs/SectionLabel" },
+        "section_title": { "$ref": "#/$defs/SectionTitle" },
+        "subsections": { "type": "array", "items": { "$ref": "#/$defs/Section" } },
+        "elements": { "type": "array", "items": { "$ref": "#/$defs/DiscourseElement" } }
+      },
+      "required": ["type"]
+    },
+
+    "Paragraph": {
+      "type": "object",
+      "properties": {
+        "@id": { "type": "string", "format": "uri" },
+        "type": { "type": "string", "const": "paragraph" },
+        "sentences": { "type": "array", "items": { "$ref": "#/$defs/Sentence" } }
+      },
+      "required": ["type"]
+    },
+
+    "Sentence": {
+      "type": "object",
+      "properties": {
+        "@id": { "type": "string", "format": "uri" },
+        "type": { "type": "string", "const": "sentence" },
+        "content": { "type": "string" }
+      },
+      "required": ["type", "content"]
+    },
+
+    "ListOfAgents": {
+      "type": "object",
+      "properties": {
+        "@id": { "type": "string", "format": "uri" },
+        "type": { "type": "string", "enum": ["list_of_authors", "list_of_contributors", "list_of_organizations"] },
+        "items": { "type": "array", "items": { "$ref": "#/$defs/Agent" } }
+      },
+      "required": ["type", "items"]
+    },
+
+    "Bibliography": {
+      "type": "object",
+      "properties": {
+        "@id": { "type": "string", "format": "uri" },
+        "type": { "type": "string", "const": "bibliography" },
+        "title": { "$ref": "#/$defs/Title" },
+        "references": { "type": "array", "items": { "$ref": "#/$defs/BibliographicReference" } }
+      },
+      "required": ["type"]
+    },
+
+    "Figure": {
+      "type": "object",
+      "description": "Abstracted communication object.",
+      "properties": {
+        "@id": { "type": "string", "format": "uri" },
+        "type": { "type": "string", "const": "figure" },
+        "url": { "type": "string", "format": "uri" },
+        "description": { "type": "string" }
+      },
+      "required": ["type"]
+    },
+
+    "Table": {
+      "type": "object",
+      "description": "Abstracted container for rows/columns.",
+      "properties": {
+        "@id": { "type": "string", "format": "uri" },
+        "type": { "type": "string", "const": "table" },
+        "content_data": { "type": "array" }
+      },
+      "required": ["type"]
+    },
+
+    "DiscourseElement": {
+      "oneOf": [
+        { "$ref": "#/$defs/Paragraph" },
+        { "$ref": "#/$defs/FigureBox" },
+        { "$ref": "#/$defs/TableBox" },
+        { "$ref": "#/$defs/CaptionedBox" }
+      ]
+    },
+
+    "Abstract": { "type": "object", "properties": { "type": { "const": "abstract" } } },
+    "Preface": { "type": "object", "properties": { "type": { "const": "preface" } } },
+    "Foreword": { "type": "object", "properties": { "type": { "const": "foreword" } } },
+    "Part": { "type": "object", "properties": { "type": { "const": "part" } } },
+    "Appendix": { "type": "object", "properties": { "type": { "const": "appendix" } } },
+    "Glossary": { "type": "object", "properties": { "type": { "const": "glossary" } } },
+    "Index": { "type": "object", "properties": { "type": { "const": "index" } } }
+  }
+}
