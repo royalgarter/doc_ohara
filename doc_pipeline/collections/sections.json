@@ -1,0 +1,3182 @@
+[
+  {
+    "id": "okf_node_1_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Title Page",
+    "level": 2
+  },
+  {
+    "id": "okf_node_2_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Publication and Copyright Information",
+    "level": 2
+  },
+  {
+    "id": "okf_node_5_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Table of Contents",
+    "level": 2
+  },
+  {
+    "id": "okf_node_18_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Preface",
+    "level": 1
+  },
+  {
+    "id": "okf_node_19_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Writing the Bitcoin Book",
+    "level": 2
+  },
+  {
+    "id": "okf_node_21_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Intended Audience",
+    "level": 2
+  },
+  {
+    "id": "okf_node_23_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Why Are There Bugs On The Cover?",
+    "level": 2
+  },
+  {
+    "id": "okf_node_26_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Conventions Used in This Book",
+    "level": 2
+  },
+  {
+    "id": "okf_node_34_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Github Source Code",
+    "level": 2
+  },
+  {
+    "id": "okf_node_35_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Code Examples",
+    "level": 2
+  },
+  {
+    "id": "okf_node_36_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Using Code Examples",
+    "level": 2
+  },
+  {
+    "id": "okf_node_37_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Safari® Books Online",
+    "level": 2
+  },
+  {
+    "id": "okf_node_41_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "How to Contact Us",
+    "level": 2
+  },
+  {
+    "id": "okf_node_44_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Acknowledgments",
+    "level": 2
+  },
+  {
+    "id": "okf_node_51_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Early Release Draft (Github Contributions)",
+    "level": 2
+  },
+  {
+    "id": "okf_node_75_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Quick Glossary",
+    "level": 2
+  },
+  {
+    "id": "okf_node_96_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "CHAPTER 1",
+    "level": 1
+  },
+  {
+    "id": "okf_node_97_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Introduction",
+    "level": 2
+  },
+  {
+    "id": "okf_node_98_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "What is Bitcoin?",
+    "level": 2
+  },
+  {
+    "id": "okf_node_105_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Digital Currencies Before Bitcoin",
+    "level": 3
+  },
+  {
+    "id": "okf_node_117_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "History of Bitcoin",
+    "level": 1
+  },
+  {
+    "id": "okf_node_121_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "A Solution To a Distributed Computing Problem",
+    "level": 2
+  },
+  {
+    "id": "okf_node_123_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Bitcoin Uses, Users and Their Stories",
+    "level": 1
+  },
+  {
+    "id": "okf_node_125_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "North American Low Value Retail",
+    "level": 2
+  },
+  {
+    "id": "okf_node_127_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "North American High Value Retail",
+    "level": 2
+  },
+  {
+    "id": "okf_node_129_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Offshore Contract Services",
+    "level": 2
+  },
+  {
+    "id": "okf_node_131_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Charitable Donations",
+    "level": 2
+  },
+  {
+    "id": "okf_node_133_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Import/Export",
+    "level": 2
+  },
+  {
+    "id": "okf_node_135_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Mining for Bitcoin",
+    "level": 2
+  },
+  {
+    "id": "okf_node_138_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Getting Started",
+    "level": 2
+  },
+  {
+    "id": "okf_node_140_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Mobile Bitcoin",
+    "level": 3
+  },
+  {
+    "id": "okf_node_143_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Quick Start",
+    "level": 1
+  },
+  {
+    "id": "okf_node_155_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Getting your first bitcoins",
+    "level": 1
+  },
+  {
+    "id": "okf_node_166_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Sending and receiving bitcoins",
+    "level": 1
+  },
+  {
+    "id": "okf_node_182_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Confirmations",
+    "level": 2
+  },
+  {
+    "id": "okf_node_185_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "CHAPTER 2: How Bitcoin Works",
+    "level": 1
+  },
+  {
+    "id": "okf_node_186_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Transactions, Blocks, Mining, and the Blockchain",
+    "level": 2
+  },
+  {
+    "id": "okf_node_193_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Bitcoin Overview",
+    "level": 2
+  },
+  {
+    "id": "okf_node_196_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Buying a cup of coffee",
+    "level": 2
+  },
+  {
+    "id": "okf_node_209_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Bitcoin Transactions",
+    "level": 1
+  },
+  {
+    "id": "okf_node_217_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Common Transaction Forms",
+    "level": 3
+  },
+  {
+    "id": "okf_node_223_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Constructing a Transaction",
+    "level": 2
+  },
+  {
+    "id": "okf_node_225_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Getting the right inputs",
+    "level": 3
+  },
+  {
+    "id": "okf_node_232_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Creating the outputs",
+    "level": 2
+  },
+  {
+    "id": "okf_node_236_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Adding the transaction to the ledger",
+    "level": 2
+  },
+  {
+    "id": "okf_node_238_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Transmitting the transaction",
+    "level": 3
+  },
+  {
+    "id": "okf_node_240_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "How it propagates",
+    "level": 3
+  },
+  {
+    "id": "okf_node_242_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Bob's view",
+    "level": 3
+  },
+  {
+    "id": "okf_node_245_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Bitcoin Mining",
+    "level": 1
+  },
+  {
+    "id": "okf_node_249_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Mining transactions in blocks",
+    "level": 2
+  },
+  {
+    "id": "okf_node_253_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Spending the transaction",
+    "level": 2
+  },
+  {
+    "id": "okf_node_257_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "CHAPTER 3: The Bitcoin Client",
+    "level": 1
+  },
+  {
+    "id": "okf_node_258_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Bitcoin Core - The reference implementation",
+    "level": 2
+  },
+  {
+    "id": "okf_node_261_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Running Bitcoin Core for the first time",
+    "level": 1
+  },
+  {
+    "id": "okf_node_266_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Compiling Bitcoin Core from the source code",
+    "level": 1
+  },
+  {
+    "id": "okf_node_295_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Using Bitcoin Core's JSON-RPC API from the command line",
+    "level": 2
+  },
+  {
+    "id": "okf_node_302_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Using Bitcoin Core's JSON-RPC API from the command line",
+    "level": 3
+  },
+  {
+    "id": "okf_node_305_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Getting information on the Bitcoin Core client status",
+    "level": 2
+  },
+  {
+    "id": "okf_node_311_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Wallet setup and encryption",
+    "level": 2
+  },
+  {
+    "id": "okf_node_321_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Wallet backup, plain-text dump and restore",
+    "level": 2
+  },
+  {
+    "id": "okf_node_329_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Wallet addresses and receiving transactions",
+    "level": 1
+  },
+  {
+    "id": "okf_node_345_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Exploring and decoding transactions",
+    "level": 1
+  },
+  {
+    "id": "okf_node_357_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Transaction database index and txindex option",
+    "level": 2
+  },
+  {
+    "id": "okf_node_359_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Exploring blocks",
+    "level": 2
+  },
+  {
+    "id": "okf_node_367_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Creating, signing and submitting transactions based on unspent",
+    "level": 2
+  },
+  {
+    "id": "okf_node_368_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "outputs",
+    "level": 3
+  },
+  {
+    "id": "okf_node_390_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Alternative clients, libraries and toolkits",
+    "level": 1
+  },
+  {
+    "id": "okf_node_400_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Libbitcoin and sx tools",
+    "level": 2
+  },
+  {
+    "id": "okf_node_402_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Installing sx",
+    "level": 3
+  },
+  {
+    "id": "okf_node_408_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "pycoin",
+    "level": 2
+  },
+  {
+    "id": "okf_node_415_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "btcd",
+    "level": 2
+  },
+  {
+    "id": "okf_node_417_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Installing btcd",
+    "level": 3
+  },
+  {
+    "id": "okf_node_422_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Controlling btcd",
+    "level": 3
+  },
+  {
+    "id": "okf_node_434_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "CHAPTER 4: Keys, Addresses, Wallets",
+    "level": 1
+  },
+  {
+    "id": "okf_node_435_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Introduction",
+    "level": 2
+  },
+  {
+    "id": "okf_node_437_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Public key cryptography and crypto-currency",
+    "level": 1
+  },
+  {
+    "id": "okf_node_441_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Private and Public Keys",
+    "level": 1
+  },
+  {
+    "id": "okf_node_444_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Private Keys",
+    "level": 1
+  },
+  {
+    "id": "okf_node_447_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Generating a private key from a random number",
+    "level": 2
+  },
+  {
+    "id": "okf_node_455_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "New key with sx tools",
+    "level": 2
+  },
+  {
+    "id": "okf_node_457_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Public Keys",
+    "level": 1
+  },
+  {
+    "id": "okf_node_459_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Elliptic Curve Cryptography Explained",
+    "level": 2
+  },
+  {
+    "id": "okf_node_467_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Generating a public key",
+    "level": 3
+  },
+  {
+    "id": "okf_node_481_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Bitcoin Addresses",
+    "level": 2
+  },
+  {
+    "id": "okf_node_491_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Base58 and Base58Check Encoding",
+    "level": 1
+  },
+  {
+    "id": "okf_node_492_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Base-58 Encoding",
+    "level": 2
+  },
+  {
+    "id": "okf_node_495_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Base58Check Encoding",
+    "level": 2
+  },
+  {
+    "id": "okf_node_502_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Creating a bitcoin address from a private key",
+    "level": 2
+  },
+  {
+    "id": "okf_node_506_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Compile the addr.cpp code",
+    "level": 1
+  },
+  {
+    "id": "okf_node_507_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Key Formats",
+    "level": 1
+  },
+  {
+    "id": "okf_node_508_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Private Key Formats",
+    "level": 2
+  },
+  {
+    "id": "okf_node_512_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Decode from Base58Check to Hex",
+    "level": 2
+  },
+  {
+    "id": "okf_node_513_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Encode from Hex to Base58Check",
+    "level": 2
+  },
+  {
+    "id": "okf_node_514_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Encode from Hex (Compressed Key) to Base58Check encoding",
+    "level": 2
+  },
+  {
+    "id": "okf_node_515_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Public Key Formats",
+    "level": 2
+  },
+  {
+    "id": "okf_node_517_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Compressed Public Keys",
+    "level": 2
+  },
+  {
+    "id": "okf_node_520_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Compressed Private Keys",
+    "level": 2
+  },
+  {
+    "id": "okf_node_523_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Implementing Keys and Addresses in Python",
+    "level": 1
+  },
+  {
+    "id": "okf_node_535_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Wallets",
+    "level": 1
+  },
+  {
+    "id": "okf_node_539_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Non-Deterministic (Random) Wallets",
+    "level": 2
+  },
+  {
+    "id": "okf_node_542_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Deterministic (Seeded) Wallets",
+    "level": 2
+  },
+  {
+    "id": "okf_node_544_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Mnemonic Code Words",
+    "level": 2
+  },
+  {
+    "id": "okf_node_555_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Hierarchical Deterministic Wallets (BIP0032/BIP0044)",
+    "level": 1
+  },
+  {
+    "id": "okf_node_560_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "HD wallet creation from a seed",
+    "level": 2
+  },
+  {
+    "id": "okf_node_564_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Private child key derivation",
+    "level": 2
+  },
+  {
+    "id": "okf_node_571_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Index Number",
+    "level": 1
+  },
+  {
+    "id": "okf_node_573_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Using derived child keys",
+    "level": 2
+  },
+  {
+    "id": "okf_node_576_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Extended keys",
+    "level": 2
+  },
+  {
+    "id": "okf_node_579_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Public child key derivation",
+    "level": 2
+  },
+  {
+    "id": "okf_node_583_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Hardened child key derivation",
+    "level": 3
+  },
+  {
+    "id": "okf_node_586_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Index numbers for normal and hardened derivation",
+    "level": 3
+  },
+  {
+    "id": "okf_node_587_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "HD wallet key identifier (path)",
+    "level": 3
+  },
+  {
+    "id": "okf_node_589_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Navigating the HD wallet tree structure",
+    "level": 3
+  },
+  {
+    "id": "okf_node_593_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Experimenting with HD wallets using sx-tools",
+    "level": 3
+  },
+  {
+    "id": "okf_node_595_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Advanced Keys and Addresses",
+    "level": 1
+  },
+  {
+    "id": "okf_node_596_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Encrypted Private Keys (BIP0038)",
+    "level": 2
+  },
+  {
+    "id": "okf_node_600_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Pay To Script Hash (P2SH) and Multi-Sig Addresses",
+    "level": 2
+  },
+  {
+    "id": "okf_node_608_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Multi-signature addresses and P2SH",
+    "level": 2
+  },
+  {
+    "id": "okf_node_610_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Vanity Addresses",
+    "level": 2
+  },
+  {
+    "id": "okf_node_613_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Generating Vanity Addresses",
+    "level": 3
+  },
+  {
+    "id": "okf_node_627_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Vanity Address Security",
+    "level": 2
+  },
+  {
+    "id": "okf_node_631_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Paper Wallets",
+    "level": 2
+  },
+  {
+    "id": "okf_node_644_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "CHAPTER 5: Transactions",
+    "level": 1
+  },
+  {
+    "id": "okf_node_645_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Introduction",
+    "level": 2
+  },
+  {
+    "id": "okf_node_647_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Transaction Lifecycle",
+    "level": 2
+  },
+  {
+    "id": "okf_node_649_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Creating Transactions",
+    "level": 3
+  },
+  {
+    "id": "okf_node_651_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Broadcasting Transactions to the Bitcoin Network",
+    "level": 2
+  },
+  {
+    "id": "okf_node_653_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Propagating Transactions on the Bitcoin Network",
+    "level": 2
+  },
+  {
+    "id": "okf_node_655_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Transaction Structure",
+    "level": 1
+  },
+  {
+    "id": "okf_node_658_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Transaction Locktime",
+    "level": 2
+  },
+  {
+    "id": "okf_node_660_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Transaction Outputs and Inputs",
+    "level": 1
+  },
+  {
+    "id": "okf_node_666_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Transaction Outputs",
+    "level": 2
+  },
+  {
+    "id": "okf_node_678_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Spending Conditions (Encumbrances)",
+    "level": 3
+  },
+  {
+    "id": "okf_node_680_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Transaction Inputs",
+    "level": 3
+  },
+  {
+    "id": "okf_node_690_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Transaction Fees",
+    "level": 2
+  },
+  {
+    "id": "okf_node_692_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Adding Fees to Transactions",
+    "level": 2
+  },
+  {
+    "id": "okf_node_701_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Transaction Chaining and Orphan Transactions",
+    "level": 2
+  },
+  {
+    "id": "okf_node_703_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Transaction Scripts and Script Language",
+    "level": 2
+  },
+  {
+    "id": "okf_node_707_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Script Construction (Lock + Unlock)",
+    "level": 2
+  },
+  {
+    "id": "okf_node_711_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Scripting Language",
+    "level": 3
+  },
+  {
+    "id": "okf_node_719_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Turing Incompleteness",
+    "level": 3
+  },
+  {
+    "id": "okf_node_721_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Stateless Verification",
+    "level": 3
+  },
+  {
+    "id": "okf_node_723_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Standard Transactions",
+    "level": 2
+  },
+  {
+    "id": "okf_node_725_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Pay to Public Key Hash (P2PKH)",
+    "level": 3
+  },
+  {
+    "id": "okf_node_735_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Pay-to-Public-Key",
+    "level": 2
+  },
+  {
+    "id": "okf_node_741_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Multi-Signature",
+    "level": 2
+  },
+  {
+    "id": "okf_node_744_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Data Output (OP_RETURN)",
+    "level": 1
+  },
+  {
+    "id": "okf_node_749_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Pay to Script Hash (P2SH)",
+    "level": 2
+  },
+  {
+    "id": "okf_node_769_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Pay-to-Script-Hash Addresses",
+    "level": 2
+  },
+  {
+    "id": "okf_node_772_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Benefits of Pay-to-Script-Hash",
+    "level": 2
+  },
+  {
+    "id": "okf_node_780_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Redeem Script and isStandard Validation",
+    "level": 2
+  },
+  {
+    "id": "okf_node_784_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "CHAPTER 6: The Bitcoin Network",
+    "level": 1
+  },
+  {
+    "id": "okf_node_785_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Peer-to-Peer Network Architecture",
+    "level": 2
+  },
+  {
+    "id": "okf_node_787_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Nodes Types and Roles",
+    "level": 2
+  },
+  {
+    "id": "okf_node_795_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "The Extended Bitcoin Network",
+    "level": 1
+  },
+  {
+    "id": "okf_node_799_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Network Discovery",
+    "level": 1
+  },
+  {
+    "id": "okf_node_815_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Full Nodes",
+    "level": 2
+  },
+  {
+    "id": "okf_node_818_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Exchanging \"Inventory\"",
+    "level": 3
+  },
+  {
+    "id": "okf_node_823_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Simplified Payment Verification (SPV) Nodes",
+    "level": 2
+  },
+  {
+    "id": "okf_node_829_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Bloom Filters",
+    "level": 2
+  },
+  {
+    "id": "okf_node_842_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Bloom Filters and Inventory Updates",
+    "level": 1
+  },
+  {
+    "id": "okf_node_846_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Transaction Pools",
+    "level": 1
+  },
+  {
+    "id": "okf_node_848_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Alert Messages",
+    "level": 2
+  },
+  {
+    "id": "okf_node_860_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "CHAPTER 7",
+    "level": 1
+  },
+  {
+    "id": "okf_node_861_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "The Blockchain",
+    "level": 2
+  },
+  {
+    "id": "okf_node_862_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Introduction",
+    "level": 2
+  },
+  {
+    "id": "okf_node_866_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Structure of a Block",
+    "level": 1
+  },
+  {
+    "id": "okf_node_869_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Block Header",
+    "level": 1
+  },
+  {
+    "id": "okf_node_873_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Block Identifiers - Block Header Hash and Block Height",
+    "level": 1
+  },
+  {
+    "id": "okf_node_878_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "The Genesis Block",
+    "level": 2
+  },
+  {
+    "id": "okf_node_885_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Linking Blocks in the Blockchain",
+    "level": 1
+  },
+  {
+    "id": "okf_node_891_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Merkle Trees",
+    "level": 1
+  },
+  {
+    "id": "okf_node_912_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Merkle Trees and Simplified Payment Verification (SPV)",
+    "level": 1
+  },
+  {
+    "id": "okf_node_914_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Mining and Consensus",
+    "level": 1
+  },
+  {
+    "id": "okf_node_915_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Introduction",
+    "level": 2
+  },
+  {
+    "id": "okf_node_918_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Chapter 8: Mining and Consensus",
+    "level": 1
+  },
+  {
+    "id": "okf_node_919_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Bitcoin Economics and Currency Creation",
+    "level": 2
+  },
+  {
+    "id": "okf_node_927_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Deflationary Money",
+    "level": 3
+  },
+  {
+    "id": "okf_node_932_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "De-centralized Consensus",
+    "level": 1
+  },
+  {
+    "id": "okf_node_941_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Independent Verification of Transactions",
+    "level": 2
+  },
+  {
+    "id": "okf_node_962_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Mining Nodes",
+    "level": 1
+  },
+  {
+    "id": "okf_node_964_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Aggregating Transactions into Blocks",
+    "level": 1
+  },
+  {
+    "id": "okf_node_966_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Transaction Age, Fees, and Priority",
+    "level": 1
+  },
+  {
+    "id": "okf_node_974_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "The Generation Transaction",
+    "level": 1
+  },
+  {
+    "id": "okf_node_979_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Coinbase Reward and Fees",
+    "level": 1
+  },
+  {
+    "id": "okf_node_985_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Structure of the Generation Transaction",
+    "level": 2
+  },
+  {
+    "id": "okf_node_991_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Coinbase Data",
+    "level": 3
+  },
+  {
+    "id": "okf_node_998_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Constructing the Block Header",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1003_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Mining the Block",
+    "level": 1
+  },
+  {
+    "id": "okf_node_1005_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Proof-of-Work Algorithm",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1010_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "show the input and hash result",
+    "level": 1
+  },
+  {
+    "id": "okf_node_1014_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Chapter 8: Mining and Consensus",
+    "level": 1
+  },
+  {
+    "id": "okf_node_1017_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "example of proof-of-work algorithm",
+    "level": 1
+  },
+  {
+    "id": "okf_node_1022_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Example 8-12. Running the Proof-of-Work example for various difficulties",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1028_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Difficulty Representation",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1031_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Difficulty Target and Re-Targeting",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1039_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Successfully Mining the Block",
+    "level": 1
+  },
+  {
+    "id": "okf_node_1043_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Validating a New Block",
+    "level": 1
+  },
+  {
+    "id": "okf_node_1053_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Assembling and Selecting Chains of Blocks",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1057_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Blockchain Forks",
+    "level": 1
+  },
+  {
+    "id": "okf_node_1069_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Mining and the Hashing Race",
+    "level": 1
+  },
+  {
+    "id": "okf_node_1082_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "The Extra Nonce Solution",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1085_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Mining Pools",
+    "level": 1
+  },
+  {
+    "id": "okf_node_1093_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Managed Pools",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1097_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "P2Pool",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1100_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Consensus Attacks",
+    "level": 1
+  },
+  {
+    "id": "okf_node_1103_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "CHAPTER 9: Alternative Chains, Currencies, and Applications",
+    "level": 1
+  },
+  {
+    "id": "okf_node_1105_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "A taxonomy of alternative currencies and chains",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1107_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Meta-Coin Platforms",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1109_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Colored Coins",
+    "level": 3
+  },
+  {
+    "id": "okf_node_1114_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Mastercoin",
+    "level": 3
+  },
+  {
+    "id": "okf_node_1116_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Counterparty",
+    "level": 3
+  },
+  {
+    "id": "okf_node_1118_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Alt-coins",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1125_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Evaluating an alt-coin",
+    "level": 1
+  },
+  {
+    "id": "okf_node_1138_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Monetary Parameter Alternatives: Litecoin, Dogecoin, Freicoin",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1140_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Litecoin",
+    "level": 3
+  },
+  {
+    "id": "okf_node_1146_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Dogecoin",
+    "level": 3
+  },
+  {
+    "id": "okf_node_1152_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Freicoin",
+    "level": 3
+  },
+  {
+    "id": "okf_node_1158_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Consensus Innovation: Peercoin, Myriad, Blackcoin, Vericoin, NXT",
+    "level": 1
+  },
+  {
+    "id": "okf_node_1160_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Peercoin",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1166_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Myriad",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1172_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Blackcoin",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1178_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "VeriCoin",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1184_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "NXT",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1190_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Dual-Purpose Mining Innovation: Primecoin, Curecoin, Gridcoin",
+    "level": 1
+  },
+  {
+    "id": "okf_node_1192_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Primecoin",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1199_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Curecoin",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1205_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Gridcoin",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1211_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Anonymity-Focused Alt-Coins: CryptoNote, Bytecoin, Monero, Zerocash/Zerocoin, Darkcoin",
+    "level": 1
+  },
+  {
+    "id": "okf_node_1214_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Zerocoin/Zerocash",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1216_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "CryptoNote",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1218_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Bytecoin",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1224_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Monero",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1230_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Darkcoin",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1236_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Non-currency alt-chains",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1238_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Namecoin",
+    "level": 3
+  },
+  {
+    "id": "okf_node_1259_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Bitmessage",
+    "level": 3
+  },
+  {
+    "id": "okf_node_1261_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Ethereum",
+    "level": 3
+  },
+  {
+    "id": "okf_node_1265_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Future of Currencies",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1267_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "CHAPTER 10",
+    "level": 1
+  },
+  {
+    "id": "okf_node_1268_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Bitcoin Security",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1270_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Security principles",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1272_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Developing Bitcoin Systems Securely",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1274_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "The Root of Trust",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1276_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "User Security Best Practices",
+    "level": 1
+  },
+  {
+    "id": "okf_node_1278_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Physical Bitcoin Storage",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1280_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Hardware Wallets",
+    "level": 1
+  },
+  {
+    "id": "okf_node_1282_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Balancing Risk (loss vs. theft)",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1284_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Diversifying Risk",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1286_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Multi-sig and Governance",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1288_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Survivability",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1290_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Conclusion",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1291_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "APPENDIX A: Appendix: Available commands with sx",
+    "level": 1
+  },
+  {
+    "id": "okf_node_1292_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "tools",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1339_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "APPENDIX B",
+    "level": 1
+  },
+  {
+    "id": "okf_node_1340_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Appendix - pycoin, ku and tx.",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1342_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Pycoin command-line tools: KU and TX",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1343_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Key Utility (KU)",
+    "level": 3
+  },
+  {
+    "id": "okf_node_1383_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Transaction Utility (TX)",
+    "level": 1
+  },
+  {
+    "id": "okf_node_1392_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Transaction Utility (TX)",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1404_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "APPENDIX C: Appendix: Transaction Script Language",
+    "level": 1
+  },
+  {
+    "id": "okf_node_1405_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Operators, Constants and Symbols",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1417_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "APPENDIX D: Appendix - Bitcoin Improvement Proposals",
+    "level": 1
+  },
+  {
+    "id": "okf_node_1426_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "About the Author",
+    "level": 1
+  },
+  {
+    "id": "okf_node_1429_1782061467169",
+    "document_id": "doc_trans_0_1782061467165",
+    "title": "Colophon",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Title Page",
+    "level": 2
+  },
+  {
+    "id": "okf_node_2_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Publication and Copyright Information",
+    "level": 2
+  },
+  {
+    "id": "okf_node_5_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Table of Contents",
+    "level": 2
+  },
+  {
+    "id": "okf_node_18_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Preface",
+    "level": 1
+  },
+  {
+    "id": "okf_node_19_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Writing the Bitcoin Book",
+    "level": 2
+  },
+  {
+    "id": "okf_node_21_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Intended Audience",
+    "level": 2
+  },
+  {
+    "id": "okf_node_23_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Why Are There Bugs On The Cover?",
+    "level": 2
+  },
+  {
+    "id": "okf_node_26_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Conventions Used in This Book",
+    "level": 2
+  },
+  {
+    "id": "okf_node_34_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Github Source Code",
+    "level": 2
+  },
+  {
+    "id": "okf_node_35_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Code Examples",
+    "level": 2
+  },
+  {
+    "id": "okf_node_36_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Using Code Examples",
+    "level": 2
+  },
+  {
+    "id": "okf_node_37_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Safari® Books Online",
+    "level": 2
+  },
+  {
+    "id": "okf_node_41_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "How to Contact Us",
+    "level": 2
+  },
+  {
+    "id": "okf_node_44_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Acknowledgments",
+    "level": 2
+  },
+  {
+    "id": "okf_node_51_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Early Release Draft (Github Contributions)",
+    "level": 2
+  },
+  {
+    "id": "okf_node_75_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Quick Glossary",
+    "level": 2
+  },
+  {
+    "id": "okf_node_96_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "CHAPTER 1",
+    "level": 1
+  },
+  {
+    "id": "okf_node_97_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Introduction",
+    "level": 2
+  },
+  {
+    "id": "okf_node_98_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "What is Bitcoin?",
+    "level": 2
+  },
+  {
+    "id": "okf_node_105_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Digital Currencies Before Bitcoin",
+    "level": 3
+  },
+  {
+    "id": "okf_node_117_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "History of Bitcoin",
+    "level": 1
+  },
+  {
+    "id": "okf_node_121_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "A Solution To a Distributed Computing Problem",
+    "level": 2
+  },
+  {
+    "id": "okf_node_123_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Bitcoin Uses, Users and Their Stories",
+    "level": 1
+  },
+  {
+    "id": "okf_node_125_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "North American Low Value Retail",
+    "level": 2
+  },
+  {
+    "id": "okf_node_127_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "North American High Value Retail",
+    "level": 2
+  },
+  {
+    "id": "okf_node_129_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Offshore Contract Services",
+    "level": 2
+  },
+  {
+    "id": "okf_node_131_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Charitable Donations",
+    "level": 2
+  },
+  {
+    "id": "okf_node_133_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Import/Export",
+    "level": 2
+  },
+  {
+    "id": "okf_node_135_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Mining for Bitcoin",
+    "level": 2
+  },
+  {
+    "id": "okf_node_138_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Getting Started",
+    "level": 2
+  },
+  {
+    "id": "okf_node_140_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Mobile Bitcoin",
+    "level": 3
+  },
+  {
+    "id": "okf_node_143_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Quick Start",
+    "level": 1
+  },
+  {
+    "id": "okf_node_155_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Getting your first bitcoins",
+    "level": 1
+  },
+  {
+    "id": "okf_node_166_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Sending and receiving bitcoins",
+    "level": 1
+  },
+  {
+    "id": "okf_node_182_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Confirmations",
+    "level": 2
+  },
+  {
+    "id": "okf_node_185_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "CHAPTER 2: How Bitcoin Works",
+    "level": 1
+  },
+  {
+    "id": "okf_node_186_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Transactions, Blocks, Mining, and the Blockchain",
+    "level": 2
+  },
+  {
+    "id": "okf_node_193_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Bitcoin Overview",
+    "level": 2
+  },
+  {
+    "id": "okf_node_196_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Buying a cup of coffee",
+    "level": 2
+  },
+  {
+    "id": "okf_node_209_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Bitcoin Transactions",
+    "level": 1
+  },
+  {
+    "id": "okf_node_217_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Common Transaction Forms",
+    "level": 3
+  },
+  {
+    "id": "okf_node_223_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Constructing a Transaction",
+    "level": 2
+  },
+  {
+    "id": "okf_node_225_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Getting the right inputs",
+    "level": 3
+  },
+  {
+    "id": "okf_node_232_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Creating the outputs",
+    "level": 2
+  },
+  {
+    "id": "okf_node_236_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Adding the transaction to the ledger",
+    "level": 2
+  },
+  {
+    "id": "okf_node_238_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Transmitting the transaction",
+    "level": 3
+  },
+  {
+    "id": "okf_node_240_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "How it propagates",
+    "level": 3
+  },
+  {
+    "id": "okf_node_242_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Bob's view",
+    "level": 3
+  },
+  {
+    "id": "okf_node_245_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Bitcoin Mining",
+    "level": 1
+  },
+  {
+    "id": "okf_node_249_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Mining transactions in blocks",
+    "level": 2
+  },
+  {
+    "id": "okf_node_253_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Spending the transaction",
+    "level": 2
+  },
+  {
+    "id": "okf_node_257_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "CHAPTER 3: The Bitcoin Client",
+    "level": 1
+  },
+  {
+    "id": "okf_node_258_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Bitcoin Core - The reference implementation",
+    "level": 2
+  },
+  {
+    "id": "okf_node_261_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Running Bitcoin Core for the first time",
+    "level": 1
+  },
+  {
+    "id": "okf_node_266_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Compiling Bitcoin Core from the source code",
+    "level": 1
+  },
+  {
+    "id": "okf_node_295_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Using Bitcoin Core's JSON-RPC API from the command line",
+    "level": 2
+  },
+  {
+    "id": "okf_node_302_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Using Bitcoin Core's JSON-RPC API from the command line",
+    "level": 3
+  },
+  {
+    "id": "okf_node_305_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Getting information on the Bitcoin Core client status",
+    "level": 2
+  },
+  {
+    "id": "okf_node_311_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Wallet setup and encryption",
+    "level": 2
+  },
+  {
+    "id": "okf_node_321_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Wallet backup, plain-text dump and restore",
+    "level": 2
+  },
+  {
+    "id": "okf_node_329_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Wallet addresses and receiving transactions",
+    "level": 1
+  },
+  {
+    "id": "okf_node_345_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Exploring and decoding transactions",
+    "level": 1
+  },
+  {
+    "id": "okf_node_357_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Transaction database index and txindex option",
+    "level": 2
+  },
+  {
+    "id": "okf_node_359_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Exploring blocks",
+    "level": 2
+  },
+  {
+    "id": "okf_node_367_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Creating, signing and submitting transactions based on unspent",
+    "level": 2
+  },
+  {
+    "id": "okf_node_368_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "outputs",
+    "level": 3
+  },
+  {
+    "id": "okf_node_390_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Alternative clients, libraries and toolkits",
+    "level": 1
+  },
+  {
+    "id": "okf_node_400_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Libbitcoin and sx tools",
+    "level": 2
+  },
+  {
+    "id": "okf_node_402_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Installing sx",
+    "level": 3
+  },
+  {
+    "id": "okf_node_408_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "pycoin",
+    "level": 2
+  },
+  {
+    "id": "okf_node_415_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "btcd",
+    "level": 2
+  },
+  {
+    "id": "okf_node_417_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Installing btcd",
+    "level": 3
+  },
+  {
+    "id": "okf_node_422_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Controlling btcd",
+    "level": 3
+  },
+  {
+    "id": "okf_node_434_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "CHAPTER 4: Keys, Addresses, Wallets",
+    "level": 1
+  },
+  {
+    "id": "okf_node_435_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Introduction",
+    "level": 2
+  },
+  {
+    "id": "okf_node_437_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Public key cryptography and crypto-currency",
+    "level": 1
+  },
+  {
+    "id": "okf_node_441_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Private and Public Keys",
+    "level": 1
+  },
+  {
+    "id": "okf_node_444_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Private Keys",
+    "level": 1
+  },
+  {
+    "id": "okf_node_447_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Generating a private key from a random number",
+    "level": 2
+  },
+  {
+    "id": "okf_node_455_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "New key with sx tools",
+    "level": 2
+  },
+  {
+    "id": "okf_node_457_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Public Keys",
+    "level": 1
+  },
+  {
+    "id": "okf_node_459_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Elliptic Curve Cryptography Explained",
+    "level": 2
+  },
+  {
+    "id": "okf_node_467_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Generating a public key",
+    "level": 3
+  },
+  {
+    "id": "okf_node_481_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Bitcoin Addresses",
+    "level": 2
+  },
+  {
+    "id": "okf_node_491_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Base58 and Base58Check Encoding",
+    "level": 1
+  },
+  {
+    "id": "okf_node_492_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Base-58 Encoding",
+    "level": 2
+  },
+  {
+    "id": "okf_node_495_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Base58Check Encoding",
+    "level": 2
+  },
+  {
+    "id": "okf_node_502_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Creating a bitcoin address from a private key",
+    "level": 2
+  },
+  {
+    "id": "okf_node_506_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Compile the addr.cpp code",
+    "level": 1
+  },
+  {
+    "id": "okf_node_507_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Key Formats",
+    "level": 1
+  },
+  {
+    "id": "okf_node_508_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Private Key Formats",
+    "level": 2
+  },
+  {
+    "id": "okf_node_512_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Decode from Base58Check to Hex",
+    "level": 2
+  },
+  {
+    "id": "okf_node_513_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Encode from Hex to Base58Check",
+    "level": 2
+  },
+  {
+    "id": "okf_node_514_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Encode from Hex (Compressed Key) to Base58Check encoding",
+    "level": 2
+  },
+  {
+    "id": "okf_node_515_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Public Key Formats",
+    "level": 2
+  },
+  {
+    "id": "okf_node_517_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Compressed Public Keys",
+    "level": 2
+  },
+  {
+    "id": "okf_node_520_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Compressed Private Keys",
+    "level": 2
+  },
+  {
+    "id": "okf_node_523_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Implementing Keys and Addresses in Python",
+    "level": 1
+  },
+  {
+    "id": "okf_node_535_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Wallets",
+    "level": 1
+  },
+  {
+    "id": "okf_node_539_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Non-Deterministic (Random) Wallets",
+    "level": 2
+  },
+  {
+    "id": "okf_node_542_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Deterministic (Seeded) Wallets",
+    "level": 2
+  },
+  {
+    "id": "okf_node_544_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Mnemonic Code Words",
+    "level": 2
+  },
+  {
+    "id": "okf_node_555_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Hierarchical Deterministic Wallets (BIP0032/BIP0044)",
+    "level": 1
+  },
+  {
+    "id": "okf_node_560_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "HD wallet creation from a seed",
+    "level": 2
+  },
+  {
+    "id": "okf_node_564_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Private child key derivation",
+    "level": 2
+  },
+  {
+    "id": "okf_node_571_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Index Number",
+    "level": 1
+  },
+  {
+    "id": "okf_node_573_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Using derived child keys",
+    "level": 2
+  },
+  {
+    "id": "okf_node_576_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Extended keys",
+    "level": 2
+  },
+  {
+    "id": "okf_node_579_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Public child key derivation",
+    "level": 2
+  },
+  {
+    "id": "okf_node_583_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Hardened child key derivation",
+    "level": 3
+  },
+  {
+    "id": "okf_node_586_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Index numbers for normal and hardened derivation",
+    "level": 3
+  },
+  {
+    "id": "okf_node_587_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "HD wallet key identifier (path)",
+    "level": 3
+  },
+  {
+    "id": "okf_node_589_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Navigating the HD wallet tree structure",
+    "level": 3
+  },
+  {
+    "id": "okf_node_593_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Experimenting with HD wallets using sx-tools",
+    "level": 3
+  },
+  {
+    "id": "okf_node_595_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Advanced Keys and Addresses",
+    "level": 1
+  },
+  {
+    "id": "okf_node_596_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Encrypted Private Keys (BIP0038)",
+    "level": 2
+  },
+  {
+    "id": "okf_node_600_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Pay To Script Hash (P2SH) and Multi-Sig Addresses",
+    "level": 2
+  },
+  {
+    "id": "okf_node_608_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Multi-signature addresses and P2SH",
+    "level": 2
+  },
+  {
+    "id": "okf_node_610_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Vanity Addresses",
+    "level": 2
+  },
+  {
+    "id": "okf_node_613_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Generating Vanity Addresses",
+    "level": 3
+  },
+  {
+    "id": "okf_node_627_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Vanity Address Security",
+    "level": 2
+  },
+  {
+    "id": "okf_node_631_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Paper Wallets",
+    "level": 2
+  },
+  {
+    "id": "okf_node_644_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "CHAPTER 5: Transactions",
+    "level": 1
+  },
+  {
+    "id": "okf_node_645_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Introduction",
+    "level": 2
+  },
+  {
+    "id": "okf_node_647_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Transaction Lifecycle",
+    "level": 2
+  },
+  {
+    "id": "okf_node_649_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Creating Transactions",
+    "level": 3
+  },
+  {
+    "id": "okf_node_651_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Broadcasting Transactions to the Bitcoin Network",
+    "level": 2
+  },
+  {
+    "id": "okf_node_653_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Propagating Transactions on the Bitcoin Network",
+    "level": 2
+  },
+  {
+    "id": "okf_node_655_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Transaction Structure",
+    "level": 1
+  },
+  {
+    "id": "okf_node_658_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Transaction Locktime",
+    "level": 2
+  },
+  {
+    "id": "okf_node_660_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Transaction Outputs and Inputs",
+    "level": 1
+  },
+  {
+    "id": "okf_node_666_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Transaction Outputs",
+    "level": 2
+  },
+  {
+    "id": "okf_node_678_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Spending Conditions (Encumbrances)",
+    "level": 3
+  },
+  {
+    "id": "okf_node_680_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Transaction Inputs",
+    "level": 3
+  },
+  {
+    "id": "okf_node_690_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Transaction Fees",
+    "level": 2
+  },
+  {
+    "id": "okf_node_692_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Adding Fees to Transactions",
+    "level": 2
+  },
+  {
+    "id": "okf_node_701_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Transaction Chaining and Orphan Transactions",
+    "level": 2
+  },
+  {
+    "id": "okf_node_703_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Transaction Scripts and Script Language",
+    "level": 2
+  },
+  {
+    "id": "okf_node_707_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Script Construction (Lock + Unlock)",
+    "level": 2
+  },
+  {
+    "id": "okf_node_711_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Scripting Language",
+    "level": 3
+  },
+  {
+    "id": "okf_node_719_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Turing Incompleteness",
+    "level": 3
+  },
+  {
+    "id": "okf_node_721_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Stateless Verification",
+    "level": 3
+  },
+  {
+    "id": "okf_node_723_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Standard Transactions",
+    "level": 2
+  },
+  {
+    "id": "okf_node_725_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Pay to Public Key Hash (P2PKH)",
+    "level": 3
+  },
+  {
+    "id": "okf_node_735_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Pay-to-Public-Key",
+    "level": 2
+  },
+  {
+    "id": "okf_node_741_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Multi-Signature",
+    "level": 2
+  },
+  {
+    "id": "okf_node_744_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Data Output (OP_RETURN)",
+    "level": 1
+  },
+  {
+    "id": "okf_node_749_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Pay to Script Hash (P2SH)",
+    "level": 2
+  },
+  {
+    "id": "okf_node_769_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Pay-to-Script-Hash Addresses",
+    "level": 2
+  },
+  {
+    "id": "okf_node_772_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Benefits of Pay-to-Script-Hash",
+    "level": 2
+  },
+  {
+    "id": "okf_node_780_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Redeem Script and isStandard Validation",
+    "level": 2
+  },
+  {
+    "id": "okf_node_784_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "CHAPTER 6: The Bitcoin Network",
+    "level": 1
+  },
+  {
+    "id": "okf_node_785_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Peer-to-Peer Network Architecture",
+    "level": 2
+  },
+  {
+    "id": "okf_node_787_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Nodes Types and Roles",
+    "level": 2
+  },
+  {
+    "id": "okf_node_795_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "The Extended Bitcoin Network",
+    "level": 1
+  },
+  {
+    "id": "okf_node_799_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Network Discovery",
+    "level": 1
+  },
+  {
+    "id": "okf_node_815_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Full Nodes",
+    "level": 2
+  },
+  {
+    "id": "okf_node_818_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Exchanging \"Inventory\"",
+    "level": 3
+  },
+  {
+    "id": "okf_node_823_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Simplified Payment Verification (SPV) Nodes",
+    "level": 2
+  },
+  {
+    "id": "okf_node_829_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Bloom Filters",
+    "level": 2
+  },
+  {
+    "id": "okf_node_842_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Bloom Filters and Inventory Updates",
+    "level": 1
+  },
+  {
+    "id": "okf_node_846_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Transaction Pools",
+    "level": 1
+  },
+  {
+    "id": "okf_node_848_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Alert Messages",
+    "level": 2
+  },
+  {
+    "id": "okf_node_860_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "CHAPTER 7",
+    "level": 1
+  },
+  {
+    "id": "okf_node_861_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "The Blockchain",
+    "level": 2
+  },
+  {
+    "id": "okf_node_862_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Introduction",
+    "level": 2
+  },
+  {
+    "id": "okf_node_866_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Structure of a Block",
+    "level": 1
+  },
+  {
+    "id": "okf_node_869_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Block Header",
+    "level": 1
+  },
+  {
+    "id": "okf_node_873_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Block Identifiers - Block Header Hash and Block Height",
+    "level": 1
+  },
+  {
+    "id": "okf_node_878_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "The Genesis Block",
+    "level": 2
+  },
+  {
+    "id": "okf_node_885_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Linking Blocks in the Blockchain",
+    "level": 1
+  },
+  {
+    "id": "okf_node_891_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Merkle Trees",
+    "level": 1
+  },
+  {
+    "id": "okf_node_912_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Merkle Trees and Simplified Payment Verification (SPV)",
+    "level": 1
+  },
+  {
+    "id": "okf_node_914_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Mining and Consensus",
+    "level": 1
+  },
+  {
+    "id": "okf_node_915_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Introduction",
+    "level": 2
+  },
+  {
+    "id": "okf_node_918_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Chapter 8: Mining and Consensus",
+    "level": 1
+  },
+  {
+    "id": "okf_node_919_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Bitcoin Economics and Currency Creation",
+    "level": 2
+  },
+  {
+    "id": "okf_node_927_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Deflationary Money",
+    "level": 3
+  },
+  {
+    "id": "okf_node_932_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "De-centralized Consensus",
+    "level": 1
+  },
+  {
+    "id": "okf_node_941_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Independent Verification of Transactions",
+    "level": 2
+  },
+  {
+    "id": "okf_node_962_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Mining Nodes",
+    "level": 1
+  },
+  {
+    "id": "okf_node_964_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Aggregating Transactions into Blocks",
+    "level": 1
+  },
+  {
+    "id": "okf_node_966_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Transaction Age, Fees, and Priority",
+    "level": 1
+  },
+  {
+    "id": "okf_node_974_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "The Generation Transaction",
+    "level": 1
+  },
+  {
+    "id": "okf_node_979_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Coinbase Reward and Fees",
+    "level": 1
+  },
+  {
+    "id": "okf_node_985_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Structure of the Generation Transaction",
+    "level": 2
+  },
+  {
+    "id": "okf_node_991_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Coinbase Data",
+    "level": 3
+  },
+  {
+    "id": "okf_node_998_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Constructing the Block Header",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1003_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Mining the Block",
+    "level": 1
+  },
+  {
+    "id": "okf_node_1005_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Proof-of-Work Algorithm",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1010_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "show the input and hash result",
+    "level": 1
+  },
+  {
+    "id": "okf_node_1014_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Chapter 8: Mining and Consensus",
+    "level": 1
+  },
+  {
+    "id": "okf_node_1017_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "example of proof-of-work algorithm",
+    "level": 1
+  },
+  {
+    "id": "okf_node_1022_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Example 8-12. Running the Proof-of-Work example for various difficulties",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1028_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Difficulty Representation",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1031_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Difficulty Target and Re-Targeting",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1039_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Successfully Mining the Block",
+    "level": 1
+  },
+  {
+    "id": "okf_node_1043_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Validating a New Block",
+    "level": 1
+  },
+  {
+    "id": "okf_node_1053_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Assembling and Selecting Chains of Blocks",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1057_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Blockchain Forks",
+    "level": 1
+  },
+  {
+    "id": "okf_node_1069_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Mining and the Hashing Race",
+    "level": 1
+  },
+  {
+    "id": "okf_node_1082_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "The Extra Nonce Solution",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1085_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Mining Pools",
+    "level": 1
+  },
+  {
+    "id": "okf_node_1093_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Managed Pools",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1097_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "P2Pool",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1100_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Consensus Attacks",
+    "level": 1
+  },
+  {
+    "id": "okf_node_1103_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "CHAPTER 9: Alternative Chains, Currencies, and Applications",
+    "level": 1
+  },
+  {
+    "id": "okf_node_1105_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "A taxonomy of alternative currencies and chains",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1107_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Meta-Coin Platforms",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1109_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Colored Coins",
+    "level": 3
+  },
+  {
+    "id": "okf_node_1114_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Mastercoin",
+    "level": 3
+  },
+  {
+    "id": "okf_node_1116_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Counterparty",
+    "level": 3
+  },
+  {
+    "id": "okf_node_1118_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Alt-coins",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1125_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Evaluating an alt-coin",
+    "level": 1
+  },
+  {
+    "id": "okf_node_1138_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Monetary Parameter Alternatives: Litecoin, Dogecoin, Freicoin",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1140_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Litecoin",
+    "level": 3
+  },
+  {
+    "id": "okf_node_1146_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Dogecoin",
+    "level": 3
+  },
+  {
+    "id": "okf_node_1152_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Freicoin",
+    "level": 3
+  },
+  {
+    "id": "okf_node_1158_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Consensus Innovation: Peercoin, Myriad, Blackcoin, Vericoin, NXT",
+    "level": 1
+  },
+  {
+    "id": "okf_node_1160_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Peercoin",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1166_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Myriad",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1172_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Blackcoin",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1178_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "VeriCoin",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1184_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "NXT",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1190_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Dual-Purpose Mining Innovation: Primecoin, Curecoin, Gridcoin",
+    "level": 1
+  },
+  {
+    "id": "okf_node_1192_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Primecoin",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1199_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Curecoin",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1205_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Gridcoin",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1211_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Anonymity-Focused Alt-Coins: CryptoNote, Bytecoin, Monero, Zerocash/Zerocoin, Darkcoin",
+    "level": 1
+  },
+  {
+    "id": "okf_node_1214_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Zerocoin/Zerocash",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1216_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "CryptoNote",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1218_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Bytecoin",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1224_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Monero",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1230_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Darkcoin",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1236_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Non-currency alt-chains",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1238_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Namecoin",
+    "level": 3
+  },
+  {
+    "id": "okf_node_1259_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Bitmessage",
+    "level": 3
+  },
+  {
+    "id": "okf_node_1261_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Ethereum",
+    "level": 3
+  },
+  {
+    "id": "okf_node_1265_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Future of Currencies",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1267_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "CHAPTER 10",
+    "level": 1
+  },
+  {
+    "id": "okf_node_1268_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Bitcoin Security",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1270_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Security principles",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1272_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Developing Bitcoin Systems Securely",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1274_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "The Root of Trust",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1276_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "User Security Best Practices",
+    "level": 1
+  },
+  {
+    "id": "okf_node_1278_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Physical Bitcoin Storage",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1280_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Hardware Wallets",
+    "level": 1
+  },
+  {
+    "id": "okf_node_1282_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Balancing Risk (loss vs. theft)",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1284_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Diversifying Risk",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1286_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Multi-sig and Governance",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1288_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Survivability",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1290_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Conclusion",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1291_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "APPENDIX A: Appendix: Available commands with sx",
+    "level": 1
+  },
+  {
+    "id": "okf_node_1292_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "tools",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1339_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "APPENDIX B",
+    "level": 1
+  },
+  {
+    "id": "okf_node_1340_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Appendix - pycoin, ku and tx.",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1342_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Pycoin command-line tools: KU and TX",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1343_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Key Utility (KU)",
+    "level": 3
+  },
+  {
+    "id": "okf_node_1383_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Transaction Utility (TX)",
+    "level": 1
+  },
+  {
+    "id": "okf_node_1392_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Transaction Utility (TX)",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1404_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "APPENDIX C: Appendix: Transaction Script Language",
+    "level": 1
+  },
+  {
+    "id": "okf_node_1405_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Operators, Constants and Symbols",
+    "level": 2
+  },
+  {
+    "id": "okf_node_1417_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "APPENDIX D: Appendix - Bitcoin Improvement Proposals",
+    "level": 1
+  },
+  {
+    "id": "okf_node_1426_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "About the Author",
+    "level": 1
+  },
+  {
+    "id": "okf_node_1429_1782061467174",
+    "document_id": "doc_trans_1_1782061467169",
+    "title": "Colophon",
+    "level": 2
+  }
+]
