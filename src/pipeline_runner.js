@@ -4,7 +4,7 @@ import { execSync } from 'child_process';
 import crypto from 'crypto';
 import { GoogleGenAI } from '@google/genai';
 import { getArangoDBSimulator } from './arangodb_sim.js';
-import { cacheKeyFor, readCache, writeCache, hasCache, credFingerprint, getCacheDir } from './llm_cache.js';
+import { cacheKeyFor, readCacheAsync, writeCache, readCacheSync, hasCache, credFingerprint, getCacheDir } from './llm_cache.js';
 import { chunkMarkdown, readMarkdownFile } from './markdown_chunker.js';
 import * as arangoClient from './arango_client.js';
 
@@ -807,21 +807,37 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}) {
         });
 
         const docsSections = transformedDocs.sections.filter(s => s.document_id === doc.id);
+        // keep track of last section id for NEXT_SIBLING link
+        let lastSectionId = null;
         for (const sec of docsSections) {
-          await arangoClient.insertSection({ document_id: inserted._key, title: sec.title, level: sec.level });
+          const secRes = await arangoClient.insertSection({ document_id: inserted._key, title: sec.title, level: sec.level });
           nodeCount += 1;
+          // add edge: document -> section
+          await arangoClient.insertEdge({ _from: inserted._id, _to: secRes._id, relation: 'HAS_CHILD', type: 'HAS_CHILD' }).catch(()=>{});
+          if (lastSectionId) {
+            await arangoClient.insertEdge({ _from: lastSectionId, _to: secRes._id, relation: 'NEXT_SIBLING', type: 'NEXT_SIBLING' }).catch(()=>{});
+          }
+          lastSectionId = secRes._id;
         }
 
         const docsParagraphs = transformedDocs.paragraphs.filter(p => p.document_id === doc.id);
         for (const p of docsParagraphs) {
-          await arangoClient.insertParagraph({ document_id: inserted._key, section_id: p.section_id ? `sections/${p.section_id}` : null, content: p.content, is_latex: p.content.includes('\\') || p.content.includes('^') || p.content.includes('_') });
+          const paraRes = await arangoClient.insertParagraph({ document_id: inserted._key, section_id: p.section_id ? `sections/${p.section_id}` : null, content: p.content, is_latex: p.content.includes('\\') || p.content.includes('^') || p.content.includes('_') });
           nodeCount += 1;
+          // link paragraph to its section if available
+          if (paraRes && paraRes._id && p.section_id) {
+            // find section inserted _id by matching title (best-effort) - since we don't keep mapping, link to document root
+            await arangoClient.insertEdge({ _from: paraRes._id, _to: inserted._id, relation: 'BELONGS_TO', type: 'BELONGS_TO' }).catch(()=>{});
+          } else {
+            await arangoClient.insertEdge({ _from: paraRes._id, _to: inserted._id, relation: 'BELONGS_TO', type: 'BELONGS_TO' }).catch(()=>{});
+          }
         }
 
         const docsTables = transformedDocs.tables.filter(t => t.document_id === doc.id);
         for (const t of docsTables) {
-          await arangoClient.insertTable({ document_id: inserted._key, section_id: t.section_id ? `sections/${t.section_id}` : null, matrix_data: t.matrix_data || [], markdown_representation: t.markdown_representation || '' });
+          const tblRes = await arangoClient.insertTable({ document_id: inserted._key, section_id: t.section_id ? `sections/${t.section_id}` : null, matrix_data: t.matrix_data || [], markdown_representation: t.markdown_representation || '' });
           nodeCount += 1;
+          await arangoClient.insertEdge({ _from: tblRes._id, _to: inserted._id, relation: 'BELONGS_TO', type: 'BELONGS_TO' }).catch(()=>{});
         }
 
       } catch (err) {
