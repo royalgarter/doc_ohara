@@ -462,6 +462,26 @@ async function structureMarkdownWithRetries(ai, filename, mdContent) {
           addPipelineLog('warn', `Failed to parse LLM output for chunk ${chunk.id}: ${parseErr.message}`);
           // include raw output in cache to aid debugging
           writeCache(key, { parsed_json: null, raw: parsedText, meta: { modelId, cached_at: new Date().toISOString(), parse_error: parseErr.message } });
+          // Attempt automated repair: ask LLM to extract the JSON object only from the noisy text
+          try {
+            addPipelineLog('info', `Attempting automated repair for chunk ${chunk.id}`);
+            const repairPrompt = `The text below may contain a JSON object mixed with commentary or markdown fences. Extract and return ONLY the JSON object (no explanation, no markdown fences). If multiple objects exist, return the single top-level object.\n\nNOISY_OUTPUT:\n${parsedText}`;
+            const repairResp = await ai.models.generateContent({ model: modelId, contents: repairPrompt });
+            const repairText = repairResp.text?.trim() || '';
+            try {
+              const repaired = safeParseJsonFromText(repairText);
+              // success: cache and return
+              writeCache(key, { parsed_json: repaired, raw: parsedText, repair_raw: repairText, meta: { modelId, repaired_at: new Date().toISOString() } });
+              addPipelineLog('info', `Automated repair succeeded for chunk ${chunk.id}`);
+              return repaired;
+            } catch (rpErr) {
+              addPipelineLog('warn', `Automated repair failed for chunk ${chunk.id}: ${rpErr.message}`);
+              // fallthrough to throw original parse error
+            }
+          } catch (repairErr) {
+            addPipelineLog('warn', `Repair LLM call failed for chunk ${chunk.id}: ${repairErr.message}`);
+          }
+
           throw parseErr;
         }
         // write cache
