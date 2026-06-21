@@ -51,8 +51,8 @@ parser.on('data', (quad) => {
     if (subjKey && objKey) {
       edges.push({
         _key: `edge_${edgeCounter++}`,
-        _from: `SumoConcepts/${subjKey}`,
-        _to: `SumoConcepts/${objKey}`,
+        _from: `${subjKey}`,
+        _to: `${objKey}`,
         type: 'is_a'
       });
       // ensure nodes exist for both ends

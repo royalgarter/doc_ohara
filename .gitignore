@@ -8,3 +8,7 @@ coverage/
 !.env.example
 /package-lock.json
 /refs/SUMO.owl
+/sumo_edges.json
+/sumo_nodes.json
+/doc_pipeline/collections/arangodb_state.json
+/doc_pipeline/collections/job_queue.json
