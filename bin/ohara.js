@@ -7,12 +7,14 @@ import chalk from 'chalk';
 import fs from 'fs';
 import path from 'path';
 import { getArangoDBSimulator } from '../src/db/simulator.js';
+import * as arangoClient from '../src/db/client.js';
 import { RetrievalEngine } from '../src/retrieval.js';
 import { getIngestionQueue } from '../src/ingest/queue.js';
 import { runWorkerOnce } from '../src/ingest/worker.js';
 import { QuartzExporter } from '../src/exporter.js';
 
 const INPUT_DIR = 'doc_pipeline/input';
+const useRealDB = !!process.env.ARANGO_URL;
 
 function emit(json, data, humanFn) {
   if (json) {
@@ -32,6 +34,7 @@ program
   .command('ingest <path>')
   .description('Queue a document for processing')
   .option('--json', 'machine-readable output')
+  .option('--force', 're-ingest even if the file hash already exists in the database')
   .action(async (filePath, opts) => {
     fs.mkdirSync(INPUT_DIR, { recursive: true });
     if (!fs.existsSync(filePath)) {
@@ -46,10 +49,11 @@ program
     fs.copyFileSync(filePath, destPath);
 
     const queue = getIngestionQueue();
-    const job = queue.add('ingestion', { filename });
+    const job = queue.add('ingestion', { filename, force: !!opts.force });
 
     if (!opts.json) {
       console.log(chalk.cyan(`Queued "${filename}" as job ${job.id}`));
+      if (opts.force) console.log(chalk.dim('  --force: skipping duplicate-hash check'));
     }
 
     const aiKey = process.env.GEMINI_API_KEY;
@@ -59,6 +63,8 @@ program
     emit(opts.json, { success: !!outcome?.success, job: queue.getJob(job.id) }, () => {
       if (outcome?.success) {
         console.log(chalk.green(`✔ Ingested ${filename}: ${outcome.result.documents} document(s), ${outcome.result.nodes} node(s)`));
+      } else if (outcome?.error?.includes('ALREADY_INGESTED')) {
+        console.log(chalk.yellow(`⚠ Skipped "${filename}": already ingested. Use --force to re-ingest.`));
       } else {
         console.error(chalk.red(`✖ Ingestion failed: ${outcome?.error || 'unknown error'}`));
         process.exitCode = 1;
@@ -68,7 +74,7 @@ program
 
 program
   .command('query <text>')
-  .description('Hybrid search (Phase 1) over the graph')
+  .description('Hybrid search over the graph')
   .option('--json', 'machine-readable output')
   .option('--depth <n>', 'deep traversal depth', '2')
   .action((text, opts) => {
@@ -90,12 +96,18 @@ program
   .command('ls')
   .description('List all ingested documents')
   .option('--json', 'machine-readable output')
-  .action((opts) => {
-    const docs = getArangoDBSimulator().getState().documents;
+  .action(async (opts) => {
+    let docs;
+    if (useRealDB) {
+      docs = await arangoClient.listDocuments();
+    } else {
+      docs = getArangoDBSimulator().getState().documents;
+    }
     emit(opts.json, { success: true, documents: docs }, () => {
       if (docs.length === 0) console.log(chalk.yellow('No documents ingested yet.'));
       docs.forEach(d => {
-        console.log(`${chalk.cyan(d._key)}  ${d.title}  ${chalk.dim(`(${d.parser_engine}, ${d.file_size})`)}`);
+        const hash = d.file_hash ? chalk.dim(` [${d.file_hash.slice(0, 10)}…]`) : '';
+        console.log(`${chalk.cyan(d._key)}  ${d.title}  ${chalk.dim(`(${d.parser_engine}, ${d.file_size})`)}${hash}`);
       });
     });
   });
@@ -104,8 +116,13 @@ program
   .command('rm <doc_id>')
   .description('Delete a document and all its associated nodes/edges')
   .option('--json', 'machine-readable output')
-  .action((docId, opts) => {
-    const deleted = getArangoDBSimulator().deleteDocument(docId);
+  .action(async (docId, opts) => {
+    let deleted;
+    if (useRealDB) {
+      deleted = await arangoClient.deleteDocumentAndNodes(docId).catch(() => false);
+    } else {
+      deleted = getArangoDBSimulator().deleteDocument(docId);
+    }
     emit(opts.json, { success: deleted }, () => {
       if (deleted) console.log(chalk.green(`✔ Deleted document "${docId}" and its graph nodes/edges.`));
       else {
@@ -117,24 +134,27 @@ program
 
 program
   .command('status')
-  .description('Check ArangoDB simulator health and ingestion queue state')
+  .description('Check database health and ingestion queue state')
   .option('--json', 'machine-readable output')
-  .action((opts) => {
-    const state = getArangoDBSimulator().getState();
+  .action(async (opts) => {
+    let dbStats;
+    if (useRealDB) {
+      const stats = await arangoClient.getStats();
+      dbStats = { ok: true, source: 'arangodb', ...stats };
+    } else {
+      const state = getArangoDBSimulator().getState();
+      dbStats = {
+        ok: true, source: 'simulator',
+        documents: state.documents.length, sections: state.sections.length,
+        paragraphs: state.paragraphs.length, tables: state.tables.length,
+        edges: state.edges.length,
+      };
+    }
     const queueStats = getIngestionQueue().stats();
-    const health = {
-      database: {
-        ok: true,
-        documents: state.documents.length,
-        sections: state.sections.length,
-        paragraphs: state.paragraphs.length,
-        tables: state.tables.length,
-        edges: state.edges.length
-      },
-      queue: queueStats
-    };
-    emit(opts.json, { success: true, ...health }, () => {
-      console.log(chalk.bold('Database:'), chalk.green('OK'), `(${health.database.documents} docs, ${health.database.edges} edges)`);
+    emit(opts.json, { success: true, database: dbStats, queue: queueStats }, () => {
+      console.log(chalk.bold('Database:'), chalk.green('OK'),
+        chalk.dim(`[${dbStats.source}]`),
+        `(${dbStats.documents} docs, ${dbStats.sections} sections, ${dbStats.paragraphs} paragraphs, ${dbStats.edges} edges)`);
       console.log(chalk.bold('Queue:'), `waiting=${queueStats.waiting} active=${queueStats.active} completed=${queueStats.completed} failed=${queueStats.failed}`);
     });
   });

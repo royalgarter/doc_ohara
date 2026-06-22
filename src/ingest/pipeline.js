@@ -871,7 +871,7 @@ const delay = (ms) => new Promise(res => setTimeout(res, ms));
 // Single-document ingestion used by the queue worker (src/worker.js).
 // Mirrors the per-file body of runPipelineExecution but reports progress via callback
 // and classifies OOM / Gemini rate-limit errors so the worker can decide whether to retry.
-export async function ingestSingleFile(filename, aiKey, onProgress = () => {}) {
+export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, options = {}) {
   // Preflight: ensure env credentials & tools
   preflightChecks(filename);
 
@@ -887,12 +887,28 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}) {
   const isPdf = ext === 'pdf';
   const engineName = isPdf ? 'MinerU' : 'Docling';
 
+  // Hash the input file and skip if already ingested (unless --force)
+  const fileContentPath = path.join(inputDir, filename);
+  let fileHash = null;
+  if (fs.existsSync(fileContentPath)) {
+    const buf = fs.readFileSync(fileContentPath);
+    fileHash = crypto.createHash('sha256').update(buf).digest('hex');
+    if (!options.force && process.env.ARANGO_URL) {
+      const existing = await arangoClient.findDocumentByHash(fileHash);
+      if (existing) {
+        const skippedError = new Error(`Document already ingested (hash ${fileHash.slice(0, 12)}…). Use --force to re-ingest.`);
+        skippedError.code = 'ALREADY_INGESTED';
+        skippedError.existingDoc = existing;
+        throw skippedError;
+      }
+    }
+  }
+
   onProgress(5, `Routing ${filename} to ${engineName} engine...`);
 
   const targetSubDir = path.join(rawOutputDir, filename);
   fs.mkdirSync(targetSubDir, { recursive: true });
 
-  const fileContentPath = path.join(inputDir, filename);
   const isRealFile = fs.existsSync(fileContentPath);
 
   let contentExcerpt;
@@ -952,7 +968,8 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}) {
           parser_engine: doc.parser_engine,
           title: doc.title,
           file_size: doc.file_size || '350 KB',
-          upload_time: new Date().toISOString()
+          upload_time: new Date().toISOString(),
+          file_hash: fileHash || null,
         });
 
         const docsSections = transformedDocs.sections.filter(s => s.document_id === doc.id);

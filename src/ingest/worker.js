@@ -5,6 +5,7 @@ import { getIngestionQueue } from './queue.js';
 import { ingestSingleFile } from './pipeline.js';
 
 const RETRYABLE_CODES = new Set(['OOM', 'RATE_LIMIT']);
+const NON_ERROR_CODES = new Set(['ALREADY_INGESTED']);
 
 async function processJob(queue, job, aiKey) {
   queue.update(job.id, { status: 'active', progress: 0, progressMessage: 'Starting...' });
@@ -12,10 +13,17 @@ async function processJob(queue, job, aiKey) {
   try {
     const result = await ingestSingleFile(job.data.filename, aiKey, (progress, message) => {
       queue.update(job.id, { progress, progressMessage: message });
-    });
+    }, { force: !!job.data.force });
     queue.update(job.id, { status: 'completed', progress: 100, result, error: null });
     return result;
   } catch (err) {
+    // ALREADY_INGESTED is not a failure — mark completed with a skipped flag
+    if (NON_ERROR_CODES.has(err.code)) {
+      const result = { skipped: true, reason: err.message, existingDoc: err.existingDoc };
+      queue.update(job.id, { status: 'completed', progress: 100, result, error: null });
+      return result;
+    }
+
     const attempts = job.attempts + 1;
     const retryable = RETRYABLE_CODES.has(err.code);
 

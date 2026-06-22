@@ -53,13 +53,14 @@ async function startServer() {
   const ingestionQueue = getIngestionQueue();
   startWorkerLoop(process.env.GEMINI_API_KEY);
 
-  // API: Get current ArangoDB simulated collections and graph structures
-  app.get('/api/database/state', (req, res) => {
+  // API: Get database stats — real ArangoDB when ARANGO_URL is set, otherwise simulator
+  app.get('/api/database/state', async (req, res) => {
     try {
-      res.json({
-        success: true,
-        state: dbSim.getState()
-      });
+      if (process.env.ARANGO_URL) {
+        const stats = await arangoClient.getStats();
+        return res.json({ success: true, source: 'arangodb', stats });
+      }
+      res.json({ success: true, source: 'simulator', state: dbSim.getState() });
     } catch (err) {
       res.status(500).json({ success: false, error: err.message });
     }
@@ -261,14 +262,21 @@ async function startServer() {
   });
 
   // API: Generates a system-prompt snippet summarizing current graph state for Claude
-  app.get('/api/agent/system-prompt', (req, res) => {
-    const state = dbSim.getState();
+  app.get('/api/agent/system-prompt', async (req, res) => {
     const stats = ingestionQueue.stats();
+    let counts;
+    if (process.env.ARANGO_URL) {
+      counts = await arangoClient.getStats().catch(() => null);
+    }
+    if (!counts) {
+      const state = dbSim.getState();
+      counts = { documents: state.documents.length, sections: state.sections.length,
+                 paragraphs: state.paragraphs.length, tables: state.tables.length, edges: state.edges.length };
+    }
     const prompt = [
       `You have access to the Doc Ohara Space-Time Graph via MCP tools (ingest, query, get_graph_context).`,
-      `Current graph: ${state.documents.length} document(s), ${state.sections.length} section(s), ${state.paragraphs.length} paragraph(s), ${state.tables.length} table(s), ${state.edges.length} edge(s).`,
+      `Current graph: ${counts.documents} document(s), ${counts.sections} section(s), ${counts.paragraphs} paragraph(s), ${counts.tables} table(s), ${counts.edges} edge(s).`,
       `Ingestion queue: waiting=${stats.waiting} active=${stats.active} completed=${stats.completed} failed=${stats.failed}.`,
-      `Documents: ${state.documents.map(d => d.title).join('; ') || '(none yet)'}.`
     ].join('\n');
     res.json({ success: true, prompt });
   });
