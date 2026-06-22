@@ -62,7 +62,9 @@ program
 
     emit(opts.json, { success: !!outcome?.success, job: queue.getJob(job.id) }, () => {
       if (outcome?.success) {
-        console.log(chalk.green(`✔ Ingested ${filename}: ${outcome.result.documents} document(s), ${outcome.result.nodes} node(s)`));
+        const u = outcome.result.llm_usage;
+        const usageStr = u ? chalk.dim(` [prompt: ${u.prompt_tokens} | generated: ${u.candidates_tokens} | total: ${u.total_tokens} tokens, ${u.chunks} chunks${u.cache_hits ? ', ' + u.cache_hits + ' cached' : ''}]`) : '';
+        console.log(chalk.green(`✔ Ingested ${filename}: ${outcome.result.documents} document(s), ${outcome.result.nodes} node(s)`) + usageStr);
       } else if (outcome?.error?.includes('ALREADY_INGESTED')) {
         console.log(chalk.yellow(`⚠ Skipped "${filename}": already ingested. Use --force to re-ingest.`));
       } else {

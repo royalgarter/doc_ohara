@@ -452,6 +452,7 @@ async function structureMarkdownWithRetries(ai, filename, mdContent) {
       parse_error: null,
       repair_error: null,
       outcome: 'unknown',
+      usage: { prompt_tokens: 0, candidates_tokens: 0, total_tokens: 0, repair_prompt_tokens: 0, repair_candidates_tokens: 0 },
     };
     chunkDiagnostics.push(diag);
 
@@ -479,6 +480,10 @@ async function structureMarkdownWithRetries(ai, filename, mdContent) {
         addPipelineLog('info', `LLM structuring chunk ${chunk.id} (attempt ${attempt}/${maxAttempts})`);
         const prompt = `${promptNorm}\n\nDOCUMENT_CHUNK_HEADING:${chunk.heading || ''}\n\n${chunk.text}`;
         const resp = await ai.models.generateContent({ model: modelId, contents: prompt });
+        const um = resp.usageMetadata || {};
+        diag.usage.prompt_tokens     += um.promptTokenCount     || 0;
+        diag.usage.candidates_tokens += um.candidatesTokenCount || 0;
+        diag.usage.total_tokens      += um.totalTokenCount      || 0;
         const parsedText = resp.text?.trim() || '{}';
         diag.raw_llm_output = parsedText;
         const cleanJson = parsedText.replace(/^```json/gi, '').replace(/^```/gi, '').replace(/```$/gi, '').trim();
@@ -496,6 +501,10 @@ async function structureMarkdownWithRetries(ai, filename, mdContent) {
             addPipelineLog('info', `Attempting automated repair for chunk ${chunk.id}`);
             const repairPrompt = `The text below may contain a JSON object mixed with commentary or markdown fences. Extract and return ONLY the JSON object (no explanation, no markdown fences). If multiple objects exist, return the single top-level object.\n\nNOISY_OUTPUT:\n${parsedText}`;
             const repairResp = await ai.models.generateContent({ model: modelId, contents: repairPrompt });
+            const rum = repairResp.usageMetadata || {};
+            diag.usage.repair_prompt_tokens     += rum.promptTokenCount     || 0;
+            diag.usage.repair_candidates_tokens += rum.candidatesTokenCount || 0;
+            diag.usage.total_tokens             += rum.totalTokenCount      || 0;
             const repairText = repairResp.text?.trim() || '';
             diag.repair_raw_output = repairText;
             try {
@@ -546,6 +555,16 @@ async function structureMarkdownWithRetries(ai, filename, mdContent) {
     resultsArr.push(...batchResults);
   }
 
+  // Aggregate token usage across all chunks
+  const usageTotals = chunkDiagnostics.reduce((acc, d) => {
+    acc.prompt_tokens            += d.usage.prompt_tokens;
+    acc.candidates_tokens        += d.usage.candidates_tokens;
+    acc.total_tokens             += d.usage.total_tokens;
+    acc.repair_prompt_tokens     += d.usage.repair_prompt_tokens;
+    acc.repair_candidates_tokens += d.usage.repair_candidates_tokens;
+    return acc;
+  }, { prompt_tokens: 0, candidates_tokens: 0, total_tokens: 0, repair_prompt_tokens: 0, repair_candidates_tokens: 0 });
+
   // write per-run diagnostics export
   try {
     const diagDir = path.join('doc_pipeline', 'diagnostics');
@@ -553,16 +572,19 @@ async function structureMarkdownWithRetries(ai, filename, mdContent) {
     const diagFile = path.join(diagDir, `${filename.replace(/[^a-z0-9_.-]/gi, '_')}_${Date.now()}.json`);
     const summary = {
       filename,
+      model: GEMINI_MODEL,
       generated_at: new Date().toISOString(),
       total_chunks: chunks.length,
       cache_hits: chunkDiagnostics.filter(d => d.cache_hit).length,
       repairs_attempted: chunkDiagnostics.filter(d => d.repair_attempted).length,
       repairs_succeeded: chunkDiagnostics.filter(d => d.repair_succeeded).length,
       failures: chunkDiagnostics.filter(d => d.outcome === 'failed').length,
+      llm_usage: usageTotals,
       chunks: chunkDiagnostics,
     };
     fs.writeFileSync(diagFile, JSON.stringify(summary, null, 2), 'utf-8');
     addPipelineLog('info', `Chunk diagnostics written to ${diagFile}`);
+    addPipelineLog('info', `LLM usage — prompt: ${usageTotals.prompt_tokens} tokens, generated: ${usageTotals.candidates_tokens} tokens, total: ${usageTotals.total_tokens} tokens`);
   } catch (diagErr) {
     addPipelineLog('warn', `Failed to write diagnostics: ${diagErr.message}`);
   }
@@ -618,7 +640,7 @@ async function structureMarkdownWithRetries(ai, filename, mdContent) {
     throw err;
   }
 
-  return { nodes: mergedNodes };
+  return { nodes: mergedNodes, llm_usage: { ...usageTotals, model: GEMINI_MODEL, chunks: chunks.length, cache_hits: chunkDiagnostics.filter(d => d.cache_hit).length } };
 }
 
 // Generate realistic mock data if Gemini API is disabled
@@ -1004,6 +1026,10 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
     throw rateLimitError;
   }
 
+  // Extract and carry llm_usage separately; parsedLayoutJSON itself only needs the nodes
+  const llmUsage = parsedLayoutJSON?.llm_usage || null;
+  if (llmUsage) delete parsedLayoutJSON.llm_usage;
+
   onProgress(60, 'Writing raw layout output...');
   const rawJsonPath = path.join(targetSubDir, `${filenameNoExt}.json`);
   fs.writeFileSync(rawJsonPath, JSON.stringify(parsedLayoutJSON, null, 2), 'utf-8');
@@ -1029,6 +1055,7 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
           file_size: doc.file_size || '350 KB',
           upload_time: new Date().toISOString(),
           file_hash: fileHash || null,
+          llm_usage: llmUsage || null,
         });
 
         const docHandle = inserted._id || `documents/${inserted._key}`;
@@ -1133,6 +1160,7 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
   return {
     filename,
     documents: docsForThisFile.length,
-    nodes: nodeCount
+    nodes: nodeCount,
+    llm_usage: llmUsage || null,
   };
 }
