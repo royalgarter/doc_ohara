@@ -32,9 +32,9 @@ fs.mkdirSync(INPUT_DIR, { recursive: true });
 fs.mkdirSync(RAW_OUT_DIR, { recursive: true });
 fs.mkdirSync(FINAL_OUT_DIR, { recursive: true });
 
+const PORT = process.env.PORT || 6454;
 async function startServer() {
   const app = express();
-  const PORT = 6000;
 
   app.use(express.json({ limit: '10mb' }));
 
