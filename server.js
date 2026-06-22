@@ -71,17 +71,64 @@ async function startServer() {
     try {
       if (process.env.ARANGO_URL) {
         const db = await arangoClient.initArangoClient();
-        const [docs, sections, paragraphs, tables, edges] = await Promise.all([
+        const [docs, sections, edges] = await Promise.all([
           db.query('FOR d IN documents SORT d._key DESC RETURN d').then(c => c.all()),
-          db.query('FOR s IN sections SORT s._key DESC LIMIT 300 RETURN {_key:s._key,_id:s._id,title:s.title,document_id:s.document_id,level:s.level}').then(c => c.all()),
-          db.query('FOR p IN paragraphs SORT p._key DESC LIMIT 200 RETURN {_key:p._key,_id:p._id,content:LEFT(p.content,300),document_id:p.document_id,section_id:p.section_id,sumo_tags:p.sumo_tags,sumo_candidate_tags_raw:p.sumo_candidate_tags_raw}').then(c => c.all()),
-          db.query('FOR t IN tables SORT t._key DESC LIMIT 50 RETURN {_key:t._key,_id:t._id,document_id:t.document_id,section_id:t.section_id,markdown_representation:t.markdown_representation}').then(c => c.all()),
-          db.query('FOR e IN edges SORT e._key DESC LIMIT 600 RETURN {_key:e._key,_id:e._id,_from:e._from,_to:e._to,relation:e.relation}').then(c => c.all()),
+          db.query('FOR s IN sections SORT s.level ASC, s._key ASC RETURN {_key:s._key,_id:s._id,title:s.title,document_id:s.document_id,level:s.level,node_type:s.node_type,parent_section_id:s.parent_section_id}').then(c => c.all()),
+          db.query(`
+            FOR e IN edges
+              FILTER (STARTS_WITH(e._from,'documents/') OR STARTS_WITH(e._from,'sections/'))
+                 AND (STARTS_WITH(e._to,'documents/')   OR STARTS_WITH(e._to,'sections/'))
+              RETURN {_key:e._key,_id:e._id,_from:e._from,_to:e._to,relation:e.relation}
+          `).then(c => c.all()),
         ]);
-        return res.json({ success: true, source: 'arangodb', documents: docs, sections, paragraphs, tables, edges });
+        return res.json({ success: true, source: 'arangodb', documents: docs, sections, paragraphs: [], tables: [], edges });
       }
       const state = dbSim.getState();
       res.json({ success: true, source: 'simulator', ...state });
+    } catch (err) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
+  // API: Lazy-load direct neighbors of a node (paragraphs, tables, sibling sections)
+  app.get('/api/graph/node/:collection/:key/neighbors', async (req, res) => {
+    try {
+      if (!process.env.ARANGO_URL) return res.json({ success: true, nodes: [], edges: [] });
+      const db = await arangoClient.initArangoClient();
+      const nodeId = `${req.params.collection}/${req.params.key}`;
+
+      // Get all edges touching this node
+      const edgesCursor = await db.query(
+        'FOR e IN edges FILTER e._from == @id OR e._to == @id RETURN {_key:e._key,_id:e._id,_from:e._from,_to:e._to,relation:e.relation}',
+        { id: nodeId }
+      );
+      const edges = await edgesCursor.all();
+
+      // Collect neighbor IDs not already in doc/section collections (i.e. paragraphs, tables)
+      const neighborIds = new Set();
+      for (const e of edges) {
+        if (e._from !== nodeId) neighborIds.add(e._from);
+        if (e._to   !== nodeId) neighborIds.add(e._to);
+      }
+
+      // Fetch paragraph and table neighbors in bulk
+      const paraIds    = [...neighborIds].filter(id => id.startsWith('paragraphs/'));
+      const tableIds   = [...neighborIds].filter(id => id.startsWith('tables/'));
+      const sectionIds = [...neighborIds].filter(id => id.startsWith('sections/'));
+
+      const [paragraphs, tables, sections] = await Promise.all([
+        paraIds.length
+          ? db.query('FOR p IN paragraphs FILTER p._id IN @ids RETURN {_key:p._key,_id:p._id,content:LEFT(p.content,500),document_id:p.document_id,section_id:p.section_id,node_type:p.node_type,sumo_tags:p.sumo_tags,sumo_candidate_tags_raw:p.sumo_candidate_tags_raw}', { ids: paraIds }).then(c=>c.all())
+          : [],
+        tableIds.length
+          ? db.query('FOR t IN tables FILTER t._id IN @ids RETURN {_key:t._key,_id:t._id,document_id:t.document_id,section_id:t.section_id,node_type:t.node_type,markdown_representation:t.markdown_representation}', { ids: tableIds }).then(c=>c.all())
+          : [],
+        sectionIds.length
+          ? db.query('FOR s IN sections FILTER s._id IN @ids RETURN {_key:s._key,_id:s._id,title:s.title,document_id:s.document_id,level:s.level,node_type:s.node_type,parent_section_id:s.parent_section_id}', { ids: sectionIds }).then(c=>c.all())
+          : [],
+      ]);
+
+      res.json({ success: true, paragraphs, tables, sections, edges });
     } catch (err) {
       res.status(500).json({ success: false, error: err.message });
     }

@@ -367,6 +367,10 @@
               x-text="selectedNode && (selectedNode.node_type || selectedNode.type || (selectedNode._id && selectedNode._id.split('/')[0]))"></span>
             <span class="text-[10px] text-slate-600"
               x-text="selectedNode && (selectedNode._key || selectedNode.id)"></span>
+            <span x-show="selectedNode && expandedNodes.has(selectedNode._id)"
+              class="text-[9px] text-emerald-400 ml-auto">expanded</span>
+            <span x-show="selectedNode && !expandedNodes.has(selectedNode._id) && selectedNode._id && !selectedNode._id.startsWith('paragraphs/')"
+              class="text-[9px] text-slate-500 ml-auto animate-pulse">loading neighbors…</span>
           </div>
           <!-- Title -->
           <div class="text-xs text-slate-200 font-semibold truncate"
@@ -430,6 +434,7 @@
       ],
 
       graphData: { documents: [], sections: [], paragraphs: [], tables: [], edges: [] },
+      expandedNodes: new Set(),
       graphSource: '',
       graphLoading: false,
       selectedNode: null,
@@ -470,6 +475,7 @@
 
       async loadGraph() {
         this.graphLoading = true;
+        this.expandedNodes = new Set();
         try {
           const r = await fetch('/api/graph');
           const d = await r.json();
@@ -488,12 +494,34 @@
         this.graphLoading = false;
       },
 
+      async expandNode(node) {
+        const nodeId = node._id || (node.id ? node.id : null);
+        if (!nodeId || this.expandedNodes.has(nodeId)) return;
+        this.expandedNodes.add(nodeId);
+        try {
+          const [collection, key] = nodeId.split('/');
+          const r = await fetch(`/api/graph/node/${collection}/${key}/neighbors`);
+          const d = await r.json();
+          if (!d.success) return;
+          // Merge new nodes/edges into graphData (deduplicate by _id)
+          const existingParaIds  = new Set(this.graphData.paragraphs.map(p => p._id));
+          const existingTableIds = new Set(this.graphData.tables.map(t => t._id));
+          const existingSecIds   = new Set(this.graphData.sections.map(s => s._id));
+          const existingEdgeIds  = new Set(this.graphData.edges.map(e => e._id));
+          for (const p of (d.paragraphs || [])) if (!existingParaIds.has(p._id))  this.graphData.paragraphs.push(p);
+          for (const t of (d.tables     || [])) if (!existingTableIds.has(t._id)) this.graphData.tables.push(t);
+          for (const s of (d.sections   || [])) if (!existingSecIds.has(s._id))   this.graphData.sections.push(s);
+          for (const e of (d.edges      || [])) if (!existingEdgeIds.has(e._id))  this.graphData.edges.push(e);
+          this.$nextTick(() => this.renderCurrentGraph());
+        } catch(e) { console.error('expandNode:', e); }
+      },
+
       renderCurrentGraph() {
         const self = this;
         const selectedKey = self.selectedNode && (self.selectedNode._key || self.selectedNode.id);
         renderGraph(this.graphData, this.colorMode, selectedKey, this.graphZoom, (node) => {
           self.selectedNode = node;
-          // re-render with new selection so highlights update immediately
+          self.expandNode(node);
           self.$nextTick(() => self.renderCurrentGraph());
         });
       },
