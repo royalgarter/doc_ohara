@@ -735,28 +735,55 @@ function transformRawToCollections(rawOutputDir) {
           file_size: '1.0 MB'
         });
 
+        // level stack for tracking Chapter→Section→Subsection nesting
+        const sectionStack = []; // [{id, level}]
         let currentSectionId = null;
+
+        const SECTION_TYPES = ['Chapter', 'Section', 'Subsection'];
+        const LEVEL_OF = { Chapter: 1, Section: 2, Subsection: 3 };
+
         rawContent.nodes.forEach((node, blockIdx) => {
           const nodeId = `okf_node_${blockIdx}_${Date.now()}`;
           const ntype = node.type || (node.metadata && node.metadata.type) || 'Paragraph';
 
-          if (['Chapter', 'Section', 'Subsection'].includes(ntype)) {
+          if (SECTION_TYPES.includes(ntype)) {
+            const level = node.metadata?.level || LEVEL_OF[ntype] || 2;
+            // pop stack until we find a shallower ancestor
+            while (sectionStack.length > 0 && sectionStack[sectionStack.length - 1].level >= level) {
+              sectionStack.pop();
+            }
+            const parentSectionId = sectionStack.length > 0 ? sectionStack[sectionStack.length - 1].id : null;
+            sectionStack.push({ id: nodeId, level });
             currentSectionId = nodeId;
             dbCollections.sections.push({
               id: nodeId,
               document_id: docId,
+              parent_section_id: parentSectionId,
+              node_type: ntype,
               title: node.title || node.content?.split('\n')[0] || '',
-              level: node.metadata?.level || 1
+              level,
             });
           } else if (['Paragraph', 'ListItem'].includes(ntype)) {
             dbCollections.paragraphs.push({
               id: nodeId,
               document_id: docId,
               section_id: currentSectionId,
+              node_type: ntype,
               content: node.content || node.text || '',
               sumo_tags: node.sumo_tags || [],
               sumo_candidate_tags_raw: node.sumo_candidate_tags_raw || [],
-              sumo_resolved_map: node.sumo_resolved_map || {}
+              sumo_resolved_map: node.sumo_resolved_map || {},
+            });
+          } else if (ntype === 'Figure') {
+            dbCollections.paragraphs.push({
+              id: nodeId,
+              document_id: docId,
+              section_id: currentSectionId,
+              node_type: 'Figure',
+              content: node.content || node.description || node.url || '',
+              sumo_tags: node.sumo_tags || [],
+              sumo_candidate_tags_raw: node.sumo_candidate_tags_raw || [],
+              sumo_resolved_map: node.sumo_resolved_map || {},
             });
           } else if (ntype === 'Table') {
             dbCollections.tables.push({
@@ -764,7 +791,7 @@ function transformRawToCollections(rawOutputDir) {
               document_id: docId,
               section_id: currentSectionId,
               matrix_data: node.metadata?.table_cells || node.table || [],
-              markdown_representation: node.markdown || node.metadata?.markdown || ''
+              markdown_representation: node.markdown || node.metadata?.markdown || '',
             });
           }
         });
@@ -785,26 +812,44 @@ function transformRawToCollections(rawOutputDir) {
           file_size: '1.2 MB'
         });
 
+        const minSectionStack = [];
         let currentSectionId = null;
 
         rawContent.pdf_body.forEach((block, blockIdx) => {
           const nodeId = `min_node_${blockIdx}_${Date.now()}`;
           if (block.type === "title") {
-             // title resolved
+            // title already captured above
           } else if (block.type === "heading") {
+            const level = block.level || 1;
+            while (minSectionStack.length > 0 && minSectionStack[minSectionStack.length - 1].level >= level) {
+              minSectionStack.pop();
+            }
+            const parentSectionId = minSectionStack.length > 0 ? minSectionStack[minSectionStack.length - 1].id : null;
+            minSectionStack.push({ id: nodeId, level });
             currentSectionId = nodeId;
             dbCollections.sections.push({
               id: nodeId,
               document_id: docId,
+              parent_section_id: parentSectionId,
+              node_type: 'Section',
               title: block.text || "",
-              level: 1
+              level,
             });
           } else if (block.type === "text" || block.type === "equation") {
             dbCollections.paragraphs.push({
               id: nodeId,
               document_id: docId,
               section_id: currentSectionId,
-              content: block.text || block.latex || ""
+              node_type: block.type === "equation" ? "Paragraph" : "Paragraph",
+              content: block.text || block.latex || "",
+            });
+          } else if (block.type === "figure") {
+            dbCollections.paragraphs.push({
+              id: nodeId,
+              document_id: docId,
+              section_id: currentSectionId,
+              node_type: 'Figure',
+              content: block.description || block.url || '',
             });
           } else if (block.type === "table") {
             dbCollections.tables.push({
@@ -812,7 +857,7 @@ function transformRawToCollections(rawOutputDir) {
               document_id: docId,
               section_id: currentSectionId,
               matrix_data: block.table_cells || [],
-              markdown_representation: block.markdown || ""
+              markdown_representation: block.markdown || "",
             });
           }
         });
@@ -827,24 +872,34 @@ function transformRawToCollections(rawOutputDir) {
           file_size: '480 KB'
         });
 
+        const docSectionStack = [];
         let currentSectionId = null;
 
         rawContent.document?.texts?.forEach((item, blockIdx) => {
           const nodeId = `doc_node_${blockIdx}_${Date.now()}`;
           if (item.label === "heading_1" || item.label === "heading_2") {
+            const level = item.label === "heading_1" ? 1 : 2;
+            while (docSectionStack.length > 0 && docSectionStack[docSectionStack.length - 1].level >= level) {
+              docSectionStack.pop();
+            }
+            const parentSectionId = docSectionStack.length > 0 ? docSectionStack[docSectionStack.length - 1].id : null;
+            docSectionStack.push({ id: nodeId, level });
             currentSectionId = nodeId;
             dbCollections.sections.push({
               id: nodeId,
               document_id: docId,
+              parent_section_id: parentSectionId,
+              node_type: level === 1 ? 'Chapter' : 'Section',
               title: item.text,
-              level: item.label === "heading_1" ? 1 : 2
+              level,
             });
           } else if (item.label === "paragraph" || item.label === "list_item") {
             dbCollections.paragraphs.push({
               id: nodeId,
               document_id: docId,
               section_id: currentSectionId,
-              content: item.text
+              node_type: item.label === "list_item" ? "ListItem" : "Paragraph",
+              content: item.text,
             });
           }
         });
@@ -972,41 +1027,81 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
           file_hash: fileHash || null,
         });
 
+        const docHandle = inserted._id || `documents/${inserted._key}`;
+
+        // Insert sections; build internalId → ArangoDB _id map for paragraph/table linking.
+        // Uses parent_section_id to wire Chapter→Section→Subsection hierarchy correctly,
+        // and only creates NEXT_SIBLING edges between sections sharing the same parent.
+        const sectionIdMap = new Map(); // internal transform id → ArangoDB _id
         const docsSections = transformedDocs.sections.filter(s => s.document_id === doc.id);
-        // keep track of last section id for NEXT_SIBLING link
-        let lastSectionId = null;
+        // lastHandleByParent tracks the last inserted section handle per parent (for NEXT_SIBLING)
+        const lastHandleByParent = new Map(); // parentInternalId|'root' → last ArangoDB _id
+
         for (const sec of docsSections) {
-          const secRes = await arangoClient.insertSection({ document_id: inserted._key, title: sec.title, level: sec.level });
+          const secRes = await arangoClient.insertSection({
+            document_id: inserted._key,
+            title: sec.title,
+            level: sec.level,
+            node_type: sec.node_type || 'Section',
+            parent_section_id: sec.parent_section_id || null,
+          });
           nodeCount += 1;
-          // add edge: document -> section
-          const docHandle = inserted._id || `documents/${inserted._key}`;
           const secHandle = secRes._id || `sections/${secRes._key}`;
-          await arangoClient.insertEdge({ _from: docHandle, _to: secHandle, relation: 'HAS_CHILD', type: 'HAS_CHILD' }).catch(()=>{});
-          if (lastSectionId) {
-            const lastHandle = lastSectionId;
-            await arangoClient.insertEdge({ _from: lastHandle, _to: secHandle, relation: 'NEXT_SIBLING', type: 'NEXT_SIBLING' }).catch(()=>{});
+          sectionIdMap.set(sec.id, secHandle);
+
+          // Parent edge: either doc→section (top-level) or parentSection→section (nested)
+          const parentHandle = sec.parent_section_id ? sectionIdMap.get(sec.parent_section_id) : null;
+          const fromHandle = parentHandle || docHandle;
+          await arangoClient.insertEdge({ _from: fromHandle, _to: secHandle, relation: 'HAS_CHILD', type: 'HAS_CHILD' }).catch(()=>{});
+
+          // NEXT_SIBLING only between sections with the same parent
+          const siblingKey = sec.parent_section_id || 'root';
+          const lastSiblingHandle = lastHandleByParent.get(siblingKey);
+          if (lastSiblingHandle) {
+            await arangoClient.insertEdge({ _from: lastSiblingHandle, _to: secHandle, relation: 'NEXT_SIBLING', type: 'NEXT_SIBLING' }).catch(()=>{});
           }
-          lastSectionId = secHandle;
+          lastHandleByParent.set(siblingKey, secHandle);
         }
 
+        // Insert paragraphs — link to their section (HAS_CHILD) and document (BELONGS_TO)
         const docsParagraphs = transformedDocs.paragraphs.filter(p => p.document_id === doc.id);
         for (const p of docsParagraphs) {
-          const paraRes = await arangoClient.insertParagraph({ document_id: inserted._key, section_id: p.section_id ? `sections/${p.section_id}` : null, content: p.content, is_latex: p.content.includes('\\') || p.content.includes('^') || p.content.includes('_'), sumo_tags: p.sumo_tags || [], sumo_candidate_tags_raw: p.sumo_candidate_tags_raw || [], sumo_resolved_map: p.sumo_resolved_map || {} });
+          const secHandle = p.section_id ? sectionIdMap.get(p.section_id) : null;
+          const paraRes = await arangoClient.insertParagraph({
+            document_id: inserted._key,
+            section_id: secHandle || null,
+            node_type: p.node_type || 'Paragraph',
+            content: p.content,
+            is_latex: p.content.includes('\\') || p.content.includes('^') || p.content.includes('_'),
+            sumo_tags: p.sumo_tags || [],
+            sumo_candidate_tags_raw: p.sumo_candidate_tags_raw || [],
+            sumo_resolved_map: p.sumo_resolved_map || {},
+          });
           nodeCount += 1;
-          // link paragraph to its document
           const paraHandle = paraRes._id || `paragraphs/${paraRes._key}`;
-          const docHandlePara = inserted._id || `documents/${inserted._key}`;
-          await arangoClient.insertEdge({ _from: paraHandle, _to: docHandlePara, relation: 'BELONGS_TO', type: 'BELONGS_TO' }).catch(()=>{});
-
+          await arangoClient.insertEdge({ _from: paraHandle, _to: docHandle, relation: 'BELONGS_TO', type: 'BELONGS_TO' }).catch(()=>{});
+          if (secHandle) {
+            await arangoClient.insertEdge({ _from: secHandle, _to: paraHandle, relation: 'HAS_CHILD', type: 'HAS_CHILD' }).catch(()=>{});
+          }
         }
 
+        // Insert tables — same linking pattern as paragraphs
         const docsTables = transformedDocs.tables.filter(t => t.document_id === doc.id);
         for (const t of docsTables) {
-          const tblRes = await arangoClient.insertTable({ document_id: inserted._key, section_id: t.section_id ? `sections/${t.section_id}` : null, matrix_data: t.matrix_data || [], markdown_representation: t.markdown_representation || '' });
+          const secHandle = t.section_id ? sectionIdMap.get(t.section_id) : null;
+          const tblRes = await arangoClient.insertTable({
+            document_id: inserted._key,
+            section_id: secHandle || null,
+            node_type: 'Table',
+            matrix_data: t.matrix_data || [],
+            markdown_representation: t.markdown_representation || '',
+          });
           nodeCount += 1;
           const tblHandle = tblRes._id || `tables/${tblRes._key}`;
-          const docHandleTbl = inserted._id || `documents/${inserted._key}`;
-          await arangoClient.insertEdge({ _from: tblHandle, _to: docHandleTbl, relation: 'BELONGS_TO', type: 'BELONGS_TO' }).catch(()=>{});
+          await arangoClient.insertEdge({ _from: tblHandle, _to: docHandle, relation: 'BELONGS_TO', type: 'BELONGS_TO' }).catch(()=>{});
+          if (secHandle) {
+            await arangoClient.insertEdge({ _from: secHandle, _to: tblHandle, relation: 'HAS_CHILD', type: 'HAS_CHILD' }).catch(()=>{});
+          }
         }
 
       } catch (err) {
