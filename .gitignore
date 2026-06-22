@@ -15,3 +15,4 @@ coverage/
 /doc_pipeline/collections/job_queue.json
 /.ohara_llm_cache
 /sample/ui
+/refs/SUMO.owl
