@@ -318,40 +318,46 @@ function attemptLiteParse(sourcePath, outMdPath) {
   }
 }
 
-// Helper: attempt to extract a JSON object from noisy LLM text outputs
+// Remove \X escape sequences that are invalid in JSON (markdown escapes like \*, \_, \[, \(, etc.).
+// Valid JSON escapes are: \" \\ \/ \b \f \n \r \t \uXXXX — everything else is illegal.
+function sanitizeJsonEscapes(s) {
+  return s.replace(/\\([^"\\\/bfnrtu\n\r])/g, (_, ch) => ch);
+}
+
+// Helper: attempt to extract a JSON object from noisy LLM text outputs.
+// Tries progressively more aggressive fixes before giving up.
 function safeParseJsonFromText(text) {
   const t = String(text || '').trim();
-  // try direct parse first
-  try {
-    return JSON.parse(t);
-  } catch (e) {}
 
-  // strip common triple-backtick fences
+  // 1. direct parse
+  try { return JSON.parse(t); } catch (_) {}
+
+  // 2. strip markdown fences then try again
   let s = t.replace(/^```json\s*/i, '').replace(/```$/i, '').trim();
-  // try extract a JSON block via regex
-  const jsonBlockMatch = s.match(/\{[\s\S]*\}/m);
+  try { return JSON.parse(s); } catch (_) {}
+
+  // 3. sanitize invalid escape sequences (e.g. \* \_ from LLM markdown habits) then parse
+  const sanitized = sanitizeJsonEscapes(s);
+  try { return JSON.parse(sanitized); } catch (_) {}
+
+  // 4. extract the outermost JSON object, sanitize, fix trailing commas
+  const jsonBlockMatch = sanitized.match(/\{[\s\S]*\}/m);
   if (jsonBlockMatch) {
     const candidate = jsonBlockMatch[0];
-    try {
-      return JSON.parse(candidate);
-    } catch (e) {
-      // attempt minor fixes: replace trailing commas
-      const fixed = candidate.replace(/,\s*([}\]])/g, '$1');
-      try { return JSON.parse(fixed); } catch (_) {}
-    }
+    try { return JSON.parse(candidate); } catch (_) {}
+    const fixed = candidate.replace(/,\s*([}\]])/g, '$1');
+    try { return JSON.parse(fixed); } catch (_) {}
   }
 
-  // as a last resort, try to find a code block labelled json
+  // 5. find a fenced ```json ... ``` block inside the text, sanitize, fix trailing commas
   const codeJson = s.match(/```json([\s\S]*?)```/i);
   if (codeJson && codeJson[1]) {
-    const candidate = codeJson[1].trim();
-    try { return JSON.parse(candidate); } catch (e) {
-      const fixed = candidate.replace(/,\s*([}\]])/g, '$1');
-      try { return JSON.parse(fixed); } catch (_) {}
-    }
+    const candidate = sanitizeJsonEscapes(codeJson[1].trim());
+    try { return JSON.parse(candidate); } catch (_) {}
+    const fixed = candidate.replace(/,\s*([}\]])/g, '$1');
+    try { return JSON.parse(fixed); } catch (_) {}
   }
 
-  // give up
   throw new Error('Unable to extract valid JSON from LLM output');
 }
 
@@ -747,7 +753,10 @@ function transformRawToCollections(rawOutputDir) {
               id: nodeId,
               document_id: docId,
               section_id: currentSectionId,
-              content: node.content || node.text || ''
+              content: node.content || node.text || '',
+              sumo_tags: node.sumo_tags || [],
+              sumo_candidate_tags_raw: node.sumo_candidate_tags_raw || [],
+              sumo_resolved_map: node.sumo_resolved_map || {}
             });
           } else if (ntype === 'Table') {
             dbCollections.tables.push({
@@ -965,7 +974,7 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}) {
 
         const docsParagraphs = transformedDocs.paragraphs.filter(p => p.document_id === doc.id);
         for (const p of docsParagraphs) {
-          const paraRes = await arangoClient.insertParagraph({ document_id: inserted._key, section_id: p.section_id ? `sections/${p.section_id}` : null, content: p.content, is_latex: p.content.includes('\\') || p.content.includes('^') || p.content.includes('_') });
+          const paraRes = await arangoClient.insertParagraph({ document_id: inserted._key, section_id: p.section_id ? `sections/${p.section_id}` : null, content: p.content, is_latex: p.content.includes('\\') || p.content.includes('^') || p.content.includes('_'), sumo_tags: p.sumo_tags || [], sumo_candidate_tags_raw: p.sumo_candidate_tags_raw || [], sumo_resolved_map: p.sumo_resolved_map || {} });
           nodeCount += 1;
           // link paragraph to its document
           const paraHandle = paraRes._id || `paragraphs/${paraRes._key}`;
