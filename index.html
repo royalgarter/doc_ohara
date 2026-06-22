@@ -734,10 +734,11 @@
       }));
 
     // ── Compute distinct section levels present in data ────────────────────
-    const MAX_PARA = 100, MAX_SEC = 200, MAX_TBL = 30;
-    const sampledSec  = sections.slice(0, MAX_SEC);
-    const sampledPara = sampleEvenly(paragraphs, MAX_PARA);
-    const sampledTbl  = tables.slice(0, MAX_TBL);
+    // Sections: render all (lazy load means this set is already correct)
+    // Paragraphs/tables: render all loaded (they arrive incrementally via neighbor fetch)
+    const sampledSec  = sections;
+    const sampledPara = paragraphs;
+    const sampledTbl  = tables;
 
     // group sections by level
     const sectionsByLevel = new Map(); // level(int) → section[]
@@ -760,7 +761,12 @@
     const levelToX = {};
     levelNums.forEach((lvl, i) => { levelToX[lvl] = SEC_START + i * SEC_GAP; });
 
-    const ROW_H = 26;
+    // Dynamic row height: keep SVG under ~3000px tall
+    const MAX_SVG_H = 3000;
+    const columnHeightsPreview = [documents.length, sampledPara.length,
+      ...levelNums.map(l => sectionsByLevel.get(l).length)];
+    const tallestPreview = Math.max(...columnHeightsPreview, 1);
+    const ROW_H = Math.max(6, Math.min(26, Math.floor((MAX_SVG_H - 72) / tallestPreview)));
     const PAD_Y = 42;
 
     const nodePos = new Map();
@@ -856,7 +862,7 @@
     const edgeG = svgEl('g', { id: 'edges' });
     const hasSelection = !!selectedKey;
 
-    for (const edge of edges.slice(0, 600)) {
+    for (const edge of edges) {
       const fk = (edge._from || '').split('/')[1];
       const tk = (edge._to   || '').split('/')[1];
       const fp = nodePos.get(fk);
