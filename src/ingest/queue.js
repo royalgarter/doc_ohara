@@ -83,6 +83,15 @@ export class JobQueue extends EventEmitter {
     return jobs[idx];
   }
 
+  remove(id) {
+    const jobs = loadJobs();
+    const idx = jobs.findIndex(j => j.id === id);
+    if (idx === -1) return false;
+    jobs.splice(idx, 1);
+    saveJobs(jobs);
+    return true;
+  }
+
   stats() {
     const jobs = loadJobs();
     return {

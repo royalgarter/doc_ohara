@@ -244,9 +244,43 @@ async function startServer() {
     }
   });
 
-  // API: Queue / worker status for the Agent Dashboard
+  // API: Queue / worker status — optionally filtered by ?status=failed|completed|waiting
   app.get('/api/queue/jobs', (req, res) => {
-    res.json({ success: true, jobs: ingestionQueue.list(), stats: ingestionQueue.stats() });
+    const { status } = req.query;
+    const jobs = status ? ingestionQueue.list({ status }) : ingestionQueue.list();
+    res.json({ success: true, jobs, stats: ingestionQueue.stats() });
+  });
+
+  // API: Requeue a failed/completed job (sets status back to waiting, resets attempts, optionally with --force)
+  app.post('/api/queue/jobs/:id/retry', (req, res) => {
+    try {
+      const job = ingestionQueue.getJob(req.params.id);
+      if (!job) return res.status(404).json({ success: false, error: 'Job not found' });
+      const force = req.body?.force ?? false;
+      ingestionQueue.update(job.id, {
+        status: 'waiting',
+        attempts: 0,
+        error: null,
+        result: null,
+        progress: 0,
+        progressMessage: '',
+        data: { ...job.data, force },
+      });
+      res.json({ success: true, job: ingestionQueue.getJob(job.id) });
+    } catch (err) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
+  // API: Delete a job record from the queue
+  app.delete('/api/queue/jobs/:id', (req, res) => {
+    try {
+      const removed = ingestionQueue.remove(req.params.id);
+      if (!removed) return res.status(404).json({ success: false, error: 'Job not found' });
+      res.json({ success: true });
+    } catch (err) {
+      res.status(500).json({ success: false, error: err.message });
+    }
   });
 
   // API: Deep graph context for a node (backs the agent's "Focus on Node X" view)

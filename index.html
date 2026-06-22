@@ -51,10 +51,13 @@
     <!-- Vertical tab bar -->
     <nav class="flex flex-col items-center gap-1 py-2 w-9 bg-slate-900 border-r border-slate-800 shrink-0">
       <template x-for="t in tabs" :key="t.id">
-        <button @click="tab = t.id" :title="t.label"
+        <button @click="tab = t.id; if(t.id==='jobs') loadJobs()" :title="t.label"
           :class="tab === t.id ? 'bg-slate-700/80 text-sky-400' : 'text-slate-600 hover:text-slate-300'"
-          class="w-7 h-7 flex items-center justify-center rounded text-sm transition"
+          class="relative w-7 h-7 flex items-center justify-center rounded text-sm transition"
           x-text="t.icon">
+          <!-- Red dot badge for failed jobs on the Jobs tab icon -->
+          <span x-show="t.id === 'jobs' && jobStats.failed > 0"
+            class="absolute top-0.5 right-0.5 w-1.5 h-1.5 rounded-full bg-red-500 pointer-events-none"></span>
         </button>
       </template>
     </nav>
@@ -195,6 +198,113 @@
         </div>
       </div>
 
+      <!-- JOBS tab -->
+      <div x-show="tab === 'jobs'" x-init="if(tab==='jobs') loadJobs()" class="flex flex-col h-full overflow-hidden p-3 gap-2">
+        <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Job Queue</div>
+
+        <!-- Stats bar -->
+        <div class="grid grid-cols-4 gap-1 shrink-0">
+          <template x-for="[key, color] in [['failed','text-red-400'],['waiting','text-amber-400'],['active','text-sky-400'],['completed','text-emerald-400']]" :key="key">
+            <div class="flex flex-col items-center py-1 rounded bg-slate-800/60 border border-slate-700/40">
+              <span class="text-xs font-bold" :class="color" x-text="jobStats[key] || 0"></span>
+              <span class="text-[9px] text-slate-600" x-text="key"></span>
+            </div>
+          </template>
+        </div>
+
+        <!-- Bulk actions (only shown when failures exist) -->
+        <div x-show="jobStats.failed > 0" class="flex gap-1.5 shrink-0">
+          <button @click="retryAllFailed(false)"
+            class="flex-1 text-[10px] py-1 rounded bg-amber-700/60 hover:bg-amber-600/70 text-amber-200 transition">
+            ↺ Retry all failed
+          </button>
+          <button @click="retryAllFailed(true)"
+            class="flex-1 text-[10px] py-1 rounded bg-red-800/50 hover:bg-red-700/60 text-red-300 transition">
+            ↺ Force retry all
+          </button>
+        </div>
+
+        <!-- Job list -->
+        <div class="flex-1 min-h-0 overflow-y-auto scrollbar-thin flex flex-col gap-1.5">
+          <template x-for="job in jobs" :key="job.id">
+            <div class="rounded border p-2 text-xs"
+              :class="{
+                'border-red-800/60 bg-red-950/30':   job.status === 'failed',
+                'border-amber-700/40 bg-amber-950/20': job.status === 'waiting',
+                'border-sky-700/40 bg-sky-950/20':   job.status === 'active',
+                'border-slate-700/30 bg-slate-800/20': job.status === 'completed',
+              }">
+
+              <!-- Header row -->
+              <div class="flex items-center gap-2 mb-1">
+                <div class="w-1.5 h-1.5 rounded-full shrink-0"
+                  :style="'background:' + jobStatusColor(job.status)"></div>
+                <span class="font-semibold text-slate-200 truncate flex-1"
+                  x-text="job.data && job.data.filename || job.id"></span>
+                <span class="text-[9px] uppercase font-bold shrink-0"
+                  :class="{
+                    'text-red-400':   job.status==='failed',
+                    'text-amber-400': job.status==='waiting',
+                    'text-sky-400':   job.status==='active',
+                    'text-emerald-400': job.status==='completed',
+                  }"
+                  x-text="job.status"></span>
+              </div>
+
+              <!-- Progress (active jobs) -->
+              <div x-show="job.status === 'active'" class="mb-1">
+                <div class="h-1 bg-slate-800 rounded overflow-hidden">
+                  <div class="h-full bg-sky-500 transition-all" :style="'width:' + (job.progress||0) + '%'"></div>
+                </div>
+                <div class="text-[9px] text-slate-500 mt-0.5" x-text="job.progressMessage || ''"></div>
+              </div>
+
+              <!-- Error message (failed jobs) -->
+              <div x-show="job.status === 'failed' && job.error"
+                class="text-[10px] text-red-400/80 mb-1.5 leading-relaxed break-words"
+                x-text="job.error"></div>
+
+              <!-- Skipped info (completed but skipped) -->
+              <div x-show="job.status === 'completed' && job.result && job.result.skipped"
+                class="text-[10px] text-amber-400/70 mb-1.5"
+                x-text="job.result && job.result.reason"></div>
+
+              <!-- Meta -->
+              <div class="flex items-center gap-2 text-[9px] text-slate-600">
+                <span x-text="'attempt ' + (job.attempts||0) + '/' + (job.maxAttempts||3)"></span>
+                <span x-text="job.updatedAt ? new Date(job.updatedAt).toLocaleTimeString() : ''"></span>
+                <span x-show="job.data && job.data.force" class="text-amber-600">--force</span>
+              </div>
+
+              <!-- Actions -->
+              <div x-show="job.status === 'failed' || job.status === 'completed'" class="flex gap-1 mt-1.5">
+                <button @click="retryJob(job.id, false)"
+                  class="text-[10px] px-2 py-0.5 rounded bg-slate-700 hover:bg-slate-600 text-slate-300 transition">
+                  ↺ Retry
+                </button>
+                <button @click="retryJob(job.id, true)"
+                  class="text-[10px] px-2 py-0.5 rounded bg-amber-800/50 hover:bg-amber-700/60 text-amber-300 transition">
+                  ↺ Force
+                </button>
+                <button @click="deleteJob(job.id)"
+                  class="text-[10px] px-2 py-0.5 rounded bg-slate-800 hover:bg-red-900/50 text-slate-600 hover:text-red-400 transition ml-auto">
+                  ✕
+                </button>
+              </div>
+            </div>
+          </template>
+
+          <div x-show="!jobsLoading && jobs.length === 0"
+            class="text-[11px] text-slate-700 text-center py-8">No jobs yet</div>
+          <div x-show="jobsLoading && jobs.length === 0"
+            class="text-[11px] text-slate-600 text-center py-8 animate-pulse">Loading…</div>
+        </div>
+
+        <button @click="loadJobs()" class="shrink-0 text-[10px] py-1 rounded bg-slate-800 text-slate-600 hover:text-slate-400 transition">
+          ↺ Refresh
+        </button>
+      </div>
+
       <!-- WIKI tab -->
       <div x-show="tab === 'wiki'" class="flex flex-col h-full overflow-hidden p-3 gap-3">
         <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Wiki Export</div>
@@ -285,6 +395,7 @@
         { id: 'graph',  icon: '⬡', label: 'Graph'  },
         { id: 'ingest', icon: '⬆', label: 'Ingest' },
         { id: 'query',  icon: '⌕', label: 'Query'  },
+        { id: 'jobs',   icon: '⚠', label: 'Jobs'   },
         { id: 'wiki',   icon: '◈', label: 'Wiki'   },
       ],
       legend: [
@@ -309,12 +420,17 @@
       queryResults: null,
       queryLoading: false,
 
+      jobs: [],
+      jobStats: { waiting: 0, active: 0, completed: 0, failed: 0, total: 0 },
+      jobsLoading: false,
+
       wikiExporting: false,
       wikiMessage: '',
 
       async init() {
-        await Promise.all([this.loadGraph(), this.loadInputFiles()]);
+        await Promise.all([this.loadGraph(), this.loadInputFiles(), this.loadJobs()]);
         setInterval(() => this.pollPipeline(), 2500);
+        setInterval(() => this.loadJobs(), 5000);
       },
 
       async loadGraph() {
@@ -428,6 +544,44 @@
           this.wikiMessage = d.success ? '✓ Exported to wiki/' : 'Error: ' + d.error;
         } catch(e) { this.wikiMessage = 'Export failed'; }
         this.wikiExporting = false;
+      },
+
+      async loadJobs() {
+        this.jobsLoading = true;
+        try {
+          const r = await fetch('/api/queue/jobs');
+          const d = await r.json();
+          if (d.success) {
+            // Sort: failed first, then waiting/active, then completed
+            const order = { failed: 0, waiting: 1, active: 2, completed: 3 };
+            this.jobs = (d.jobs || []).sort((a, b) => (order[a.status] ?? 9) - (order[b.status] ?? 9));
+            this.jobStats = d.stats || {};
+          }
+        } catch(e) {}
+        this.jobsLoading = false;
+      },
+
+      async retryJob(id, force) {
+        await fetch('/api/queue/jobs/' + id + '/retry', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ force: !!force }),
+        });
+        await this.loadJobs();
+      },
+
+      async deleteJob(id) {
+        await fetch('/api/queue/jobs/' + id, { method: 'DELETE' });
+        await this.loadJobs();
+      },
+
+      async retryAllFailed(force) {
+        const failed = this.jobs.filter(j => j.status === 'failed');
+        await Promise.all(failed.map(j => this.retryJob(j.id, force)));
+      },
+
+      jobStatusColor(status) {
+        return { failed: '#f87171', waiting: '#fbbf24', active: '#38bdf8', completed: '#4ade80' }[status] || '#94a3b8';
       },
 
       nodeColor(node) { return getNodeColor(node, this.colorMode); },
