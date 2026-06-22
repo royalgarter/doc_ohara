@@ -1,6 +1,6 @@
 import dotenv from 'dotenv';
 import fs from 'fs';
-import * as ac from '../src/arango_client.js';
+import * as ac from '../src/db/client.js';
 
 dotenv.config();
 (async ()=>{

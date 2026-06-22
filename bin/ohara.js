@@ -6,11 +6,11 @@ import { Command } from 'commander';
 import chalk from 'chalk';
 import fs from 'fs';
 import path from 'path';
-import { getArangoDBSimulator } from '../src/arangodb_sim.js';
-import { RetrievalEngine } from '../src/retrieval_engine.js';
-import { getIngestionQueue } from '../src/queue.js';
-import { runWorkerOnce } from '../src/worker.js';
-import { QuartzExporter } from '../src/quartz_exporter.js';
+import { getArangoDBSimulator } from '../src/db/simulator.js';
+import { RetrievalEngine } from '../src/retrieval.js';
+import { getIngestionQueue } from '../src/ingest/queue.js';
+import { runWorkerOnce } from '../src/ingest/worker.js';
+import { QuartzExporter } from '../src/exporter.js';
 
 const INPUT_DIR = 'doc_pipeline/input';
 

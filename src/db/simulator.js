@@ -6,7 +6,7 @@ import {
   sampleParagraphs,
   sampleTables,
   buildSampleEdges
-} from './document_samples.js';
+} from './seed.js';
 
 const STATE_FILE_PATH = 'doc_pipeline/collections/arangodb_state.json';
 

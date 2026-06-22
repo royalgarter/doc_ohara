@@ -11,16 +11,17 @@
     "build": "echo 'No build step required'",
     "start": "node server.js",
     "lint": "echo 'No lint required'",
-    "export-wiki": "node scripts/export_quartz.js",
     "ohara": "node bin/ohara.js",
     "ohara:ingest": "node bin/ohara.js ingest \"sample/Mastering Bitcoin 2nd.pdf\"",
     "ohara:query": "node bin/ohara.js query \"bitcoin theoretical\"",
     "ohara:ls": "node bin/ohara.js ls",
-    "ohara:rm": "node bin/ohara.js rm",
     "ohara:status": "node bin/ohara.js status",
     "ohara:export": "node bin/ohara.js export --format quartz",
     "ohara:export:json": "node bin/ohara.js export --format json",
-    "ohara:mcp": "node bin/ohara-mcp.js"
+    "ohara:mcp": "node bin/ohara-mcp.js",
+    "build:sumo": "node scripts/build-sumo-index.js",
+    "test": "node --test tests/ingest.test.js",
+    "admin": "node scripts/admin-queries.js"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",

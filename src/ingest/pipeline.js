@@ -3,11 +3,11 @@ import path from 'path';
 import { execSync } from 'child_process';
 import crypto from 'crypto';
 import { GoogleGenAI } from '@google/genai';
-import { getArangoDBSimulator } from './arangodb_sim.js';
-import { cacheKeyFor, readCacheAsync, writeCache, readCacheSync, hasCache, credFingerprint, getCacheDir } from './llm_cache.js';
-import { chunkMarkdown, readMarkdownFile } from './markdown_chunker.js';
-import * as arangoClient from './arango_client.js';
-import { validateTags } from './sumo_index.js';
+import { getArangoDBSimulator } from '../db/simulator.js';
+import { cacheKeyFor, readCacheAsync, writeCache, readCacheSync, hasCache, credFingerprint, getCacheDir } from '../cache.js';
+import { chunkMarkdown, readMarkdownFile } from './chunker.js';
+import * as arangoClient from '../db/client.js';
+import { validateTags } from '../sumo.js';
 
 // Global log tracking for the active pipeline run
 let currentLogs = [];
@@ -426,21 +426,38 @@ async function structureMarkdownWithRetries(ai, filename, mdContent) {
 
   // parallel pool
   const concurrency = parseInt(process.env.OHARA_INGEST_CONCURRENCY || '4', 10) || 4;
-  const results = [];
 
-  let idx = 0;
+  // per-run diagnostics: one entry per chunk, written to doc_pipeline/diagnostics/
+  const chunkDiagnostics = [];
+
   async function worker(chunk) {
+    const diag = {
+      chunk_id: chunk.id,
+      heading: chunk.heading || null,
+      started_at: new Date().toISOString(),
+      cache_hit: false,
+      attempts: 0,
+      repair_attempted: false,
+      repair_succeeded: false,
+      raw_llm_output: null,
+      repair_raw_output: null,
+      parse_error: null,
+      repair_error: null,
+      outcome: 'unknown',
+    };
+    chunkDiagnostics.push(diag);
+
     const systemPrompt = fs.readFileSync(path.join('prompts', 'ingest_document.md'), 'utf-8');
     const promptNorm = systemPrompt.trim();
     const modelId = 'gemini-3.5-flash';
     const credFp = credFingerprint();
     const key = cacheKeyFor([promptNorm, chunk.text, modelId, credFp]);
 
-    // Check cache
-    // attempt to read cache from disk or DB
     const cached = await readCacheAsync(key);
     if (cached && cached.parsed_json) {
       addPipelineLog('info', `Cache hit for chunk ${chunk.id}`);
+      diag.cache_hit = true;
+      diag.outcome = 'cache_hit';
       return cached.parsed_json;
     }
 
@@ -449,43 +466,50 @@ async function structureMarkdownWithRetries(ai, filename, mdContent) {
     let attempt = 0;
     while (attempt < maxAttempts) {
       attempt += 1;
+      diag.attempts = attempt;
       try {
         addPipelineLog('info', `LLM structuring chunk ${chunk.id} (attempt ${attempt}/${maxAttempts})`);
         const prompt = `${promptNorm}\n\nDOCUMENT_CHUNK_HEADING:${chunk.heading || ''}\n\n${chunk.text}`;
         const resp = await ai.models.generateContent({ model: modelId, contents: prompt });
         const parsedText = resp.text?.trim() || '{}';
+        diag.raw_llm_output = parsedText;
         const cleanJson = parsedText.replace(/^```json/gi, '').replace(/^```/gi, '').replace(/```$/gi, '').trim();
         let parsed;
         try {
           parsed = safeParseJsonFromText(cleanJson);
         } catch (parseErr) {
+          diag.parse_error = parseErr.message;
           addPipelineLog('warn', `Failed to parse LLM output for chunk ${chunk.id}: ${parseErr.message}`);
-          // include raw output in cache to aid debugging
           writeCache(key, { parsed_json: null, raw: parsedText, meta: { modelId, cached_at: new Date().toISOString(), parse_error: parseErr.message } });
-          // Attempt automated repair: ask LLM to extract the JSON object only from the noisy text
+
+          // Attempt automated repair
+          diag.repair_attempted = true;
           try {
             addPipelineLog('info', `Attempting automated repair for chunk ${chunk.id}`);
             const repairPrompt = `The text below may contain a JSON object mixed with commentary or markdown fences. Extract and return ONLY the JSON object (no explanation, no markdown fences). If multiple objects exist, return the single top-level object.\n\nNOISY_OUTPUT:\n${parsedText}`;
             const repairResp = await ai.models.generateContent({ model: modelId, contents: repairPrompt });
             const repairText = repairResp.text?.trim() || '';
+            diag.repair_raw_output = repairText;
             try {
               const repaired = safeParseJsonFromText(repairText);
-              // success: cache and return
               writeCache(key, { parsed_json: repaired, raw: parsedText, repair_raw: repairText, meta: { modelId, repaired_at: new Date().toISOString() } });
               addPipelineLog('info', `Automated repair succeeded for chunk ${chunk.id}`);
+              diag.repair_succeeded = true;
+              diag.outcome = 'repaired';
               return repaired;
             } catch (rpErr) {
+              diag.repair_error = rpErr.message;
               addPipelineLog('warn', `Automated repair failed for chunk ${chunk.id}: ${rpErr.message}`);
-              // fallthrough to throw original parse error
             }
           } catch (repairErr) {
+            diag.repair_error = repairErr.message;
             addPipelineLog('warn', `Repair LLM call failed for chunk ${chunk.id}: ${repairErr.message}`);
           }
 
           throw parseErr;
         }
-        // write cache
         writeCache(key, { parsed_json: parsed, raw: parsedText, meta: { modelId, cached_at: new Date().toISOString() } });
+        diag.outcome = 'success';
         return parsed;
       } catch (err) {
         addPipelineLog('warn', `LLM error on chunk ${chunk.id}: ${err.message}`);
@@ -494,6 +518,7 @@ async function structureMarkdownWithRetries(ai, filename, mdContent) {
           await delay(30000);
           continue;
         }
+        diag.outcome = 'failed';
         const e = new Error(`LLM structuring failed for chunk ${chunk.id} after ${maxAttempts} attempts: ${err.message}`);
         e.code = 'LLM_FAILED';
         throw e;
@@ -511,6 +536,27 @@ async function structureMarkdownWithRetries(ai, filename, mdContent) {
     });
     const batchResults = await Promise.all(promises);
     resultsArr.push(...batchResults);
+  }
+
+  // write per-run diagnostics export
+  try {
+    const diagDir = path.join('doc_pipeline', 'diagnostics');
+    fs.mkdirSync(diagDir, { recursive: true });
+    const diagFile = path.join(diagDir, `${filename.replace(/[^a-z0-9_.-]/gi, '_')}_${Date.now()}.json`);
+    const summary = {
+      filename,
+      generated_at: new Date().toISOString(),
+      total_chunks: chunks.length,
+      cache_hits: chunkDiagnostics.filter(d => d.cache_hit).length,
+      repairs_attempted: chunkDiagnostics.filter(d => d.repair_attempted).length,
+      repairs_succeeded: chunkDiagnostics.filter(d => d.repair_succeeded).length,
+      failures: chunkDiagnostics.filter(d => d.outcome === 'failed').length,
+      chunks: chunkDiagnostics,
+    };
+    fs.writeFileSync(diagFile, JSON.stringify(summary, null, 2), 'utf-8');
+    addPipelineLog('info', `Chunk diagnostics written to ${diagFile}`);
+  } catch (diagErr) {
+    addPipelineLog('warn', `Failed to write diagnostics: ${diagErr.message}`);
   }
 
   // merge results preserving chunk order
@@ -538,16 +584,22 @@ async function structureMarkdownWithRetries(ai, filename, mdContent) {
     }
   }
 
-  // Validate SUMO candidate tags for each node and promote to sumo_tags
+  // Validate SUMO candidate tags for each node and promote to sumo_tags.
+  // Provenance: sumo_candidate_tags (original LLM output) is preserved alongside
+  // sumo_tags (validated canonicals) and sumo_resolved_map (alias mappings used).
   try {
     for (const node of mergedNodes) {
       if (node && Array.isArray(node.sumo_candidate_tags)) {
-        const { valid, invalid } = validateTags(node.sumo_candidate_tags);
+        const { valid, invalid, resolved_map } = validateTags(node.sumo_candidate_tags);
         node.sumo_tags = valid;
-        // remove candidate list to keep stored documents clean
+        // keep original candidates for audit; rename to make intent clear
+        node.sumo_candidate_tags_raw = node.sumo_candidate_tags;
         delete node.sumo_candidate_tags;
+        if (Object.keys(resolved_map).length > 0) {
+          node.sumo_resolved_map = resolved_map;
+        }
         if (invalid && invalid.length > 0) {
-          addPipelineLog('warn', `Node validation removed invalid SUMO tags: ${invalid.join(', ')}`);
+          addPipelineLog('warn', `Node SUMO validation dropped ${invalid.length} tag(s): ${invalid.join(', ')}`);
         }
       }
     }

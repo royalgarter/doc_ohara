@@ -4,7 +4,7 @@ import { RdfXmlParser } from 'rdfxml-streaming-parser';
 // Initialize the RDF/XML streaming parser
 const parser = new RdfXmlParser({ baseIRI: 'http://ontologyportal.org' });
 // Resolve file path relative to this module
-const filePath = new URL('../refs/SUMO.owl', import.meta.url).pathname;
+const filePath = new URL('../ontology/SUMO.owl', import.meta.url).pathname;
 const fileStream = fs.createReadStream(filePath);
 
 const nodes = new Map();
@@ -83,9 +83,9 @@ parser.on('end', () => {
       if (!byName.has(s.localName)) byName.set(s.localName, s);
     }
     const indexArr = Array.from(byName.values());
-    const refsPath = new URL('../refs/sumo_index.json', import.meta.url).pathname;
+    const refsPath = new URL('../ontology/sumo_index.json', import.meta.url).pathname;
     fs.writeFileSync(refsPath, JSON.stringify(indexArr, null, 2));
-    console.log(`Wrote SUMO index to refs/sumo_index.json (${indexArr.length} entries)`);
+    console.log(`Wrote SUMO index to ontology/sumo_index.json (${indexArr.length} entries)`);
   } catch (err) {
     console.error('Failed to write SUMO index:', err.message);
   }

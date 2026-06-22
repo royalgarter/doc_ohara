@@ -1,5 +1,5 @@
 import dotenv from 'dotenv';
-import * as client from '../src/arango_client.js';
+import * as client from '../src/db/client.js';
 
 dotenv.config();
 (async ()=>{

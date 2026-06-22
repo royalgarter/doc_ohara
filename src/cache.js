@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
-import * as arangoClient from './arango_client.js';
+import * as arangoClient from './db/client.js';
 
 const DEFAULT_DIR = '.ohara_llm_cache';
 

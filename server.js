@@ -1,18 +1,18 @@
 import express from 'express';
 import path from 'path';
 import fs from 'fs';
-import { getArangoDBSimulator } from './src/arangodb_sim.js';
-import { QuartzExporter } from './src/quartz_exporter.js';
-import { RetrievalEngine } from './src/retrieval_engine.js';
-import { getIngestionQueue } from './src/queue.js';
-import { runWorkerOnce, startWorkerLoop } from './src/worker.js';
+import { getArangoDBSimulator } from './src/db/simulator.js';
+import { QuartzExporter } from './src/exporter.js';
+import { RetrievalEngine } from './src/retrieval.js';
+import { getIngestionQueue } from './src/ingest/queue.js';
+import { runWorkerOnce, startWorkerLoop } from './src/ingest/worker.js';
 import {
   getPipelineLogs,
   isPipelineActive,
   runPipelineExecution,
   clearPipelineLogs,
   addPipelineLog
-} from './src/pipeline_runner.js';
+} from './src/ingest/pipeline.js';
 
 // Tool catalog shared between /tools discovery and the MCP server (bin/ohara-mcp.js)
 const AGENT_TOOLS = [
