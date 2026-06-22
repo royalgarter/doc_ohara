@@ -1063,40 +1063,72 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
         // Insert sections; build internalId → ArangoDB _id map for paragraph/table linking.
         // Uses parent_section_id to wire Chapter→Section→Subsection hierarchy correctly,
         // and only creates NEXT_SIBLING edges between sections sharing the same parent.
-        const sectionIdMap = new Map(); // internal transform id → ArangoDB _id
-        const docsSections = transformedDocs.sections.filter(s => s.document_id === doc.id);
-        // lastHandleByParent tracks the last inserted section handle per parent (for NEXT_SIBLING)
-        const lastHandleByParent = new Map(); // parentInternalId|'root' → last ArangoDB _id
-
-        for (const sec of docsSections) {
-          const secRes = await arangoClient.insertSection({
-            document_id: inserted._key,
-            title: sec.title,
-            level: sec.level,
-            node_type: sec.node_type || 'Section',
-            parent_section_id: sec.parent_section_id || null,
-          });
-          nodeCount += 1;
-          const secHandle = secRes._id || `sections/${secRes._key}`;
-          sectionIdMap.set(sec.id, secHandle);
-
-          // Parent edge: either doc→section (top-level) or parentSection→section (nested)
-          const parentHandle = sec.parent_section_id ? sectionIdMap.get(sec.parent_section_id) : null;
-          const fromHandle = parentHandle || docHandle;
-          await arangoClient.insertEdge({ _from: fromHandle, _to: secHandle, relation: 'HAS_CHILD', type: 'HAS_CHILD' }).catch(()=>{});
-
-          // NEXT_SIBLING only between sections with the same parent
-          const siblingKey = sec.parent_section_id || 'root';
-          const lastSiblingHandle = lastHandleByParent.get(siblingKey);
-          if (lastSiblingHandle) {
-            await arangoClient.insertEdge({ _from: lastSiblingHandle, _to: secHandle, relation: 'NEXT_SIBLING', type: 'NEXT_SIBLING' }).catch(()=>{});
+        const BATCH_SIZE = 10;
+        // Helper: run an array of async task-fns in parallel batches of BATCH_SIZE
+        async function runBatched(items, taskFn) {
+          for (let i = 0; i < items.length; i += BATCH_SIZE) {
+            await Promise.all(items.slice(i, i + BATCH_SIZE).map(taskFn));
           }
-          lastHandleByParent.set(siblingKey, secHandle);
         }
 
-        // Insert paragraphs — link to their section (HAS_CHILD) and document (BELONGS_TO)
+        const sectionIdMap = new Map(); // internal transform id → ArangoDB _id
+        const docsSections = transformedDocs.sections.filter(s => s.document_id === doc.id);
+        // Group sections by level so parents are always fully inserted before children.
+        // Within each level-group, process in batches of BATCH_SIZE (parent IDs already resolved).
+        // NEXT_SIBLING edges must reflect document order, so we assign sibling indices first.
+        const siblingPrev = new Map(); // sec.id → previous sibling's internal id (or null)
+        const seenByParent = new Map();
+        for (const sec of docsSections) {
+          const pkey = sec.parent_section_id || 'root';
+          siblingPrev.set(sec.id, seenByParent.get(pkey) || null);
+          seenByParent.set(pkey, sec.id);
+        }
+
+        const levelGroups = new Map();
+        for (const sec of docsSections) {
+          const lv = sec.level ?? 1;
+          if (!levelGroups.has(lv)) levelGroups.set(lv, []);
+          levelGroups.get(lv).push(sec);
+        }
+        const sortedLevels = [...levelGroups.keys()].sort((a, b) => a - b);
+
+        for (const lv of sortedLevels) {
+          const group = levelGroups.get(lv);
+          // Process in batches; within each batch insert nodes + HAS_CHILD in parallel,
+          // then add NEXT_SIBLING edges after the batch so sibling handles are all resolved.
+          for (let i = 0; i < group.length; i += BATCH_SIZE) {
+            const batch = group.slice(i, i + BATCH_SIZE);
+            await Promise.all(batch.map(async (sec) => {
+              const secRes = await arangoClient.insertSection({
+                document_id: inserted._key,
+                title: sec.title,
+                level: sec.level,
+                node_type: sec.node_type || 'Section',
+                parent_section_id: sec.parent_section_id || null,
+              });
+              nodeCount += 1;
+              const secHandle = secRes._id || `sections/${secRes._key}`;
+              sectionIdMap.set(sec.id, secHandle);
+
+              const parentHandle = sec.parent_section_id ? sectionIdMap.get(sec.parent_section_id) : null;
+              const fromHandle = parentHandle || docHandle;
+              await arangoClient.insertEdge({ _from: fromHandle, _to: secHandle, relation: 'HAS_CHILD', type: 'HAS_CHILD' }).catch(()=>{});
+            }));
+            // Now all handles in this batch are in sectionIdMap — add NEXT_SIBLING edges
+            await Promise.all(batch.map(async (sec) => {
+              const secHandle = sectionIdMap.get(sec.id);
+              const prevSibId = siblingPrev.get(sec.id);
+              const prevHandle = prevSibId ? sectionIdMap.get(prevSibId) : null;
+              if (prevHandle) {
+                await arangoClient.insertEdge({ _from: prevHandle, _to: secHandle, relation: 'NEXT_SIBLING', type: 'NEXT_SIBLING' }).catch(()=>{});
+              }
+            }));
+          }
+        }
+
+        // Insert paragraphs in parallel batches — section IDs are all resolved by now
         const docsParagraphs = transformedDocs.paragraphs.filter(p => p.document_id === doc.id);
-        for (const p of docsParagraphs) {
+        await runBatched(docsParagraphs, async (p) => {
           const secHandle = p.section_id ? sectionIdMap.get(p.section_id) : null;
           const paraRes = await arangoClient.insertParagraph({
             document_id: inserted._key,
@@ -1110,15 +1142,17 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
           });
           nodeCount += 1;
           const paraHandle = paraRes._id || `paragraphs/${paraRes._key}`;
-          await arangoClient.insertEdge({ _from: paraHandle, _to: docHandle, relation: 'BELONGS_TO', type: 'BELONGS_TO' }).catch(()=>{});
-          if (secHandle) {
-            await arangoClient.insertEdge({ _from: secHandle, _to: paraHandle, relation: 'HAS_CHILD', type: 'HAS_CHILD' }).catch(()=>{});
-          }
-        }
+          await Promise.all([
+            arangoClient.insertEdge({ _from: paraHandle, _to: docHandle, relation: 'BELONGS_TO', type: 'BELONGS_TO' }).catch(()=>{}),
+            secHandle
+              ? arangoClient.insertEdge({ _from: secHandle, _to: paraHandle, relation: 'HAS_CHILD', type: 'HAS_CHILD' }).catch(()=>{})
+              : Promise.resolve(),
+          ]);
+        });
 
-        // Insert tables — same linking pattern as paragraphs
+        // Insert tables in parallel batches — same pattern as paragraphs
         const docsTables = transformedDocs.tables.filter(t => t.document_id === doc.id);
-        for (const t of docsTables) {
+        await runBatched(docsTables, async (t) => {
           const secHandle = t.section_id ? sectionIdMap.get(t.section_id) : null;
           const tblRes = await arangoClient.insertTable({
             document_id: inserted._key,
@@ -1129,11 +1163,13 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
           });
           nodeCount += 1;
           const tblHandle = tblRes._id || `tables/${tblRes._key}`;
-          await arangoClient.insertEdge({ _from: tblHandle, _to: docHandle, relation: 'BELONGS_TO', type: 'BELONGS_TO' }).catch(()=>{});
-          if (secHandle) {
-            await arangoClient.insertEdge({ _from: secHandle, _to: tblHandle, relation: 'HAS_CHILD', type: 'HAS_CHILD' }).catch(()=>{});
-          }
-        }
+          await Promise.all([
+            arangoClient.insertEdge({ _from: tblHandle, _to: docHandle, relation: 'BELONGS_TO', type: 'BELONGS_TO' }).catch(()=>{}),
+            secHandle
+              ? arangoClient.insertEdge({ _from: secHandle, _to: tblHandle, relation: 'HAS_CHILD', type: 'HAS_CHILD' }).catch(()=>{})
+              : Promise.resolve(),
+          ]);
+        });
 
       } catch (err) {
         addPipelineLog('error', `ArangoDB persistence failed for ${doc.source_file}: ${err.message}`);

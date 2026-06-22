@@ -140,16 +140,23 @@ export async function listDocuments() {
 
 export async function deleteDocumentAndNodes(docKey) {
   if (!initialized) await initArangoClient();
-  // Remove paragraphs, sections, tables, edges belonging to this document
+  // Cascade-delete all edges that touch any node belonging to this document
+  // (sections, paragraphs, tables, and the document itself)
+  await db.query(`
+    LET nodeIds = UNION(
+      (FOR s IN sections  FILTER s.document_id == @k RETURN s._id),
+      (FOR p IN paragraphs FILTER p.document_id == @k RETURN p._id),
+      (FOR t IN tables    FILTER t.document_id == @k RETURN t._id),
+      [CONCAT("documents/", @k)]
+    )
+    FOR e IN edges FILTER e._from IN nodeIds OR e._to IN nodeIds
+      REMOVE e IN edges
+  `, { k: docKey }).catch(() => {});
+  // Remove the child collections
   await db.query('FOR p IN paragraphs FILTER p.document_id == @k REMOVE p IN paragraphs', { k: docKey }).catch(() => {});
-  await db.query('FOR s IN sections FILTER s.document_id == @k REMOVE s IN sections', { k: docKey }).catch(() => {});
-  await db.query('FOR t IN tables FILTER t.document_id == @k REMOVE t IN tables', { k: docKey }).catch(() => {});
-  await db.query(
-    'FOR e IN edges FILTER e._from == CONCAT("documents/", @k) OR e._to == CONCAT("documents/", @k) REMOVE e IN edges',
-    { k: docKey }
-  ).catch(() => {});
-  const coll = db.collection('documents');
-  await coll.remove(docKey).catch(() => {});
+  await db.query('FOR s IN sections  FILTER s.document_id == @k REMOVE s IN sections',  { k: docKey }).catch(() => {});
+  await db.query('FOR t IN tables    FILTER t.document_id == @k REMOVE t IN tables',    { k: docKey }).catch(() => {});
+  await db.collection('documents').remove(docKey).catch(() => {});
   return true;
 }
 
