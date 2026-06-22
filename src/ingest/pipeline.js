@@ -9,6 +9,8 @@ import { chunkMarkdown, readMarkdownFile } from './chunker.js';
 import * as arangoClient from '../db/client.js';
 import { validateTags } from '../sumo.js';
 
+const GEMINI_MODEL = 'gemini-2.5-flash-lite';
+
 // Global log tracking for the active pipeline run
 let currentLogs = [];
 let isPipelineRunning = false;
@@ -294,7 +296,7 @@ ${content}
 `;
 
   const result = await ai.models.generateContent({
-    model: 'gemini-3.5-flash',
+    model: GEMINI_MODEL,
     contents: prompt
   });
 
@@ -358,7 +360,7 @@ async function generateFromMarkdown(ai, mdContent, filename) {
   try {
     const promptTemplate = fs.readFileSync(path.join('prompts', 'ingest_document.md'), 'utf-8');
     const prompt = `${promptTemplate}\n\nDOCUMENT_MARKDOWN:\n\n${mdContent}`;
-    const result = await ai.models.generateContent({ model: 'gemini-3.5-flash', contents: prompt });
+    const result = await ai.models.generateContent({ model: GEMINI_MODEL, contents: prompt });
     const parsedText = result.text?.trim() || '{}';
     const cleanJson = parsedText.replace(/^```json/gi, '').replace(/^```/gi, '').replace(/```$/gi, '').trim();
     return safeParseJsonFromText(cleanJson);
@@ -449,7 +451,7 @@ async function structureMarkdownWithRetries(ai, filename, mdContent) {
 
     const systemPrompt = fs.readFileSync(path.join('prompts', 'ingest_document.md'), 'utf-8');
     const promptNorm = systemPrompt.trim();
-    const modelId = 'gemini-3.5-flash';
+    const modelId = GEMINI_MODEL;
     const credFp = credFingerprint();
     const key = cacheKeyFor([promptNorm, chunk.text, modelId, credFp]);
 

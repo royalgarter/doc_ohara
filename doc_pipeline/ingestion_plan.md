@@ -141,7 +141,6 @@ Implementation details (changes/additions)
   - Persisted ArangoDB documents should include fields:
     - doc: { _key, title, source_file, doc_type: 'Document', sumo_tags: [..], checksum }
     - section/chapter: { _key, document_id, title, level, start_offset, end_offset, sumo_tags: [..], checksum }
-
 - LLM cache & tagging:
   - Cache keys MUST include whether SUMO tagging was requested (so cache key differs if tagging option changes).
   - If the LLM returns candidate tags, store them in the cache along with parsed DoCO JSON to avoid re-validating identical outputs.
@@ -156,6 +155,79 @@ Implementation details (changes/additions)
     - tags are present in refs/sumo_index.json
   - Unit test for scripts/build_sumo_index.js to verify expected index structure.
 
-Approval
 --------
-Proceed with implementation? If yes, confirm desired concurrency and cache directory location (defaults will be used otherwise).
+
+# Main Functions — Ingest Pipeline
+
+ohara ingest <path>                              [bin/ohara.js]
+│
+├─ 1. Validate file & copy to doc_pipeline/input/
+│
+├─ 2. queue.add('ingestion', { filename })       [src/queue.js]
+│     Creates an in-memory job with id, status='waiting'
+│
+└─ 3. runWorkerOnce(GEMINI_API_KEY)              [src/worker.js]
+      │
+      └─ processJob(queue, job, aiKey)
+            │
+            └─ ingestSingleFile(filename, aiKey, onProgress)   [src/pipeline_runner.js]
+                  │
+                  ├─ A. preflightChecks(filename)
+                  │     Requires: GEMINI_API_KEY, ARANGO_URL, lit CLI on PATH
+                  │
+                  ├─ B. new GoogleGenAI({ apiKey })
+                  │     Initialise Gemini client
+                  │
+                  ├─ C. performParsing(ai, filename, ...)
+                  │     │
+                  │     ├─ attemptLiteParse(pdf → .md)        [execSync 'lit parse ...']
+                  │     │   Retries up to 3×, waits 30s between
+                  │     │
+                  │     └─ structureMarkdownWithRetries(ai, mdContent)
+                  │           │
+                  │           ├─ chunkMarkdown(content, maxChars=12000)   [src/markdown_chunker.js]
+                  │           │
+                  │           └─ parallel pool (concurrency=4):
+                  │               For each chunk:
+                  │                 ① check llm_cache (disk / ArangoDB)
+                  │                 ② if miss → ai.models.generateContent(gemini-3.5-flash)
+                  │                    prompt = `prompts/ingest_document.md` + chunk text
+                  │                 ③ safeParseJsonFromText(response)
+                  │                    if parse fails → auto-repair via 2nd LLM call
+                  │                 ④ writeCache(key, parsed_json)
+                  │
+                  │           Merge chunk results → { nodes: [...] }
+                  │           SUMO tag validation (validateTags) per node
+                  │
+                  ├─ D. Write raw JSON → doc_pipeline/raw_output/<filename>/<name>.json
+                  │
+                  ├─ E. transformRawToCollections(rawOutputDir)
+                  │     Reads node types (Chapter/Section → sections[], Paragraph → paragraphs[], Table → tables[])
+                  │     Returns { documents[], sections[], paragraphs[], tables[] }
+                  │
+                  └─ F. Persist to DB
+                        if ARANGO_URL set  → arangoClient.insertDocument/Section/Paragraph/Table + edges
+                        else               → arangoDBSimulator (in-memory, file-backed)
+
+---
+Key design decisions to know
+
+┌─────────────────┬─────────────────────────────────────────────────────────────────────────────────┐
+│     Concern     │                                How it's handled                                 │
+├─────────────────┼─────────────────────────────────────────────────────────────────────────────────┤
+│ PDF parsing     │ lit parse CLI converts PDF → Markdown (LiteParse); retries 3×                   │
+├─────────────────┼─────────────────────────────────────────────────────────────────────────────────┤
+│ LLM structuring │ Gemini gemini-3.5-flash with prompts/ingest_document.md as system prompt        │
+├─────────────────┼─────────────────────────────────────────────────────────────────────────────────┤
+│ Large docs      │ Markdown is chunked at 12 000 chars, processed 4 chunks in parallel             │
+├─────────────────┼─────────────────────────────────────────────────────────────────────────────────┤
+│ LLM noise       │ safeParseJsonFromText strips fences; on failure a 2nd "repair" LLM call is made │
+├─────────────────┼─────────────────────────────────────────────────────────────────────────────────┤
+│ Caching         │ SHA-based cache keyed on prompt + chunk + model + credential fingerprint        │
+├─────────────────┼─────────────────────────────────────────────────────────────────────────────────┤
+│ DB              │ Writes to real ArangoDB if ARANGO_URL is set, otherwise an in-memory simulator  │
+├─────────────────┼─────────────────────────────────────────────────────────────────────────────────┤
+│ Retry logic     │ Worker retries OOM and RATE_LIMIT errors with exponential backoff               │
+└─────────────────┴─────────────────────────────────────────────────────────────────────────────────┘
+
+The critical env vars are GEMINI_API_KEY, ARANGO_URL, and lit (LiteParse) must be on $PATH for non-markdown files.
