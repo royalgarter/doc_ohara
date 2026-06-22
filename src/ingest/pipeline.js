@@ -948,13 +948,17 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
   if (fs.existsSync(fileContentPath)) {
     const buf = fs.readFileSync(fileContentPath);
     fileHash = crypto.createHash('sha256').update(buf).digest('hex');
-    if (!options.force && process.env.ARANGO_URL) {
+    if (process.env.ARANGO_URL) {
       const existing = await arangoClient.findDocumentByHash(fileHash);
       if (existing) {
-        const skippedError = new Error(`Document already ingested (hash ${fileHash.slice(0, 12)}…). Use --force to re-ingest.`);
-        skippedError.code = 'ALREADY_INGESTED';
-        skippedError.existingDoc = existing;
-        throw skippedError;
+        if (!options.force) {
+          const skippedError = new Error(`Document already ingested (hash ${fileHash.slice(0, 12)}…). Use --force to re-ingest.`);
+          skippedError.code = 'ALREADY_INGESTED';
+          skippedError.existingDoc = existing;
+          throw skippedError;
+        }
+        addPipelineLog('warn', `--force: deleting existing document ${existing._key} before re-ingesting…`);
+        await arangoClient.deleteDocumentAndNodes(existing._key);
       }
     }
   }

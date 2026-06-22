@@ -85,7 +85,7 @@
             class="text-xs text-slate-700 text-center py-6">No documents yet</div>
         </div>
         <!-- Legend -->
-        <div class="border-t border-slate-800 pt-2.5 grid grid-cols-2 gap-x-3 gap-y-1">
+        <div class="border-t border-slate-800 pt-2.5 grid grid-cols-2 gap-x-3 gap-y-1.5">
           <template x-for="item in legend" :key="item[1]">
             <div class="flex items-center gap-1.5 text-[10px] text-slate-500">
               <div class="w-2.5 h-2.5 rounded-full shrink-0" :style="'background:' + item[0]"></div>
@@ -401,9 +401,11 @@
       ],
       legend: [
         ['#38bdf8', 'Document'],
-        ['#818cf8', 'Chapter'],
-        ['#2dd4bf', 'Section'],
-        ['#67e8f9', 'Subsection'],
+        ['#818cf8', 'Section L1'],
+        ['#2dd4bf', 'Section L2'],
+        ['#67e8f9', 'Section L3'],
+        ['#a78bfa', 'Section L4'],
+        ['#f0abfc', 'Section L5'],
         ['#fbbf24', 'Para/Figure'],
         ['#f472b6', 'Table'],
         ['#4ade80', 'SUMO Tag'],
@@ -605,14 +607,14 @@
 
   // ── SVG Graph Renderer ────────────────────────────────────────────────────
 
-  const COL_COLORS = {
-    document:   '#38bdf8',  // sky
-    chapter:    '#818cf8',  // indigo
-    section:    '#2dd4bf',  // teal
-    subsection: '#67e8f9',  // cyan
-    paragraph:  '#fbbf24',  // amber
-    table:      '#f472b6',  // pink
-    tag:        '#4ade80',  // green
+  // One color per section level (index 0 = level 1, etc.)
+  const LEVEL_COLORS = ['#818cf8','#2dd4bf','#67e8f9','#a78bfa','#f0abfc','#fb923c','#34d399'];
+
+  const FIXED_COLORS = {
+    document:  '#38bdf8',
+    paragraph: '#fbbf24',
+    table:     '#f472b6',
+    tag:       '#4ade80',
   };
 
   const CLUSTER_PALETTE = [
@@ -620,36 +622,32 @@
     '#fb923c','#4ade80','#facc15','#e879f9',
   ];
 
+  // Returns a stable colKey string for a node.
+  // For sections, colKey = 'section_L<level>' so each level gets its own column.
   function colKeyOf(node) {
-    // prefer explicit node_type set by the pipeline
-    const nt = (node.node_type || '').toLowerCase();
-    if (nt === 'chapter')    return 'chapter';
-    if (nt === 'subsection') return 'subsection';
-    if (nt === 'section')    return 'section';
-    if (nt === 'figure' || nt === 'listitem' || nt === 'paragraph') return 'paragraph';
-    if (nt === 'table')      return 'table';
-
-    // fall back to _id prefix + level
     const id = node._id || '';
     if (id.startsWith('documents/'))  return 'document';
     if (id.startsWith('paragraphs/')) return 'paragraph';
     if (id.startsWith('tables/'))     return 'table';
     if (id.startsWith('tags/'))       return 'tag';
-    if (id.startsWith('sections/')) {
-      const lvl = node.level || 1;
-      if (lvl === 1) return 'chapter';
-      if (lvl >= 3)  return 'subsection';
-      return 'section';
-    }
+    if (id.startsWith('sections/'))   return 'section_L' + (node.level || 1);
 
-    // legacy type string
-    const t = (node.type || '').toLowerCase();
-    if (t === 'chapter')    return 'chapter';
-    if (t === 'subsection') return 'subsection';
-    if (['section'].includes(t)) return 'section';
-    if (['paragraph','listitem','text','code','figure'].includes(t)) return 'paragraph';
-    if (t === 'document') return 'document';
-    return 'section';
+    // legacy / simulator nodes — use type/node_type
+    const nt = (node.node_type || node.type || '').toLowerCase();
+    if (nt === 'chapter')    return 'section_L1';
+    if (nt === 'subsection') return 'section_L3';
+    if (['section'].includes(nt)) return 'section_L2';
+    if (['paragraph','listitem','text','code','figure'].includes(nt)) return 'paragraph';
+    if (nt === 'table')    return 'table';
+    if (nt === 'document') return 'document';
+    return 'paragraph';
+  }
+
+  function sectionLevel(node) {
+    // parse level from colKey
+    const ck = colKeyOf(node);
+    const m = ck.match(/section_L(\d+)/);
+    return m ? parseInt(m[1], 10) : null;
   }
 
   function getNodeColor(node, colorMode) {
@@ -662,7 +660,12 @@
         return CLUSTER_PALETTE[h % CLUSTER_PALETTE.length];
       }
     }
-    return COL_COLORS[colKeyOf(node)] || '#475569';
+    const ck = colKeyOf(node);
+    if (ck.startsWith('section_L')) {
+      const lvl = parseInt(ck.replace('section_L', ''), 10);
+      return LEVEL_COLORS[(lvl - 1) % LEVEL_COLORS.length];
+    }
+    return FIXED_COLORS[ck] || '#475569';
   }
 
   function renderGraph(data, colorMode, selectedKey, zoom, onSelect) {
@@ -684,50 +687,52 @@
         _key: 'tag:' + name, _id: 'tags/' + name, type: 'tag', title: name, _tagCount: count,
       }));
 
-    // ── Split sections by structural level ────────────────────────────────
-    const isChapter  = s => s.node_type === 'Chapter'    || (!s.node_type && (s.level || 1) === 1);
-    const isSubsec   = s => s.node_type === 'Subsection' || (!s.node_type && (s.level || 1) >= 3);
-    const isSection  = s => !isChapter(s) && !isSubsec(s);
-
+    // ── Compute distinct section levels present in data ────────────────────
     const MAX_PARA = 100, MAX_SEC = 200, MAX_TBL = 30;
     const sampledSec  = sections.slice(0, MAX_SEC);
     const sampledPara = sampleEvenly(paragraphs, MAX_PARA);
     const sampledTbl  = tables.slice(0, MAX_TBL);
 
-    const chapNodes = sampledSec.filter(isChapter);
-    const secNodes  = sampledSec.filter(isSection);
-    const subNodes  = sampledSec.filter(isSubsec);
+    // group sections by level
+    const sectionsByLevel = new Map(); // level(int) → section[]
+    for (const s of sampledSec) {
+      const lvl = s.level || 1;
+      if (!sectionsByLevel.has(lvl)) sectionsByLevel.set(lvl, []);
+      sectionsByLevel.get(lvl).push(s);
+    }
+    const levelNums = [...sectionsByLevel.keys()].sort((a, b) => a - b);
+    const numLevels = levelNums.length || 0;
 
-    // ── Column x positions ────────────────────────────────────────────────
-    const CX = {
-      document:   75,
-      chapter:    195,
-      section:    305,
-      subsection: 405,
-      paragraph:  510,
-      table:      548,   // slight offset from paragraph to distinguish
-      tag:        680,
-    };
+    // ── Dynamic column x positions ────────────────────────────────────────
+    const DOC_X   = 70;
+    const SEC_START = DOC_X + 110;    // x of first section level column
+    const SEC_GAP   = 90;             // gap between level columns
+    const PARA_X  = SEC_START + numLevels * SEC_GAP + 20;
+    const TAG_X   = PARA_X + 145;
+    const svgW    = TAG_X + 115;
+
+    const levelToX = {};
+    levelNums.forEach((lvl, i) => { levelToX[lvl] = SEC_START + i * SEC_GAP; });
+
     const ROW_H = 26;
     const PAD_Y = 42;
 
     const nodePos = new Map();
 
-    function placeColumn(nodes, colKey, xOverride) {
-      const x = xOverride !== undefined ? xOverride : CX[colKey];
+    function placeColumn(nodes, colKey, x) {
       nodes.forEach((node, i) => {
         const key = node._key || node.id || colKey + '_' + i;
         nodePos.set(key, { x, y: PAD_Y + i * ROW_H, node, colKey });
       });
     }
 
-    placeColumn(documents,   'document');
-    placeColumn(chapNodes,   'chapter');
-    placeColumn(secNodes,    'section');
-    placeColumn(subNodes,    'subsection');
-    placeColumn(sampledPara, 'paragraph');
-    if (sampledTbl.length > 0) placeColumn(sampledTbl, 'table');
-    placeColumn(tagNodes,    'tag');
+    placeColumn(documents,   'document', DOC_X);
+    for (const lvl of levelNums) {
+      placeColumn(sectionsByLevel.get(lvl), 'section_L' + lvl, levelToX[lvl]);
+    }
+    placeColumn(sampledPara, 'paragraph', PARA_X);
+    if (sampledTbl.length > 0) placeColumn(sampledTbl, 'table', PARA_X + 35);
+    placeColumn(tagNodes,    'tag',       TAG_X);
 
     // ── Compute related keys for the selected node ─────────────────────────
     const relatedKeys    = new Set();
@@ -741,16 +746,13 @@
           relatedEdgeIds.add(edge._key || (edge._from + '→' + edge._to));
         }
       }
-      // also mark tag relationships
+      // tag relationships (virtual edges)
       for (const p of sampledPara) {
         if (p._key !== selectedKey) continue;
-        for (const tagName of (p.sumo_tags || [])) {
-          relatedKeys.add('tag:' + tagName);
-        }
+        for (const tagName of (p.sumo_tags || [])) relatedKeys.add('tag:' + tagName);
       }
-      const selNode = nodePos.get(selectedKey);
-      if (selNode && colKeyOf(selNode.node) === 'tag') {
-        // reverse: find paragraphs that have this tag
+      const selEntry = nodePos.get(selectedKey);
+      if (selEntry && selEntry.colKey === 'tag') {
         const tagName = selectedKey.replace('tag:', '');
         for (const p of sampledPara) {
           if ((p.sumo_tags || []).includes(tagName)) relatedKeys.add(p._key);
@@ -759,11 +761,9 @@
     }
 
     // ── SVG dimensions ────────────────────────────────────────────────────
-    const tallest = Math.max(
-      documents.length, chapNodes.length, secNodes.length,
-      subNodes.length, sampledPara.length, tagNodes.length, 1
-    );
-    const svgW = 760;
+    const columnHeights = [documents.length, sampledPara.length, tagNodes.length,
+      ...levelNums.map(l => sectionsByLevel.get(l).length)];
+    const tallest = Math.max(...columnHeights, 1);
     const svgH = Math.max(PAD_Y + tallest * ROW_H + 30, 300);
 
     svg.setAttribute('viewBox', '0 0 ' + svgW + ' ' + svgH);
@@ -772,29 +772,34 @@
 
     // ── Defs ──────────────────────────────────────────────────────────────
     const defs = svgEl('defs');
-    const filter = svgEl('filter', { id: 'glow', x: '-50%', y: '-50%', width: '200%', height: '200%' });
-    filter.innerHTML = '<feGaussianBlur stdDeviation="2.5" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>';
-    defs.appendChild(filter);
-    const filterSoft = svgEl('filter', { id: 'glow-soft', x: '-50%', y: '-50%', width: '200%', height: '200%' });
-    filterSoft.innerHTML = '<feGaussianBlur stdDeviation="1.5" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>';
-    defs.appendChild(filterSoft);
+    const mkFilter = (id, std) => {
+      const f = svgEl('filter', { id, x: '-50%', y: '-50%', width: '200%', height: '200%' });
+      f.innerHTML = `<feGaussianBlur stdDeviation="${std}" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>`;
+      return f;
+    };
+    defs.appendChild(mkFilter('glow', '2.5'));
+    defs.appendChild(mkFilter('glow-soft', '1.5'));
     svg.appendChild(defs);
 
     // ── Column guide lines + headers ──────────────────────────────────────
     const guideG = svgEl('g');
+
     const colDefs = [
-      [CX.document,   'DOCUMENT',   COL_COLORS.document],
-      [CX.chapter,    'CHAPTER',    COL_COLORS.chapter],
-      [CX.section,    'SECTION',    COL_COLORS.section],
-      [CX.subsection, 'SUBSECTION', COL_COLORS.subsection],
-      [CX.paragraph,  'PARA/FIG',   COL_COLORS.paragraph],
-      [CX.tag,        'SUMO TAG',   COL_COLORS.tag],
+      [DOC_X, 'DOCUMENT', FIXED_COLORS.document],
+      ...levelNums.map(lvl => [
+        levelToX[lvl],
+        'LEVEL ' + lvl,
+        LEVEL_COLORS[(lvl - 1) % LEVEL_COLORS.length],
+      ]),
+      [PARA_X, 'PARA/FIG', FIXED_COLORS.paragraph],
+      [TAG_X,  'SUMO TAG', FIXED_COLORS.tag],
     ];
+
     for (const [x, label, col] of colDefs) {
       guideG.appendChild(svgEl('line', { x1: x, y1: 28, x2: x, y2: svgH - 8,
         stroke: '#1e293b', 'stroke-width': '1' }));
       const txt = svgEl('text', { x, y: 16, 'text-anchor': 'middle',
-        'font-size': '7', fill: col, opacity: '0.5', 'font-weight': '700',
+        'font-size': '7', fill: col, opacity: '0.55', 'font-weight': '700',
         'letter-spacing': '1', 'font-family': 'ui-monospace,monospace' });
       txt.textContent = label;
       guideG.appendChild(txt);
@@ -803,7 +808,6 @@
 
     // ── Edges ─────────────────────────────────────────────────────────────
     const edgeG = svgEl('g', { id: 'edges' });
-
     const hasSelection = !!selectedKey;
 
     for (const edge of edges.slice(0, 600)) {
@@ -813,19 +817,16 @@
       const tp = nodePos.get(tk);
       if (!fp || !tp) continue;
 
-      const edgeId = edge._key || (edge._from + '→' + edge._to);
-      const isRelated = hasSelection && relatedEdgeIds.has(edgeId);
-      const isConnected = isRelated || fk === selectedKey || tk === selectedKey;
+      const edgeId      = edge._key || (edge._from + '→' + edge._to);
+      const isConnected = hasSelection && relatedEdgeIds.has(edgeId);
 
-      // dim non-related edges when something is selected
-      const stroke  = isConnected ? '#60a5fa' : '#334155';
-      const opacity = isConnected ? '0.75' : (hasSelection ? '0.08' : '0.3');
-      const width   = isConnected ? '1.2' : '0.7';
-
-      edgeG.appendChild(bezierEdge(fp.x, fp.y, tp.x, tp.y, stroke, opacity, width));
+      edgeG.appendChild(bezierEdge(fp.x, fp.y, tp.x, tp.y,
+        isConnected ? '#60a5fa' : '#334155',
+        isConnected ? '0.75' : (hasSelection ? '0.07' : '0.28'),
+        isConnected ? '1.2' : '0.7'));
     }
 
-    // Tag edges (virtual, from sumo_tags arrays)
+    // virtual tag edges
     for (const p of sampledPara) {
       const pp = nodePos.get(p._key);
       if (!pp) continue;
@@ -846,12 +847,13 @@
     const nodeG = svgEl('g', { id: 'nodes' });
 
     for (const [key, { x, y, node, colKey }] of nodePos) {
-      const isTag  = key.startsWith('tag:');
-      const ck     = isTag ? 'tag' : colKeyOf(node);
-      const r      = isTag ? 4 : (ck === 'document' ? 7 : 5);
-      const color  = (colorMode === 'sumo' && !isTag)
+      const isTag    = key.startsWith('tag:');
+      const isDoc    = colKey === 'document';
+      const isSec    = colKey.startsWith('section_L');
+      const color    = (colorMode === 'sumo' && !isTag)
         ? getNodeColor(node, 'sumo')
-        : (COL_COLORS[ck] || '#475569');
+        : getNodeColor(node, 'type');
+      const r        = isDoc ? 7 : isTag ? 4 : 5;
 
       const isSel     = key === selectedKey;
       const isRelated = !isSel && hasSelection && relatedKeys.has(key);
@@ -859,39 +861,36 @@
 
       const g = svgEl('g', { class: 'node-g', transform: 'translate(' + x + ',' + y + ')' });
 
-      // Selection glow ring
       if (isSel) {
         g.appendChild(svgEl('circle', { r: r + 6, fill: color, opacity: '0.15', filter: 'url(#glow)' }));
         g.appendChild(svgEl('circle', { r: r + 2.5, fill: 'none', stroke: color, 'stroke-width': '1.5', opacity: '0.8' }));
       }
-
-      // Secondary highlight ring for related nodes
       if (isRelated) {
         g.appendChild(svgEl('circle', { r: r + 3.5, fill: 'none', stroke: color, 'stroke-width': '1', opacity: '0.5', filter: 'url(#glow-soft)' }));
       }
 
-      const fillOpacity = isSel ? '1' : isRelated ? '0.9' : isDimmed ? '0.15' : '0.65';
+      const fillOpacity = isSel ? '1' : isRelated ? '0.9' : isDimmed ? '0.12' : '0.65';
       const circle = svgEl('circle', {
         r, fill: color, 'fill-opacity': fillOpacity,
         stroke: isSel ? color : 'none', 'stroke-width': '1.5',
       });
       g.appendChild(circle);
 
-      // Labels: documents, tags, chapters always labeled; sections labeled if few
-      const showLabel = ck === 'document' || isTag || ck === 'chapter'
-        || (ck === 'section' && secNodes.length <= 20)
-        || (ck === 'subsection' && subNodes.length <= 15);
+      // section label count threshold: only label if ≤ 25 nodes in that level column
+      const secLvl = isSec ? parseInt(colKey.replace('section_L', ''), 10) : null;
+      const secCount = secLvl !== null ? (sectionsByLevel.get(secLvl) || []).length : 0;
+      const showLabel = isDoc || isTag
+        || (isSec && secCount <= 25)
+        || false; // paragraphs/tables: no label (too many)
 
       if (showLabel) {
-        const rawLabel = isTag
-          ? '#' + node.title
-          : (node.title || node.source_file || key);
-        const maxLen = ck === 'document' ? 32 : isTag ? 20 : 22;
-        const label  = rawLabel.length > maxLen ? rawLabel.slice(0, maxLen - 1) + '…' : rawLabel;
+        const rawLabel = isTag ? '#' + node.title : (node.title || node.source_file || key);
+        const maxLen   = isDoc ? 32 : isTag ? 20 : 20;
+        const label    = rawLabel.length > maxLen ? rawLabel.slice(0, maxLen - 1) + '…' : rawLabel;
         const txt = svgEl('text', {
           x: r + 4, y: 4,
-          'font-size': isTag ? '7' : ck === 'document' ? '8.5' : '7.5',
-          fill: isDimmed ? '#1e293b' : (isTag ? '#86efac' : ck === 'document' ? '#cbd5e1' : '#94a3b8'),
+          'font-size': isTag ? '7' : isDoc ? '8.5' : '7.5',
+          fill: isDimmed ? '#1e293b' : isTag ? '#86efac' : isDoc ? '#cbd5e1' : '#94a3b8',
           'font-family': 'ui-monospace,monospace',
           opacity: isDimmed ? '0.4' : '1',
         });
@@ -900,10 +899,7 @@
       }
 
       g.addEventListener('mouseenter', () => {
-        if (!isSel) {
-          circle.setAttribute('r', r + 2);
-          circle.setAttribute('fill-opacity', '1');
-        }
+        if (!isSel) { circle.setAttribute('r', r + 2); circle.setAttribute('fill-opacity', '1'); }
       });
       g.addEventListener('mouseleave', () => {
         circle.setAttribute('r', r);
