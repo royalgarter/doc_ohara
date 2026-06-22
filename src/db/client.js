@@ -106,6 +106,23 @@ export async function insertEdge(edge) {
   return { _key: res._key, _id: res._id };
 }
 
+// Returns a {getState()} adapter over real ArangoDB so QuartzExporter works unchanged.
+export function realDBAdapter() {
+  return {
+    async getState() {
+      await initArangoClient();
+      const [documents, sections, paragraphs, tables, edges] = await Promise.all([
+        db.query('FOR d IN documents RETURN d').then(c => c.all()),
+        db.query('FOR s IN sections RETURN s').then(c => c.all()),
+        db.query('FOR p IN paragraphs RETURN p').then(c => c.all()),
+        db.query('FOR t IN tables RETURN t').then(c => c.all()),
+        db.query('FOR e IN edges RETURN e').then(c => c.all()),
+      ]);
+      return { documents, sections, paragraphs, tables, edges };
+    },
+  };
+}
+
 export async function findDocumentByHash(fileHash) {
   if (!initialized) await initArangoClient();
   const cursor = await db.query(

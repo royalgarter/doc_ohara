@@ -318,7 +318,8 @@ async function startServer() {
   // API: Trigger Quartz Wiki Export
   app.post('/api/quartz/export', async (req, res) => {
     try {
-      const exporter = new QuartzExporter(dbSim, 'wiki');
+      const db = process.env.ARANGO_URL ? arangoClient.realDBAdapter() : dbSim;
+      const exporter = new QuartzExporter(db, 'wiki');
       await exporter.export();
       res.json({
         success: true,

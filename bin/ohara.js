@@ -165,15 +165,16 @@ program
   .option('--format <format>', 'quartz or json', 'quartz')
   .option('--json', 'machine-readable output')
   .action(async (opts) => {
-    const dbSim = getArangoDBSimulator();
+    const db = useRealDB ? arangoClient.realDBAdapter() : getArangoDBSimulator();
     if (opts.format === 'json') {
+      const state = await db.getState();
       const outPath = path.join(process.cwd(), 'doc_pipeline/collections/export.json');
-      fs.writeFileSync(outPath, JSON.stringify(dbSim.getState(), null, 2), 'utf-8');
+      fs.writeFileSync(outPath, JSON.stringify(state, null, 2), 'utf-8');
       emit(opts.json, { success: true, path: outPath }, () => console.log(chalk.green(`✔ Exported JSON to ${outPath}`)));
       return;
     }
 
-    const exporter = new QuartzExporter(dbSim, 'wiki');
+    const exporter = new QuartzExporter(db, 'wiki');
     await exporter.export();
     const outPath = path.join(process.cwd(), 'wiki');
     emit(opts.json, { success: true, path: outPath }, () => console.log(chalk.green(`✔ Exported Quartz wiki to ${outPath}`)));

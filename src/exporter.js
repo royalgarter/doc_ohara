@@ -18,7 +18,7 @@ export class QuartzExporter {
    */
   async export() {
     console.log(`[QuartzExporter] Starting export to "${this.outputDir}"...`);
-    const state = this.db.getState();
+    const state = await Promise.resolve(this.db.getState());
 
     // Clean and recreate output directory
     if (fs.existsSync(this.outputDir)) {
