@@ -16,3 +16,4 @@ coverage/
 /.ohara_llm_cache
 /sample/ui
 /refs/SUMO.owl
+/doc_pipeline/diagnostics
