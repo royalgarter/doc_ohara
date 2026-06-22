@@ -74,10 +74,14 @@ async function startServer() {
         const [docs, sections, edges] = await Promise.all([
           db.query('FOR d IN documents SORT d._key DESC RETURN d').then(c => c.all()),
           db.query('FOR s IN sections SORT s.level ASC, s._key ASC RETURN {_key:s._key,_id:s._id,title:s.title,document_id:s.document_id,level:s.level,node_type:s.node_type,parent_section_id:s.parent_section_id}').then(c => c.all()),
+          // Filter to doc/section structural edges only — avoids full scan.
+          // HAS_CHILD and NEXT_SIBLING never point to paragraphs/tables at the
+          // top level; BELONGS_TO only goes para/table→doc and is loaded lazily.
           db.query(`
             FOR e IN edges
-              FILTER (STARTS_WITH(e._from,'documents/') OR STARTS_WITH(e._from,'sections/'))
-                 AND (STARTS_WITH(e._to,'documents/')   OR STARTS_WITH(e._to,'sections/'))
+              FILTER e.relation IN ['HAS_CHILD', 'NEXT_SIBLING']
+                 AND NOT STARTS_WITH(e._to, 'paragraphs/')
+                 AND NOT STARTS_WITH(e._to, 'tables/')
               RETURN {_key:e._key,_id:e._id,_from:e._from,_to:e._to,relation:e.relation}
           `).then(c => c.all()),
         ]);

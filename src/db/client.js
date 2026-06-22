@@ -62,6 +62,22 @@ export async function initArangoClient() {
     await db.createEdgeCollection('edges').catch(err => { throw err; });
   }
 
+  // Ensure indexes for query performance (idempotent — ArangoDB skips if already exists)
+  await Promise.all([
+    // document_id filters on sections/paragraphs/tables (deleteDocumentAndNodes, getState, etc.)
+    db.collection('sections').ensureIndex({ type: 'persistent', fields: ['document_id'], name: 'idx_sections_document_id' }).catch(() => {}),
+    db.collection('paragraphs').ensureIndex({ type: 'persistent', fields: ['document_id'], name: 'idx_paragraphs_document_id' }).catch(() => {}),
+    db.collection('tables').ensureIndex({ type: 'persistent', fields: ['document_id'], name: 'idx_tables_document_id' }).catch(() => {}),
+    // level sort on sections (initial graph load: SORT s.level ASC)
+    db.collection('sections').ensureIndex({ type: 'persistent', fields: ['level', '_key'], name: 'idx_sections_level_key' }).catch(() => {}),
+    // _to index on edges — ArangoDB's built-in edge index only covers _from
+    db.collection('edges').ensureIndex({ type: 'persistent', fields: ['_to'], name: 'idx_edges_to' }).catch(() => {}),
+    // relation index for the initial graph-load filter
+    db.collection('edges').ensureIndex({ type: 'persistent', fields: ['relation'], name: 'idx_edges_relation' }).catch(() => {}),
+    // file_hash lookup on documents (findDocumentByHash)
+    db.collection('documents').ensureIndex({ type: 'persistent', fields: ['file_hash'], name: 'idx_documents_file_hash' }).catch(() => {}),
+  ]);
+
   initialized = true;
   return db;
 }
