@@ -494,10 +494,11 @@
         this.graphLoading = false;
       },
 
-      async expandNode(node) {
+      async expandNode(node, _depth) {
         const nodeId = node._id || (node.id ? node.id : null);
         if (!nodeId || this.expandedNodes.has(nodeId)) return;
         this.expandedNodes.add(nodeId);
+        const depth = _depth || 0;
         try {
           const [collection, key] = nodeId.split('/');
           const r = await fetch(`/api/graph/node/${collection}/${key}/neighbors`);
@@ -512,6 +513,12 @@
           for (const t of (d.tables     || [])) if (!existingTableIds.has(t._id)) this.graphData.tables.push(t);
           for (const s of (d.sections   || [])) if (!existingSecIds.has(s._id))   this.graphData.sections.push(s);
           for (const e of (d.edges      || [])) if (!existingEdgeIds.has(e._id))  this.graphData.edges.push(e);
+          // Auto-expand neighbor sections (both parent + child) up to 1 hop, so the
+          // full chain is visible without requiring manual clicks on each level.
+          if (depth < 1) {
+            const neighborSections = (d.sections || []).filter(s => !this.expandedNodes.has(s._id));
+            await Promise.all(neighborSections.map(s => this.expandNode(s, depth + 1)));
+          }
           this.$nextTick(() => this.renderCurrentGraph());
         } catch(e) { console.error('expandNode:', e); }
       },
