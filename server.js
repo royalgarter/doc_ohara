@@ -1,6 +1,8 @@
+import 'dotenv/config';
 import express from 'express';
 import path from 'path';
 import fs from 'fs';
+import * as arangoClient from './src/db/client.js';
 import { getArangoDBSimulator } from './src/db/simulator.js';
 import { QuartzExporter } from './src/exporter.js';
 import { RetrievalEngine } from './src/retrieval.js';
@@ -58,6 +60,27 @@ async function startServer() {
         success: true,
         state: dbSim.getState()
       });
+    } catch (err) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
+  // API: Graph data for the UI — queries real ArangoDB when available, falls back to simulator
+  app.get('/api/graph', async (req, res) => {
+    try {
+      if (process.env.ARANGO_URL) {
+        const db = await arangoClient.initArangoClient();
+        const [docs, sections, paragraphs, tables, edges] = await Promise.all([
+          db.query('FOR d IN documents SORT d._key DESC RETURN d').then(c => c.all()),
+          db.query('FOR s IN sections SORT s._key DESC LIMIT 300 RETURN {_key:s._key,_id:s._id,title:s.title,document_id:s.document_id,level:s.level}').then(c => c.all()),
+          db.query('FOR p IN paragraphs SORT p._key DESC LIMIT 200 RETURN {_key:p._key,_id:p._id,content:LEFT(p.content,300),document_id:p.document_id,section_id:p.section_id,sumo_tags:p.sumo_tags,sumo_candidate_tags_raw:p.sumo_candidate_tags_raw}').then(c => c.all()),
+          db.query('FOR t IN tables SORT t._key DESC LIMIT 50 RETURN {_key:t._key,_id:t._id,document_id:t.document_id,section_id:t.section_id,markdown_representation:t.markdown_representation}').then(c => c.all()),
+          db.query('FOR e IN edges SORT e._key DESC LIMIT 600 RETURN {_key:e._key,_id:e._id,_from:e._from,_to:e._to,relation:e.relation}').then(c => c.all()),
+        ]);
+        return res.json({ success: true, source: 'arangodb', documents: docs, sections, paragraphs, tables, edges });
+      }
+      const state = dbSim.getState();
+      res.json({ success: true, source: 'simulator', ...state });
     } catch (err) {
       res.status(500).json({ success: false, error: err.message });
     }

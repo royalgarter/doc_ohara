@@ -14,3 +14,4 @@ coverage/
 /doc_pipeline/collections/arangodb_state.json
 /doc_pipeline/collections/job_queue.json
 /.ohara_llm_cache
+/sample/ui
