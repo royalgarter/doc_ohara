@@ -85,6 +85,12 @@ export class ArangoDBSimulator {
     return fullDoc;
   }
 
+  updateDocument(key, patch) {
+    const doc = this.state.documents.find(d => d._key === key);
+    if (doc) Object.assign(doc, patch);
+    this.saveState();
+  }
+
   insertSection(sec) {
     const key = sec._key || `sec_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
     const fullSec = {

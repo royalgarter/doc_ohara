@@ -8,6 +8,7 @@ import { cacheKeyFor, readCacheAsync, writeCache, readCacheSync, hasCache, credF
 import { chunkMarkdown, readMarkdownFile } from './chunker.js';
 import * as arangoClient from '../db/client.js';
 import { validateTags } from '../sumo.js';
+import { processNodeEntities, normalizeEntity } from '../entities.js';
 
 const GEMINI_MODEL = 'gemini-2.5-flash-lite';
 
@@ -640,6 +641,22 @@ async function structureMarkdownWithRetries(ai, filename, mdContent) {
     throw err;
   }
 
+  // Process candidate_entities from each node — validate types, deduplicate within node.
+  for (const node of mergedNodes) {
+    if (node && Array.isArray(node.candidate_entities) && node.candidate_entities.length > 0) {
+      const { valid, invalid } = processNodeEntities(node.candidate_entities);
+      node.entities = valid;
+      node.candidate_entities_raw = node.candidate_entities;
+      delete node.candidate_entities;
+      if (invalid.length > 0) {
+        addPipelineLog('warn', `Node entity validation dropped ${invalid.length} entity/entities`);
+      }
+    } else {
+      node.entities = [];
+      delete node.candidate_entities;
+    }
+  }
+
   return { nodes: mergedNodes, llm_usage: { ...usageTotals, model: GEMINI_MODEL, chunks: chunks.length, cache_hits: chunkDiagnostics.filter(d => d.cache_hit).length } };
 }
 
@@ -826,6 +843,7 @@ function transformRawToCollections(rawOutputDir) {
               sumo_tags: node.sumo_tags || [],
               sumo_candidate_tags_raw: node.sumo_candidate_tags_raw || [],
               sumo_resolved_map: node.sumo_resolved_map || {},
+              entities: node.entities || [],
             });
           } else if (ntype === 'Figure') {
             // LLM returns Figure as: caption, figure (object with description/url), label
@@ -843,6 +861,7 @@ function transformRawToCollections(rawOutputDir) {
               sumo_tags: node.sumo_tags || [],
               sumo_candidate_tags_raw: node.sumo_candidate_tags_raw || [],
               sumo_resolved_map: node.sumo_resolved_map || {},
+              entities: node.entities || [],
             });
           } else if (ntype === 'Table') {
             const contentData = node.table?.content_data || node.metadata?.table_cells || node.table || [];
@@ -871,6 +890,7 @@ function transformRawToCollections(rawOutputDir) {
                   sumo_tags: node.sumo_tags || [],
                   sumo_candidate_tags_raw: node.sumo_candidate_tags_raw || [],
                   sumo_resolved_map: node.sumo_resolved_map || {},
+                  entities: node.entities || [],
                 });
               }
             }
@@ -1285,16 +1305,89 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
             sumo_tags: p.sumo_tags || [],
             sumo_candidate_tags_raw: p.sumo_candidate_tags_raw || [],
             sumo_resolved_map: p.sumo_resolved_map || {},
+            entity_slugs: (p.entities || []).map(e => e.slug),
           });
           nodeCount += 1;
           const paraHandle = paraRes._id || `paragraphs/${paraRes._key}`;
-          await Promise.all([
+
+          const edgePromises = [
             arangoClient.insertEdge({ _from: paraHandle, _to: docHandle, relation: 'BELONGS_TO', type: 'BELONGS_TO' }).catch(()=>{}),
             secHandle
               ? arangoClient.insertEdge({ _from: secHandle, _to: paraHandle, relation: 'HAS_CHILD', type: 'HAS_CHILD' }).catch(()=>{})
               : Promise.resolve(),
-          ]);
+          ];
+
+          // Upsert entities and create MENTIONS edges
+          if (p.entities && p.entities.length > 0) {
+            const entityHandles = await Promise.all(p.entities.map(async (entity) => {
+              const res = await arangoClient.upsertEntity({ ...entity, norm_key: normalizeEntity(entity.canonical), document_id: inserted._key }).catch(() => null);
+              return res ? (res._id || `entities/${res._key}`) : null;
+            }));
+
+            const validHandles = entityHandles.filter(Boolean);
+            for (const entityHandle of validHandles) {
+              edgePromises.push(
+                arangoClient.insertEdge({
+                  _from: paraHandle,
+                  _to: entityHandle,
+                  relation: 'MENTIONS',
+                  type: 'MENTIONS',
+                  context: typeof p.content === 'string' ? p.content.slice(0, 200) : '',
+                }).catch(()=>{})
+              );
+            }
+
+            // RELATED_TO edges between entity pairs co-occurring in this paragraph
+            for (let i = 0; i < validHandles.length; i++) {
+              for (let j = i + 1; j < validHandles.length; j++) {
+                edgePromises.push(
+                  arangoClient.insertEdge({ _from: validHandles[i], _to: validHandles[j], relation: 'RELATED_TO', type: 'RELATED_TO' }).catch(()=>{})
+                );
+              }
+            }
+          }
+
+          await Promise.all(edgePromises);
         });
+
+        // Roll up entity_slugs and sumo_tags onto the document record for O(docs) pre-filtering
+        {
+          const entitySlugSet = new Set();
+          const sumoTagSet = new Set();
+          for (const p of docsParagraphs) {
+            for (const e of (p.entities || [])) entitySlugSet.add(e.slug);
+            for (const t of (p.sumo_tags || [])) sumoTagSet.add(t);
+          }
+          const entitySlugs = [...entitySlugSet];
+          await arangoClient.updateDocument(inserted._key, {
+            entity_slugs: entitySlugs,
+            sumo_tags: [...sumoTagSet],
+            entity_count: entitySlugs.length,
+          }).catch(() => {});
+
+          // Compute Jaccard similarity against all other documents and insert SIMILAR_TO edges
+          const similarityThreshold = parseFloat(process.env.OHARA_SIMILARITY_THRESHOLD || '0.1');
+          if (entitySlugs.length > 0 && similarityThreshold > 0) {
+            const allDocs = transformedDocs.documents.filter(d => d.id !== doc.id);
+            for (const otherDoc of allDocs) {
+              if (!Array.isArray(otherDoc.entity_slugs) || otherDoc.entity_slugs.length === 0) continue;
+              const otherSet = new Set(otherDoc.entity_slugs);
+              const intersection = entitySlugs.filter(s => otherSet.has(s)).length;
+              const union = new Set([...entitySlugs, ...otherDoc.entity_slugs]).size;
+              const jaccard = union > 0 ? intersection / union : 0;
+              if (jaccard >= similarityThreshold) {
+                const otherHandle = `documents/${otherDoc.id}`;
+                await arangoClient.insertEdge({
+                  _from: docHandle,
+                  _to: otherHandle,
+                  relation: 'SIMILAR_TO',
+                  type: 'SIMILAR_TO',
+                  weight: Math.round(jaccard * 1000) / 1000,
+                }).catch(() => {});
+              }
+            }
+          }
+        }
 
         // Insert tables in parallel batches — same pattern as paragraphs
         const docsTables = transformedDocs.tables.filter(t => t.document_id === doc.id);

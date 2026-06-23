@@ -3,6 +3,8 @@ import path from 'path';
 
 const SUMO_INDEX_PATH = path.join(process.cwd(), 'ontology', 'sumo_index.json');
 let index = null;
+let exactMap = null;
+let normMap = null;
 
 // Common aliases: terms LLMs frequently emit → canonical SUMO local names.
 // Values are arrays so one alias can resolve to multiple candidates (first valid wins).
@@ -55,16 +57,23 @@ const ALIASES = {
 export function loadSumoIndex() {
   if (index) return index;
   if (!fs.existsSync(SUMO_INDEX_PATH)) {
+    console.warn('SUMO index not found — all tags will be treated as invalid');
     index = [];
+    exactMap = new Map();
+    normMap = new Map();
     return index;
   }
   try {
     const raw = fs.readFileSync(SUMO_INDEX_PATH, 'utf-8');
     index = JSON.parse(raw);
+    exactMap = new Map(index.map(e => [e.localName, true]));
+    normMap = new Map(index.map(e => [normalize(e.localName), e.localName]));
     return index;
   } catch (err) {
     console.error('Failed to load SUMO index:', err.message);
     index = [];
+    exactMap = new Map();
+    normMap = new Map();
     return index;
   }
 }
@@ -81,22 +90,22 @@ function normalize(s) {
 //   3. alias table lookup → first candidate that exists in index
 export function resolveTag(tag) {
   if (!tag) return null;
-  const idx = loadSumoIndex();
+  loadSumoIndex(); // ensure Maps are built
   const t = String(tag).trim();
   const norm = normalize(t);
 
-  // 1. exact
-  if (idx.some(e => e.localName === t)) return t;
+  // 1. exact — O(1)
+  if (exactMap.has(t)) return t;
 
-  // 2. case + separator insensitive
-  const ci = idx.find(e => normalize(e.localName) === norm);
-  if (ci) return ci.localName;
+  // 2. case + separator insensitive — O(1)
+  const ci = normMap.get(norm);
+  if (ci) return ci;
 
   // 3. alias table
-  const candidates = ALIASES[norm] || ALIASES[t.toLowerCase()];
+  const candidates = ALIASES[norm];
   if (candidates) {
     for (const c of candidates) {
-      if (idx.some(e => e.localName === c)) return c;
+      if (exactMap.has(c)) return c;
     }
   }
 
@@ -126,7 +135,7 @@ export function validateTags(tags) {
       invalid.push(t);
     }
   }
-  return { valid, invalid, resolved_map };
+  return { valid: [...new Set(valid)], invalid, resolved_map };
 }
 
 export default { loadSumoIndex, resolveTag, isValidTag, validateTags };
