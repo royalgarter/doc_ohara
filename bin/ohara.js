@@ -330,37 +330,102 @@ program
     const totalContentLen = paragraphs.reduce((sum, p) => sum + (p.content?.length || 0), 0);
     stats.total_content_chars = totalContentLen;
 
-    // Try to find the original file
-    const inputDir = 'doc_pipeline/input';
-    const sampleDir = 'sample';
+    // Try to find the intermediate markdown (text extraction output) to compare
+    // against extracted content. We use the markdown, not the original PDF/binary,
+    // because binary files contain fonts/images/compression that inflate byte count.
     const srcFile = doc.source_file;
+    const rawOutputBase = 'doc_pipeline/raw_output';
     let originalLen = null;
-    for (const dir of [inputDir, sampleDir]) {
-      const candidate = path.join(dir, srcFile);
-      if (fs.existsSync(candidate)) {
-        originalLen = fs.statSync(candidate).size;
+    // Look for <srcFile>.md or <srcFile>/<srcFile without ext>.md
+    const mdCandidates = [
+      path.join(rawOutputBase, srcFile.replace(/\.[^.]+$/, '.md')),
+      path.join(rawOutputBase, srcFile, srcFile.replace(/\.[^.]+$/, '.md')),
+      path.join(rawOutputBase, srcFile),
+    ];
+    for (const candidate of mdCandidates) {
+      const st = fs.existsSync(candidate) && fs.statSync(candidate);
+      if (st && st.isFile()) {
+        originalLen = st.size;
         stats.original_file_bytes = originalLen;
         stats.original_file_path  = candidate;
         break;
       }
     }
+    // Fall back to original source file only if it is plaintext (not a binary format)
+    if (originalLen === null) {
+      for (const dir of ['doc_pipeline/input', 'sample']) {
+        const candidate = path.join(dir, srcFile);
+        if (fs.existsSync(candidate) && /\.(md|txt)$/i.test(srcFile)) {
+          originalLen = fs.statSync(candidate).size;
+          stats.original_file_bytes = originalLen;
+          stats.original_file_path  = candidate;
+          break;
+        }
+      }
+    }
 
     if (originalLen !== null) {
-      // Paragraphs are extracted text from markdown, so expect 40–110% coverage
+      // Expect extracted content to be 40–110% of the markdown text
       const ratio = totalContentLen / originalLen;
       stats.content_coverage_ratio = Math.round(ratio * 100) + '%';
       if (ratio < 0.3) {
         fail('LOW_CONTENT_COVERAGE',
-          `Extracted text (${totalContentLen} chars) is only ${Math.round(ratio * 100)}% of the original file (${originalLen} bytes) — expected ≥30%`);
+          `Extracted text (${totalContentLen} chars) is only ${Math.round(ratio * 100)}% of the parsed markdown (${originalLen} bytes) — expected ≥30%`);
       } else if (ratio < 0.5) {
         warn('PARTIAL_CONTENT_COVERAGE',
-          `Extracted text is ${Math.round(ratio * 100)}% of original — may indicate missing sections`);
+          `Extracted text is ${Math.round(ratio * 100)}% of parsed markdown — may indicate missing sections`);
       }
     } else {
-      warn('ORIGINAL_FILE_NOT_FOUND', `Could not find original file "${srcFile}" to compare content length`);
+      warn('ORIGINAL_FILE_NOT_FOUND', `Could not find parsed markdown for "${srcFile}" to compare content length`);
     }
 
-    // ── 10. NEXT_SIBLING chain sanity ────────────────────────────────────
+    // ── 10. Markdown paragraph spot-check (random 10) ────────────────────
+    if (stats.original_file_path) {
+      const mdText = fs.readFileSync(stats.original_file_path, 'utf-8');
+      // Split on blank lines, keep blocks that look like real prose (≥60 chars, not a heading/fence)
+      const mdParas = mdText.split(/\n{2,}/)
+        .map(b => b.trim())
+        .filter(b => b.length >= 60 && !b.startsWith('#') && !b.startsWith('```') && !b.startsWith('|') && !b.startsWith('---'));
+
+      if (mdParas.length >= 5) {
+        // Pick 10 random paragraphs (or fewer if not enough)
+        const sample = [];
+        const pool = [...mdParas];
+        const n = Math.min(10, pool.length);
+        for (let i = 0; i < n; i++) {
+          const idx = Math.floor(Math.random() * pool.length);
+          sample.push(pool.splice(idx, 1)[0]);
+        }
+
+        // Build a flat string of all DB paragraph content for substring search
+        const dbContent = paragraphs.map(p => p.content || '').join('\n');
+
+        let hits = 0;
+        const misses = [];
+        for (const mdPara of sample) {
+          // Use a 40-char probe from the middle of the block (avoids heading noise at start)
+          const probe = mdPara.replace(/\s+/g, ' ').slice(20, 60).trim();
+          if (probe.length >= 20 && dbContent.includes(probe)) {
+            hits++;
+          } else {
+            misses.push(probe);
+          }
+        }
+
+        stats.spot_check = `${hits}/${n} matched`;
+        // Note: ~20-30% misses are expected — TOC lines, figure captions with markdown
+        // syntax, and numbered list items don't match verbatim against stored content.
+        if (hits < Math.ceil(n * 0.4)) {
+          fail('SPOT_CHECK_FAILED',
+            `Only ${hits}/${n} sampled markdown paragraphs found in DB. First miss: "${misses[0]}"`);
+        } else if (hits < Math.ceil(n * 0.6)) {
+          warn('SPOT_CHECK_PARTIAL',
+            `${hits}/${n} sampled markdown paragraphs found in DB — some content may be missing`);
+        }
+      }
+    }
+
+    // ── 11. NEXT_SIBLING chain sanity ────────────────────────────────────
     const multiNextSibling = sections.filter(s => {
       const out = (fromMap.get(s._id) || []).filter(e => e.relation === 'NEXT_SIBLING');
       return out.length > 1;
@@ -406,6 +471,9 @@ program
         ];
         if (stats.original_file_bytes) {
           statLines.push(['Original file', `${(stats.original_file_bytes / 1024).toFixed(1)} KB  →  ${stats.content_coverage_ratio} coverage`]);
+        }
+        if (stats.spot_check) {
+          statLines.push(['Spot check', stats.spot_check + ' paragraphs found in DB']);
         }
         for (const [k, v] of statLines) {
           console.log(`  ${chalk.dim(k.padEnd(22))} ${chalk.white(v)}`);
