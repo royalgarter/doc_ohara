@@ -6,13 +6,15 @@ import { Command } from 'commander';
 import chalk from 'chalk';
 import fs from 'fs';
 import path from 'path';
-import { getArangoDBSimulator } from '../src/arangodb_sim.js';
-import { RetrievalEngine } from '../src/retrieval_engine.js';
-import { getIngestionQueue } from '../src/queue.js';
-import { runWorkerOnce } from '../src/worker.js';
-import { QuartzExporter } from '../src/quartz_exporter.js';
+import { getArangoDBSimulator } from '../src/db/simulator.js';
+import * as arangoClient from '../src/db/client.js';
+import { RetrievalEngine } from '../src/retrieval.js';
+import { getIngestionQueue } from '../src/ingest/queue.js';
+import { runWorkerOnce } from '../src/ingest/worker.js';
+import { QuartzExporter } from '../src/exporter.js';
 
 const INPUT_DIR = 'doc_pipeline/input';
+const useRealDB = !!process.env.ARANGO_URL;
 
 function emit(json, data, humanFn) {
   if (json) {
@@ -32,6 +34,7 @@ program
   .command('ingest <path>')
   .description('Queue a document for processing')
   .option('--json', 'machine-readable output')
+  .option('--force', 're-ingest even if the file hash already exists in the database')
   .action(async (filePath, opts) => {
     fs.mkdirSync(INPUT_DIR, { recursive: true });
     if (!fs.existsSync(filePath)) {
@@ -46,10 +49,11 @@ program
     fs.copyFileSync(filePath, destPath);
 
     const queue = getIngestionQueue();
-    const job = queue.add('ingestion', { filename });
+    const job = queue.add('ingestion', { filename, force: !!opts.force });
 
     if (!opts.json) {
       console.log(chalk.cyan(`Queued "${filename}" as job ${job.id}`));
+      if (opts.force) console.log(chalk.dim('  --force: skipping duplicate-hash check'));
     }
 
     const aiKey = process.env.GEMINI_API_KEY;
@@ -58,7 +62,11 @@ program
 
     emit(opts.json, { success: !!outcome?.success, job: queue.getJob(job.id) }, () => {
       if (outcome?.success) {
-        console.log(chalk.green(`✔ Ingested ${filename}: ${outcome.result.documents} document(s), ${outcome.result.nodes} node(s)`));
+        const u = outcome.result.llm_usage;
+        const usageStr = u ? chalk.dim(` [prompt: ${u.prompt_tokens} | generated: ${u.candidates_tokens} | total: ${u.total_tokens} tokens, ${u.chunks} chunks${u.cache_hits ? ', ' + u.cache_hits + ' cached' : ''}]`) : '';
+        console.log(chalk.green(`✔ Ingested ${filename}: ${outcome.result.documents} document(s), ${outcome.result.nodes} node(s)`) + usageStr);
+      } else if (outcome?.error?.includes('ALREADY_INGESTED')) {
+        console.log(chalk.yellow(`⚠ Skipped "${filename}": already ingested. Use --force to re-ingest.`));
       } else {
         console.error(chalk.red(`✖ Ingestion failed: ${outcome?.error || 'unknown error'}`));
         process.exitCode = 1;
@@ -68,7 +76,7 @@ program
 
 program
   .command('query <text>')
-  .description('Hybrid search (Phase 1) over the graph')
+  .description('Hybrid search over the graph')
   .option('--json', 'machine-readable output')
   .option('--depth <n>', 'deep traversal depth', '2')
   .action((text, opts) => {
@@ -90,22 +98,357 @@ program
   .command('ls')
   .description('List all ingested documents')
   .option('--json', 'machine-readable output')
-  .action((opts) => {
-    const docs = getArangoDBSimulator().getState().documents;
+  .action(async (opts) => {
+    let docs;
+    if (useRealDB) {
+      docs = await arangoClient.listDocuments();
+    } else {
+      docs = getArangoDBSimulator().getState().documents;
+    }
     emit(opts.json, { success: true, documents: docs }, () => {
       if (docs.length === 0) console.log(chalk.yellow('No documents ingested yet.'));
       docs.forEach(d => {
-        console.log(`${chalk.cyan(d._key)}  ${d.title}  ${chalk.dim(`(${d.parser_engine}, ${d.file_size})`)}`);
+        const hash = d.file_hash ? chalk.dim(` [${d.file_hash.slice(0, 10)}…]`) : '';
+        console.log(`${chalk.cyan(d._key)}  ${d.title}  ${chalk.dim(`(${d.parser_engine}, ${d.file_size})`)}${hash}`);
       });
     });
+  });
+
+program
+  .command('verify <doc_id>')
+  .description('Run integrity checks on an ingested document')
+  .option('--json', 'machine-readable output')
+  .option('--fix', 'attempt to repair recoverable issues (missing edges)')
+  .action(async (docId, opts) => {
+    if (!useRealDB) {
+      console.error(chalk.red('✖ verify requires a real ArangoDB connection (ARANGO_URL not set)'));
+      process.exitCode = 1; return;
+    }
+    const db = await arangoClient.initArangoClient();
+
+    // ── Fetch the document ────────────────────────────────────────────────
+    const doc = await db.query('FOR d IN documents FILTER d._key == @k RETURN d', { k: docId })
+      .then(c => c.next()).catch(() => null);
+    if (!doc) {
+      console.error(chalk.red(`✖ Document "${docId}" not found`));
+      process.exitCode = 1; return;
+    }
+
+    const issues   = [];   // { severity: 'error'|'warn', code, message, detail? }
+    const stats    = {};
+    const repairs  = [];
+
+    function fail(code, message, detail)  { issues.push({ severity: 'error', code, message, detail }); }
+    function warn(code, message, detail)  { issues.push({ severity: 'warn',  code, message, detail }); }
+
+    // ── 1. Fetch all nodes for this document ─────────────────────────────
+    const [sections, paragraphs, tables] = await Promise.all([
+      db.query('FOR s IN sections  FILTER s.document_id == @k RETURN s', { k: docId }).then(c => c.all()),
+      db.query('FOR p IN paragraphs FILTER p.document_id == @k RETURN p', { k: docId }).then(c => c.all()),
+      db.query('FOR t IN tables    FILTER t.document_id == @k RETURN t', { k: docId }).then(c => c.all()),
+    ]);
+
+    stats.sections   = sections.length;
+    stats.paragraphs = paragraphs.length;
+    stats.tables     = tables.length;
+    stats.nodes      = sections.length + paragraphs.length + tables.length;
+
+    if (stats.nodes === 0) {
+      fail('NO_NODES', 'Document has no child nodes at all — ingestion may have failed');
+    }
+
+    // ── 2. Fetch all edges touching any node of this document ────────────
+    const allNodeIds = [
+      `documents/${docId}`,
+      ...sections.map(s => s._id),
+      ...paragraphs.map(p => p._id),
+      ...tables.map(t => t._id),
+    ];
+    const edges = await db.query(
+      'FOR e IN edges FILTER e._from IN @ids OR e._to IN @ids RETURN e',
+      { ids: allNodeIds }
+    ).then(c => c.all());
+
+    stats.edges = edges.length;
+
+    const edgeSet  = new Set(edges.map(e => `${e._from}→${e._to}→${e.relation}`));
+    const fromMap  = new Map(); // nodeId → [edges where _from == nodeId]
+    const toMap    = new Map(); // nodeId → [edges where _to   == nodeId]
+    for (const e of edges) {
+      if (!fromMap.has(e._from)) fromMap.set(e._from, []);
+      if (!toMap.has(e._to))     toMap.set(e._to, []);
+      fromMap.get(e._from).push(e);
+      toMap.get(e._to).push(e);
+    }
+
+    // ── 3. Duplicate edges ───────────────────────────────────────────────
+    const edgeSigs = edges.map(e => `${e._from}→${e._to}→${e.relation}`);
+    const dupSigs  = edgeSigs.filter((s, i) => edgeSigs.indexOf(s) !== i);
+    if (dupSigs.length > 0) {
+      fail('DUPLICATE_EDGES', `${dupSigs.length} duplicate edge(s) found`, dupSigs.slice(0, 5));
+    }
+
+    // ── 4. Section hierarchy checks ──────────────────────────────────────
+    const secById = new Map(sections.map(s => [s._id, s]));
+
+    // 4a. Every section must have exactly one incoming HAS_CHILD edge
+    const missingParentEdge = [];
+    const fixEdges = [];
+    for (const sec of sections) {
+      const incoming = (toMap.get(sec._id) || []).filter(e => e.relation === 'HAS_CHILD');
+      if (incoming.length === 0) {
+        missingParentEdge.push(sec._id);
+        // Determine what the parent edge should be
+        const parentHandle = sec.parent_section_id
+          ? secById.get(sec.parent_section_id)?._id || null
+          : null;
+        fixEdges.push({ _from: parentHandle || `documents/${docId}`, _to: sec._id });
+      } else if (incoming.length > 1) {
+        warn('MULTI_PARENT_EDGE', `Section ${sec._id} has ${incoming.length} incoming HAS_CHILD edges`);
+      }
+    }
+    if (missingParentEdge.length > 0) {
+      fail('MISSING_SECTION_PARENT_EDGE',
+        `${missingParentEdge.length} section(s) have no incoming HAS_CHILD edge`,
+        missingParentEdge.slice(0, 10));
+      if (opts.fix) {
+        for (const e of fixEdges) {
+          await arangoClient.insertEdge({ ...e, relation: 'HAS_CHILD', type: 'HAS_CHILD' }).catch(() => {});
+          repairs.push(`Added HAS_CHILD ${e._from} → ${e._to}`);
+        }
+      }
+    }
+
+    // 4b. parent_section_id field (if set and looks like an ArangoDB _id) must resolve to a real section
+    const danglingParentRef = sections.filter(s =>
+      s.parent_section_id &&
+      s.parent_section_id.startsWith('sections/') &&
+      !secById.has(s.parent_section_id)
+    );
+    // Legacy docs may store internal okf_node_ IDs — warn instead of error
+    const legacyParentRef = sections.filter(s =>
+      s.parent_section_id && !s.parent_section_id.startsWith('sections/')
+    );
+    if (danglingParentRef.length > 0) {
+      fail('DANGLING_PARENT_SECTION_ID',
+        `${danglingParentRef.length} section(s) have parent_section_id pointing to a non-existent section`,
+        danglingParentRef.map(s => ({ id: s._id, parent_section_id: s.parent_section_id })).slice(0, 5));
+    }
+    if (legacyParentRef.length > 0) {
+      warn('LEGACY_PARENT_SECTION_ID',
+        `${legacyParentRef.length} section(s) have legacy internal parent_section_id (re-ingest with --force to fix)`);
+    }
+
+    // 4c. Level continuity — no section should jump more than 1 level below its parent
+    let levelGaps = 0;
+    for (const sec of sections) {
+      if (!sec.parent_section_id || !sec.parent_section_id.startsWith('sections/')) continue;
+      const parent = secById.get(sec.parent_section_id);
+      if (parent && sec.level - parent.level > 1) levelGaps++;
+    }
+    if (levelGaps > 0) {
+      warn('LEVEL_GAP', `${levelGaps} section(s) jump more than 1 level below their parent (e.g. L1 → L3)`);
+    }
+
+    // 4d. Sections with no children at all (no HAS_CHILD outgoing, no paragraphs)
+    const leafSections = sections.filter(s => {
+      const outgoing = (fromMap.get(s._id) || []).filter(e => e.relation === 'HAS_CHILD');
+      return outgoing.length === 0;
+    });
+    stats.leaf_sections = leafSections.length;
+    if (leafSections.length > 0 && leafSections.length === sections.length) {
+      warn('ALL_SECTIONS_LEAF', 'Every section is a leaf — no section has children. Hierarchy may not have been wired.');
+    }
+
+    // ── 5. Paragraph / table edge checks ─────────────────────────────────
+    const missingBelongsTo = [];
+    const missingSectionLink = [];
+
+    for (const p of [...paragraphs, ...tables]) {
+      const out = fromMap.get(p._id) || [];
+      const hasBelongsTo = out.some(e => e.relation === 'BELONGS_TO');
+      if (!hasBelongsTo) missingBelongsTo.push(p._id);
+
+      if (p.section_id) {
+        const inc = toMap.get(p._id) || [];
+        const hasSectionChild = inc.some(e => e.relation === 'HAS_CHILD' && e._from === p.section_id);
+        if (!hasSectionChild) missingSectionLink.push({ node: p._id, section: p.section_id });
+      }
+    }
+    if (missingBelongsTo.length > 0) {
+      fail('MISSING_BELONGS_TO',
+        `${missingBelongsTo.length} paragraph/table(s) missing BELONGS_TO edge to document`,
+        missingBelongsTo.slice(0, 10));
+      if (opts.fix) {
+        for (const nodeId of missingBelongsTo) {
+          await arangoClient.insertEdge({ _from: nodeId, _to: `documents/${docId}`, relation: 'BELONGS_TO', type: 'BELONGS_TO' }).catch(() => {});
+          repairs.push(`Added BELONGS_TO ${nodeId} → documents/${docId}`);
+        }
+      }
+    }
+    if (missingSectionLink.length > 0) {
+      fail('MISSING_SECTION_HAS_CHILD',
+        `${missingSectionLink.length} paragraph/table(s) have section_id set but no HAS_CHILD edge from that section`,
+        missingSectionLink.slice(0, 10));
+    }
+
+    // ── 6. Orphaned nodes (document_id matches but no edges at all) ──────
+    const orphans = [...sections, ...paragraphs, ...tables].filter(n =>
+      !(fromMap.has(n._id)) && !(toMap.has(n._id))
+    );
+    if (orphans.length > 0) {
+      fail('ORPHANED_NODES', `${orphans.length} node(s) have no edges at all`, orphans.map(n => n._id).slice(0, 10));
+    }
+
+    // ── 7. Dead edges (point to nodes not in this document's set) ────────
+    const knownIds = new Set(allNodeIds);
+    const deadEdges = edges.filter(e => !knownIds.has(e._from) && !knownIds.has(e._to));
+    if (deadEdges.length > 0) {
+      warn('DEAD_EDGES', `${deadEdges.length} edge(s) reference nodes outside this document`, deadEdges.map(e => e._id).slice(0, 5));
+    }
+
+    // ── 8. Empty content ─────────────────────────────────────────────────
+    // Figures have no extractable text — exclude them from this check
+    const textParas    = paragraphs.filter(p => p.node_type !== 'Figure');
+    const emptyParas   = textParas.filter(p => !p.content || p.content.trim().length === 0);
+    stats.text_paragraphs  = textParas.length;
+    stats.empty_paragraphs = emptyParas.length;
+    if (textParas.length > 0) {
+      const emptyRatio = emptyParas.length / textParas.length;
+      if (emptyRatio > 0.5) {
+        fail('EMPTY_PARAGRAPHS',
+          `${emptyParas.length}/${textParas.length} text paragraphs (${Math.round(emptyRatio * 100)}%) have empty content — possible extraction failure`);
+      } else if (emptyParas.length > 0) {
+        warn('EMPTY_PARAGRAPHS', `${emptyParas.length} paragraph(s) have empty content`);
+      }
+    }
+
+    // ── 9. Content length vs original file ───────────────────────────────
+    const totalContentLen = paragraphs.reduce((sum, p) => sum + (p.content?.length || 0), 0);
+    stats.total_content_chars = totalContentLen;
+
+    // Try to find the original file
+    const inputDir = 'doc_pipeline/input';
+    const sampleDir = 'sample';
+    const srcFile = doc.source_file;
+    let originalLen = null;
+    for (const dir of [inputDir, sampleDir]) {
+      const candidate = path.join(dir, srcFile);
+      if (fs.existsSync(candidate)) {
+        originalLen = fs.statSync(candidate).size;
+        stats.original_file_bytes = originalLen;
+        stats.original_file_path  = candidate;
+        break;
+      }
+    }
+
+    if (originalLen !== null) {
+      // Paragraphs are extracted text from markdown, so expect 40–110% coverage
+      const ratio = totalContentLen / originalLen;
+      stats.content_coverage_ratio = Math.round(ratio * 100) + '%';
+      if (ratio < 0.3) {
+        fail('LOW_CONTENT_COVERAGE',
+          `Extracted text (${totalContentLen} chars) is only ${Math.round(ratio * 100)}% of the original file (${originalLen} bytes) — expected ≥30%`);
+      } else if (ratio < 0.5) {
+        warn('PARTIAL_CONTENT_COVERAGE',
+          `Extracted text is ${Math.round(ratio * 100)}% of original — may indicate missing sections`);
+      }
+    } else {
+      warn('ORIGINAL_FILE_NOT_FOUND', `Could not find original file "${srcFile}" to compare content length`);
+    }
+
+    // ── 10. NEXT_SIBLING chain sanity ────────────────────────────────────
+    const multiNextSibling = sections.filter(s => {
+      const out = (fromMap.get(s._id) || []).filter(e => e.relation === 'NEXT_SIBLING');
+      return out.length > 1;
+    });
+    if (multiNextSibling.length > 0) {
+      warn('MULTI_NEXT_SIBLING', `${multiNextSibling.length} section(s) have more than one outgoing NEXT_SIBLING edge`);
+    }
+
+    // ── 11. SUMO tag coverage ────────────────────────────────────────────
+    const taggedParas  = paragraphs.filter(p => (p.sumo_tags || []).length > 0).length;
+    stats.tagged_paragraphs = taggedParas;
+    stats.tag_coverage = paragraphs.length > 0
+      ? Math.round(taggedParas / paragraphs.length * 100) + '%'
+      : 'N/A';
+    if (paragraphs.length > 0 && taggedParas === 0) {
+      warn('NO_SUMO_TAGS', 'No paragraphs have SUMO tags — semantic tagging may not have run');
+    }
+
+    // ── Result ────────────────────────────────────────────────────────────
+    const errors = issues.filter(i => i.severity === 'error');
+    const warns  = issues.filter(i => i.severity === 'warn');
+    const passed = errors.length === 0;
+
+    emit(opts.json,
+      { success: passed, doc: { _key: doc._key, title: doc.title }, stats, issues, repairs },
+      () => {
+        console.log('');
+        console.log(chalk.bold(`Document: ${chalk.cyan(doc.title || doc.source_file)} [${docId}]`));
+        console.log(chalk.dim(`  source: ${doc.source_file}  hash: ${doc.file_hash?.slice(0,12)}…`));
+        console.log('');
+
+        // Stats table
+        const statLines = [
+          ['Sections',         stats.sections],
+          ['Paragraphs',       `${stats.paragraphs} (${stats.text_paragraphs} text, ${stats.paragraphs - stats.text_paragraphs} figures)`],
+          ['Tables',           stats.tables],
+          ['Total nodes',      stats.nodes],
+          ['Edges',            stats.edges],
+          ['Leaf sections',    stats.leaf_sections],
+          ['Empty paragraphs', `${stats.empty_paragraphs} / ${stats.text_paragraphs} text nodes`],
+          ['Tagged paragraphs',`${stats.tagged_paragraphs} (${stats.tag_coverage})`],
+          ['Content chars',    stats.total_content_chars?.toLocaleString()],
+        ];
+        if (stats.original_file_bytes) {
+          statLines.push(['Original file', `${(stats.original_file_bytes / 1024).toFixed(1)} KB  →  ${stats.content_coverage_ratio} coverage`]);
+        }
+        for (const [k, v] of statLines) {
+          console.log(`  ${chalk.dim(k.padEnd(22))} ${chalk.white(v)}`);
+        }
+        console.log('');
+
+        if (issues.length === 0) {
+          console.log(chalk.green('✔ All integrity checks passed'));
+        } else {
+          for (const issue of issues) {
+            const icon  = issue.severity === 'error' ? chalk.red('✖') : chalk.yellow('⚠');
+            const color = issue.severity === 'error' ? chalk.red : chalk.yellow;
+            console.log(`${icon} [${color(issue.code)}] ${issue.message}`);
+            if (issue.detail && Array.isArray(issue.detail)) {
+              for (const d of issue.detail.slice(0, 3)) {
+                console.log(chalk.dim(`    ${typeof d === 'string' ? d : JSON.stringify(d)}`));
+              }
+              if (issue.detail.length > 3) console.log(chalk.dim(`    … and ${issue.detail.length - 3} more`));
+            }
+          }
+          console.log('');
+          console.log(`${errors.length} error(s)  ${warns.length} warning(s)`);
+        }
+
+        if (repairs.length > 0) {
+          console.log('');
+          console.log(chalk.cyan(`🔧 ${repairs.length} repair(s) applied:`));
+          for (const r of repairs) console.log(chalk.dim(`  ${r}`));
+        }
+
+        if (!passed) process.exitCode = 1;
+      }
+    );
   });
 
 program
   .command('rm <doc_id>')
   .description('Delete a document and all its associated nodes/edges')
   .option('--json', 'machine-readable output')
-  .action((docId, opts) => {
-    const deleted = getArangoDBSimulator().deleteDocument(docId);
+  .action(async (docId, opts) => {
+    let deleted;
+    if (useRealDB) {
+      deleted = await arangoClient.deleteDocumentAndNodes(docId).catch(() => false);
+    } else {
+      deleted = getArangoDBSimulator().deleteDocument(docId);
+    }
     emit(opts.json, { success: deleted }, () => {
       if (deleted) console.log(chalk.green(`✔ Deleted document "${docId}" and its graph nodes/edges.`));
       else {
@@ -117,24 +460,27 @@ program
 
 program
   .command('status')
-  .description('Check ArangoDB simulator health and ingestion queue state')
+  .description('Check database health and ingestion queue state')
   .option('--json', 'machine-readable output')
-  .action((opts) => {
-    const state = getArangoDBSimulator().getState();
+  .action(async (opts) => {
+    let dbStats;
+    if (useRealDB) {
+      const stats = await arangoClient.getStats();
+      dbStats = { ok: true, source: 'arangodb', ...stats };
+    } else {
+      const state = getArangoDBSimulator().getState();
+      dbStats = {
+        ok: true, source: 'simulator',
+        documents: state.documents.length, sections: state.sections.length,
+        paragraphs: state.paragraphs.length, tables: state.tables.length,
+        edges: state.edges.length,
+      };
+    }
     const queueStats = getIngestionQueue().stats();
-    const health = {
-      database: {
-        ok: true,
-        documents: state.documents.length,
-        sections: state.sections.length,
-        paragraphs: state.paragraphs.length,
-        tables: state.tables.length,
-        edges: state.edges.length
-      },
-      queue: queueStats
-    };
-    emit(opts.json, { success: true, ...health }, () => {
-      console.log(chalk.bold('Database:'), chalk.green('OK'), `(${health.database.documents} docs, ${health.database.edges} edges)`);
+    emit(opts.json, { success: true, database: dbStats, queue: queueStats }, () => {
+      console.log(chalk.bold('Database:'), chalk.green('OK'),
+        chalk.dim(`[${dbStats.source}]`),
+        `(${dbStats.documents} docs, ${dbStats.sections} sections, ${dbStats.paragraphs} paragraphs, ${dbStats.edges} edges)`);
       console.log(chalk.bold('Queue:'), `waiting=${queueStats.waiting} active=${queueStats.active} completed=${queueStats.completed} failed=${queueStats.failed}`);
     });
   });
@@ -145,15 +491,16 @@ program
   .option('--format <format>', 'quartz or json', 'quartz')
   .option('--json', 'machine-readable output')
   .action(async (opts) => {
-    const dbSim = getArangoDBSimulator();
+    const db = useRealDB ? arangoClient.realDBAdapter() : getArangoDBSimulator();
     if (opts.format === 'json') {
+      const state = await db.getState();
       const outPath = path.join(process.cwd(), 'doc_pipeline/collections/export.json');
-      fs.writeFileSync(outPath, JSON.stringify(dbSim.getState(), null, 2), 'utf-8');
+      fs.writeFileSync(outPath, JSON.stringify(state, null, 2), 'utf-8');
       emit(opts.json, { success: true, path: outPath }, () => console.log(chalk.green(`✔ Exported JSON to ${outPath}`)));
       return;
     }
 
-    const exporter = new QuartzExporter(dbSim, 'wiki');
+    const exporter = new QuartzExporter(db, 'wiki');
     await exporter.export();
     const outPath = path.join(process.cwd(), 'wiki');
     emit(opts.json, { success: true, path: outPath }, () => console.log(chalk.green(`✔ Exported Quartz wiki to ${outPath}`)));

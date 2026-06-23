@@ -1,0 +1,28 @@
+# DoCO node schema — compact reference for LLM ingestion
+# Only the node types emitted per chunk are listed here.
+# Full JSON Schema is in doco_schema.json.
+
+nodes:               # top-level output array
+  - type: Chapter    # required; one of the enum values below
+    title: string    # heading text
+    content: string  # raw text body (optional for structural nodes)
+    metadata:
+      page: number
+      level: number  # hierarchy depth (1 = top)
+    sumo_candidate_tags: [string]   # short local names, e.g. ["Agent","Transaction"]
+
+# --- node type enum ---
+# Chapter     – numbered top-level division
+# Section     – subdivision within a chapter (level 2+)
+# Subsection  – deeper subdivision (level 3+)
+# Paragraph   – body text block
+# ListItem    – single item inside a list
+# Table       – matrix of rows/columns; include content_data: [[row],[row],…]
+# Figure      – image/diagram; include description and url if available
+
+# --- field rules ---
+# type        required on every node
+# title       required for Chapter / Section / Subsection
+# content     required for Paragraph / ListItem / Figure
+# content_data required for Table (array of arrays)
+# sumo_candidate_tags  optional array of short SUMO local names per node

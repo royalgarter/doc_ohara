@@ -6,10 +6,10 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { z } from 'zod';
 import fs from 'fs';
 import path from 'path';
-import { getArangoDBSimulator } from '../src/arangodb_sim.js';
-import { RetrievalEngine } from '../src/retrieval_engine.js';
-import { getIngestionQueue } from '../src/queue.js';
-import { runWorkerOnce } from '../src/worker.js';
+import { getArangoDBSimulator } from '../src/db/simulator.js';
+import { RetrievalEngine } from '../src/retrieval.js';
+import { getIngestionQueue } from '../src/ingest/queue.js';
+import { runWorkerOnce } from '../src/ingest/worker.js';
 
 const INPUT_DIR = 'doc_pipeline/input';
 

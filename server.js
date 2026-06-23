@@ -1,18 +1,20 @@
+import 'dotenv/config';
 import express from 'express';
 import path from 'path';
 import fs from 'fs';
-import { getArangoDBSimulator } from './src/arangodb_sim.js';
-import { QuartzExporter } from './src/quartz_exporter.js';
-import { RetrievalEngine } from './src/retrieval_engine.js';
-import { getIngestionQueue } from './src/queue.js';
-import { runWorkerOnce, startWorkerLoop } from './src/worker.js';
+import * as arangoClient from './src/db/client.js';
+import { getArangoDBSimulator } from './src/db/simulator.js';
+import { QuartzExporter } from './src/exporter.js';
+import { RetrievalEngine } from './src/retrieval.js';
+import { getIngestionQueue } from './src/ingest/queue.js';
+import { runWorkerOnce, startWorkerLoop } from './src/ingest/worker.js';
 import {
   getPipelineLogs,
   isPipelineActive,
   runPipelineExecution,
   clearPipelineLogs,
   addPipelineLog
-} from './src/pipeline_runner.js';
+} from './src/ingest/pipeline.js';
 
 // Tool catalog shared between /tools discovery and the MCP server (bin/ohara-mcp.js)
 const AGENT_TOOLS = [
@@ -30,9 +32,9 @@ fs.mkdirSync(INPUT_DIR, { recursive: true });
 fs.mkdirSync(RAW_OUT_DIR, { recursive: true });
 fs.mkdirSync(FINAL_OUT_DIR, { recursive: true });
 
+const PORT = process.env.PORT || 6454;
 async function startServer() {
   const app = express();
-  const PORT = 6000;
 
   app.use(express.json({ limit: '10mb' }));
 
@@ -51,13 +53,86 @@ async function startServer() {
   const ingestionQueue = getIngestionQueue();
   startWorkerLoop(process.env.GEMINI_API_KEY);
 
-  // API: Get current ArangoDB simulated collections and graph structures
-  app.get('/api/database/state', (req, res) => {
+  // API: Get database stats — real ArangoDB when ARANGO_URL is set, otherwise simulator
+  app.get('/api/database/state', async (req, res) => {
     try {
-      res.json({
-        success: true,
-        state: dbSim.getState()
-      });
+      if (process.env.ARANGO_URL) {
+        const stats = await arangoClient.getStats();
+        return res.json({ success: true, source: 'arangodb', stats });
+      }
+      res.json({ success: true, source: 'simulator', state: dbSim.getState() });
+    } catch (err) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
+  // API: Graph data for the UI — queries real ArangoDB when available, falls back to simulator
+  app.get('/api/graph', async (req, res) => {
+    try {
+      if (process.env.ARANGO_URL) {
+        const db = await arangoClient.initArangoClient();
+        const [docs, sections, edges] = await Promise.all([
+          db.query('FOR d IN documents SORT d._key DESC RETURN d').then(c => c.all()),
+          db.query('FOR s IN sections SORT s.level ASC, s._key ASC RETURN {_key:s._key,_id:s._id,title:s.title,document_id:s.document_id,level:s.level,node_type:s.node_type,parent_section_id:s.parent_section_id}').then(c => c.all()),
+          // Filter to doc/section structural edges only — avoids full scan.
+          // HAS_CHILD and NEXT_SIBLING never point to paragraphs/tables at the
+          // top level; BELONGS_TO only goes para/table→doc and is loaded lazily.
+          db.query(`
+            FOR e IN edges
+              FILTER e.relation IN ['HAS_CHILD', 'NEXT_SIBLING']
+                 AND NOT STARTS_WITH(e._to, 'paragraphs/')
+                 AND NOT STARTS_WITH(e._to, 'tables/')
+              RETURN {_key:e._key,_id:e._id,_from:e._from,_to:e._to,relation:e.relation}
+          `).then(c => c.all()),
+        ]);
+        return res.json({ success: true, source: 'arangodb', documents: docs, sections, paragraphs: [], tables: [], edges });
+      }
+      const state = dbSim.getState();
+      res.json({ success: true, source: 'simulator', ...state });
+    } catch (err) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
+  // API: Lazy-load direct neighbors of a node (paragraphs, tables, sibling sections)
+  app.get('/api/graph/node/:collection/:key/neighbors', async (req, res) => {
+    try {
+      if (!process.env.ARANGO_URL) return res.json({ success: true, nodes: [], edges: [] });
+      const db = await arangoClient.initArangoClient();
+      const nodeId = `${req.params.collection}/${req.params.key}`;
+
+      // Get all edges touching this node
+      const edgesCursor = await db.query(
+        'FOR e IN edges FILTER e._from == @id OR e._to == @id RETURN {_key:e._key,_id:e._id,_from:e._from,_to:e._to,relation:e.relation}',
+        { id: nodeId }
+      );
+      const edges = await edgesCursor.all();
+
+      // Collect neighbor IDs not already in doc/section collections (i.e. paragraphs, tables)
+      const neighborIds = new Set();
+      for (const e of edges) {
+        if (e._from !== nodeId) neighborIds.add(e._from);
+        if (e._to   !== nodeId) neighborIds.add(e._to);
+      }
+
+      // Fetch paragraph and table neighbors in bulk
+      const paraIds    = [...neighborIds].filter(id => id.startsWith('paragraphs/'));
+      const tableIds   = [...neighborIds].filter(id => id.startsWith('tables/'));
+      const sectionIds = [...neighborIds].filter(id => id.startsWith('sections/'));
+
+      const [paragraphs, tables, sections] = await Promise.all([
+        paraIds.length
+          ? db.query('FOR p IN paragraphs FILTER p._id IN @ids RETURN {_key:p._key,_id:p._id,content:LEFT(p.content,500),document_id:p.document_id,section_id:p.section_id,node_type:p.node_type,sumo_tags:p.sumo_tags,sumo_candidate_tags_raw:p.sumo_candidate_tags_raw}', { ids: paraIds }).then(c=>c.all())
+          : [],
+        tableIds.length
+          ? db.query('FOR t IN tables FILTER t._id IN @ids RETURN {_key:t._key,_id:t._id,document_id:t.document_id,section_id:t.section_id,node_type:t.node_type,markdown_representation:t.markdown_representation}', { ids: tableIds }).then(c=>c.all())
+          : [],
+        sectionIds.length
+          ? db.query('FOR s IN sections FILTER s._id IN @ids RETURN {_key:s._key,_id:s._id,title:s.title,document_id:s.document_id,level:s.level,node_type:s.node_type,parent_section_id:s.parent_section_id}', { ids: sectionIds }).then(c=>c.all())
+          : [],
+      ]);
+
+      res.json({ success: true, paragraphs, tables, sections, edges });
     } catch (err) {
       res.status(500).json({ success: false, error: err.message });
     }
@@ -220,9 +295,43 @@ async function startServer() {
     }
   });
 
-  // API: Queue / worker status for the Agent Dashboard
+  // API: Queue / worker status — optionally filtered by ?status=failed|completed|waiting
   app.get('/api/queue/jobs', (req, res) => {
-    res.json({ success: true, jobs: ingestionQueue.list(), stats: ingestionQueue.stats() });
+    const { status } = req.query;
+    const jobs = status ? ingestionQueue.list({ status }) : ingestionQueue.list();
+    res.json({ success: true, jobs, stats: ingestionQueue.stats() });
+  });
+
+  // API: Requeue a failed/completed job (sets status back to waiting, resets attempts, optionally with --force)
+  app.post('/api/queue/jobs/:id/retry', (req, res) => {
+    try {
+      const job = ingestionQueue.getJob(req.params.id);
+      if (!job) return res.status(404).json({ success: false, error: 'Job not found' });
+      const force = req.body?.force ?? false;
+      ingestionQueue.update(job.id, {
+        status: 'waiting',
+        attempts: 0,
+        error: null,
+        result: null,
+        progress: 0,
+        progressMessage: '',
+        data: { ...job.data, force },
+      });
+      res.json({ success: true, job: ingestionQueue.getJob(job.id) });
+    } catch (err) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
+  // API: Delete a job record from the queue
+  app.delete('/api/queue/jobs/:id', (req, res) => {
+    try {
+      const removed = ingestionQueue.remove(req.params.id);
+      if (!removed) return res.status(404).json({ success: false, error: 'Job not found' });
+      res.json({ success: true });
+    } catch (err) {
+      res.status(500).json({ success: false, error: err.message });
+    }
   });
 
   // API: Deep graph context for a node (backs the agent's "Focus on Node X" view)
@@ -238,14 +347,21 @@ async function startServer() {
   });
 
   // API: Generates a system-prompt snippet summarizing current graph state for Claude
-  app.get('/api/agent/system-prompt', (req, res) => {
-    const state = dbSim.getState();
+  app.get('/api/agent/system-prompt', async (req, res) => {
     const stats = ingestionQueue.stats();
+    let counts;
+    if (process.env.ARANGO_URL) {
+      counts = await arangoClient.getStats().catch(() => null);
+    }
+    if (!counts) {
+      const state = dbSim.getState();
+      counts = { documents: state.documents.length, sections: state.sections.length,
+                 paragraphs: state.paragraphs.length, tables: state.tables.length, edges: state.edges.length };
+    }
     const prompt = [
       `You have access to the Doc Ohara Space-Time Graph via MCP tools (ingest, query, get_graph_context).`,
-      `Current graph: ${state.documents.length} document(s), ${state.sections.length} section(s), ${state.paragraphs.length} paragraph(s), ${state.tables.length} table(s), ${state.edges.length} edge(s).`,
+      `Current graph: ${counts.documents} document(s), ${counts.sections} section(s), ${counts.paragraphs} paragraph(s), ${counts.tables} table(s), ${counts.edges} edge(s).`,
       `Ingestion queue: waiting=${stats.waiting} active=${stats.active} completed=${stats.completed} failed=${stats.failed}.`,
-      `Documents: ${state.documents.map(d => d.title).join('; ') || '(none yet)'}.`
     ].join('\n');
     res.json({ success: true, prompt });
   });
@@ -253,7 +369,8 @@ async function startServer() {
   // API: Trigger Quartz Wiki Export
   app.post('/api/quartz/export', async (req, res) => {
     try {
-      const exporter = new QuartzExporter(dbSim, 'wiki');
+      const db = process.env.ARANGO_URL ? arangoClient.realDBAdapter() : dbSim;
+      const exporter = new QuartzExporter(db, 'wiki');
       await exporter.export();
       res.json({
         success: true,
