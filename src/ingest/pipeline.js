@@ -173,7 +173,7 @@ export async function runPipelineExecution(aiKey) {
               document_id: inserted._key,
               section_id: p.section_id ? `sections/${p.section_id}` : null,
               content: p.content,
-              is_latex: p.content.includes('\\') || p.content.includes('^') || p.content.includes('_')
+              is_latex: typeof p.content === 'string' && (p.content.includes('\\') || p.content.includes('^') || p.content.includes('_'))
             });
           }
 
@@ -221,7 +221,7 @@ export async function runPipelineExecution(aiKey) {
             document_id: insertedDoc._key,
             section_id: p.section_id ? `sections/${p.section_id}` : null,
             content: p.content,
-            is_latex: p.content.includes('\\') || p.content.includes('^') || p.content.includes('_')
+            is_latex: typeof p.content === 'string' && (p.content.includes('\\') || p.content.includes('^') || p.content.includes('_'))
           });
         });
 
@@ -786,23 +786,38 @@ function transformRawToCollections(rawOutputDir) {
               level,
             });
           } else if (['Paragraph', 'ListItem'].includes(ntype)) {
+            // LLM returns Paragraph text as either:
+            //   sentences: [{content: "…"}, …]  (structured)
+            //   content / text: "…"              (flat, but may be non-string)
+            let content = '';
+            if (Array.isArray(node.sentences) && node.sentences.length > 0) {
+              content = node.sentences.map(s => s.content || s.text || '').filter(Boolean).join(' ');
+            } else if (typeof node.content === 'string') {
+              content = node.content;
+            } else if (typeof node.text === 'string') {
+              content = node.text;
+            } else if (node.content != null) {
+              content = String(node.content);
+            }
             dbCollections.paragraphs.push({
               id: nodeId,
               document_id: docId,
               section_id: currentSectionId,
               node_type: ntype,
-              content: node.content || node.text || '',
+              content,
               sumo_tags: node.sumo_tags || [],
               sumo_candidate_tags_raw: node.sumo_candidate_tags_raw || [],
               sumo_resolved_map: node.sumo_resolved_map || {},
             });
           } else if (ntype === 'Figure') {
+            // LLM returns Figure as: caption, figure (alt/src), label
+            const content = node.caption || node.figure || node.label || node.content || node.description || '';
             dbCollections.paragraphs.push({
               id: nodeId,
               document_id: docId,
               section_id: currentSectionId,
               node_type: 'Figure',
-              content: node.content || node.description || node.url || '',
+              content,
               sumo_tags: node.sumo_tags || [],
               sumo_candidate_tags_raw: node.sumo_candidate_tags_raw || [],
               sumo_resolved_map: node.sumo_resolved_map || {},
@@ -1138,7 +1153,7 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
             section_id: secHandle || null,
             node_type: p.node_type || 'Paragraph',
             content: p.content,
-            is_latex: p.content.includes('\\') || p.content.includes('^') || p.content.includes('_'),
+            is_latex: typeof p.content === 'string' && (p.content.includes('\\') || p.content.includes('^') || p.content.includes('_')),
             sumo_tags: p.sumo_tags || [],
             sumo_candidate_tags_raw: p.sumo_candidate_tags_raw || [],
             sumo_resolved_map: p.sumo_resolved_map || {},
@@ -1185,7 +1200,7 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
       docsSections.forEach(sec => { arangoDb.insertSection({ _key: sec.id, document_id: insertedDoc._key, title: sec.title, level: sec.level }); nodeCount += 1; });
 
       const docsParagraphs = transformedDocs.paragraphs.filter(p => p.document_id === doc.id);
-      docsParagraphs.forEach(p => { arangoDb.insertParagraph({ _key: p.id, document_id: insertedDoc._key, section_id: p.section_id ? `sections/${p.section_id}` : null, content: p.content, is_latex: p.content.includes('\\') || p.content.includes('^') || p.content.includes('_') }); nodeCount += 1; });
+      docsParagraphs.forEach(p => { arangoDb.insertParagraph({ _key: p.id, document_id: insertedDoc._key, section_id: p.section_id ? `sections/${p.section_id}` : null, content: p.content, is_latex: typeof p.content === 'string' && (p.content.includes('\\') || p.content.includes('^') || p.content.includes('_')) }); nodeCount += 1; });
 
       const docsTables = transformedDocs.tables.filter(t => t.document_id === doc.id);
       docsTables.forEach(t => { arangoDb.insertTable({ _key: t.id, document_id: insertedDoc._key, section_id: t.section_id ? `sections/${t.section_id}` : null, matrix_data: t.matrix_data || [], markdown_representation: t.markdown_representation || '' }); nodeCount += 1; });
