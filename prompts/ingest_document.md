@@ -34,10 +34,10 @@ sumo_candidate_tags: [string]   # short SUMO local names, e.g. ["Agent","Transac
 #             title:  string   # REQUIRED
 # Subsection  label?: string
 #             title:  string   # REQUIRED
-# Paragraph   sentences: [{ content: string }]   # sentence-level granularity
+# Paragraph   content: string  # full paragraph text — preserve verbatim, do NOT split by sentence
 # ListItem    content: string
 # Figure      label?:   string   # e.g. "Figure 3"
-#             caption?: string
+#             caption?: string   # human-readable caption — REQUIRED if any caption text exists
 #             figure: { description: string, url?: string }
 # Table       label?:   string   # e.g. "Table 2"
 #             caption?: string
@@ -57,11 +57,15 @@ sumo_candidate_tags: [string]   # short SUMO local names, e.g. ["Agent","Transac
 
 1. **Analyze** the layout and hierarchy of the input chunk.
 2. **Map** every content block to exactly one DoCO type — do not skip sections.
-3. **Preserve** raw text verbatim inside `content` / `sentences[].content`; do not paraphrase.
-4. **Respect granularity**: Paragraphs must carry a `sentences` array, not a flat `content` string. Tables must carry a nested `table.content_data` 2-D array, not a flat string. Figures must carry a nested `figure` object.
+3. **Preserve** raw text verbatim inside `content`; do not paraphrase or summarize.
+4. **Respect granularity**:
+   - `Paragraph` uses a flat `content: string` — the full paragraph text as-is. Do NOT split a paragraph into individual sentences. Do NOT create multiple Paragraph nodes for what is one natural paragraph in the source. If the source has several consecutive sentences that form a cohesive paragraph, they belong in ONE Paragraph node.
+   - `Table` must carry a nested `table.content_data` 2-D array, not a flat string.
+   - `Figure` must carry a nested `figure` object with a `description` string (not an object within `figure`).
 5. **Assign `part`** to every node: anything before the first chapter is `front_matter`; bibliography, appendixes, glossary, index are `back_matter`; everything else is `body_matter`.
 6. **Populate `sumo_candidate_tags`** per node with short SUMO concept local names (e.g. `Agent`, `Transaction`, `Text`, `Quantity`). Not full URIs. These are validated against the local SUMO index.
 7. **Output only** a JSON object `{ "nodes": [...] }`. No markdown fences, no commentary.
+8. **Never emit empty nodes**: every Paragraph must have non-empty `content`, every Figure must have a non-empty `caption` or `figure.description`, every Section/Chapter must have a non-empty `title`. Skip any block with no extractable text.
 
 ---
 
@@ -114,10 +118,7 @@ sumo_candidate_tags: [string]   # short SUMO local names, e.g. ["Agent","Transac
     {
       "type": "Paragraph",
       "part": "body_matter",
-      "sentences": [
-        { "content": "Bitcoin is a collection of concepts and technologies that form the basis of a digital money ecosystem." },
-        { "content": "Units of currency called bitcoin are used to store and transmit value among participants in the bitcoin network." }
-      ],
+      "content": "Bitcoin is a collection of concepts and technologies that form the basis of a digital money ecosystem. Units of currency called bitcoin are used to store and transmit value among participants in the bitcoin network. Bitcoin can be sent over the internet without a middleman, like email for money.",
       "metadata": { "page": 5, "level": 2 },
       "sumo_candidate_tags": ["Currency", "FinancialTransaction", "ComputerNetwork"]
     },
@@ -165,11 +166,13 @@ sumo_candidate_tags: [string]   # short SUMO local names, e.g. ["Agent","Transac
 
 - Output must start with `{` and end with `}` — pure JSON, no fences.
 - Every node must have `type`, `part`, and `metadata`.
-- `Paragraph` nodes must use `sentences[]`, not a flat `content` string.
+- `Paragraph` nodes must use a flat `content: string` — **never** a `sentences[]` array.
 - `Table` nodes must use `table.content_data` (2-D array), not a flat string.
-- `Figure` nodes must use a nested `figure` object.
+- `Figure` nodes must use a nested `figure` object with `description` as a plain string.
 - `Authors` must use `agents_group` with a typed `agents[]` array.
 - `Bibliography` must list individual `references[]` with at minimum `citation_text`.
+- Never emit a Paragraph with empty `content` — skip it entirely.
+- Never split one source paragraph into multiple Paragraph nodes.
 - Preserve document order in the array.
 - Short SUMO local names only — no full URIs, no SUMO namespace prefixes.
 - Outputs must be deterministic for identical inputs (cache validity).

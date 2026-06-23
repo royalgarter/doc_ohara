@@ -786,32 +786,37 @@ function transformRawToCollections(rawOutputDir) {
               level,
             });
           } else if (['Paragraph', 'ListItem'].includes(ntype)) {
-            // LLM returns Paragraph text as either:
-            //   sentences: [{content: "…"}, …]  (structured)
-            //   content / text: "…"              (flat, but may be non-string)
+            // Prefer flat content string (new schema). Fall back to joining sentences[]
+            // for backwards-compat with cached LLM outputs that used the old schema.
             let content = '';
-            if (Array.isArray(node.sentences) && node.sentences.length > 0) {
-              content = node.sentences.map(s => s.content || s.text || '').filter(Boolean).join(' ');
-            } else if (typeof node.content === 'string') {
+            if (typeof node.content === 'string' && node.content.trim()) {
               content = node.content;
-            } else if (typeof node.text === 'string') {
+            } else if (typeof node.text === 'string' && node.text.trim()) {
               content = node.text;
+            } else if (Array.isArray(node.sentences) && node.sentences.length > 0) {
+              content = node.sentences.map(s => s.content || s.text || '').filter(Boolean).join(' ');
             } else if (node.content != null) {
               content = String(node.content);
             }
+            // Skip nodes with no extractable text
+            if (!content.trim()) return;
             dbCollections.paragraphs.push({
               id: nodeId,
               document_id: docId,
               section_id: currentSectionId,
               node_type: ntype,
-              content,
+              content: content.trim(),
               sumo_tags: node.sumo_tags || [],
               sumo_candidate_tags_raw: node.sumo_candidate_tags_raw || [],
               sumo_resolved_map: node.sumo_resolved_map || {},
             });
           } else if (ntype === 'Figure') {
-            // LLM returns Figure as: caption, figure (alt/src), label
-            const content = node.caption || node.figure || node.label || node.content || node.description || '';
+            // LLM returns Figure as: caption, figure (object with description/url), label
+            const figureDesc = typeof node.figure === 'object'
+              ? (node.figure?.description || node.figure?.url || '')
+              : (typeof node.figure === 'string' ? node.figure : '');
+            const content = node.caption || figureDesc || node.label || node.description || (typeof node.content === 'string' ? node.content : '') || '';
+            if (!content.trim()) return;
             dbCollections.paragraphs.push({
               id: nodeId,
               document_id: docId,
@@ -823,13 +828,35 @@ function transformRawToCollections(rawOutputDir) {
               sumo_resolved_map: node.sumo_resolved_map || {},
             });
           } else if (ntype === 'Table') {
-            dbCollections.tables.push({
-              id: nodeId,
-              document_id: docId,
-              section_id: currentSectionId,
-              matrix_data: node.metadata?.table_cells || node.table || [],
-              markdown_representation: node.markdown || node.metadata?.markdown || '',
-            });
+            const contentData = node.table?.content_data || node.metadata?.table_cells || node.table || [];
+            const hasValidData = Array.isArray(contentData) && contentData.length > 0
+              && Array.isArray(contentData[0]) && contentData[0].length > 0;
+            if (hasValidData) {
+              dbCollections.tables.push({
+                id: nodeId,
+                document_id: docId,
+                section_id: currentSectionId,
+                node_type: 'Table',
+                matrix_data: contentData,
+                markdown_representation: node.markdown || node.metadata?.markdown || '',
+              });
+            } else {
+              // Table data missing or malformed — preserve as raw Paragraph so no content is lost
+              const fallback = [node.caption, node.label, node.markdown, node.metadata?.markdown]
+                .filter(s => typeof s === 'string' && s.trim()).join('\n').trim();
+              if (fallback) {
+                dbCollections.paragraphs.push({
+                  id: nodeId,
+                  document_id: docId,
+                  section_id: currentSectionId,
+                  node_type: 'Table',
+                  content: fallback,
+                  sumo_tags: node.sumo_tags || [],
+                  sumo_candidate_tags_raw: node.sumo_candidate_tags_raw || [],
+                  sumo_resolved_map: node.sumo_resolved_map || {},
+                });
+              }
+            }
           }
         });
 
@@ -954,6 +981,80 @@ function transformRawToCollections(rawOutputDir) {
       }
     });
   });
+
+  // ── Post-process pass 1: strip PDF/Markdown artifacts ───────────────────
+  // Artifacts are nodes whose content is structural noise: separator lines,
+  // LLM placeholders, TOC page-number entries, pure-symbol strings, etc.
+  // We drop these entirely — they carry no semantic content.
+  function isArtifact(content) {
+    if (typeof content !== 'string') return false;
+    const t = content.trim();
+    if (!t) return true;
+    // Pure separator characters: dashes, pipes, equals, hashes, spaces, underscores, asterisks
+    if (/^[-=|#\s*_~`]+$/.test(t)) return true;
+    // LLM placeholder brackets: [... text ...] or [...more...]
+    if (/^\[\.{2,}.*\]$/.test(t)) return true;
+    // PDF table-of-contents artifact: mix of heading anchors + roman/arabic page numbers
+    // e.g. "--- ###### Preface | xi -----"
+    if (/#{2,}/.test(t) && /[-|]{2,}/.test(t)) return true;
+    // Starts with markdown heading fence inside body text (leaked from chunker boundary)
+    if (/^#{3,}\s/.test(t)) return true;
+    // Fewer than 3 alphabetic characters — almost certainly not real prose
+    const wordChars = (t.match(/[a-zA-Z]/g) || []).length;
+    if (wordChars < 3) return true;
+    return false;
+  }
+
+  dbCollections.paragraphs = dbCollections.paragraphs.filter(p => !isArtifact(p.content));
+
+  // ── Post-process pass 2: reattach Paragraph fragments to their sibling ───
+  // A "fragment" is a Paragraph node that got split away from its predecessor
+  // (e.g. at a chunk boundary or by LLM over-segmentation). We never break an
+  // existing paragraph apart — we only APPEND a fragment to the last real
+  // Paragraph that precedes it in the same section.
+  //
+  // Detection: a Paragraph (not ListItem/Figure/Table) is a fragment when:
+  //   • its content is < FRAGMENT_CHARS, AND
+  //   • it starts with a lowercase letter (clear mid-sentence continuation), OR
+  //   • it is < TINY_CHARS (too short to be a standalone paragraph).
+  const FRAGMENT_CHARS = 120;
+  const TINY_CHARS     = 60;
+
+  function isFragment(p) {
+    if (p.node_type !== 'Paragraph') return false;
+    if (typeof p.content !== 'string') return false;
+    const t = p.content.trim();
+    if (t.length >= FRAGMENT_CHARS) return false;
+    // starts lowercase → mid-sentence continuation
+    if (/^[a-z]/.test(t)) return true;
+    // extremely short → almost certainly detached fragment
+    if (t.length < TINY_CHARS) return true;
+    return false;
+  }
+
+  const reattached = [];
+  for (const p of dbCollections.paragraphs) {
+    if (isFragment(p)) {
+      // Find the last Paragraph in reattached that shares the same section
+      let absorbed = false;
+      for (let k = reattached.length - 1; k >= 0; k--) {
+        const prev = reattached[k];
+        if (prev.document_id === p.document_id && prev.section_id === p.section_id && prev.node_type === 'Paragraph') {
+          // Determine join separator: if prev ends with a sentence-ending char, use a space;
+          // otherwise (mid-sentence break) join with a single space too — content is verbatim.
+          prev.content = prev.content.trimEnd() + ' ' + p.content.trimStart();
+          absorbed = true;
+          break;
+        }
+        // Stop searching if we hit a section boundary marker (different section)
+        if (prev.section_id !== p.section_id) break;
+      }
+      if (!absorbed) reattached.push(p); // no sibling found — keep as-is
+    } else {
+      reattached.push(p);
+    }
+  }
+  dbCollections.paragraphs = reattached;
 
   return dbCollections;
 }
