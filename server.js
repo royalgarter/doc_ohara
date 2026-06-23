@@ -77,8 +77,8 @@ async function startServer() {
         const [docs, sections, paragraphs, edges] = await Promise.all([
           db.query('FOR d IN documents SORT d._key DESC RETURN d').then(c => c.all()),
           db.query('FOR s IN sections SORT s.level ASC, s._key ASC RETURN {_key:s._key,_id:s._id,title:s.title,document_id:s.document_id,level:s.level,node_type:s.node_type,parent_section_id:s.parent_section_id}').then(c => c.all()),
-          db.query('FOR p IN paragraphs RETURN {_key:p._key,_id:p._id,document_id:p.document_id,section_id:p.section_id,node_type:p.node_type}').then(c => c.all()),
-          db.query('FOR e IN edges RETURN {_key:e._key,_id:e._id,_from:e._from,_to:e._to,relation:e.relation}').then(c => c.all()),
+          db.query('LET docKeys = (FOR d IN documents RETURN d._key) FOR p IN paragraphs FILTER p.document_id IN docKeys RETURN {_key:p._key,_id:p._id,document_id:p.document_id,section_id:p.section_id,node_type:p.node_type}').then(c => c.all()),
+          db.query('LET docKeys = (FOR d IN documents RETURN d._key) LET validIds = UNION((FOR d IN documents RETURN d._id),(FOR s IN sections FILTER s.document_id IN docKeys RETURN s._id),(FOR p IN paragraphs FILTER p.document_id IN docKeys RETURN p._id),(FOR t IN tables FILTER t.document_id IN docKeys RETURN t._id)) FOR e IN edges FILTER e._from IN validIds OR e._to IN validIds RETURN {_key:e._key,_id:e._id,_from:e._from,_to:e._to,relation:e.relation}').then(c => c.all()),
         ]);
         return res.json({ success: true, source: 'arangodb', documents: docs, sections, paragraphs, tables: [], edges });
       }
