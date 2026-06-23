@@ -764,27 +764,44 @@ function transformRawToCollections(rawOutputDir) {
         const SECTION_TYPES = ['Chapter', 'Section', 'Subsection'];
         const LEVEL_OF = { Chapter: 1, Section: 2, Subsection: 3 };
 
+        // Dedup map: "(docId, level, normalizedTitle)" → existing section id.
+        // When the same section header re-appears in a later chunk we reuse the
+        // existing section node instead of creating a duplicate.
+        const sectionDedup = new Map(); // key → section id
+
         rawContent.nodes.forEach((node, blockIdx) => {
           const nodeId = `okf_node_${blockIdx}_${Date.now()}`;
           const ntype = node.type || (node.metadata && node.metadata.type) || 'Paragraph';
 
           if (SECTION_TYPES.includes(ntype)) {
             const level = node.metadata?.level || LEVEL_OF[ntype] || 2;
+            const title = (node.title || node.content?.split('\n')[0] || '').trim();
+            const dedupKey = `${docId}::L${level}::${title.toLowerCase()}`;
+
             // pop stack until we find a shallower ancestor
             while (sectionStack.length > 0 && sectionStack[sectionStack.length - 1].level >= level) {
               sectionStack.pop();
             }
-            const parentSectionId = sectionStack.length > 0 ? sectionStack[sectionStack.length - 1].id : null;
-            sectionStack.push({ id: nodeId, level });
-            currentSectionId = nodeId;
-            dbCollections.sections.push({
-              id: nodeId,
-              document_id: docId,
-              parent_section_id: parentSectionId,
-              node_type: ntype,
-              title: node.title || node.content?.split('\n')[0] || '',
-              level,
-            });
+
+            if (sectionDedup.has(dedupKey)) {
+              // Reuse the existing section — just restore it as the current context.
+              const existingId = sectionDedup.get(dedupKey);
+              sectionStack.push({ id: existingId, level });
+              currentSectionId = existingId;
+            } else {
+              const parentSectionId = sectionStack.length > 0 ? sectionStack[sectionStack.length - 1].id : null;
+              sectionStack.push({ id: nodeId, level });
+              currentSectionId = nodeId;
+              sectionDedup.set(dedupKey, nodeId);
+              dbCollections.sections.push({
+                id: nodeId,
+                document_id: docId,
+                parent_section_id: parentSectionId,
+                node_type: ntype,
+                title,
+                level,
+              });
+            }
           } else if (['Paragraph', 'ListItem'].includes(ntype)) {
             // Prefer flat content string (new schema). Fall back to joining sentences[]
             // for backwards-compat with cached LLM outputs that used the old schema.
@@ -878,6 +895,7 @@ function transformRawToCollections(rawOutputDir) {
 
         const minSectionStack = [];
         let currentSectionId = null;
+        const minSectionDedup = new Map();
 
         rawContent.pdf_body.forEach((block, blockIdx) => {
           const nodeId = `min_node_${blockIdx}_${Date.now()}`;
@@ -885,20 +903,29 @@ function transformRawToCollections(rawOutputDir) {
             // title already captured above
           } else if (block.type === "heading") {
             const level = block.level || 1;
+            const title = (block.text || '').trim();
+            const dedupKey = `${docId}::L${level}::${title.toLowerCase()}`;
             while (minSectionStack.length > 0 && minSectionStack[minSectionStack.length - 1].level >= level) {
               minSectionStack.pop();
             }
-            const parentSectionId = minSectionStack.length > 0 ? minSectionStack[minSectionStack.length - 1].id : null;
-            minSectionStack.push({ id: nodeId, level });
-            currentSectionId = nodeId;
-            dbCollections.sections.push({
-              id: nodeId,
-              document_id: docId,
-              parent_section_id: parentSectionId,
-              node_type: 'Section',
-              title: block.text || "",
-              level,
-            });
+            if (minSectionDedup.has(dedupKey)) {
+              const existingId = minSectionDedup.get(dedupKey);
+              minSectionStack.push({ id: existingId, level });
+              currentSectionId = existingId;
+            } else {
+              const parentSectionId = minSectionStack.length > 0 ? minSectionStack[minSectionStack.length - 1].id : null;
+              minSectionStack.push({ id: nodeId, level });
+              currentSectionId = nodeId;
+              minSectionDedup.set(dedupKey, nodeId);
+              dbCollections.sections.push({
+                id: nodeId,
+                document_id: docId,
+                parent_section_id: parentSectionId,
+                node_type: 'Section',
+                title,
+                level,
+              });
+            }
           } else if (block.type === "text" || block.type === "equation") {
             dbCollections.paragraphs.push({
               id: nodeId,
