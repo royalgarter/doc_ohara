@@ -2,6 +2,7 @@
 // Doc_Ohara CLI (ohara 2.0) — multi-action front-end over the Space-Time Graph.
 import dotenv from 'dotenv';
 dotenv.config();
+import { loadEnvFromDB, listEnv, getEnv, setEnv, unsetEnv } from '../src/db/env.js';
 import { Command } from 'commander';
 import chalk from 'chalk';
 import fs from 'fs';
@@ -14,6 +15,8 @@ import { runWorkerOnce } from '../src/ingest/worker.js';
 import { QuartzExporter } from '../src/exporter.js';
 
 const INPUT_DIR = 'doc_pipeline/input';
+if (process.env.ARANGO_URL) await loadEnvFromDB();
+
 const useRealDB = !!process.env.ARANGO_URL;
 
 function emit(json, data, humanFn) {
@@ -504,6 +507,63 @@ program
     await exporter.export();
     const outPath = path.join(process.cwd(), 'wiki');
     emit(opts.json, { success: true, path: outPath }, () => console.log(chalk.green(`✔ Exported Quartz wiki to ${outPath}`)));
+  });
+
+// ── env command ──────────────────────────────────────────────────────────────
+const envCmd = program.command('env').description('Manage environment variables stored in ArangoDB');
+
+envCmd
+  .command('list')
+  .description('List all env vars stored in ArangoDB')
+  .option('--json', 'machine-readable output')
+  .action(async (opts) => {
+    const entries = await listEnv();
+    emit(opts.json, { success: true, env: entries }, () => {
+      if (entries.length === 0) {
+        console.log(chalk.yellow('No env vars stored in ArangoDB yet.'));
+      } else {
+        for (const { key, value } of entries) {
+          const masked = key.toLowerCase().includes('key') || key.toLowerCase().includes('pass') || key.toLowerCase().includes('secret')
+            ? value.slice(0, 4) + '…'
+            : value;
+          console.log(`${chalk.cyan(key.padEnd(32))} ${masked}`);
+        }
+      }
+    });
+  });
+
+envCmd
+  .command('get <key>')
+  .description('Get a single env var from ArangoDB')
+  .action(async (key) => {
+    const value = await getEnv(key);
+    if (value === null) {
+      console.log(chalk.yellow(`"${key}" is not set in ArangoDB.`));
+      process.exitCode = 1;
+    } else {
+      console.log(value);
+    }
+  });
+
+envCmd
+  .command('set <key> <value>')
+  .description('Set an env var in ArangoDB (and immediately into process.env)')
+  .action(async (key, value) => {
+    try {
+      await setEnv(key, value);
+      console.log(chalk.green(`✔ Set ${key}`));
+    } catch (err) {
+      console.error(chalk.red(`✖ ${err.message}`));
+      process.exitCode = 1;
+    }
+  });
+
+envCmd
+  .command('unset <key>')
+  .description('Remove an env var from ArangoDB')
+  .action(async (key) => {
+    await unsetEnv(key);
+    console.log(chalk.green(`✔ Unset ${key}`));
   });
 
 program.parse();

@@ -18,6 +18,7 @@
     "ohara:status": "node bin/ohara.js status",
     "ohara:export": "node bin/ohara.js export --format quartz",
     "ohara:export:json": "node bin/ohara.js export --format json",
+    "ohara:verify": "node bin/ohara.js verify",
     "ohara:mcp": "node bin/ohara-mcp.js",
     "build:sumo": "node scripts/build-sumo-index.js",
     "test": "node --test tests/ingest.test.js",
