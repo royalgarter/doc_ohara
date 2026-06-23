@@ -58,8 +58,8 @@ export async function getEnv(key) {
 
 /** Set / upsert a key. */
 export async function setEnv(key, value) {
-  if (key === 'ARANGO_URL' || key === 'GEMINI_API_KEY') {
-    throw new Error(`${key} must stay in .env — it is required before the DB is available.`);
+  if (key === 'ARANGO_URL') {
+    throw new Error(`ARANGO_URL must stay in .env — it is required to connect to the DB in the first place.`);
   }
   const { coll } = await getDB();
   await coll.save({ _key: key, value: String(value) }, { overwriteMode: 'replace' });
