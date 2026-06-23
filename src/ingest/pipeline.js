@@ -1099,18 +1099,21 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
           for (let i = 0; i < group.length; i += BATCH_SIZE) {
             const batch = group.slice(i, i + BATCH_SIZE);
             await Promise.all(batch.map(async (sec) => {
+              // Resolve parent's ArangoDB _id (always available: parents are a lower level,
+              // processed in a prior iteration of sortedLevels)
+              const parentHandle = sec.parent_section_id ? sectionIdMap.get(sec.parent_section_id) : null;
               const secRes = await arangoClient.insertSection({
                 document_id: inserted._key,
                 title: sec.title,
                 level: sec.level,
                 node_type: sec.node_type || 'Section',
-                parent_section_id: sec.parent_section_id || null,
+                // Store the resolved ArangoDB _id so verify/queries can follow the reference
+                parent_section_id: parentHandle || null,
               });
               nodeCount += 1;
               const secHandle = secRes._id || `sections/${secRes._key}`;
               sectionIdMap.set(sec.id, secHandle);
 
-              const parentHandle = sec.parent_section_id ? sectionIdMap.get(sec.parent_section_id) : null;
               const fromHandle = parentHandle || docHandle;
               await arangoClient.insertEdge({ _from: fromHandle, _to: secHandle, relation: 'HAS_CHILD', type: 'HAS_CHILD' }).catch(()=>{});
             }));
