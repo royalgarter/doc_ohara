@@ -794,12 +794,12 @@
     const levelToX = {};
     levelNums.forEach((lvl, i) => { levelToX[lvl] = SEC_START + i * SEC_GAP; });
 
-    // Dynamic row height: keep SVG under ~3000px tall
-    const MAX_SVG_H = 3000;
+    // Row height: at least 14px so 5px-radius nodes never overlap.
+    // The container is overflow-auto so the SVG can be as tall as needed.
     const columnHeightsPreview = [documents.length, sampledPara.length,
       ...levelNums.map(l => sectionsByLevel.get(l).length)];
     const tallestPreview = Math.max(...columnHeightsPreview, 1);
-    const ROW_H = Math.max(6, Math.min(26, Math.floor((MAX_SVG_H - 72) / tallestPreview)));
+    const ROW_H = Math.max(14, Math.min(26, Math.floor(2400 / tallestPreview)));
     const PAD_Y = 100;
 
     const nodePos = new Map();
