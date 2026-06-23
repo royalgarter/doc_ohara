@@ -45,6 +45,42 @@ export class RetrievalEngine {
     return scored;
   }
 
+  // Phase 1b: Entity pivot — for seed paragraphs, find cross-document paragraphs sharing entities.
+  // Uses MENTIONS edges in state (relation: 'MENTIONS') to traverse paragraph→entity→paragraph.
+  getEntityPivotContext(seedResults, state, options = {}) {
+    const limit = options.entityPivotLimit
+      ?? parseInt(process.env.OHARA_ENTITY_PIVOT_LIMIT || '5', 10);
+    const weight = options.entityPivotWeight
+      ?? parseFloat(process.env.OHARA_ENTITY_PIVOT_WEIGHT || '0.5');
+
+    // Collect entity slugs from seed paragraph results
+    const seedEntitySlugs = new Set();
+    for (const { node } of seedResults) {
+      for (const slug of (node.entity_slugs || [])) seedEntitySlugs.add(slug);
+    }
+    if (seedEntitySlugs.size === 0) return [];
+
+    // Build paragraph → entity slug set from MENTIONS edges
+    const mentionEdges = (state.edges || []).filter(e => e.relation === 'MENTIONS' || e.type === 'MENTIONS');
+    const seedParaIds = new Set(seedResults.map(r => r.node._id));
+
+    // Find paragraphs (not already in seed) that share at least one entity slug
+    const pivotScores = new Map(); // paraId → { node, score }
+    for (const p of state.paragraphs) {
+      if (seedParaIds.has(p._id)) continue;
+      const pSlugs = p.entity_slugs || [];
+      if (pSlugs.length === 0) continue;
+      const shared = pSlugs.filter(s => seedEntitySlugs.has(s)).length;
+      if (shared > 0) {
+        pivotScores.set(p._id, { node: p, score: weight * (shared / Math.max(pSlugs.length, 1)) });
+      }
+    }
+
+    return [...pivotScores.values()]
+      .sort((a, b) => b.score - a.score)
+      .slice(0, limit);
+  }
+
   // Phase 2: Deep Context (depth traversal from a target node)
   getDeepContext(targetNodeId, edgeTypes = ['has_section', 'contains_paragraph', 'belongs_to'], options = {}) {
     const depth = options.depth || 1;
@@ -53,18 +89,22 @@ export class RetrievalEngine {
     return result.results || [];
   }
 
-  // Orchestrates Phase 0 -> Phase 1 -> Phase 2
+  // Orchestrates Phase 0 -> Phase 1 -> Phase 1b (entity pivot) -> Phase 2
   query(rawInput, options = {}) {
     const processedQuery = this.preprocessInput(rawInput);
     const shallowResults = this.getShallowContext(processedQuery, options);
 
     if (shallowResults.length === 0) {
-      return { processedQuery, shallowResults: [], deepResults: [] };
+      return { processedQuery, shallowResults: [], entityPivotResults: [], deepResults: [] };
     }
+
+    // Phase 1b: entity pivot for cross-document expansion
+    const state = this.dbSim.getState();
+    const entityPivotResults = this.getEntityPivotContext(shallowResults, state, options);
 
     const topNode = shallowResults[0].node;
     const deepResults = this.getDeepContext(topNode._id, undefined, { depth: options.depth || 2 });
 
-    return { processedQuery, shallowResults, deepResults };
+    return { processedQuery, shallowResults, entityPivotResults, deepResults };
   }
 }

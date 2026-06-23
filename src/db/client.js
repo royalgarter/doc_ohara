@@ -30,7 +30,7 @@ export async function initArangoClient() {
   if (username) db.useBasicAuth(username, password);
 
   // ensure collections exist
-  const docCollections = ['documents', 'sections', 'paragraphs', 'tables', 'llm_cache'];
+  const docCollections = ['documents', 'sections', 'paragraphs', 'tables', 'llm_cache', 'entities'];
   for (const name of docCollections) {
     const coll = db.collection(name);
     const exists = await coll.exists().catch(() => false);
@@ -76,6 +76,9 @@ export async function initArangoClient() {
     db.collection('edges').ensureIndex({ type: 'persistent', fields: ['relation'], name: 'idx_edges_relation' }).catch(() => {}),
     // file_hash lookup on documents (findDocumentByHash)
     db.collection('documents').ensureIndex({ type: 'persistent', fields: ['file_hash'], name: 'idx_documents_file_hash' }).catch(() => {}),
+    // entity slug uniqueness + normKey lookup for dedup
+    db.collection('entities').ensureIndex({ type: 'persistent', fields: ['slug'], unique: true, name: 'idx_entities_slug' }).catch(() => {}),
+    db.collection('entities').ensureIndex({ type: 'persistent', fields: ['norm_key'], name: 'idx_entities_norm_key' }).catch(() => {}),
   ]);
 
   initialized = true;
@@ -115,6 +118,50 @@ export async function insertTable(t) {
   return { _key: res._key, _id: res._id };
 }
 
+export async function updateDocument(key, patch) {
+  if (!initialized) await initArangoClient();
+  const coll = db.collection('documents');
+  await coll.update(key, patch);
+}
+
+export async function upsertEntity(entity) {
+  if (!initialized) await initArangoClient();
+  const coll = db.collection('entities');
+  // AQL upsert: create on first encounter, merge aliases + increment mention_count on subsequent
+  const cursor = await db.query({
+    query: `
+      UPSERT { slug: @slug }
+      INSERT @insert
+      UPDATE {
+        aliases: UNIQUE(APPEND(OLD.aliases, @newAliases)),
+        mention_count: OLD.mention_count + 1,
+        document_ids: UNIQUE(APPEND(OLD.document_ids, [@docId]))
+      }
+      IN entities
+      RETURN NEW
+    `,
+    bindVars: {
+      slug: entity.slug,
+      insert: {
+        _key: entity.slug,
+        name: entity.canonical,
+        slug: entity.slug,
+        norm_key: entity.norm_key,
+        type: entity.type,
+        aliases: entity.aliases || [],
+        description: null,
+        document_ids: entity.document_id ? [entity.document_id] : [],
+        mention_count: 1,
+        first_seen: new Date().toISOString(),
+      },
+      newAliases: [entity.name, ...(entity.aliases || [])].filter(a => a !== entity.canonical),
+      docId: entity.document_id || null,
+    },
+  });
+  const [result] = await cursor.all();
+  return { _key: result._key, _id: result._id };
+}
+
 export async function insertEdge(edge) {
   if (!initialized) await initArangoClient();
   const coll = db.collection('edges');
@@ -127,14 +174,15 @@ export function realDBAdapter() {
   return {
     async getState() {
       await initArangoClient();
-      const [documents, sections, paragraphs, tables, edges] = await Promise.all([
+      const [documents, sections, paragraphs, tables, edges, entities] = await Promise.all([
         db.query('FOR d IN documents RETURN d').then(c => c.all()),
         db.query('FOR s IN sections RETURN s').then(c => c.all()),
         db.query('FOR p IN paragraphs RETURN p').then(c => c.all()),
         db.query('FOR t IN tables RETURN t').then(c => c.all()),
         db.query('FOR e IN edges RETURN e').then(c => c.all()),
+        db.query('FOR e IN entities RETURN e').then(c => c.all()),
       ]);
-      return { documents, sections, paragraphs, tables, edges };
+      return { documents, sections, paragraphs, tables, edges, entities };
     },
   };
 }

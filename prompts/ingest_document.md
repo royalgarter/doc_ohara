@@ -17,6 +17,14 @@ metadata:
   level: number   # hierarchy depth (0=Part, 1=Chapter, 2=Section, 3=Subsection…)
 sumo_candidate_tags: [string]   # short SUMO local names, e.g. ["Agent","Transaction"]
                                 # omit any you are uncertain about
+candidate_entities: [           # named entities mentioned in this node
+  {
+    name:      string           # exact surface form as it appears in text
+    canonical: string           # normalized canonical name, e.g. "BTC" → "Bitcoin"
+    type:      string           # one of: PERSON | ORG | LOCATION | DATE | TECH | AMOUNT | EVENT | CONCEPT
+    aliases:   [string]         # other known surface forms (optional)
+  }
+]
 
 # ── FRONT MATTER types ───────────────────────────────────────────────
 # Title       title: string (REQUIRED), subtitle?: string
@@ -64,6 +72,7 @@ sumo_candidate_tags: [string]   # short SUMO local names, e.g. ["Agent","Transac
    - `Figure` must carry a nested `figure` object with a `description` string (not an object within `figure`).
 5. **Assign `part`** to every node: anything before the first chapter is `front_matter`; bibliography, appendixes, glossary, index are `back_matter`; everything else is `body_matter`.
 6. **Populate `sumo_candidate_tags`** per node with short SUMO concept local names (e.g. `Agent`, `Transaction`, `Text`, `Quantity`). Not full URIs. These are validated against the local SUMO index.
+6b. **Populate `candidate_entities`** per node with every named entity mentioned in the node's text. Use the canonical name for well-known aliases (e.g. "BTC" → canonical `"Bitcoin"`). Only include entities you are confident about. Valid types: `PERSON`, `ORG`, `LOCATION`, `DATE`, `TECH`, `AMOUNT`, `EVENT`, `CONCEPT`. Omit this field entirely if the node has no named entities.
 7. **Output only** a JSON object `{ "nodes": [...] }`. No markdown fences, no commentary.
 8. **Never emit empty nodes**: every Paragraph must have non-empty `content`, every Figure must have a non-empty `caption` or `figure.description`, every Section/Chapter must have a non-empty `title`. Skip any block with no extractable text.
 
@@ -120,7 +129,11 @@ sumo_candidate_tags: [string]   # short SUMO local names, e.g. ["Agent","Transac
       "part": "body_matter",
       "content": "Bitcoin is a collection of concepts and technologies that form the basis of a digital money ecosystem. Units of currency called bitcoin are used to store and transmit value among participants in the bitcoin network. Bitcoin can be sent over the internet without a middleman, like email for money.",
       "metadata": { "page": 5, "level": 2 },
-      "sumo_candidate_tags": ["Currency", "FinancialTransaction", "ComputerNetwork"]
+      "sumo_candidate_tags": ["Currency", "FinancialTransaction", "ComputerNetwork"],
+      "candidate_entities": [
+        { "name": "Bitcoin", "canonical": "Bitcoin", "type": "TECH", "aliases": ["BTC", "₿"] },
+        { "name": "bitcoin network", "canonical": "Bitcoin Network", "type": "TECH" }
+      ]
     },
     {
       "type": "Figure",
@@ -175,4 +188,6 @@ sumo_candidate_tags: [string]   # short SUMO local names, e.g. ["Agent","Transac
 - Never split one source paragraph into multiple Paragraph nodes.
 - Preserve document order in the array.
 - Short SUMO local names only — no full URIs, no SUMO namespace prefixes.
+- `candidate_entities` type must be exactly one of: `PERSON`, `ORG`, `LOCATION`, `DATE`, `TECH`, `AMOUNT`, `EVENT`, `CONCEPT`. No other values.
+- `candidate_entities[].canonical` must be the well-known English name, not an abbreviation or symbol.
 - Outputs must be deterministic for identical inputs (cache validity).
