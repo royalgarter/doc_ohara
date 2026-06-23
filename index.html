@@ -369,8 +369,8 @@
               x-text="selectedNode && (selectedNode._key || selectedNode.id)"></span>
             <span x-show="selectedNode && expandedNodes.has(selectedNode._id)"
               class="text-[9px] text-emerald-400 ml-auto">expanded</span>
-            <span x-show="selectedNode && !expandedNodes.has(selectedNode._id) && selectedNode._id && !selectedNode._id.startsWith('paragraphs/')"
-              class="text-[9px] text-slate-500 ml-auto animate-pulse">loading neighbors…</span>
+            <span x-show="selectedNode && !expandedNodes.has(selectedNode._id)"
+              class="text-[9px] text-slate-500 ml-auto animate-pulse">loading…</span>
           </div>
           <!-- Title -->
           <div class="text-xs text-slate-200 font-semibold truncate"
@@ -381,9 +381,12 @@
             style="max-height: 130px; white-space: pre-wrap; word-break: break-word;"
             x-show="selectedNode && selectedNode.content"
             x-text="selectedNode && (selectedNode.content || '')"></div>
+          <!-- Empty content notification for paragraphs that loaded but have no text -->
+          <div class="text-[11px] text-amber-600 italic"
+            x-show="selectedNode && selectedNode._id && selectedNode._id.startsWith('paragraphs/') && expandedNodes.has(selectedNode._id) && selectedNode.content === ''">[EMPTY CONTENT]</div>
           <!-- Empty state for structural nodes -->
           <div class="text-[11px] text-slate-700 italic"
-            x-show="selectedNode && !selectedNode.content && !selectedNode.title">—</div>
+            x-show="selectedNode && !selectedNode.content && !selectedNode.title && !(selectedNode._id && selectedNode._id.startsWith('paragraphs/') && expandedNodes.has(selectedNode._id))">—</div>
         </div>
 
         <!-- SUMO tags -->
@@ -494,31 +497,35 @@
         this.graphLoading = false;
       },
 
-      async expandNode(node, _depth) {
+      async expandNode(node) {
         const nodeId = node._id || (node.id ? node.id : null);
         if (!nodeId || this.expandedNodes.has(nodeId)) return;
         this.expandedNodes.add(nodeId);
-        const depth = _depth || 0;
         try {
           const [collection, key] = nodeId.split('/');
           const r = await fetch(`/api/graph/node/${collection}/${key}/neighbors`);
           const d = await r.json();
           if (!d.success) return;
-          // Merge new nodes/edges into graphData (deduplicate by _id)
-          const existingParaIds  = new Set(this.graphData.paragraphs.map(p => p._id));
+          // Merge new nodes/edges into graphData; for paragraphs, UPDATE stubs with content
+          const existingParaMap  = new Map(this.graphData.paragraphs.map(p => [p._id, p]));
           const existingTableIds = new Set(this.graphData.tables.map(t => t._id));
           const existingSecIds   = new Set(this.graphData.sections.map(s => s._id));
           const existingEdgeIds  = new Set(this.graphData.edges.map(e => e._id));
-          for (const p of (d.paragraphs || [])) if (!existingParaIds.has(p._id))  this.graphData.paragraphs.push(p);
-          for (const t of (d.tables     || [])) if (!existingTableIds.has(t._id)) this.graphData.tables.push(t);
-          for (const s of (d.sections   || [])) if (!existingSecIds.has(s._id))   this.graphData.sections.push(s);
-          for (const e of (d.edges      || [])) if (!existingEdgeIds.has(e._id))  this.graphData.edges.push(e);
-          // Auto-expand neighbor sections (both parent + child) up to 1 hop, so the
-          // full chain is visible without requiring manual clicks on each level.
-          if (depth < 1) {
-            const neighborSections = (d.sections || []).filter(s => !this.expandedNodes.has(s._id));
-            await Promise.all(neighborSections.map(s => this.expandNode(s, depth + 1)));
+          for (const p of (d.paragraphs || [])) {
+            if (existingParaMap.has(p._id)) {
+              // Update stub with full content
+              Object.assign(existingParaMap.get(p._id), p);
+            } else {
+              this.graphData.paragraphs.push(p);
+            }
           }
+          for (const t of (d.tables   || [])) if (!existingTableIds.has(t._id)) this.graphData.tables.push(t);
+          for (const s of (d.sections || [])) if (!existingSecIds.has(s._id))   this.graphData.sections.push(s);
+          for (const e of (d.edges    || [])) if (!existingEdgeIds.has(e._id))  this.graphData.edges.push(e);
+          // Recursively expand all neighboring sections in both parent and child
+          // directions until the full chain from root document to leaves is loaded.
+          const neighbors = (d.sections || []).filter(n => !this.expandedNodes.has(n._id));
+          if (neighbors.length) await Promise.all(neighbors.map(n => this.expandNode(n)));
           this.$nextTick(() => this.renderCurrentGraph());
         } catch(e) { console.error('expandNode:', e); }
       },

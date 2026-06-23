@@ -74,21 +74,13 @@ async function startServer() {
     try {
       if (process.env.ARANGO_URL) {
         const db = await arangoClient.initArangoClient();
-        const [docs, sections, edges] = await Promise.all([
+        const [docs, sections, paragraphs, edges] = await Promise.all([
           db.query('FOR d IN documents SORT d._key DESC RETURN d').then(c => c.all()),
           db.query('FOR s IN sections SORT s.level ASC, s._key ASC RETURN {_key:s._key,_id:s._id,title:s.title,document_id:s.document_id,level:s.level,node_type:s.node_type,parent_section_id:s.parent_section_id}').then(c => c.all()),
-          // Filter to doc/section structural edges only — avoids full scan.
-          // HAS_CHILD and NEXT_SIBLING never point to paragraphs/tables at the
-          // top level; BELONGS_TO only goes para/table→doc and is loaded lazily.
-          db.query(`
-            FOR e IN edges
-              FILTER e.relation IN ['HAS_CHILD', 'NEXT_SIBLING']
-                 AND NOT STARTS_WITH(e._to, 'paragraphs/')
-                 AND NOT STARTS_WITH(e._to, 'tables/')
-              RETURN {_key:e._key,_id:e._id,_from:e._from,_to:e._to,relation:e.relation}
-          `).then(c => c.all()),
+          db.query('FOR p IN paragraphs RETURN {_key:p._key,_id:p._id,document_id:p.document_id,section_id:p.section_id,node_type:p.node_type}').then(c => c.all()),
+          db.query('FOR e IN edges RETURN {_key:e._key,_id:e._id,_from:e._from,_to:e._to,relation:e.relation}').then(c => c.all()),
         ]);
-        return res.json({ success: true, source: 'arangodb', documents: docs, sections, paragraphs: [], tables: [], edges });
+        return res.json({ success: true, source: 'arangodb', documents: docs, sections, paragraphs, tables: [], edges });
       }
       const state = dbSim.getState();
       res.json({ success: true, source: 'simulator', ...state });
@@ -123,9 +115,13 @@ async function startServer() {
       const tableIds   = [...neighborIds].filter(id => id.startsWith('tables/'));
       const sectionIds = [...neighborIds].filter(id => id.startsWith('sections/'));
 
+      // If the clicked node is a paragraph, fetch its own full content too
+      const selfParaIds = nodeId.startsWith('paragraphs/') ? [nodeId] : [];
+      const allParaIds  = [...new Set([...paraIds, ...selfParaIds])];
+
       const [paragraphs, tables, sections] = await Promise.all([
-        paraIds.length
-          ? db.query('FOR p IN paragraphs FILTER p._id IN @ids RETURN {_key:p._key,_id:p._id,content:LEFT(p.content,500),document_id:p.document_id,section_id:p.section_id,node_type:p.node_type,sumo_tags:p.sumo_tags,sumo_candidate_tags_raw:p.sumo_candidate_tags_raw}', { ids: paraIds }).then(c=>c.all())
+        allParaIds.length
+          ? db.query('FOR p IN paragraphs FILTER p._id IN @ids RETURN {_key:p._key,_id:p._id,content:p.content,document_id:p.document_id,section_id:p.section_id,node_type:p.node_type,sumo_tags:p.sumo_tags,sumo_candidate_tags_raw:p.sumo_candidate_tags_raw}', { ids: allParaIds }).then(c=>c.all())
           : [],
         tableIds.length
           ? db.query('FOR t IN tables FILTER t._id IN @ids RETURN {_key:t._key,_id:t._id,document_id:t.document_id,section_id:t.section_id,node_type:t.node_type,markdown_representation:t.markdown_representation}', { ids: tableIds }).then(c=>c.all())
