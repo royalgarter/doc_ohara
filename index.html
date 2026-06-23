@@ -18,30 +18,30 @@
   </style>
 </head>
 <body x-data="app()" x-init="init()" x-cloak
-  class="bg-slate-950 text-slate-100 h-screen flex flex-col overflow-hidden">
+  class="bg-gray-950 text-gray-100 h-screen flex flex-col overflow-hidden">
 
   <!-- ── Header ─────────────────────────────────────────────────────────────── -->
-  <header class="flex items-center gap-5 px-4 h-10 bg-slate-900 border-b border-slate-800 shrink-0 select-none">
+  <header class="flex items-center gap-5 px-4 h-10 bg-gray-900 border-b border-gray-800 shrink-0 select-none">
     <div class="flex items-center gap-2">
       <div class="w-2 h-2 rounded-full bg-sky-400 shadow-[0_0_6px_#38bdf8]"></div>
       <span class="text-xs font-bold text-sky-400 tracking-[0.15em]">DOC OHARA</span>
     </div>
-    <div class="flex gap-4 text-xs text-slate-500">
-      <span><span class="text-slate-300" x-text="graphData.documents.length"></span> docs</span>
-      <span><span class="text-slate-300" x-text="graphData.sections.length"></span> sections</span>
-      <span><span class="text-slate-300" x-text="graphData.paragraphs.length"></span> nodes</span>
-      <span><span class="text-slate-300" x-text="graphData.edges.length"></span> edges</span>
-      <span class="text-slate-700" x-text="graphSource ? '[' + graphSource + ']' : ''"></span>
+    <div class="flex gap-4 text-xs text-gray-500">
+      <span><span class="text-gray-300" x-text="graphData.documents.length"></span> docs</span>
+      <span><span class="text-gray-300" x-text="graphData.sections.length"></span> sections</span>
+      <span><span class="text-gray-300" x-text="graphData.paragraphs.length"></span> nodes</span>
+      <span><span class="text-gray-300" x-text="graphData.edges.length"></span> edges</span>
+      <span class="text-gray-700" x-text="graphSource ? '[' + graphSource + ']' : ''"></span>
     </div>
     <div class="ml-auto flex items-center gap-2">
       <button @click="colorMode='type'; renderCurrentGraph()"
-        :class="colorMode==='type' ? 'bg-sky-700/70 text-sky-200' : 'bg-slate-800 text-slate-500 hover:text-slate-300'"
-        class="text-[10px] px-2 py-0.5 rounded transition">by type</button>
+        :class="colorMode==='type' ? 'bg-sky-700/70 text-sky-200' : 'bg-gray-800 text-gray-500 hover:text-gray-300'"
+        class="text-sm px-2 py-0.5 rounded transition">by type</button>
       <button @click="colorMode='sumo'; renderCurrentGraph()"
-        :class="colorMode==='sumo' ? 'bg-emerald-800/70 text-emerald-200' : 'bg-slate-800 text-slate-500 hover:text-slate-300'"
-        class="text-[10px] px-2 py-0.5 rounded transition">by SUMO</button>
+        :class="colorMode==='sumo' ? 'bg-emerald-800/70 text-emerald-200' : 'bg-gray-800 text-gray-500 hover:text-gray-300'"
+        class="text-sm px-2 py-0.5 rounded transition">by SUMO</button>
       <button @click="loadGraph()"
-        class="text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-500 hover:text-slate-300 transition">↺</button>
+        class="text-sm px-2 py-0.5 rounded bg-gray-800 text-gray-500 hover:text-gray-300 transition">↺</button>
     </div>
   </header>
 
@@ -49,10 +49,10 @@
   <div class="flex flex-1 min-h-0">
 
     <!-- Vertical tab bar -->
-    <nav class="flex flex-col items-center gap-1 py-2 w-9 bg-slate-900 border-r border-slate-800 shrink-0">
+    <nav class="flex flex-col items-center gap-1 py-2 w-9 bg-gray-900 border-r border-gray-800 shrink-0">
       <template x-for="t in tabs" :key="t.id">
         <button @click="tab = t.id; if(t.id==='jobs') loadJobs()" :title="t.label"
-          :class="tab === t.id ? 'bg-slate-700/80 text-sky-400' : 'text-slate-600 hover:text-slate-300'"
+          :class="tab === t.id ? 'bg-gray-700/80 text-sky-400' : 'text-gray-600 hover:text-gray-300'"
           class="relative w-7 h-7 flex items-center justify-center rounded text-sm transition"
           x-text="t.icon">
           <span x-show="t.id === 'jobs' && jobStats.failed > 0"
@@ -62,37 +62,37 @@
     </nav>
 
     <!-- Left panel -->
-    <div class="w-64 flex flex-col bg-slate-900/40 border-r border-slate-800 shrink-0 overflow-hidden">
+    <div class="w-64 flex flex-col bg-gray-900/40 border-r border-gray-800 shrink-0 overflow-hidden">
 
       <!-- GRAPH tab -->
       <div x-show="tab === 'graph'" class="flex flex-col h-full overflow-hidden p-3 gap-3">
         <!-- Documents header with fold toggle -->
         <button @click="docsOpen = !docsOpen"
-          class="flex items-center justify-between text-[10px] font-bold text-slate-500 uppercase tracking-widest hover:text-slate-300 transition select-none">
+          class="flex items-center justify-between text-sm font-bold text-gray-500 uppercase tracking-widest hover:text-gray-300 transition select-none">
           <span>Documents</span>
-          <span x-text="docsOpen ? '▾' : '▸'" class="text-slate-600"></span>
+          <span x-text="docsOpen ? '▾' : '▸'" class="text-gray-600"></span>
         </button>
         <div x-show="docsOpen" class="flex flex-col gap-1.5 overflow-y-auto scrollbar-thin" style="max-height:40vh">
           <template x-for="doc in graphData.documents" :key="doc._key || doc.id">
             <div @click="focusDocument(doc)"
-              class="group p-2 rounded bg-slate-800/50 border border-slate-700/40 cursor-pointer
-                     hover:border-sky-600/50 hover:bg-slate-800 transition text-xs shrink-0">
-              <div class="text-slate-200 truncate group-hover:text-sky-300 transition"
+              class="group p-2 rounded bg-gray-800/50 border border-gray-700/40 cursor-pointer
+                     hover:border-sky-600/50 hover:bg-gray-800 transition text-xs shrink-0">
+              <div class="text-gray-200 truncate group-hover:text-sky-300 transition"
                 x-text="doc.title || doc.source_file"></div>
               <div class="flex justify-between mt-0.5">
-                <span class="text-slate-600" x-text="doc.parser_engine || 'LiteParse'"></span>
-                <span class="text-slate-600 text-[10px]"
+                <span class="text-gray-600" x-text="doc.parser_engine || 'LiteParse'"></span>
+                <span class="text-gray-600 text-sm"
                   x-text="doc.upload_time ? new Date(doc.upload_time).toLocaleDateString() : ''"></span>
               </div>
             </div>
           </template>
           <div x-show="graphData.documents.length === 0"
-            class="text-xs text-slate-700 text-center py-6">No documents yet</div>
+            class="text-xs text-gray-700 text-center py-6">No documents yet</div>
         </div>
         <!-- Legend -->
-        <div class="border-t border-slate-800 pt-2.5 grid grid-cols-2 gap-x-3 gap-y-1.5 mt-auto">
+        <div class="border-t border-gray-800 pt-2.5 grid grid-cols-2 gap-x-3 gap-y-1.5 mt-auto">
           <template x-for="item in legend" :key="item[1]">
-            <div class="flex items-center gap-1.5 text-[10px] text-slate-500">
+            <div class="flex items-center gap-1.5 text-sm text-gray-500">
               <div class="w-2.5 h-2.5 rounded-full shrink-0" :style="'background:' + item[0]"></div>
               <span x-text="item[1]"></span>
             </div>
@@ -102,33 +102,33 @@
 
       <!-- INGEST tab -->
       <div x-show="tab === 'ingest'" class="flex flex-col h-full overflow-hidden p-3 gap-3">
-        <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Pipeline Control</div>
+        <div class="text-sm font-bold text-gray-500 uppercase tracking-widest">Pipeline Control</div>
 
         <div class="flex flex-col gap-1">
-          <div class="text-[10px] text-slate-600 mb-0.5">Staged input files</div>
+          <div class="text-sm text-gray-600 mb-0.5">Staged input files</div>
           <div class="flex flex-col gap-1 max-h-36 overflow-y-auto scrollbar-thin">
             <template x-for="f in inputFiles" :key="f.name">
-              <div class="flex items-center gap-2 text-xs px-2 py-1 rounded bg-slate-800/50 border border-slate-700/40">
-                <span class="flex-1 truncate text-slate-300" x-text="f.name"></span>
-                <span class="text-slate-600 text-[10px] shrink-0" x-text="f.size"></span>
+              <div class="flex items-center gap-2 text-xs px-2 py-1 rounded bg-gray-800/50 border border-gray-700/40">
+                <span class="flex-1 truncate text-gray-300" x-text="f.name"></span>
+                <span class="text-gray-600 text-sm shrink-0" x-text="f.size"></span>
                 <button @click="deleteInputFile(f.name)"
-                  class="text-slate-700 hover:text-red-400 transition shrink-0 leading-none">✕</button>
+                  class="text-gray-700 hover:text-red-400 transition shrink-0 leading-none">✕</button>
               </div>
             </template>
             <div x-show="inputFiles.length === 0"
-              class="text-[10px] text-slate-700 text-center py-2">No files staged</div>
+              class="text-sm text-gray-700 text-center py-2">No files staged</div>
           </div>
         </div>
 
         <button @click="runPipeline()" :disabled="pipelineActive"
-          :class="pipelineActive ? 'bg-slate-800 text-slate-600 cursor-not-allowed' : 'bg-sky-700 hover:bg-sky-600 text-white'"
+          :class="pipelineActive ? 'bg-gray-800 text-gray-600 cursor-not-allowed' : 'bg-sky-700 hover:bg-sky-600 text-white'"
           class="text-xs font-semibold py-1.5 rounded transition flex items-center justify-center gap-2">
           <span x-show="pipelineActive" class="animate-spin inline-block">⟳</span>
           <span x-text="pipelineActive ? 'Running…' : '▶ Run Pipeline'"></span>
         </button>
 
-        <div class="flex-1 min-h-0 flex flex-col overflow-hidden rounded border border-slate-800 bg-slate-950">
-          <div class="text-[10px] text-slate-700 px-2 py-1 border-b border-slate-800 shrink-0">log</div>
+        <div class="flex-1 min-h-0 flex flex-col overflow-hidden rounded border border-gray-800 bg-gray-950">
+          <div class="text-sm text-gray-700 px-2 py-1 border-b border-gray-800 shrink-0">log</div>
           <div class="flex-1 overflow-y-auto scrollbar-thin p-2 flex flex-col gap-0.5" id="log-console">
             <template x-for="(log, i) in pipelineLogs" :key="i">
               <div class="log-line"
@@ -136,24 +136,24 @@
                   'text-emerald-400': log.level === 'success',
                   'text-red-400':     log.level === 'error',
                   'text-amber-400':   log.level === 'warn',
-                  'text-slate-500':   log.level === 'info'
+                  'text-gray-500':   log.level === 'info'
                 }"
                 x-text="'[' + log.level + '] ' + log.message"></div>
             </template>
-            <div x-show="pipelineLogs.length === 0" class="text-[10px] text-slate-800 py-1">idle</div>
+            <div x-show="pipelineLogs.length === 0" class="text-sm text-gray-800 py-1">idle</div>
           </div>
         </div>
       </div>
 
       <!-- QUERY tab -->
       <div x-show="tab === 'query'" class="flex flex-col h-full overflow-hidden p-3 gap-3">
-        <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Hybrid Retrieval</div>
+        <div class="text-sm font-bold text-gray-500 uppercase tracking-widest">Hybrid Retrieval</div>
 
         <div class="flex gap-1.5">
           <input x-model="queryInput" @keydown.enter="runQuery()"
             placeholder="Search the graph…"
-            class="flex-1 text-xs bg-slate-800 border border-slate-700/60 rounded px-2.5 py-1.5
-                   text-slate-200 placeholder-slate-700 focus:outline-none focus:border-sky-500 transition" />
+            class="flex-1 text-xs bg-gray-800 border border-gray-700/60 rounded px-2.5 py-1.5
+                   text-gray-200 placeholder-gray-700 focus:outline-none focus:border-sky-500 transition" />
           <button @click="runQuery()" :disabled="queryLoading"
             class="text-xs px-2.5 py-1.5 bg-sky-700 hover:bg-sky-600 text-white rounded transition shrink-0">→</button>
         </div>
@@ -161,7 +161,7 @@
         <div x-show="queryResults && queryResults.processedQuery && queryResults.processedQuery.keywords && queryResults.processedQuery.keywords.length"
           class="flex flex-wrap gap-1">
           <template x-for="kw in (queryResults && queryResults.processedQuery && queryResults.processedQuery.keywords || [])" :key="kw">
-            <span class="text-[10px] px-1.5 py-0.5 bg-slate-800 border border-slate-700/50 text-slate-400 rounded"
+            <span class="text-sm px-1.5 py-0.5 bg-gray-800 border border-gray-700/50 text-gray-400 rounded"
               x-text="kw"></span>
           </template>
         </div>
@@ -169,54 +169,54 @@
         <div class="flex-1 min-h-0 overflow-y-auto scrollbar-thin flex flex-col gap-2">
           <template x-for="(r, i) in (queryResults && queryResults.shallowResults || [])" :key="i">
             <div @click="highlightResultNode(r.node)"
-              class="text-xs p-2 rounded bg-slate-800/50 border border-slate-700/40 cursor-pointer
+              class="text-xs p-2 rounded bg-gray-800/50 border border-gray-700/40 cursor-pointer
                      hover:border-sky-600/50 transition">
               <div class="flex justify-between items-center mb-1">
-                <span class="text-sky-500 text-[10px] font-bold" x-text="'#' + (i + 1)"></span>
-                <span class="text-emerald-400 text-[10px]"
+                <span class="text-sky-500 text-sm font-bold" x-text="'#' + (i + 1)"></span>
+                <span class="text-emerald-400 text-sm"
                   x-text="Math.round(r.score * 100) + '%'"></span>
               </div>
-              <div class="text-slate-300 text-[11px] leading-relaxed line-clamp-3"
+              <div class="text-gray-300 text-base leading-relaxed line-clamp-3"
                 x-text="r.node.content || r.node.title || '—'"></div>
               <div class="flex flex-wrap gap-1 mt-1.5">
                 <template x-for="tag in (r.node.sumo_tags || []).slice(0, 4)" :key="tag">
-                  <span class="text-[9px] px-1 py-0.5 bg-emerald-900/40 text-emerald-400 rounded"
+                  <span class="text-sm px-1 py-0.5 bg-emerald-900/40 text-emerald-400 rounded"
                     x-text="tag"></span>
                 </template>
               </div>
             </div>
           </template>
           <div x-show="queryResults && !(queryResults.shallowResults && queryResults.shallowResults.length)"
-            class="text-xs text-slate-700 text-center py-6">No results</div>
+            class="text-xs text-gray-700 text-center py-6">No results</div>
           <div x-show="!queryResults && !queryLoading"
-            class="text-[11px] text-slate-700 text-center py-6 leading-relaxed">
+            class="text-base text-gray-700 text-center py-6 leading-relaxed">
             Enter a keyword or phrase<br>to search the knowledge graph
           </div>
           <div x-show="queryLoading"
-            class="text-xs text-slate-600 text-center py-6 animate-pulse">Searching…</div>
+            class="text-xs text-gray-600 text-center py-6 animate-pulse">Searching…</div>
         </div>
       </div>
 
       <!-- JOBS tab -->
       <div x-show="tab === 'jobs'" x-init="if(tab==='jobs') loadJobs()" class="flex flex-col h-full overflow-hidden p-3 gap-2">
-        <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Job Queue</div>
+        <div class="text-sm font-bold text-gray-500 uppercase tracking-widest">Job Queue</div>
 
         <div class="grid grid-cols-4 gap-1 shrink-0">
           <template x-for="[key, color] in [['failed','text-red-400'],['waiting','text-amber-400'],['active','text-sky-400'],['completed','text-emerald-400']]" :key="key">
-            <div class="flex flex-col items-center py-1 rounded bg-slate-800/60 border border-slate-700/40">
+            <div class="flex flex-col items-center py-1 rounded bg-gray-800/60 border border-gray-700/40">
               <span class="text-xs font-bold" :class="color" x-text="jobStats[key] || 0"></span>
-              <span class="text-[9px] text-slate-600" x-text="key"></span>
+              <span class="text-sm text-gray-600" x-text="key"></span>
             </div>
           </template>
         </div>
 
         <div x-show="jobStats.failed > 0" class="flex gap-1.5 shrink-0">
           <button @click="retryAllFailed(false)"
-            class="flex-1 text-[10px] py-1 rounded bg-amber-700/60 hover:bg-amber-600/70 text-amber-200 transition">
+            class="flex-1 text-sm py-1 rounded bg-amber-700/60 hover:bg-amber-600/70 text-amber-200 transition">
             ↺ Retry all failed
           </button>
           <button @click="retryAllFailed(true)"
-            class="flex-1 text-[10px] py-1 rounded bg-red-800/50 hover:bg-red-700/60 text-red-300 transition">
+            class="flex-1 text-sm py-1 rounded bg-red-800/50 hover:bg-red-700/60 text-red-300 transition">
             ↺ Force retry all
           </button>
         </div>
@@ -228,14 +228,14 @@
                 'border-red-800/60 bg-red-950/30':   job.status === 'failed',
                 'border-amber-700/40 bg-amber-950/20': job.status === 'waiting',
                 'border-sky-700/40 bg-sky-950/20':   job.status === 'active',
-                'border-slate-700/30 bg-slate-800/20': job.status === 'completed',
+                'border-gray-700/30 bg-gray-800/20': job.status === 'completed',
               }">
               <div class="flex items-center gap-2 mb-1">
                 <div class="w-1.5 h-1.5 rounded-full shrink-0"
                   :style="'background:' + jobStatusColor(job.status)"></div>
-                <span class="font-semibold text-slate-200 truncate flex-1"
+                <span class="font-semibold text-gray-200 truncate flex-1"
                   x-text="job.data && job.data.filename || job.id"></span>
-                <span class="text-[9px] uppercase font-bold shrink-0"
+                <span class="text-sm uppercase font-bold shrink-0"
                   :class="{
                     'text-red-400':   job.status==='failed',
                     'text-amber-400': job.status==='waiting',
@@ -245,28 +245,28 @@
                   x-text="job.status"></span>
               </div>
               <div x-show="job.status === 'active'" class="mb-1">
-                <div class="h-1 bg-slate-800 rounded overflow-hidden">
+                <div class="h-1 bg-gray-800 rounded overflow-hidden">
                   <div class="h-full bg-sky-500 transition-all" :style="'width:' + (job.progress||0) + '%'"></div>
                 </div>
-                <div class="text-[9px] text-slate-500 mt-0.5" x-text="job.progressMessage || ''"></div>
+                <div class="text-sm text-gray-500 mt-0.5" x-text="job.progressMessage || ''"></div>
               </div>
               <div x-show="job.status === 'failed' && job.error"
-                class="text-[10px] text-red-400/80 mb-1.5 leading-relaxed break-words"
+                class="text-sm text-red-400/80 mb-1.5 leading-relaxed break-words"
                 x-text="job.error"></div>
               <div x-show="job.status === 'completed' && job.result && job.result.skipped"
-                class="text-[10px] text-amber-400/70 mb-1.5"
+                class="text-sm text-amber-400/70 mb-1.5"
                 x-text="job.result && job.result.reason"></div>
 
               <!-- LLM usage summary -->
               <template x-if="job.status === 'completed' && job.result && job.result.llm_usage && job.result.llm_usage.total_tokens > 0">
-                <div class="mt-1 mb-1.5 rounded border border-slate-800/60 px-2 py-1.5 bg-slate-900/40">
-                  <div class="text-[9px] font-bold text-slate-600 uppercase tracking-wider mb-1"
+                <div class="mt-1 mb-1.5 rounded border border-gray-800/60 px-2 py-1.5 bg-gray-900/40">
+                  <div class="text-sm font-bold text-gray-600 uppercase tracking-wider mb-1"
                     x-text="(job.result.llm_usage.model || 'Gemini') + ' · usage'"></div>
-                  <div class="grid grid-cols-2 gap-x-4 gap-y-0.5 text-[9px] text-slate-500">
-                    <div>Prompt <span class="text-slate-300 float-right" x-text="job.result.llm_usage.prompt_tokens.toLocaleString()"></span></div>
+                  <div class="grid grid-cols-2 gap-x-4 gap-y-0.5 text-sm text-gray-500">
+                    <div>Prompt <span class="text-gray-300 float-right" x-text="job.result.llm_usage.prompt_tokens.toLocaleString()"></span></div>
                     <div>Generated <span class="text-emerald-400 float-right" x-text="job.result.llm_usage.candidates_tokens.toLocaleString()"></span></div>
                     <div>Total tokens <span class="text-sky-400 float-right" x-text="job.result.llm_usage.total_tokens.toLocaleString()"></span></div>
-                    <div>Chunks <span class="text-slate-300 float-right" x-text="job.result.llm_usage.chunks + (job.result.llm_usage.cache_hits ? ' (' + job.result.llm_usage.cache_hits + ' cached)' : '')"></span></div>
+                    <div>Chunks <span class="text-gray-300 float-right" x-text="job.result.llm_usage.chunks + (job.result.llm_usage.cache_hits ? ' (' + job.result.llm_usage.cache_hits + ' cached)' : '')"></span></div>
                     <template x-if="job.result.llm_usage.repair_prompt_tokens > 0">
                       <div class="col-span-2 text-amber-600">Repair tokens <span class="float-right" x-text="(job.result.llm_usage.repair_prompt_tokens + job.result.llm_usage.repair_candidates_tokens).toLocaleString()"></span></div>
                     </template>
@@ -274,54 +274,54 @@
                 </div>
               </template>
 
-              <div class="flex items-center gap-2 text-[9px] text-slate-600">
+              <div class="flex items-center gap-2 text-sm text-gray-600">
                 <span x-text="'attempt ' + (job.attempts||0) + '/' + (job.maxAttempts||3)"></span>
                 <span x-text="job.updatedAt ? new Date(job.updatedAt).toLocaleTimeString() : ''"></span>
                 <span x-show="job.data && job.data.force" class="text-amber-600">--force</span>
               </div>
               <div x-show="job.status === 'failed' || job.status === 'completed'" class="flex gap-1 mt-1.5">
                 <button @click="retryJob(job.id, false)"
-                  class="text-[10px] px-2 py-0.5 rounded bg-slate-700 hover:bg-slate-600 text-slate-300 transition">
+                  class="text-sm px-2 py-0.5 rounded bg-gray-700 hover:bg-gray-600 text-gray-300 transition">
                   ↺ Retry
                 </button>
                 <button @click="retryJob(job.id, true)"
-                  class="text-[10px] px-2 py-0.5 rounded bg-amber-800/50 hover:bg-amber-700/60 text-amber-300 transition">
+                  class="text-sm px-2 py-0.5 rounded bg-amber-800/50 hover:bg-amber-700/60 text-amber-300 transition">
                   ↺ Force
                 </button>
                 <button @click="deleteJob(job.id)"
-                  class="text-[10px] px-2 py-0.5 rounded bg-slate-800 hover:bg-red-900/50 text-slate-600 hover:text-red-400 transition ml-auto">
+                  class="text-sm px-2 py-0.5 rounded bg-gray-800 hover:bg-red-900/50 text-gray-600 hover:text-red-400 transition ml-auto">
                   ✕
                 </button>
               </div>
             </div>
           </template>
           <div x-show="!jobsLoading && jobs.length === 0"
-            class="text-[11px] text-slate-700 text-center py-8">No jobs yet</div>
+            class="text-base text-gray-700 text-center py-8">No jobs yet</div>
           <div x-show="jobsLoading && jobs.length === 0"
-            class="text-[11px] text-slate-600 text-center py-8 animate-pulse">Loading…</div>
+            class="text-base text-gray-600 text-center py-8 animate-pulse">Loading…</div>
         </div>
 
-        <button @click="loadJobs()" class="shrink-0 text-[10px] py-1 rounded bg-slate-800 text-slate-600 hover:text-slate-400 transition">
+        <button @click="loadJobs()" class="shrink-0 text-sm py-1 rounded bg-gray-800 text-gray-600 hover:text-gray-400 transition">
           ↺ Refresh
         </button>
       </div>
 
       <!-- WIKI tab -->
       <div x-show="tab === 'wiki'" class="flex flex-col h-full overflow-hidden p-3 gap-3">
-        <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Wiki Export</div>
-        <p class="text-[11px] text-slate-600 leading-relaxed">
+        <div class="text-sm font-bold text-gray-500 uppercase tracking-widest">Wiki Export</div>
+        <p class="text-base text-gray-600 leading-relaxed">
           Compile graph nodes into Quartz-compatible markdown files for publishing.
         </p>
         <button @click="exportWiki()" :disabled="wikiExporting"
-          class="text-xs py-1.5 px-3 rounded border border-slate-700 hover:border-slate-500
-                 text-slate-300 hover:text-white transition flex items-center justify-center gap-2">
+          class="text-xs py-1.5 px-3 rounded border border-gray-700 hover:border-gray-500
+                 text-gray-300 hover:text-white transition flex items-center justify-center gap-2">
           <span x-show="wikiExporting" class="animate-spin inline-block">⟳</span>
           <span x-text="wikiExporting ? 'Exporting…' : '⬇ Export to wiki/'"></span>
         </button>
-        <div x-show="wikiMessage" class="text-[11px] text-emerald-400" x-text="wikiMessage"></div>
+        <div x-show="wikiMessage" class="text-base text-emerald-400" x-text="wikiMessage"></div>
         <div class="flex-1"></div>
-        <div class="text-[10px] text-slate-700 border-t border-slate-800 pt-2">
-          Output: <code class="text-slate-600">wiki/*.md</code>
+        <div class="text-sm text-gray-700 border-t border-gray-800 pt-2">
+          Output: <code class="text-gray-600">wiki/*.md</code>
         </div>
       </div>
 
@@ -331,35 +331,35 @@
     <div class="flex flex-col flex-1 min-w-0 overflow-hidden">
 
       <!-- SVG canvas -->
-      <div class="flex-1 overflow-auto relative bg-slate-950" id="graph-container">
+      <div class="flex-1 overflow-auto relative bg-gray-950" id="graph-container">
         <svg id="graph-svg" preserveAspectRatio="xMidYMid meet"></svg>
 
         <!-- Zoom controls overlay -->
         <div class="absolute top-2 right-2 flex items-center gap-1 z-10 select-none">
           <button @click="zoomOut()" title="Zoom out (-)"
-            class="w-6 h-6 flex items-center justify-center rounded bg-slate-800/80 border border-slate-700/60
-                   text-slate-400 hover:text-white hover:bg-slate-700 transition text-sm leading-none">−</button>
-          <span class="text-[10px] text-slate-600 w-10 text-center"
+            class="w-6 h-6 flex items-center justify-center rounded bg-gray-800/80 border border-gray-700/60
+                   text-gray-400 hover:text-white hover:bg-gray-700 transition text-sm leading-none">−</button>
+          <span class="text-sm text-gray-600 w-10 text-center"
             x-text="Math.round(graphZoom * 100) + '%'"></span>
           <button @click="zoomIn()" title="Zoom in (+)"
-            class="w-6 h-6 flex items-center justify-center rounded bg-slate-800/80 border border-slate-700/60
-                   text-slate-400 hover:text-white hover:bg-slate-700 transition text-sm leading-none">+</button>
+            class="w-6 h-6 flex items-center justify-center rounded bg-gray-800/80 border border-gray-700/60
+                   text-gray-400 hover:text-white hover:bg-gray-700 transition text-sm leading-none">+</button>
         </div>
 
         <div x-show="graphLoading"
           class="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <span class="text-xs text-slate-600 animate-pulse">Loading graph…</span>
+          <span class="text-xs text-gray-600 animate-pulse">Loading graph…</span>
         </div>
         <div x-show="!graphLoading && graphData.documents.length === 0"
           class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none gap-2">
-          <span class="text-slate-700 text-sm">No data</span>
-          <span class="text-slate-800 text-xs">Run the pipeline from the Ingest tab</span>
+          <span class="text-gray-700 text-sm">No data</span>
+          <span class="text-gray-800 text-xs">Run the pipeline from the Ingest tab</span>
         </div>
       </div>
 
       <!-- Node inspector strip -->
       <div x-show="selectedNode"
-        class="shrink-0 border-t border-slate-800 bg-slate-900/90 p-3 flex gap-4 items-start"
+        class="shrink-0 border-t border-gray-800 bg-gray-900/90 p-3 flex gap-4 items-start"
         style="max-height: 400px;">
 
         <div class="flex-1 min-w-0 flex flex-col gap-1.5 overflow-hidden">
@@ -367,60 +367,60 @@
           <div class="flex items-center gap-2">
             <div class="w-2.5 h-2.5 rounded-full shrink-0"
               :style="'background:' + nodeColor(selectedNode)"></div>
-            <span class="text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider"
+            <span class="text-sm font-bold px-1.5 py-0.5 rounded uppercase tracking-wider"
               :style="'background:' + nodeColor(selectedNode) + '22; color:' + nodeColor(selectedNode)"
               x-text="selectedNode && (selectedNode.node_type || selectedNode.type || (selectedNode._id && selectedNode._id.split('/')[0]))"></span>
-            <span class="text-[10px] text-slate-600"
+            <span class="text-sm text-gray-600"
               x-text="selectedNode && (selectedNode._key || selectedNode.id)"></span>
             <!-- Loading indicator: only for real DB nodes that haven't been expanded yet -->
             <span x-show="selectedNode && selectedNode._id && !selectedNode._id.startsWith('tags/') && !expandedNodes.has(selectedNode._id)"
-              class="text-[9px] text-slate-500 ml-auto animate-pulse">loading…</span>
+              class="text-sm text-gray-500 ml-auto animate-pulse">loading…</span>
             <span x-show="selectedNode && selectedNode._id && !selectedNode._id.startsWith('tags/') && expandedNodes.has(selectedNode._id)"
-              class="text-[9px] text-emerald-400 ml-auto">expanded</span>
+              class="text-sm text-emerald-400 ml-auto">expanded</span>
           </div>
           <!-- SUMO tag inspector: tag name + paragraph count -->
           <div x-show="selectedNode && selectedNode._id && selectedNode._id.startsWith('tags/')"
             class="flex flex-col gap-1">
             <div class="text-xs text-emerald-300 font-semibold"
               x-text="selectedNode && ('#' + selectedNode.title)"></div>
-            <div class="text-[11px] text-slate-500"
+            <div class="text-base text-gray-500"
               x-text="selectedNode && selectedNode._tagCount + ' paragraph(s) tagged — full path highlighted in graph'"></div>
           </div>
           <!-- Title (sections / documents) -->
-          <div class="text-xs text-slate-200 font-semibold truncate"
+          <div class="text-xs text-gray-200 font-semibold truncate"
             x-show="selectedNode && !selectedNode._id?.startsWith('tags/') && (selectedNode.title || selectedNode.source_file)"
             x-text="selectedNode && (selectedNode.title || selectedNode.source_file || '')"></div>
           <!-- Content (paragraph text) -->
-          <div class="text-[11px] text-slate-400 overflow-y-auto scrollbar-thin leading-relaxed flex-1"
-            style="max-height: 130px; white-space: pre-wrap; word-break: break-word;"
+          <div class="text-base text-gray-400 overflow-y-auto scrollbar-thin leading-relaxed flex-1"
+            style="max-height: 300px; white-space: pre-wrap; word-break: break-word;"
             x-show="selectedNode && !selectedNode._id?.startsWith('tags/') && selectedNode.content"
             x-text="selectedNode && (selectedNode.content || '')"></div>
           <!-- Empty content notification for paragraphs that loaded but have no text -->
-          <div class="text-[11px] text-amber-600 italic"
+          <div class="text-base text-amber-600 italic"
             x-show="selectedNode && selectedNode._id && selectedNode._id.startsWith('paragraphs/') && expandedNodes.has(selectedNode._id) && selectedNode.content === ''">[EMPTY CONTENT]</div>
           <!-- Empty state for structural nodes (not tags, not paragraphs-with-content) -->
-          <div class="text-[11px] text-slate-700 italic"
+          <div class="text-base text-gray-700 italic"
             x-show="selectedNode && !selectedNode._id?.startsWith('tags/') && !selectedNode.content && !selectedNode.title && !(selectedNode._id?.startsWith('paragraphs/') && expandedNodes.has(selectedNode._id))">—</div>
         </div>
 
         <!-- SUMO tags (shown for paragraphs/sections that HAVE tags, not for tag nodes themselves) -->
         <div x-show="selectedNode && !selectedNode._id?.startsWith('tags/') && selectedNode.sumo_tags && selectedNode.sumo_tags.length > 0"
           class="shrink-0 w-44 flex flex-col gap-1.5">
-          <div class="text-[10px] font-bold text-slate-600 uppercase tracking-wider">SUMO Tags</div>
+          <div class="text-sm font-bold text-gray-600 uppercase tracking-wider">SUMO Tags</div>
           <div class="flex flex-wrap gap-1 overflow-y-auto scrollbar-thin" style="max-height: 140px;">
             <template x-for="tag in (selectedNode && selectedNode.sumo_tags || []).slice(0, 20)" :key="tag">
-              <span class="text-[9px] px-1.5 py-0.5 bg-emerald-900/40 border border-emerald-800/50
+              <span class="text-sm px-1.5 py-0.5 bg-emerald-900/40 border border-emerald-800/50
                            text-emerald-300 rounded" x-text="tag"></span>
             </template>
           </div>
           <div x-show="selectedNode && (selectedNode.sumo_candidate_tags_raw || []).length > (selectedNode.sumo_tags || []).length"
-            class="text-[9px] text-slate-700"
+            class="text-sm text-gray-700"
             x-text="selectedNode ? '+' + ((selectedNode.sumo_candidate_tags_raw || []).length - (selectedNode.sumo_tags || []).length) + ' dropped' : ''">
           </div>
         </div>
 
         <button @click="selectedNode = null; renderCurrentGraph()"
-          class="shrink-0 text-slate-700 hover:text-slate-400 transition text-xs mt-0.5">✕</button>
+          class="shrink-0 text-gray-700 hover:text-gray-400 transition text-xs mt-0.5">✕</button>
       </div>
 
     </div>
