@@ -74,13 +74,14 @@ async function startServer() {
     try {
       if (process.env.ARANGO_URL) {
         const db = await arangoClient.initArangoClient();
-        const [docs, sections, paragraphs, edges] = await Promise.all([
+        const [docs, sections, paragraphs, tables, edges] = await Promise.all([
           db.query('FOR d IN documents SORT d._key DESC RETURN d').then(c => c.all()),
           db.query('FOR s IN sections SORT s.level ASC, s._key ASC RETURN {_key:s._key,_id:s._id,title:s.title,document_id:s.document_id,level:s.level,node_type:s.node_type,parent_section_id:s.parent_section_id}').then(c => c.all()),
           db.query('LET docKeys = (FOR d IN documents RETURN d._key) FOR p IN paragraphs FILTER p.document_id IN docKeys RETURN {_key:p._key,_id:p._id,document_id:p.document_id,section_id:p.section_id,node_type:p.node_type}').then(c => c.all()),
+          db.query('LET docKeys = (FOR d IN documents RETURN d._key) FOR t IN tables FILTER t.document_id IN docKeys RETURN {_key:t._key,_id:t._id,document_id:t.document_id,section_id:t.section_id,node_type:t.node_type}').then(c => c.all()),
           db.query('LET docKeys = (FOR d IN documents RETURN d._key) LET validIds = UNION((FOR d IN documents RETURN d._id),(FOR s IN sections FILTER s.document_id IN docKeys RETURN s._id),(FOR p IN paragraphs FILTER p.document_id IN docKeys RETURN p._id),(FOR t IN tables FILTER t.document_id IN docKeys RETURN t._id)) FOR e IN edges FILTER e._from IN validIds OR e._to IN validIds RETURN {_key:e._key,_id:e._id,_from:e._from,_to:e._to,relation:e.relation}').then(c => c.all()),
         ]);
-        return res.json({ success: true, source: 'arangodb', documents: docs, sections, paragraphs, tables: [], edges });
+        return res.json({ success: true, source: 'arangodb', documents: docs, sections, paragraphs, tables, edges });
       }
       const state = dbSim.getState();
       res.json({ success: true, source: 'simulator', ...state });
@@ -115,16 +116,18 @@ async function startServer() {
       const tableIds   = [...neighborIds].filter(id => id.startsWith('tables/'));
       const sectionIds = [...neighborIds].filter(id => id.startsWith('sections/'));
 
-      // If the clicked node is a paragraph, fetch its own full content too
-      const selfParaIds = nodeId.startsWith('paragraphs/') ? [nodeId] : [];
-      const allParaIds  = [...new Set([...paraIds, ...selfParaIds])];
+      // If the clicked node is a paragraph/table, fetch its own full content too
+      const selfParaIds  = nodeId.startsWith('paragraphs/') ? [nodeId] : [];
+      const selfTableIds = nodeId.startsWith('tables/')     ? [nodeId] : [];
+      const allParaIds   = [...new Set([...paraIds,  ...selfParaIds])];
+      const allTableIds  = [...new Set([...tableIds, ...selfTableIds])];
 
       const [paragraphs, tables, sections] = await Promise.all([
         allParaIds.length
           ? db.query('FOR p IN paragraphs FILTER p._id IN @ids RETURN {_key:p._key,_id:p._id,content:p.content,document_id:p.document_id,section_id:p.section_id,node_type:p.node_type,sumo_tags:p.sumo_tags,sumo_candidate_tags_raw:p.sumo_candidate_tags_raw}', { ids: allParaIds }).then(c=>c.all())
           : [],
-        tableIds.length
-          ? db.query('FOR t IN tables FILTER t._id IN @ids RETURN {_key:t._key,_id:t._id,document_id:t.document_id,section_id:t.section_id,node_type:t.node_type,markdown_representation:t.markdown_representation}', { ids: tableIds }).then(c=>c.all())
+        allTableIds.length
+          ? db.query('FOR t IN tables FILTER t._id IN @ids RETURN {_key:t._key,_id:t._id,document_id:t.document_id,section_id:t.section_id,node_type:t.node_type,matrix_data:t.matrix_data,markdown_representation:t.markdown_representation}', { ids: allTableIds }).then(c=>c.all())
           : [],
         sectionIds.length
           ? db.query('FOR s IN sections FILTER s._id IN @ids RETURN {_key:s._key,_id:s._id,title:s.title,document_id:s.document_id,level:s.level,node_type:s.node_type,parent_section_id:s.parent_section_id}', { ids: sectionIds }).then(c=>c.all())

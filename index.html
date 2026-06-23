@@ -440,7 +440,8 @@
         ['#67e8f9', 'Section L3'],
         ['#a78bfa', 'Section L4'],
         ['#f0abfc', 'Section L5'],
-        ['#fbbf24', 'Para/Figure'],
+        ['#fbbf24', 'Paragraph'],
+        ['#c084fc', 'Figure'],
         ['#f472b6', 'Table'],
         ['#4ade80', 'SUMO Tag'],
       ],
@@ -520,7 +521,6 @@
           if (!d.success) return;
           // Merge new nodes/edges into graphData; for paragraphs, UPDATE stubs with content
           const existingParaMap  = new Map(this.graphData.paragraphs.map(p => [p._id, p]));
-          const existingTableIds = new Set(this.graphData.tables.map(t => t._id));
           const existingSecIds   = new Set(this.graphData.sections.map(s => s._id));
           const existingEdgeIds  = new Set(this.graphData.edges.map(e => e._id));
           for (const p of (d.paragraphs || [])) {
@@ -531,13 +531,13 @@
               this.graphData.paragraphs.push(p);
             }
           }
-          for (const t of (d.tables   || [])) if (!existingTableIds.has(t._id)) this.graphData.tables.push(t);
+          const existingTableMap = new Map(this.graphData.tables.map(t => [t._id, t]));
+          for (const t of (d.tables || [])) {
+            if (existingTableMap.has(t._id)) Object.assign(existingTableMap.get(t._id), t);
+            else this.graphData.tables.push(t);
+          }
           for (const s of (d.sections || [])) if (!existingSecIds.has(s._id))   this.graphData.sections.push(s);
           for (const e of (d.edges    || [])) if (!existingEdgeIds.has(e._id))  this.graphData.edges.push(e);
-          // Recursively expand all neighboring sections in both parent and child
-          // directions until the full chain from root document to leaves is loaded.
-          const neighbors = (d.sections || []).filter(n => !this.expandedNodes.has(n._id));
-          if (neighbors.length) await Promise.all(neighbors.map(n => this.expandNode(n)));
           this.$nextTick(() => this.renderCurrentGraph());
         } catch(e) { console.error('expandNode:', e); }
       },
@@ -685,6 +685,7 @@
   const FIXED_COLORS = {
     document:  '#38bdf8',
     paragraph: '#fbbf24',
+    figure:    '#c084fc',
     table:     '#f472b6',
     tag:       '#4ade80',
   };
@@ -699,7 +700,7 @@
   function colKeyOf(node) {
     const id = node._id || '';
     if (id.startsWith('documents/'))  return 'document';
-    if (id.startsWith('paragraphs/')) return 'paragraph';
+    if (id.startsWith('paragraphs/')) return (node.node_type || '').toLowerCase() === 'figure' ? 'figure' : 'paragraph';
     if (id.startsWith('tables/'))     return 'table';
     if (id.startsWith('tags/'))       return 'tag';
     if (id.startsWith('sections/'))   return 'section_L' + (node.level || 1);
