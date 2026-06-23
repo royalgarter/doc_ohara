@@ -62,7 +62,7 @@
     </nav>
 
     <!-- Left panel -->
-    <div class="w-72 flex flex-col bg-slate-900/40 border-r border-slate-800 shrink-0 overflow-hidden">
+    <div class="w-64 flex flex-col bg-slate-900/40 border-r border-slate-800 shrink-0 overflow-hidden">
 
       <!-- GRAPH tab -->
       <div x-show="tab === 'graph'" class="flex flex-col h-full overflow-hidden p-3 gap-3">
@@ -355,7 +355,7 @@
       <!-- Node inspector strip -->
       <div x-show="selectedNode"
         class="shrink-0 border-t border-slate-800 bg-slate-900/90 p-3 flex gap-4 items-start"
-        style="max-height: 220px;">
+        style="max-height: 400px;">
 
         <div class="flex-1 min-w-0 flex flex-col gap-1.5 overflow-hidden">
           <!-- Type + key row -->
@@ -780,7 +780,7 @@
     // ── Dynamic column x positions ────────────────────────────────────────
     const DOC_X   = 70;
     const SEC_START = DOC_X + 110;    // x of first section level column
-    const SEC_GAP   = 90;             // gap between level columns
+    const SEC_GAP   = 150;             // gap between level columns
     const PARA_X  = SEC_START + numLevels * SEC_GAP + 20;
     const TAG_X   = PARA_X + 145;
     const svgW    = TAG_X + 115;
@@ -994,20 +994,19 @@
       // section label count threshold: only label if ≤ 25 nodes in that level column
       const secLvl = isSec ? parseInt(colKey.replace('section_L', ''), 10) : null;
       const secCount = secLvl !== null ? (sectionsByLevel.get(secLvl) || []).length : 0;
-      const showLabel = isDoc || isTag
-        || (isSec && secCount <= 25)
-        || false; // paragraphs/tables: no label (too many)
+      const showLabel = isDoc || isTag || isSec || false; // paragraphs/tables: no label (too many)
 
       if (showLabel) {
         const rawLabel = isTag ? '#' + node.title : (node.title || node.source_file || key);
-        const maxLen   = isDoc ? 32 : isTag ? 20 : 20;
+        const maxLen   = isDoc ? 60 : isSec ? 40 : 20;
         const label    = rawLabel.length > maxLen ? rawLabel.slice(0, maxLen - 1) + '…' : rawLabel;
         const txt = svgEl('text', {
-          x: r + 4, y: 4,
-          'font-size': isTag ? '7' : isDoc ? '8.5' : '7.5',
-          fill: isDimmed ? '#1e293b' : isTag ? '#86efac' : isDoc ? '#cbd5e1' : '#94a3b8',
+          'x': r + 4, 
+          'y': 4,
+          'font-size':  isDoc ? '8' : isSec ? '7' : '6',
+          'fill': isDimmed ? '#1e293b' : isTag ? '#86efac' : isDoc ? '#cbd5e1' : '#94a3b8',
           'font-family': 'ui-monospace,monospace',
-          opacity: isDimmed ? '0.4' : '1',
+          'opacity': isDimmed ? '0.4' : '1',
         });
         txt.textContent = label;
         g.appendChild(txt);
