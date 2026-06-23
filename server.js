@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import { loadEnvFromDB } from './src/db/env.js';
 import express from 'express';
 import path from 'path';
 import fs from 'fs';
@@ -31,6 +32,8 @@ const FINAL_OUT_DIR = 'doc_pipeline/collections';
 fs.mkdirSync(INPUT_DIR, { recursive: true });
 fs.mkdirSync(RAW_OUT_DIR, { recursive: true });
 fs.mkdirSync(FINAL_OUT_DIR, { recursive: true });
+
+await loadEnvFromDB();
 
 const PORT = process.env.PORT || 6454;
 async function startServer() {
