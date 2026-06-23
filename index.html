@@ -62,7 +62,7 @@
     </nav>
 
     <!-- Left panel -->
-    <div class="w-72 flex flex-col bg-slate-900/40 border-r border-slate-800 shrink-0 overflow-hidden">
+    <div class="w-64 flex flex-col bg-slate-900/40 border-r border-slate-800 shrink-0 overflow-hidden">
 
       <!-- GRAPH tab -->
       <div x-show="tab === 'graph'" class="flex flex-col h-full overflow-hidden p-3 gap-3">
@@ -355,7 +355,7 @@
       <!-- Node inspector strip -->
       <div x-show="selectedNode"
         class="shrink-0 border-t border-slate-800 bg-slate-900/90 p-3 flex gap-4 items-start"
-        style="max-height: 220px;">
+        style="max-height: 400px;">
 
         <div class="flex-1 min-w-0 flex flex-col gap-1.5 overflow-hidden">
           <!-- Type + key row -->
@@ -367,30 +367,39 @@
               x-text="selectedNode && (selectedNode.node_type || selectedNode.type || (selectedNode._id && selectedNode._id.split('/')[0]))"></span>
             <span class="text-[10px] text-slate-600"
               x-text="selectedNode && (selectedNode._key || selectedNode.id)"></span>
-            <span x-show="selectedNode && expandedNodes.has(selectedNode._id)"
-              class="text-[9px] text-emerald-400 ml-auto">expanded</span>
-            <span x-show="selectedNode && !expandedNodes.has(selectedNode._id)"
+            <!-- Loading indicator: only for real DB nodes that haven't been expanded yet -->
+            <span x-show="selectedNode && selectedNode._id && !selectedNode._id.startsWith('tags/') && !expandedNodes.has(selectedNode._id)"
               class="text-[9px] text-slate-500 ml-auto animate-pulse">loading…</span>
+            <span x-show="selectedNode && selectedNode._id && !selectedNode._id.startsWith('tags/') && expandedNodes.has(selectedNode._id)"
+              class="text-[9px] text-emerald-400 ml-auto">expanded</span>
           </div>
-          <!-- Title -->
+          <!-- SUMO tag inspector: tag name + paragraph count -->
+          <div x-show="selectedNode && selectedNode._id && selectedNode._id.startsWith('tags/')"
+            class="flex flex-col gap-1">
+            <div class="text-xs text-emerald-300 font-semibold"
+              x-text="selectedNode && ('#' + selectedNode.title)"></div>
+            <div class="text-[11px] text-slate-500"
+              x-text="selectedNode && selectedNode._tagCount + ' paragraph(s) tagged — full path highlighted in graph'"></div>
+          </div>
+          <!-- Title (sections / documents) -->
           <div class="text-xs text-slate-200 font-semibold truncate"
-            x-show="selectedNode && (selectedNode.title || selectedNode.source_file)"
+            x-show="selectedNode && !selectedNode._id?.startsWith('tags/') && (selectedNode.title || selectedNode.source_file)"
             x-text="selectedNode && (selectedNode.title || selectedNode.source_file || '')"></div>
           <!-- Content (paragraph text) -->
           <div class="text-[11px] text-slate-400 overflow-y-auto scrollbar-thin leading-relaxed flex-1"
             style="max-height: 130px; white-space: pre-wrap; word-break: break-word;"
-            x-show="selectedNode && selectedNode.content"
+            x-show="selectedNode && !selectedNode._id?.startsWith('tags/') && selectedNode.content"
             x-text="selectedNode && (selectedNode.content || '')"></div>
           <!-- Empty content notification for paragraphs that loaded but have no text -->
           <div class="text-[11px] text-amber-600 italic"
             x-show="selectedNode && selectedNode._id && selectedNode._id.startsWith('paragraphs/') && expandedNodes.has(selectedNode._id) && selectedNode.content === ''">[EMPTY CONTENT]</div>
-          <!-- Empty state for structural nodes -->
+          <!-- Empty state for structural nodes (not tags, not paragraphs-with-content) -->
           <div class="text-[11px] text-slate-700 italic"
-            x-show="selectedNode && !selectedNode.content && !selectedNode.title && !(selectedNode._id && selectedNode._id.startsWith('paragraphs/') && expandedNodes.has(selectedNode._id))">—</div>
+            x-show="selectedNode && !selectedNode._id?.startsWith('tags/') && !selectedNode.content && !selectedNode.title && !(selectedNode._id?.startsWith('paragraphs/') && expandedNodes.has(selectedNode._id))">—</div>
         </div>
 
-        <!-- SUMO tags -->
-        <div x-show="selectedNode && selectedNode.sumo_tags && selectedNode.sumo_tags.length > 0"
+        <!-- SUMO tags (shown for paragraphs/sections that HAVE tags, not for tag nodes themselves) -->
+        <div x-show="selectedNode && !selectedNode._id?.startsWith('tags/') && selectedNode.sumo_tags && selectedNode.sumo_tags.length > 0"
           class="shrink-0 w-44 flex flex-col gap-1.5">
           <div class="text-[10px] font-bold text-slate-600 uppercase tracking-wider">SUMO Tags</div>
           <div class="flex flex-wrap gap-1 overflow-y-auto scrollbar-thin" style="max-height: 140px;">
@@ -500,6 +509,9 @@
       async expandNode(node) {
         const nodeId = node._id || (node.id ? node.id : null);
         if (!nodeId || this.expandedNodes.has(nodeId)) return;
+        // SUMO tags are virtual nodes built client-side — they have no DB record.
+        // Skip the neighbors fetch; highlighting is handled purely by renderGraph.
+        if (nodeId.startsWith('tags/')) return;
         this.expandedNodes.add(nodeId);
         try {
           const [collection, key] = nodeId.split('/');
@@ -767,7 +779,7 @@
     // ── Dynamic column x positions ────────────────────────────────────────
     const DOC_X   = 70;
     const SEC_START = DOC_X + 110;    // x of first section level column
-    const SEC_GAP   = 90;             // gap between level columns
+    const SEC_GAP   = 150;             // gap between level columns
     const PARA_X  = SEC_START + numLevels * SEC_GAP + 20;
     const TAG_X   = PARA_X + 145;
     const svgW    = TAG_X + 115;
@@ -801,27 +813,63 @@
     placeColumn(tagNodes,    'tag',       TAG_X);
 
     // ── Compute related keys for the selected node ─────────────────────────
+
+    // Pre-build parent-chain lookup from HAS_CHILD edges so we can walk
+    // from any node all the way up to the root document in O(depth).
+    const parentOf = new Map(); // childKey → { key: parentKey, edgeId }
+    for (const edge of edges) {
+      if (edge.relation === 'HAS_CHILD') {
+        const fk  = (edge._from || '').split('/')[1];
+        const tk  = (edge._to   || '').split('/')[1];
+        const eid = edge._key || (edge._from + '→' + edge._to);
+        if (fk && tk) parentOf.set(tk, { key: fk, edgeId: eid });
+      }
+    }
+
+    // Walk every ancestor of startKey, adding them to relatedKeys/relatedEdgeIds.
+    function addAncestors(startKey) {
+      let cur = startKey;
+      while (parentOf.has(cur)) {
+        const { key: pk, edgeId } = parentOf.get(cur);
+        relatedKeys.add(pk);
+        relatedEdgeIds.add(edgeId);
+        cur = pk;
+      }
+    }
+
     const relatedKeys    = new Set();
     const relatedEdgeIds = new Set();
     if (selectedKey) {
+      // 1. Direct 1-hop neighbors via all real edges
       for (const edge of edges) {
-        const fk = (edge._from || '').split('/')[1];
-        const tk = (edge._to   || '').split('/')[1];
+        const fk  = (edge._from || '').split('/')[1];
+        const tk  = (edge._to   || '').split('/')[1];
+        const eid = edge._key || (edge._from + '→' + edge._to);
         if (fk === selectedKey || tk === selectedKey) {
           relatedKeys.add(fk === selectedKey ? tk : fk);
-          relatedEdgeIds.add(edge._key || (edge._from + '→' + edge._to));
+          relatedEdgeIds.add(eid);
         }
       }
-      // tag relationships (virtual edges)
+
+      // 2. Walk the full ancestor chain up to the root document
+      addAncestors(selectedKey);
+
+      // 3. Virtual tag edges: paragraph → its SUMO tags
       for (const p of sampledPara) {
         if (p._key !== selectedKey) continue;
         for (const tagName of (p.sumo_tags || [])) relatedKeys.add('tag:' + tagName);
       }
+
+      // 4. SUMO tag selected: highlight all paragraphs with that tag AND their
+      //    full chains (paragraph → section → … → document)
       const selEntry = nodePos.get(selectedKey);
       if (selEntry && selEntry.colKey === 'tag') {
         const tagName = selectedKey.replace('tag:', '');
         for (const p of sampledPara) {
-          if ((p.sumo_tags || []).includes(tagName)) relatedKeys.add(p._key);
+          if ((p.sumo_tags || []).includes(tagName)) {
+            relatedKeys.add(p._key);
+            addAncestors(p._key);
+          }
         }
       }
     }
@@ -945,20 +993,19 @@
       // section label count threshold: only label if ≤ 25 nodes in that level column
       const secLvl = isSec ? parseInt(colKey.replace('section_L', ''), 10) : null;
       const secCount = secLvl !== null ? (sectionsByLevel.get(secLvl) || []).length : 0;
-      const showLabel = isDoc || isTag
-        || (isSec && secCount <= 25)
-        || false; // paragraphs/tables: no label (too many)
+      const showLabel = isDoc || isTag || isSec || false; // paragraphs/tables: no label (too many)
 
       if (showLabel) {
         const rawLabel = isTag ? '#' + node.title : (node.title || node.source_file || key);
-        const maxLen   = isDoc ? 32 : isTag ? 20 : 20;
+        const maxLen   = isDoc ? 60 : isSec ? 40 : 20;
         const label    = rawLabel.length > maxLen ? rawLabel.slice(0, maxLen - 1) + '…' : rawLabel;
         const txt = svgEl('text', {
-          x: r + 4, y: 4,
-          'font-size': isTag ? '7' : isDoc ? '8.5' : '7.5',
-          fill: isDimmed ? '#1e293b' : isTag ? '#86efac' : isDoc ? '#cbd5e1' : '#94a3b8',
+          'x': r + 4, 
+          'y': 4,
+          'font-size':  isDoc ? '8' : isSec ? '7' : '6',
+          'fill': isDimmed ? '#1e293b' : isTag ? '#86efac' : isDoc ? '#cbd5e1' : '#94a3b8',
           'font-family': 'ui-monospace,monospace',
-          opacity: isDimmed ? '0.4' : '1',
+          'opacity': isDimmed ? '0.4' : '1',
         });
         txt.textContent = label;
         g.appendChild(txt);
