@@ -91,21 +91,85 @@ program
 
 program
   .command('query <text>')
-  .description('Hybrid search over the graph')
+  .description('5-phase hybrid search: BM25 + SUMO tags + entity graph + structural traversal')
   .option('--json', 'machine-readable output')
-  .option('--depth <n>', 'deep traversal depth', '2')
-  .action((text, opts) => {
-    const engine = new RetrievalEngine(getArangoDBSimulator());
-    const result = engine.query(text, { depth: parseInt(opts.depth, 10) });
+  .option('--depth <n>', 'structural traversal depth', '2')
+  .option('--limit <n>', 'max results to return', '20')
+  .option('--verbose', 'show per-result source phases and scores')
+  .option('--raw', 'show flat scored list instead of reconstructed Markdown')
+  .action(async (text, opts) => {
+    let retrievalDB;
+    if (useRealDB) {
+      await arangoClient.initArangoClient();
+      retrievalDB = { executeAQL: (q, b) => arangoClient.executeAQL(q, b) };
+    } else {
+      const sim = getArangoDBSimulator();
+      retrievalDB = {
+        executeAQL: (q, b) => {
+          const r = sim.executeAQL(q, b);
+          return Promise.resolve(r?.results || []);
+        },
+      };
+    }
 
-    emit(opts.json, { success: true, ...result }, () => {
-      console.log(chalk.bold(`Top matches for "${text}":`));
-      if (result.shallowResults.length === 0) {
-        console.log(chalk.yellow('  (no matches)'));
+    const engine = new RetrievalEngine(retrievalDB);
+
+    if (!opts.json) {
+      const inputType = text.trim().split(/\s+/).length <= 3 ? 'keyword'
+        : text.trim().split(/\s+/).length <= 30 ? 'phrase' : 'paragraph';
+      console.log(chalk.dim(`Input type: ${inputType}${inputType === 'paragraph' ? ' (Gemini extraction)' : ''}`));
+    }
+
+    const result = await engine.query(text, {
+      depth: parseInt(opts.depth, 10),
+      limit: parseInt(opts.limit, 10),
+    });
+
+    const markdown = opts.json || opts.raw ? null : await engine.formatAsMarkdown(result.results || []);
+
+    emit(opts.json, { success: true, ...result }, async () => {
+      const { results = [], processedQuery } = result;
+
+      // Always print the query summary header
+      console.log('');
+      console.log(chalk.bold(`Results for: ${chalk.white(`"${text}"`)}`));
+      if (processedQuery?.keywords?.length) {
+        console.log(chalk.dim(`  keywords: ${processedQuery.keywords.join(', ')}`));
       }
-      result.shallowResults.forEach(({ node, score }) => {
-        console.log(`  ${chalk.green(score.toFixed(2))}  ${node.title || node.content?.slice(0, 80) || node._id}`);
-      });
+      if (processedQuery?.entityHints?.length) {
+        console.log(chalk.dim(`  entity hints: ${processedQuery.entityHints.join(', ')}`));
+      }
+      if (processedQuery?.sumoHints?.length) {
+        console.log(chalk.dim(`  SUMO hints: ${processedQuery.sumoHints.join(', ')}`));
+      }
+      console.log(chalk.dim(`  ${results.length} result(s) — depth=${opts.depth} limit=${opts.limit}`));
+      console.log('');
+
+      if (results.length === 0) {
+        console.log(chalk.yellow('  (no matches)'));
+        return;
+      }
+
+      if (opts.raw) {
+        // Flat scored list
+        results.forEach(({ node, score, sources }, i) => {
+          const label = node.title || node.content?.replace(/\s+/g, ' ').slice(0, 100) || node._id;
+          const sourceTag = opts.verbose ? chalk.dim(` [${(sources || []).join('+')}]`) : '';
+          const rank = chalk.dim(`${String(i + 1).padStart(2)}.`);
+          console.log(`${rank} ${chalk.green(score.toFixed(3))}  ${label}${sourceTag}`);
+          if (opts.verbose && node._id) console.log(chalk.dim(`       id: ${node._id}`));
+        });
+      } else {
+        // Reconstructed Markdown grouped by document → section
+        if (opts.verbose) {
+          // prepend score/source annotation per paragraph in verbose mode
+          results.forEach(({ node, score, sources }) => {
+            if (node?._id) console.log(chalk.dim(`  [${chalk.green(score.toFixed(3))} ${(sources||[]).join('+')}] ${node._id}`));
+          });
+          console.log('');
+        }
+        console.log(markdown);
+      }
     });
   });
 
