@@ -416,6 +416,110 @@ async function performParsing(ai, filename, fileContentPath, isPdf, targetSubDir
   throw err;
 }
 
+// Detect and extract TOC and Glossary sections from raw Markdown before chunking.
+// Returns { cleanedMarkdown, toc, glossary } where toc and glossary have { raw, entries }.
+// The cleaned markdown has those blocks removed so the LLM never sees them as regular chunks.
+function preDetectSpecialSections(markdown) {
+  const lines = markdown.split(/\r?\n/);
+  const tocEntries = [];
+  const glossaryEntries = [];
+  let tocRaw = null;
+  let glossaryRaw = null;
+
+  // TOC line patterns: markdown links, dotted leaders, or numbered heading lines
+  const TOC_LINE_RE = /^[-*]\s+\[.+\]\(#.+\)|^\s*(chapter|section|part|appendix)?\s*\d+[\d.]*\s+.{3,}[.\s]{4,}\d+\s*$|^\s*\d+[\d.]*\s+.{3,}[.\s]{4,}\d+\s*$/i;
+
+  // Glossary heading pattern
+  const GLOSSARY_HEADING_RE = /^#{1,4}\s+(glossary|terms\s*(&amp;|&|and)?\s*definitions?|abbreviations|key\s+terms)/i;
+
+  let i = 0;
+  const keepLines = [];
+
+  while (i < lines.length) {
+    // --- Detect TOC block ---
+    // Look for a heading that signals a TOC, or a run of TOC-matching lines
+    const isTocHeading = /^#{1,4}\s+(table\s+of\s+contents?|contents?|toc)\b/i.test(lines[i]);
+    if (isTocHeading) {
+      const blockStart = i;
+      const blockLines = [lines[i]];
+      i++;
+      // consume subsequent lines until a non-TOC heading or double blank gap
+      let blanks = 0;
+      while (i < lines.length) {
+        const l = lines[i];
+        if (/^#{1,4}\s+/.test(l) && !isTocHeading) break; // new section
+        if (l.trim() === '') { blanks++; if (blanks > 2) break; }
+        else blanks = 0;
+        blockLines.push(l);
+        // parse entry text from markdown link or plain numbered line
+        const linkMatch = l.match(/\[(.+?)\]\(#.+?\)/);
+        if (linkMatch) tocEntries.push(linkMatch[1].trim());
+        i++;
+      }
+      tocRaw = blockLines.join('\n');
+      addPipelineLog('info', `Pre-detected TOC block (${blockLines.length} lines) — excluded from LLM chunking`);
+      continue; // don't push these lines to keepLines
+    }
+
+    // Also detect a run of ≥5 TOC-style lines without an explicit heading
+    if (!tocRaw && TOC_LINE_RE.test(lines[i])) {
+      let runStart = i;
+      const run = [];
+      while (i < lines.length && (TOC_LINE_RE.test(lines[i]) || lines[i].trim() === '')) {
+        run.push(lines[i]);
+        i++;
+      }
+      if (run.filter(l => TOC_LINE_RE.test(l)).length >= 5) {
+        tocRaw = run.join('\n');
+        run.filter(l => TOC_LINE_RE.test(l)).forEach(l => {
+          const m = l.match(/\[(.+?)\]/) || l.match(/^\s*\d[\d.]*\s+(.+?)\s*[.\s]{4,}/);
+          if (m) tocEntries.push(m[1].trim());
+        });
+        addPipelineLog('info', `Pre-detected TOC block (heuristic, ${run.length} lines) — excluded from LLM chunking`);
+        continue;
+      } else {
+        // Not a TOC run — keep lines
+        run.forEach(l => keepLines.push(l));
+        continue;
+      }
+    }
+
+    // --- Detect Glossary block ---
+    if (GLOSSARY_HEADING_RE.test(lines[i])) {
+      const blockLines = [lines[i]];
+      i++;
+      // consume until next same-or-shallower heading
+      const headLevel = (lines[i - 1].match(/^(#{1,4})/) || ['', ''])[1].length;
+      while (i < lines.length) {
+        const nextHeadMatch = lines[i].match(/^(#{1,4})\s+/);
+        if (nextHeadMatch && nextHeadMatch[1].length <= headLevel) break;
+        blockLines.push(lines[i]);
+
+        // Parse definition list: `**term** — definition` or `term: definition` or `| term | def |`
+        const defListMatch = lines[i].match(/^\*{1,2}(.+?)\*{1,2}\s*[—:\-]\s*(.+)/);
+        const colonMatch = !defListMatch && lines[i].match(/^([^|:]{2,40})\s*:\s{1,4}(.{5,})/);
+        const tableMatch = !defListMatch && !colonMatch && lines[i].match(/^\|\s*([^|]+?)\s*\|\s*([^|]+?)\s*\|/);
+        if (defListMatch) glossaryEntries.push({ term: defListMatch[1].trim(), definition: defListMatch[2].trim() });
+        else if (colonMatch) glossaryEntries.push({ term: colonMatch[1].trim(), definition: colonMatch[2].trim() });
+        else if (tableMatch && !/^[\s|:-]+$/.test(lines[i])) glossaryEntries.push({ term: tableMatch[1].trim(), definition: tableMatch[2].trim() });
+        i++;
+      }
+      glossaryRaw = blockLines.join('\n');
+      addPipelineLog('info', `Pre-detected Glossary block (${blockLines.length} lines, ${glossaryEntries.length} entries) — will be stored as structured entries`);
+      continue;
+    }
+
+    keepLines.push(lines[i]);
+    i++;
+  }
+
+  return {
+    cleanedMarkdown: keepLines.join('\n'),
+    toc: tocRaw ? { raw: tocRaw, entries: tocEntries } : null,
+    glossary: glossaryRaw ? { raw: glossaryRaw, entries: glossaryEntries } : null,
+  };
+}
+
 // Structure markdown using chunking + LLM with cache and retries
 async function structureMarkdownWithRetries(ai, filename, mdContent) {
   if (!ai) {
@@ -424,7 +528,12 @@ async function structureMarkdownWithRetries(ai, filename, mdContent) {
     throw err;
   }
 
-  let chunks = chunkMarkdown(mdContent, { maxChars: 12000 });
+  // Pre-detect TOC and Glossary before chunking so they are not fed to the LLM as ordinary content.
+  const { cleanedMarkdown, toc: detectedToc, glossary: detectedGlossary } = preDetectSpecialSections(mdContent);
+  if (detectedToc) addPipelineLog('info', `TOC detected: ${detectedToc.entries.length} entry/entries extracted`);
+  if (detectedGlossary) addPipelineLog('info', `Glossary detected: ${detectedGlossary.entries.length} term(s) parsed`);
+
+  let chunks = chunkMarkdown(cleanedMarkdown, { maxChars: 12000 });
   // test override: limit number of chunks processed when OHARA_TEST_CHUNKS_LIMIT is set
   const testLimit = parseInt(process.env.OHARA_TEST_CHUNKS_LIMIT || '0', 10) || 0;
   if (testLimit > 0) {
@@ -479,7 +588,8 @@ async function structureMarkdownWithRetries(ai, filename, mdContent) {
       diag.attempts = attempt;
       try {
         addPipelineLog('info', `LLM structuring chunk ${chunk.id} (attempt ${attempt}/${maxAttempts})`);
-        const prompt = `${promptNorm}\n\nDOCUMENT_CHUNK_HEADING:${chunk.heading || ''}\n\n${chunk.text}`;
+        const levelHint = chunk.headingLevel ? `\nHEADING_LEVEL:${chunk.headingLevel}` : '';
+        const prompt = `${promptNorm}${levelHint}\n\nDOCUMENT_CHUNK_HEADING:${chunk.heading || ''}\n\n${chunk.text}`;
         const resp = await ai.models.generateContent({ model: modelId, contents: prompt });
         const um = resp.usageMetadata || {};
         diag.usage.prompt_tokens     += um.promptTokenCount     || 0;
@@ -605,6 +715,12 @@ async function structureMarkdownWithRetries(ai, filename, mdContent) {
     }
     // Expect parsed to be { nodes: [...] } or { document: { texts: [...] } }
     if (parsed.nodes) {
+      // Tag each node with the Markdown heading level from the source chunk so
+      // transformRawToCollections can use the authoritative # depth rather than
+      // relying solely on the LLM's type/level inference.
+      if (entry.chunk.headingLevel != null) {
+        parsed.nodes.forEach(n => { n._chunk_heading_level = entry.chunk.headingLevel; });
+      }
       mergedNodes.push(...parsed.nodes);
     } else if (parsed.document && Array.isArray(parsed.document.texts)) {
       parsed.document.texts.forEach(t => mergedNodes.push({ type: t.label === 'paragraph' ? 'Paragraph' : 'Paragraph', content: t.text, title: t.label && t.label.startsWith('heading') ? t.text : undefined }));
@@ -657,7 +773,7 @@ async function structureMarkdownWithRetries(ai, filename, mdContent) {
     }
   }
 
-  return { nodes: mergedNodes, llm_usage: { ...usageTotals, model: GEMINI_MODEL, chunks: chunks.length, cache_hits: chunkDiagnostics.filter(d => d.cache_hit).length } };
+  return { nodes: mergedNodes, llm_usage: { ...usageTotals, model: GEMINI_MODEL, chunks: chunks.length, cache_hits: chunkDiagnostics.filter(d => d.cache_hit).length }, toc: detectedToc, glossary: detectedGlossary };
 }
 
 // Generate realistic mock data if Gemini API is disabled
@@ -791,7 +907,8 @@ function transformRawToCollections(rawOutputDir) {
           const ntype = node.type || (node.metadata && node.metadata.type) || 'Paragraph';
 
           if (SECTION_TYPES.includes(ntype)) {
-            const level = node.metadata?.level || LEVEL_OF[ntype] || 2;
+            // Prefer the Markdown # depth recorded during chunking; fall back to LLM output then type-name map.
+            const level = node._chunk_heading_level ?? node.metadata?.level ?? LEVEL_OF[ntype] ?? 2;
             const title = (node.title || node.content?.split('\n')[0] || '').trim();
             const dedupKey = `${docId}::L${level}::${title.toLowerCase()}`;
 
@@ -1189,9 +1306,13 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
     throw rateLimitError;
   }
 
-  // Extract and carry llm_usage separately; parsedLayoutJSON itself only needs the nodes
+  // Extract and carry llm_usage, toc, glossary separately; parsedLayoutJSON itself only needs the nodes
   const llmUsage = parsedLayoutJSON?.llm_usage || null;
+  const detectedToc = parsedLayoutJSON?.toc || null;
+  const detectedGlossary = parsedLayoutJSON?.glossary || null;
   if (llmUsage) delete parsedLayoutJSON.llm_usage;
+  if (parsedLayoutJSON?.toc) delete parsedLayoutJSON.toc;
+  if (parsedLayoutJSON?.glossary) delete parsedLayoutJSON.glossary;
 
   onProgress(60, 'Writing raw layout output...');
   const rawJsonPath = path.join(targetSubDir, `${filenameNoExt}.json`);
@@ -1219,6 +1340,9 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
           upload_time: new Date().toISOString(),
           file_hash: fileHash || null,
           llm_usage: llmUsage || null,
+          toc_raw: detectedToc?.raw || null,
+          toc_entries: detectedToc?.entries || [],
+          glossary_entries: detectedGlossary?.entries || [],
         });
 
         const docHandle = inserted._id || `documents/${inserted._key}`;
@@ -1415,7 +1539,7 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
         throw err;
       }
     } else {
-      const insertedDoc = arangoDb.insertDocument({ _key: doc.id, source_file: doc.source_file, parser_engine: doc.parser_engine, title: doc.title, file_size: doc.file_size || '350 KB', upload_time: new Date().toISOString() });
+      const insertedDoc = arangoDb.insertDocument({ _key: doc.id, source_file: doc.source_file, parser_engine: doc.parser_engine, title: doc.title, file_size: doc.file_size || '350 KB', upload_time: new Date().toISOString(), toc_raw: detectedToc?.raw || null, toc_entries: detectedToc?.entries || [], glossary_entries: detectedGlossary?.entries || [] });
 
       const docsSections = transformedDocs.sections.filter(s => s.document_id === doc.id);
       docsSections.forEach(sec => { arangoDb.insertSection({ _key: sec.id, document_id: insertedDoc._key, title: sec.title, level: sec.level }); nodeCount += 1; });

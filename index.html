@@ -390,17 +390,48 @@
           <div class="text-xs text-gray-200 font-semibold truncate"
             x-show="selectedNode && !selectedNode._id?.startsWith('tags/') && (selectedNode.title || selectedNode.source_file)"
             x-text="selectedNode && (selectedNode.title || selectedNode.source_file || '')"></div>
-          <!-- Content (paragraph text) -->
+          <!-- Section children: show all child paragraph/table content with node ID annotations -->
+          <div x-show="selectedNode && selectedNode._id && selectedNode._id.startsWith('sections/')"
+            class="overflow-y-auto scrollbar-thin flex-1 flex flex-col gap-3"
+            style="max-height: 300px;">
+            <template x-if="sectionChildren(selectedNode).length === 0">
+              <div class="text-base text-gray-700 italic">
+                <span x-show="!expandedNodes.has(selectedNode && selectedNode._id)" class="animate-pulse">loading children…</span>
+                <span x-show="expandedNodes.has(selectedNode && selectedNode._id)">no content nodes found</span>
+              </div>
+            </template>
+            <template x-for="child in sectionChildren(selectedNode)" :key="child.node._id">
+              <div class="flex flex-col gap-0.5">
+                <!-- Child node ID annotation -->
+                <div class="flex items-center gap-1.5">
+                  <span class="text-xs font-mono text-gray-700" x-text="child.node._id"></span>
+                  <span class="text-xs px-1 rounded"
+                    :style="'background:' + (child.kind === 'table' ? '#f472b622' : '#fbbf2422') + '; color:' + (child.kind === 'table' ? '#f472b6' : '#fbbf24')"
+                    x-text="child.node.node_type || child.kind"></span>
+                </div>
+                <!-- Paragraph content -->
+                <div x-show="child.kind === 'paragraph'"
+                  class="text-base text-gray-400 leading-relaxed"
+                  style="white-space: pre-wrap; word-break: break-word;"
+                  x-text="child.node.content || (expandedNodes.has(child.node._id) ? '[empty]' : '…')"></div>
+                <!-- Table: render as simple grid summary -->
+                <div x-show="child.kind === 'table'" class="text-sm text-gray-500 font-mono">
+                  <span x-text="child.node.markdown_representation || ('[table ' + ((child.node.matrix_data || []).length) + ' rows]')"></span>
+                </div>
+              </div>
+            </template>
+          </div>
+          <!-- Content (paragraph / figure text — non-section nodes) -->
           <div class="text-base text-gray-400 overflow-y-auto scrollbar-thin leading-relaxed flex-1"
             style="max-height: 300px; white-space: pre-wrap; word-break: break-word;"
-            x-show="selectedNode && !selectedNode._id?.startsWith('tags/') && selectedNode.content"
+            x-show="selectedNode && !selectedNode._id?.startsWith('tags/') && !selectedNode._id?.startsWith('sections/') && selectedNode.content"
             x-text="selectedNode && (selectedNode.content || '')"></div>
           <!-- Empty content notification for paragraphs that loaded but have no text -->
           <div class="text-base text-amber-600 italic"
             x-show="selectedNode && selectedNode._id && selectedNode._id.startsWith('paragraphs/') && expandedNodes.has(selectedNode._id) && selectedNode.content === ''">[EMPTY CONTENT]</div>
-          <!-- Empty state for structural nodes (not tags, not paragraphs-with-content) -->
+          <!-- Empty state for structural nodes (not tags, not paragraphs-with-content, not sections) -->
           <div class="text-base text-gray-700 italic"
-            x-show="selectedNode && !selectedNode._id?.startsWith('tags/') && !selectedNode.content && !selectedNode.title && !(selectedNode._id?.startsWith('paragraphs/') && expandedNodes.has(selectedNode._id))">—</div>
+            x-show="selectedNode && !selectedNode._id?.startsWith('tags/') && !selectedNode._id?.startsWith('sections/') && !selectedNode.content && !selectedNode.title && !(selectedNode._id?.startsWith('paragraphs/') && expandedNodes.has(selectedNode._id))">—</div>
         </div>
 
         <!-- SUMO tags (shown for paragraphs/sections that HAVE tags, not for tag nodes themselves) -->
@@ -546,6 +577,35 @@
           for (const e of (d.edges    || [])) if (!existingEdgeIds.has(e._id))  this.graphData.edges.push(e);
           this.$nextTick(() => this.renderCurrentGraph());
         } catch(e) { console.error('expandNode:', e); }
+      },
+
+      // Returns ordered children (paragraphs + tables) of the given section node,
+      // using HAS_CHILD / contains_paragraph / contains_table edges in graphData.
+      sectionChildren(node) {
+        if (!node || !node._id) return [];
+        const sectionId = node._id;
+        const childEdgeTypes = new Set(['HAS_CHILD', 'contains_paragraph', 'contains_table']);
+        const childIds = new Set(
+          this.graphData.edges
+            .filter(e => e._from === sectionId && childEdgeTypes.has(e.relation || e.type))
+            .map(e => e._to)
+        );
+        if (childIds.size === 0) return [];
+
+        const paraMap = new Map(this.graphData.paragraphs.map(p => [p._id, p]));
+        const tableMap = new Map(this.graphData.tables.map(t => [t._id, t]));
+
+        const children = [];
+        for (const id of childIds) {
+          if (paraMap.has(id)) children.push({ kind: 'paragraph', node: paraMap.get(id) });
+          else if (tableMap.has(id)) children.push({ kind: 'table', node: tableMap.get(id) });
+        }
+        // Stable sort: paragraphs before tables, then by _key lexicographic order
+        children.sort((a, b) => {
+          if (a.kind !== b.kind) return a.kind === 'paragraph' ? -1 : 1;
+          return (a.node._key || '').localeCompare(b.node._key || '');
+        });
+        return children;
       },
 
       renderCurrentGraph() {
