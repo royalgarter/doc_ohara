@@ -7,13 +7,13 @@ export function chunkMarkdown(mdText, opts = {}) {
   const lines = mdText.split(/\r?\n/);
 
   const chunks = [];
-  let current = { heading: null, text: '' };
+  let current = { heading: null, headingLevel: null, text: '' };
 
   const pushCurrent = () => {
     if (current.text.trim()) {
-      chunks.push({ heading: current.heading || null, text: current.text });
+      chunks.push({ heading: current.heading || null, headingLevel: current.headingLevel, text: current.text });
     }
-    current = { heading: null, text: '' };
+    current = { heading: null, headingLevel: null, text: '' };
   };
 
   for (let i = 0; i < lines.length; i++) {
@@ -26,6 +26,7 @@ export function chunkMarkdown(mdText, opts = {}) {
 
     if (headingMatch && (!current.heading || current.text.length === 0)) {
       current.heading = headingMatch[2].trim();
+      current.headingLevel = headingMatch[1].length; // 1=#, 2=##, 3=###
       current.text += line + '\n';
     } else {
       current.text += line + '\n';
@@ -37,7 +38,7 @@ export function chunkMarkdown(mdText, opts = {}) {
   pushCurrent();
 
   // Ensure no empty chunks
-  return chunks.map((c, idx) => ({ id: `chunk_${idx}`, heading: c.heading, text: c.text }));
+  return chunks.map((c, idx) => ({ id: `chunk_${idx}`, heading: c.heading, headingLevel: c.headingLevel, text: c.text }));
 }
 
 export function readMarkdownFile(mdPath) {

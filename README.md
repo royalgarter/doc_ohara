@@ -1,450 +1,324 @@
-# Doc Ohara: Space-Time Graph for Advanced Context Retrieval 🌌
+# Doc Ohara: Space-Time Graph for Advanced Context Retrieval
 
-Doc Ohara is a high-efficiency document transformation and retrieval engine. It converts unstructured documents into a multi-dimensional **Space-Time Graph** to solve the "lost in the middle" and context-window limitations of traditional RAG.
+Doc Ohara is a document transformation and retrieval engine that converts unstructured documents into a multi-dimensional **Space-Time Graph** stored in ArangoDB. It solves the "lost in the middle" problem of traditional flat-chunk RAG by navigating a structured graph instead of scanning a flat list.
 
-> **TL;DR**: Doc Ohara doesn't just "chunk" text; it mimics how humans read (scanning & referencing). It builds a hierarchical **Pseudo-TOC** to enable sub-second retrieval from millions of tokens by navigating a structured graph instead of scanning flat lists.
-
----
-
-## 🎯 Mission
-Standard RAG relies on flat vector similarity which loses structural intent. Doc Ohara implements the **Open Knowledge Format (OKF)** to treat documents as living graphs. 
-
-**Our Philosophy: Human-Centric Retrieval**
-Humans read using the "Layer Cake" and "F-Pattern"—scanning headings and jumping to references rather than reading cover-to-cover. Doc Ohara's architecture is built to mirror this:
-- **Scanning**: Our **Pseudo-TOC** provides the "headings" for AI to scan.
-- **Referencing**: Graph edges allow targeted "Ctrl+F" style jumps between concepts.
-- **Priming**: Sequential traversals provide the context needed to "prime" the LLM for accurate answers.
-
-**The Intelligent Archivist**
-Doc Ohara evolves beyond traditional RAG and static wikis by acting as an **Intelligent Archivist**. It doesn't just store information; it dynamically refines it:
-- **Thematic Clustering**: Uses ArangoDB's graph algorithms to discover cross-document themes.
-- **Incremental Growth**: Never re-processes what it already knows.
-- **Trust via Audit**: Flags its own low-confidence extractions for human review, ensuring the knowledge base remains a "Source of Truth."
-
+> **TL;DR**: Doc Ohara parses documents into a hierarchy of sections and paragraphs, enriches each node with SUMO ontology tags and named entities, links shared concepts across documents, and retrieves context through a three-phase hybrid engine.
 
 ---
 
-## 🏗️ Core Architecture: The Space-Time Graph
-
-Doc Ohara transforms unstructured documents into a multi-dimensional knowledge web. The system is designed to be engine-agnostic, supporting both local extraction (MinerU/Docling) and cloud-native workflows (Gemini 1.5 Pro).
-
-Powered by **ArangoDB Multi-Model**, the system tracks:
-- **Structural Flow**: Parent-child (Chapters → Sections → Paragraphs) and sequential siblings.
-- **Semantic Web**: Entities, concepts, and cross-document citations.
-- **Bi-Temporal Versioning**: Tracking when information was valid vs. when it was extracted.
-- **Geo-Spatial Metadata**: Mapping document content to physical coordinates or layout boxes.
-
-### 🛰️ The Space-Time Pipeline
-Doc Ohara's pipeline is designed for **incremental growth** and **deterministic accuracy**, bridging the gap between automated libraries and high-fidelity cartography.
-
-1.  **Smart Ingestion**: Uses SHA256 hashing to detect changes. Only modified pages are re-processed, drastically reducing token costs.
-2.  **Structural Decomposition (DocsRay)**: LLM-driven **Pseudo-TOC Generation** for semantic partitioning.
-3.  **Semantic Enrichment**: Generating multi-vector embeddings, semantic tags, and entity discovery.
-4.  **Relational Synthesis**: Building the graph with strict outbound directionality and temporal metadata.
-5.  **The Refinery (Refinement)**: Automatic thematic clustering (Louvain) and cross-document "surprising connection" discovery.
-6.  **Persistence**: ACID transactions in ArangoDB with integrated **Confidence Scoring**.
-7.  **Human-in-the-Loop Audit**: AI-flagged low-confidence nodes/edges are queued for expert verification.
-
-#### 📍 Pseudo-TOC (DocsRay Implementation)
-Doc Ohara integrates the **DocsRay** algorithm to transform unstructured text into semantically coherent hierarchies:
-- **Phase 1: Boundary Detection**: LLM analyzes text junctions to identify topic shifts.
-- **Phase 2: Adaptive Merging**: Small segments are merged based on embedding similarity to maintain a minimum section size.
-- **Phase 3: Automatic Titling**: LLM generates concise, descriptive titles for the resulting sections.
-
-This approach reduces retrieval complexity from $O(N)$ to $O(S + k_1 \cdot N_s)$, improving speed by up to 45%.
-
-### Schema (OKF + DoCO)
-We utilize ArangoDB to model the **Open Knowledge Format (OKF)** and **DoCO (Document Components Ontology)**.
-
-- `okf_documents`: Metadata root for document ownership and licensing.
-- `okf_nodes`: Vertices containing content, layout coordinates, vector embeddings, and `content_hash`.
-- `okf_edges`: Strongly typed relations (`HAS_CHILD`, `NEXT_SIBLING`, `HAS_TAG`, `INDEXED_UNDER`, `REFERENCES`, `SUCCEEDS`).
-  - `confidence`: Reliability score (0-1).
-  - `requires_review`: Flag for human-in-the-loop audit.
-  - **Strict Outbound Directionality**: Ensures deterministic graph traversals.
-
-#### Schema Definition (`setup_okf_schema.js`)
-```javascript
-/**
- * Doc_Ohara: ArangoDB Multi-Model Schema Definition (OKF + DoCO)
- * Implements persistent indexing for tags, geo-spatial metadata, and bitemporal ranges.
- */
-import { Database } from 'arangojs';
-
-const db = new Database({
-  url: "http://localhost:8529",
-  databaseName: "doc_ohara_knowledge_base",
-  auth: { username: "root", password: "password" }
-});
-
-// JSON Validation Schema for 'okf_nodes'
-const nodeSchema = {
-  rule: {
-    type: "object",
-    required: ["type", "doc_id", "temporal"],
-    properties: {
-      type: {
-        type: "string",
-        enum: ["Chapter", "Section", "Subsection", "Paragraph", "Table", "ListItem", "Figure", "Concept", "Tag", "AlphabetIndexItem"]
-      },
-      doc_id: { type: "string" },
-      content: { type: "string" },
-      spatial: {
-        type: "object",
-        properties: {
-          layout_box: { type: "object" },
-          geo_json: { type: "object" }
-        }
-      },
-      temporal: {
-        type: "object",
-        required: ["extracted_at", "valid_from"],
-        properties: {
-          extracted_at: { type: "string", format: "date-time" },
-          valid_from: { type: "string", format: "date-time" }
-        }
-      },
-      tags: { type: "array", items: { type: "string" } },
-      vector_embedding: { type: "array", items: { type: "number" } }
-    }
-  }
-};
-
-// JSON Validation Schema for 'okf_edges'
-const edgeSchema = {
-  rule: {
-    type: "object",
-    required: ["_from", "_to", "relation"],
-    properties: {
-      relation: {
-        type: "string",
-        enum: ["HAS_CHILD", "NEXT_SIBLING", "HAS_TAG", "INDEXED_UNDER", "REFERENCES", "SUCCEEDS"]
-      },
-      confidence: { type: "number", minimum: 0, maximum: 1 }
-    }
-  }
-};
-
-// (Index configuration and collection creation logic omitted for brevity)
-```
-
----
-
-## 3. Ingestion & Transformation Lifecycle
-
-The ingestion process bridges the gap between raw binary formats and our graph schema.
-
-For straightforward implementation, documents are first converted to Markdown using LiteParse (https://github.com/run-llama/liteparse) during the ingestion phase. All downstream decomposition and extraction operate on the parsed Markdown files — DocsRay and subsequent extractors run against the Markdown representation.
-
-### 3.1 The 7-Stage Transformation Flow
-
-| Stage | Activity | Output |
-| :--- | :--- | :--- |
-| **1. Smart Ingestion** | LiteParse conversion to Markdown + SHA256 hashing & Change Detection | Modified Markdown Content |
-| **2. Normalization** | Frontmatter parsing, line-break sanitization on Markdown | Sanitized Markdown + Metadata |
-| **3. Decomposition** | DocsRay Pseudo-TOC partitioning applied to the parsed Markdown | Hierarchy of Nodes |
-| **4. Enrichment** | Multi-Vector Indexing + Semantic Tagging | Vector-ready Nodes |
-| **5. The Refinery** | Louvain Clustering & Link Discovery | Thematic Hubs |
-| **6. Synthesis** | Relational edge generation (ACID) | Space-Time Graph |
-| **7. Persistence** | Atomic Insert with Confidence Scoring | Persistent Audit Records |
-
----
-
-## 4. Extraction Engines: Local vs. Cloud
-
-### 4.1 Robust Orchestration
-For high-volume processing, we replace brittle shell scripts with a distributed task queue (e.g., **BullMQ** or **Temporal**). This provides retries, timeout handling for OOM errors, and proper state tracking.
-
-**Worker Definition**:
-```javascript
-// Example worker orchestration
-const worker = new Worker('ingestion_queue', async job => {
-  const { filePath, docId } = job.data;
-  // 1. Convert source to Markdown via LiteParse
-  // 2. Run DocsRay / decomposition on parsed Markdown and perform deterministic OKF/DoCO mapping
-  // 3. Multi-Vector Enrichment
-  // 4. Atomic Graph Persistence
-});
-```
-
-**`transform.js`**:
-Standardizes the parsed Markdown (produced by LiteParse) into the unified OKF/DoCO format using deterministic relational mapping.
-
-### 4.2 Cloud-Native Extraction (Gemini Flash Lite)
-Leveraging Gemini's 2M context window for instant "Zero-GPU" extraction using Structured Outputs.
-
-```javascript
-// Gemini Response Schema mapping directly to DoCO
-const docoResponseSchema = {
-    type: Type.OBJECT,
-    properties: {
-        title: { type: Type.STRING },
-        sections: { type: Type.ARRAY, items: { ... } },
-        paragraphs: { type: Type.ARRAY, items: { ... } }
-    }
-};
-```
-
----
-
-## 5. LLM Orchestration & Prompt Engineering
-
-The LLM acts as the **Semantic Orchestrator**, responsible for structural architecting and relationship inference. All system instructions are managed in the `prompts/` directory for deterministic versioning.
-
-### 5.1 Prompt Library
-| Prompt | Purpose |
-| :--- | :--- |
-| `ingest_document.md` | Structural decomposition into Chapter, Section, Paragraph nodes. |
-| `extract_toc.md` | Mapping the document's hierarchical skeleton (P-TOC). |
-| `extract_tags.md` | Generating semantic tags for Phase 0 expansion. |
-| `extract_entities.md` | Named Entity Recognition (NER) for the Semantic Web layer. |
-| `boundary_detection.md` | Identifying topic shifts in the DocsRay pipeline. |
-| `generate_section_title.md` | Extracting concise titles for pseudo-TOC sections. |
-
-### 5.2 The "Multi-Vector" Context Strategy
-Standard "Contextual Headers" (prepending metadata to text) can dilute vector density. We recommend **Multi-Vector Indexing**:
-*   **Primary Vector**: The pure paragraph content.
-*   **Secondary Vector**: The parent section's summary or structural context.
-*   **Graph Context**: Fetching parent/sibling metadata *after* retrieval via AQL to provide context without inflating token usage during vectorization.
-
-*Legacy Contextual Header Example*: "In the context of Results for Method B Testing... [Paragraph Content]" (Caution: Use sparingly to avoid noise).
-
----
-
-## 6. Deterministic Integrity & Transactional Guarantees
-
-Instead of relying on LLMs to "heal" broken graphs, Doc Ohara enforces structural integrity at the point of ingestion.
-
-1.  **Schema Enforcement**: Strict validation against `DESIGN.md` rules using ArangoDB JSON Schema.
-2.  **ACID Transactions**: Every document is inserted as a single transaction. If one edge fails, the entire document rolls back, preventing orphaned nodes.
-3.  **Semantic De-duplication**: Use deterministic hashing and entity matching to merge redundant concepts across sections.
-
-**Automated Integrity Check**:
-```javascript
-// Ensure strict sequence continuity
-const result = await db.query(aql`
-  FOR n IN okf_nodes
-    FILTER n.type == "Paragraph"
-    LET sib = FIRST(FOR v, e IN 1..1 OUTBOUND n okf_edges FILTER e.relation == "NEXT_SIBLING" RETURN v)
-    FILTER sib == null AND n.has_next == true // Flagged for manual review
-    RETURN n._id
-`);
-```
-
----
-
-## ⚡ Two-Step Retrieval Engine
-
-Doc Ohara bypasses flat search bottlenecks with a bifurcated retrieval strategy.
-
-### 7.1 Retrieval Architecture Overview
+## Architecture Overview
 
 ```
-   [ User Input String ]
+PDF / EPUB / MD
+      │
+      ▼  LiteParse / Gemini
+  Markdown chunks
+      │
+      ▼  Gemini (gemini-2.5-flash-lite)
+  Structured nodes (DoCO schema)
+      │
+      ├─ SUMO tag validation    src/sumo.js
+      ├─ Entity extraction      src/entities.js
+      └─ Graph persistence      src/db/client.js
              │
              ▼
-┌───────────────────────────────────────────┐
-│     Phase 0: Input Parsing & Expansion    │
-│  - Local NLP: sub-50ms NER & Keywords    │
-│  - Tag Expansion: Map query to system tags│
-│  - Compute: Query Vector Embedding       │
-└───────────────────────────────────────────┘
+        ArangoDB
+        ┌──────────────────────────────────────────────────┐
+        │  documents  sections  paragraphs  tables  entities│
+        │              edges (HAS_CHILD, MENTIONS, ...)     │
+        └──────────────────────────────────────────────────┘
              │
-             ▼
-┌───────────────────────────────────────────┐
-│        Phase 1: Shallow Context           │
-│  - ArangoSearch: BM25 + Exact Tag Match  │
-│  - Native ANN: Fast Vector Search        │
-│  - Hybrid: Dynamic Scoring (Vector+Text) │
-└───────────────────────────────────────────┘
+             ▼  src/retrieval.js
+  Three-phase retrieval (keyword → entity-pivot → graph traversal)
              │
-             ▼  (User/Agent choice of direction)
-┌───────────────────────────────────────────┐
-│         Phase 2: Deep Context             │
-│  - Target node-specific graph expansion   │
-│  - High-depth traversals (Up/Down/Sibs)    │
-│  - Geo-spatial bounding box filtering     │
-└───────────────────────────────────────────┘
+             ▼  src/exporter.js
+  Quartz / Wiki.js export
 ```
 
-### 7.2 Phase 1: Shallow Context (Breadth Search)
-Combines **ArangoSearch (BM25)** and **Native Vector Search**. We avoid `CONTAINS` and `FILTER` for text, instead routing all text queries through ArangoSearch Views for performance.
+---
 
-**Tag Expansion Strategy**:
-Instead of fuzzy vector search on tags, we use Phase 0 to map the user query to exact system tags (e.g., "Healthcare" -> `["Medical", "Compliance"]`) and then perform high-speed exact matching in AQL.
+## The Space-Time Graph
 
-### 7.3 Phase 2: Deep Context (Depth Traversal)
-Executes targeted AQL multi-hop traversals. Strict outbound directionality ensures sequential walking (e.g., `NEXT_SIBLING` chain) is deterministic and fast.
+### Collections
 
-### 7.4 Node.js Implementation: `RetrievalEngine.js`
+| Collection | Contents |
+|---|---|
+| `documents` | Metadata root: source file, parser, title, upload time, entity_slugs, sumo_tags |
+| `sections` | Structural hierarchy: chapter, section, subsection with level and title |
+| `paragraphs` | Content nodes: body text, figures, list items with sumo_tags, entity_slugs |
+| `tables` | 2-D matrix data with markdown representation |
+| `entities` | Named entities: canonical name, type, aliases, description, document_ids |
+| `edges` | All relations (single collection, typed by `relation` field) |
 
-```javascript
-/**
- * Doc_Ohara: Optimized Hybrid Retrieval Engine
- */
+### Edge Types
 
-export class RetrievalEngine {
-  /**
-   * Phase 0: Preprocessing with Local NLP
-   */
-  async preprocessInput(rawInput) {
-    // 1. Local NER & Keyword extraction (e.g., via spaCy/ONNX)
-    const extraction = await localNlp.parse(rawInput); // < 50ms
+| Relation | Direction | Meaning |
+|---|---|---|
+| `HAS_CHILD` | section → section / paragraph / table | Structural parent–child |
+| `NEXT_SIBLING` | section → section | Sequential ordering |
+| `BELONGS_TO` | paragraph / table → document | Ownership |
+| `MENTIONS` | paragraph → entity | Named entity occurrence |
+| `RELATED_TO` | entity ↔ entity | Co-occurrence in the same paragraph |
+| `SIMILAR_TO` | document → document | Jaccard similarity of entity sets (threshold-gated) |
 
-    // 2. Semantic Tag Expansion (Healthcare -> Medical)
-    const expandedTags = await tagTaxonomy.expand(extraction.tags);
+---
 
-    return {
-      vector: await computeEmbedding(rawInput),
-      tags: expandedTags,
-      keywords: extraction.keywords
-    };
-  }
+## Ingest Pipeline
 
-  /**
-   * Phase 1: Shallow Context using ArangoSearch
-   */
-  async getShallowContext(processedQuery, options = {}) {
-    const query = aql`
-      FOR doc IN okf_search_view
-        SEARCH 
-          ANALYZER(doc.content IN TOKENS(${processedQuery.keywords.join(" ")}, "text_en"), "text_en")
-          OR doc.tags ANY IN ${processedQuery.tags}
+### Stages (`src/ingest/pipeline.js`)
 
-        // Native Vector Search (ANN)
-        LET vectorScore = COSINE_SIMILARITY(doc.vector_embedding, ${processedQuery.vector})
-        LET textScore = BM25(doc)
-        
-        // Dynamic weight adjustment
-        LET compositeScore = (vectorScore * 0.6) + (textScore * 0.4)
-        
-        SORT compositeScore DESC
-        LIMIT 10
-        RETURN doc
-    `;
-    // ... execution logic
-  }
+1. **Preflight** — validates `GEMINI_API_KEY`, `ARANGO_URL`, and the `lit` CLI (LiteParse).
+2. **Dedup** — SHA-256 hashes the file; skips if already ingested (override with `--force`).
+3. **Parsing** — LiteParse converts PDF/EPUB/DOCX to Markdown; plain `.md` files pass through directly.
+4. **LLM structuring** — Gemini (`gemini-2.5-flash-lite`) maps Markdown chunks to DoCO nodes (`Chapter`, `Section`, `Paragraph`, `Table`, `Figure`, `Authors`, `Bibliography`, …). Responses are cached by content hash. Parallel batches (default 4, `OHARA_INGEST_CONCURRENCY`).
+5. **SUMO tag validation** — resolves `sumo_candidate_tags` against the SUMO ontology index (22,700 entries). Three-stage resolution: exact match → case/separator-insensitive → alias table. Duplicates collapsed. Invalid tags logged and dropped.
+6. **Entity extraction** — validates `candidate_entities` from the LLM. Supported types: `PERSON`, `ORG`, `LOCATION`, `DATE`, `TECH`, `AMOUNT`, `EVENT`, `CONCEPT`. Canonical deduplication within each node.
+7. **Collection transform** — normalizes nodes into `documents`, `sections`, `paragraphs`, `tables`. Artifact filter removes separator lines, TOC noise, and very short nodes. Fragment reattachment merges orphaned short paragraphs.
+8. **Persistence** — inserts into ArangoDB with `HAS_CHILD`, `NEXT_SIBLING`, `BELONGS_TO` structural edges; upserts entity nodes and inserts `MENTIONS` / `RELATED_TO` edges.
+9. **Document rollup** — after all paragraphs are inserted, unions `entity_slugs` and `sumo_tags` onto the `documents` record for O(docs) pre-filtering.
+10. **Cross-document similarity** — computes Jaccard similarity between the new document's entity set and all existing documents. Creates `SIMILAR_TO` edges where similarity ≥ `OHARA_SIMILARITY_THRESHOLD` (default 0.1).
+
+### Prompt Schema (`prompts/ingest_document.md`)
+
+The Gemini prompt instructs the model to output `{ nodes: [...] }` where each node carries:
+
+```
+type              # DoCO type (Chapter, Section, Paragraph, Table, Figure, …)
+part              # front_matter | body_matter | back_matter
+metadata          # { page, level }
+sumo_candidate_tags   # short SUMO local names e.g. ["Agent", "Transaction"]
+candidate_entities    # [{ name, canonical, type, aliases? }]
+content / title / table / figure / agents_group / references   # type-specific fields
+```
+
+---
+
+## Retrieval Engine (`src/retrieval.js`)
+
+Four sequential phases via `RetrievalEngine.query(rawInput, options)`:
+
+### Phase 0 — Input Parsing
+Tokenizes raw input: lowercase, `[a-z0-9]+` regex, strips stopwords, drops tokens ≤ 2 chars. Returns `{ keywords, raw }`.
+
+### Phase 1 — Shallow Context
+Scores all sections and paragraphs by keyword term-overlap ratio (BM25-style). Returns top N results (default 10) with scores.
+
+### Phase 1b — Entity Pivot
+From the top seed paragraphs' `entity_slugs`, finds other paragraphs across all documents that share those entities. Scores with a damped weight (`OHARA_ENTITY_PIVOT_WEIGHT`, default 0.5). This is the cross-document "see also" expansion.
+
+### Phase 2 — Deep Context
+AQL graph traversal outbound from the top-scored node via `has_section`, `contains_paragraph`, `belongs_to` edge types. Depth defaults to 2.
+
+Returns `{ processedQuery, shallowResults, entityPivotResults, deepResults }`.
+
+---
+
+## Entity System (`src/entities.js`)
+
+Named entities are first-class graph nodes, not just tags on paragraphs.
+
+**Entity types**: `PERSON`, `ORG`, `LOCATION`, `DATE`, `TECH`, `AMOUNT`, `EVENT`, `CONCEPT`
+
+**Entity record**:
+```json
+{
+  "_key": "bitcoin",
+  "name": "Bitcoin",
+  "slug": "bitcoin",
+  "norm_key": "bitcoin",
+  "type": "TECH",
+  "aliases": ["BTC", "₿"],
+  "description": "Decentralized digital currency…",
+  "document_ids": ["doc/abc123", "doc/def456"],
+  "mention_count": 47,
+  "first_seen": "2026-06-23T…"
 }
 ```
 
-### 7.5 Execution Example: Multi-Hop Retrieval
-
-```javascript
-// Example Usage Execution Block
-async function runDemo() {
-  const userInput = "Show me quantum superposition and how it connects to qubits in Dr. Jenkins' lab.";
-  const processedQuery = await engine.preprocessInput(userInput);
-  const shallowResults = await engine.getShallowContext(processedQuery, { limit: 3 });
-  
-  if (shallowResults.length > 0) {
-    const targetNodeId = shallowResults[0].node.id;
-    const deepResults = await engine.getDeepContext(targetNodeId, 'semantic_web', { depth: 2 });
-    console.dir(deepResults, { depth: null });
-  }
-}
-```
+**Cross-document dedup**: run `node src/ingest/entity_dedup.js` after batch ingest to merge entity nodes with matching `norm_key`, repointing all `MENTIONS` edges to the surviving canonical node.
 
 ---
 
-## 🛠️ Interactive Playground & Simulation
+## SUMO Ontology Tags (`src/sumo.js`)
 
-This repository includes a Node.js-native playground to test these concepts:
-- **Double-Engine Extraction**: Simulated **MinerU** (academic/LaTeX) and **Docling** (business/docx) pipelines.
-- **ArangoDB Simulator**: Disk-buffered in-memory graph instance with **AQL (ArangoDB Query Language)** support.
-- **Gemini Integration**: Live partitioning of docs via `@google/genai`.
-- **Visualization**: Live graph dashboard for real-time traversal monitoring.
+Every node is tagged with concepts from the [SUMO ontology](https://www.ontologyportal.org/) (22,700 entries in `ontology/sumo_index.json`).
+
+Resolution order per tag:
+1. Exact match against `sumo_index.json`
+2. Case + separator-insensitive match
+3. Alias table (~50 common LLM-emitted terms → canonical SUMO names)
+
+Tags that fail all three stages are dropped and logged. Duplicate canonical tags within a node are collapsed.
 
 ---
 
-## 🏛️ Wiki & Encyclopedia Interface
+## Wiki Export (`src/exporter.js`)
 
-Doc Ohara supports exporting its entire Space-Time Graph into a **Quartz-compatible Digital Garden**. This allows you to browse your document knowledge base as an interconnected Wiki.
+`QuartzExporter` converts the ArangoDB graph into a Quartz-compatible Markdown wiki.
 
-### 📤 Exporting to Quartz
-You can generate the Markdown wiki by running:
 ```bash
-npm run export-wiki
+npm run ohara:export          # Quartz Markdown → wiki/
+npm run ohara:export:json     # Raw JSON → doc_pipeline/collections/export.json
 ```
-This will create a `./wiki` folder with:
-- `index.md`: Home page with all document links.
-- `documents/`: Organized folders per document containing sections as individual pages.
-- **Wikilinks**: Automated `[[link]]` connections between related sections and documents.
 
-To view the wiki, you can point a [Quartz](https://quartz.jzhao.xyz/) installation to the `./wiki` directory or use any Markdown bower like **Obsidian**.
+Output structure:
+```
+wiki/
+  index.md                    # Home page with document list and entity index link
+  documents/
+    <doc-slug>/
+      index.md                # Document landing page with TOC
+      <section-slug>.md       # One page per section with content + related links
+  entities/
+    index.md                  # Entity index grouped by type
+    <entity-slug>.md          # Per-entity page: description + backlinks + related entities
+```
+
+Entity pages include:
+- YAML frontmatter with `title`, `tags`, `aliases`
+- LLM-generated stub description (filled during ingest)
+- **Mentioned in** — every paragraph that mentions the entity with document/section context
+- **Related Entities** — entities co-occurring in the same paragraphs
 
 ---
 
-## 🚀 Getting Started
+## Configuration
 
-### 1. Installation
+All tunables are set via environment variables. Copy `.env.example` to `.env`:
+
+| Variable | Default | Purpose |
+|---|---|---|
+| `GEMINI_API_KEY` | — | Required. Google Gemini API key |
+| `ARANGO_URL` | — | ArangoDB connection URL (may include credentials and DB name) |
+| `ARANGO_USER` | — | DB username (can also embed in URL) |
+| `ARANGO_PASSWORD` | — | DB password |
+| `LITEPARSE_CLI_PATH` | — | Path to the `lit` LiteParse CLI binary |
+| `PORT` | `3000` | HTTP server port |
+| `OHARA_INGEST_CONCURRENCY` | `4` | Parallel LLM chunk requests during ingest |
+| `OHARA_LLM_CACHE_DIR` | — | Directory for LLM response cache |
+| `OHARA_SIMILARITY_THRESHOLD` | `0.1` | Min Jaccard score to create a `SIMILAR_TO` doc–doc edge |
+| `OHARA_ENTITY_PIVOT_LIMIT` | `5` | Max cross-document paragraphs from entity-pivot phase |
+| `OHARA_ENTITY_PIVOT_WEIGHT` | `0.5` | Score multiplier for entity-pivot results |
+
+---
+
+## Getting Started
+
+### 1. Install
 ```bash
 npm install
 ```
 
-### 2. Configure Environment
-Create a `.env` file:
-```env
-GEMINI_API_KEY=your_key_here
-```
-
-### 3. Quick Start: Ingest & Retrieve
-Professional readers often start with code. Here is how you use Doc Ohara in **3 lines**:
-
-```javascript
-import { DocOhara } from './src/pipeline_runner.js';
-
-const ohara = new DocOhara();
-await ohara.ingest('path/to/my_dense_doc.pdf'); // Ingests into Space-Time Graph
-const results = await ohara.query('Find quantum gravity metrics'); // Hierarchical search
-```
-
-### 4. Run the Dashboard
-Access the visualization tool at **http://localhost:3000**.
+### 2. Configure
 ```bash
-npm run dev
+cp .env.example .env
+# Fill in GEMINI_API_KEY, ARANGO_URL (or leave blank to use in-memory simulator)
+```
+
+### 3. Run the dashboard
+```bash
+npm run dev        # starts Express server with nodemon
+# open http://localhost:3000
+```
+
+### 4. Ingest a document
+```bash
+# Via dashboard UI — drag and drop in the Ingest tab
+# Via CLI:
+npm run ohara:ingest                          # ingest sample PDF
+node bin/ohara.js ingest path/to/file.pdf    # ingest any file
+node bin/ohara.js ingest path/to/file.pdf --force  # re-ingest even if already processed
+```
+
+### 5. Query
+```bash
+npm run ohara:query                                         # sample query
+node bin/ohara.js query "proof of work consensus"          # custom query
+```
+
+### 6. Export to wiki
+```bash
+npm run ohara:export        # Quartz Markdown → wiki/
+npm run ohara:export:json   # Raw JSON dump
+```
+
+### 7. Cross-document entity dedup (run after batch ingest)
+```bash
+node src/ingest/entity_dedup.js
 ```
 
 ---
 
-## 📁 Repository Structure
+## Repository Structure
 
-```text
+```
+├── bin/
+│   ├── ohara.js              # CLI entry point
+│   └── ohara-mcp.js          # MCP server
 ├── src/
-│   ├── arangodb_sim.js         # Multi-model Graph + AQL Interpreter
-│   ├── pipeline_runner.js      # Extraction engine logic
-│   └── pseudo_toc_generator.js # DocsRay Pseudo-TOC implementation
-├── prompts/                    # LLM System Instructions
-│   ├── ingest_document.md      # Structural decomposition
-│   ├── extract_toc.md          # TOC skeleton extraction
-│   ├── extract_tags.md         # Semantic tagging
-│   ├── extract_entities.md     # Relationship discovery
-│   ├── boundary_detection.md   # Topic boundary analysis
-│   └── generate_section_title.md # TOC-ready title generation
-├── doc_pipeline/               # Pipeline workspace & state
-└── index.html                  # Dashboard UI
+│   ├── entities.js           # NER validation, slug/dedup helpers
+│   ├── exporter.js           # QuartzExporter (Markdown wiki)
+│   ├── retrieval.js          # Three-phase retrieval engine
+│   ├── sumo.js               # SUMO ontology tag validation
+│   ├── toc.js                # Pseudo-TOC generator
+│   ├── cache.js              # LLM response cache
+│   ├── db/
+│   │   ├── client.js         # ArangoDB client (real DB)
+│   │   ├── simulator.js      # In-memory ArangoDB simulator with AQL support
+│   │   └── seed.js           # Sample graph seed data
+│   └── ingest/
+│       ├── pipeline.js       # Core ingestion pipeline
+│       ├── worker.js         # BullMQ worker
+│       ├── queue.js          # Job queue management
+│       ├── chunker.js        # Markdown chunker
+│       └── entity_dedup.js   # Cross-document entity merge worker
+├── prompts/
+│   ├── ingest_document.md    # Main LLM prompt (DoCO structuring + entities + SUMO)
+│   ├── extract_toc.md
+│   ├── extract_tags.md
+│   ├── extract_entities.md
+│   ├── boundary_detection.md
+│   └── generate_section_title.md
+├── ontology/
+│   ├── SUMO.owl              # SUMO ontology source
+│   └── sumo_index.json       # Flat index built by scripts/build-sumo-index.js
+├── scripts/
+│   ├── build-sumo-index.js   # Builds sumo_index.json from SUMO.owl
+│   ├── db-init.js            # ArangoDB collection/index setup
+│   ├── admin-queries.js      # Diagnostic AQL queries
+│   └── sync-cache.js         # LLM cache sync utility
+├── tests/
+│   └── ingest.test.js        # Node.js built-in test runner
+├── doc_pipeline/             # Pipeline workspace (raw output, diagnostics)
+├── wiki/                     # Quartz export output
+├── index.html                # Dashboard UI (Alpine.js + SVG graph)
+├── server.js                 # Express API server
+└── .env.example              # Environment variable reference
 ```
 
 ---
 
-## 📚 Reference & API
+## API Reference
 
-For targeted technical details, refer to the following core components:
+All endpoints are served by `server.js`.
 
-- **Graph Schema**: See `setup_okf_schema.js` in the Codebase for ArangoDB collection and index definitions.
-- **Pseudo-TOC Logic**: See `src/pseudo_toc_generator.js` for the implementation of the DocsRay boundary detection and merging algorithm.
-- **Retrieval Engine**: See `RetrievalEngine.js` (logic described in Section 7) for hybrid search and multi-hop traversal implementation.
-- **Prompt Library**: Explore the `prompts/` directory for all LLM system instructions.
-
----
-
-## ⚡ AQL Example: Optimized Multi-Hop Retrieval
-```aql
-// Find sibling paragraphs of a section containing "Quantum"
-// Optimized using ArangoSearch and graph traversal
-FOR start IN okf_search_view
-  SEARCH ANALYZER(start.title IN TOKENS("Quantum", "text_en"), "text_en")
-  FILTER start.type == "Section"
-  FOR v, e IN 1..2 OUTBOUND start okf_edges
-    FILTER e.relation == "NEXT_SIBLING"
-    RETURN v.content
-```
+| Method | Path | Purpose |
+|---|---|---|
+| `GET` | `/api/graph` | Full graph state (documents, sections, paragraphs, tables, edges) |
+| `GET` | `/api/graph/node/:collection/:key/neighbors` | Lazy-load a node's neighbors |
+| `POST` | `/api/retrieval/query` | Run the retrieval engine |
+| `GET` | `/api/retrieval/context/:nodeId` | Get context for a specific node |
+| `POST` | `/api/pipeline/upload` | Upload a file for ingestion |
+| `POST` | `/api/pipeline/run` | Trigger pipeline on uploaded files |
+| `GET` | `/api/pipeline/status` | Poll pipeline logs and status |
+| `GET` | `/api/pipeline/input-files` | List files in the ingest queue |
+| `POST` | `/api/queue/ingest` | Enqueue a file via BullMQ |
+| `GET` | `/api/queue/jobs` | List queued jobs and their status |
+| `POST` | `/api/queue/jobs/:id/retry` | Retry a failed job |
+| `DELETE` | `/api/queue/jobs/:id` | Remove a job |
+| `GET` | `/api/database/state` | Raw DB state dump |
+| `POST` | `/api/database/seed` | Reset to seed data |
+| `POST` | `/api/database/clear` | Clear all data |
+| `POST` | `/api/database/query` | Execute an AQL query |
+| `POST` | `/api/quartz/export` | Trigger Quartz wiki export |
+| `GET` | `/api/agent/system-prompt` | Retrieve agent system prompt |
