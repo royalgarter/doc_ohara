@@ -863,33 +863,20 @@
 
     // Filter by selected documents (empty set = show all)
     if (selectedDocKeys && selectedDocKeys.size > 0) {
-      const selDocIds = new Set([...selectedDocKeys].map(k => 'documents/' + k));
       documents = documents.filter(d => selectedDocKeys.has(d._key || d.id));
 
-      // Collect allowed section/paragraph/table IDs via edges
-      const allowedNodeIds = new Set([...selDocIds]);
-      // BFS over HAS_CHILD edges to find all descendant sections
-      let frontier = [...selDocIds];
-      while (frontier.length > 0) {
-        const next = [];
-        for (const edge of edges) {
-          if (frontier.includes(edge._from) && !allowedNodeIds.has(edge._to)) {
-            allowedNodeIds.add(edge._to);
-            next.push(edge._to);
-          }
-        }
-        frontier = next;
-      }
-      // Also include via BELONGS_TO (paragraph → document)
-      for (const edge of edges) {
-        if (edge.relation === 'BELONGS_TO' && selDocIds.has(edge._to)) {
-          allowedNodeIds.add(edge._from);
-        }
-      }
-      sections   = sections.filter(s => allowedNodeIds.has(s._id));
-      paragraphs = paragraphs.filter(p => allowedNodeIds.has(p._id));
-      tables     = tables.filter(t => allowedNodeIds.has(t._id));
-      edges      = edges.filter(e => allowedNodeIds.has(e._from) && allowedNodeIds.has(e._to));
+      // Use document_id field on sections/paragraphs/tables directly — much faster than BFS
+      sections   = sections.filter(s => selectedDocKeys.has(s.document_id));
+      paragraphs = paragraphs.filter(p => selectedDocKeys.has(p.document_id));
+      tables     = tables.filter(t => selectedDocKeys.has(t.document_id));
+
+      const allowedIds = new Set([
+        ...documents.map(d => d._id),
+        ...sections.map(s => s._id),
+        ...paragraphs.map(p => p._id),
+        ...tables.map(t => t._id),
+      ]);
+      edges = edges.filter(e => allowedIds.has(e._from) && allowedIds.has(e._to));
     }
 
     // ── Build virtual SUMO tag nodes ──────────────────────────────────────
