@@ -17,3 +17,5 @@ coverage/
 /sample/ui
 /refs/SUMO.owl
 /doc_pipeline/diagnostics
+/.data
+/doc_pipeline
