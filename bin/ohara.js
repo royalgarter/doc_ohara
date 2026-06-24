@@ -65,9 +65,21 @@ program
 
     emit(opts.json, { success: !!outcome?.success, job: queue.getJob(job.id) }, () => {
       if (outcome?.success) {
+        const status = outcome.result?.ingestion_status;
         const u = outcome.result.llm_usage;
         const usageStr = u ? chalk.dim(` [prompt: ${u.prompt_tokens} | generated: ${u.candidates_tokens} | total: ${u.total_tokens} tokens, ${u.chunks} chunks${u.cache_hits ? ', ' + u.cache_hits + ' cached' : ''}]`) : '';
-        console.log(chalk.green(`✔ Ingested ${filename}: ${outcome.result.documents} document(s), ${outcome.result.nodes} node(s)`) + usageStr);
+        if (status === 'partial') {
+          const { completed_chunks, total_chunks } = outcome.result;
+          console.log(chalk.yellow(`⚠ Partially ingested "${filename}": ${completed_chunks}/${total_chunks} chunks completed`) + usageStr);
+          if (outcome.result.ingestion_error) console.log(chalk.dim(`  ${outcome.result.ingestion_error}`));
+          console.log(chalk.dim('  Use --force to retry missing chunks.'));
+          process.exitCode = 1;
+        } else if (status === 'failed') {
+          console.error(chalk.red(`✖ Ingestion failed: ${outcome.result.ingestion_error || outcome.error}`));
+          process.exitCode = 1;
+        } else {
+          console.log(chalk.green(`✔ Ingested ${filename}: ${outcome.result.documents} document(s), ${outcome.result.nodes} node(s)`) + usageStr);
+        }
       } else if (outcome?.error?.includes('ALREADY_INGESTED')) {
         console.log(chalk.yellow(`⚠ Skipped "${filename}": already ingested. Use --force to re-ingest.`));
       } else {

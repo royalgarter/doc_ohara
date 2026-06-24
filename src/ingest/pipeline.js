@@ -726,8 +726,12 @@ async function structureMarkdownWithRetries(ai, filename, mdContent) {
   for (let i = 0; i < chunks.length; i += concurrency) {
     const batch = chunks.slice(i, i + concurrency);
     const promises = batch.map(async (chunk) => {
-      const res = await worker(chunk);
-      return { chunk, res };
+      try {
+        const res = await worker(chunk);
+        return { chunk, res };
+      } catch (err) {
+        return { chunk, error: err };
+      }
     });
     const batchResults = await Promise.all(promises);
     resultsArr.push(...batchResults);
@@ -769,16 +773,20 @@ async function structureMarkdownWithRetries(ai, filename, mdContent) {
 
   // merge results preserving chunk order
   const mergedNodes = [];
+  const failedChunks = [];
   const chunkIdToIndex = new Map();
   chunks.forEach((c, i) => chunkIdToIndex.set(c.id, i));
   const ordered = resultsArr.sort((a, b) => chunkIdToIndex.get(a.chunk.id) - chunkIdToIndex.get(b.chunk.id));
 
   for (const entry of ordered) {
+    if (entry.error) {
+      failedChunks.push({ id: entry.chunk.id, error: entry.error.message });
+      continue;
+    }
     const parsed = entry.res;
     if (!parsed) {
-      const err = new Error(`Empty parsed output for chunk ${entry.chunk.id}`);
-      err.code = 'EMPTY_CHUNK_PARSE';
-      throw err;
+      addPipelineLog('warn', `Empty parsed output for chunk ${entry.chunk.id} — skipping`);
+      continue;
     }
     // Expect parsed to be { nodes: [...] } or { document: { texts: [...] } }
     if (parsed.nodes) {
@@ -792,10 +800,17 @@ async function structureMarkdownWithRetries(ai, filename, mdContent) {
     } else if (parsed.document && Array.isArray(parsed.document.texts)) {
       parsed.document.texts.forEach(t => mergedNodes.push({ type: t.label === 'paragraph' ? 'Paragraph' : 'Paragraph', content: t.text, title: t.label && t.label.startsWith('heading') ? t.text : undefined }));
     } else {
-      const err = new Error('Unexpected parsed schema from LLM; aborting ingestion');
-      err.code = 'INVALID_SCHEMA';
-      throw err;
+      addPipelineLog('warn', `Unexpected parsed schema from LLM for chunk ${entry.chunk.id} — skipping`);
+      continue;
     }
+  }
+
+  // If all chunks failed, throw so caller knows nothing was produced
+  if (mergedNodes.length === 0 && failedChunks.length > 0) {
+    const err = new Error(`All ${failedChunks.length} chunk(s) failed: ${failedChunks.map(e => e.error).join('; ')}`);
+    err.code = 'LLM_FAILED';
+    err.failedChunks = failedChunks;
+    throw err;
   }
 
   // Validate SUMO candidate tags for each node and promote to sumo_tags.
@@ -840,7 +855,16 @@ async function structureMarkdownWithRetries(ai, filename, mdContent) {
     }
   }
 
-  return { nodes: mergedNodes, llm_usage: { ...usageTotals, model: GEMINI_MODEL, chunks: chunks.length, cache_hits: chunkDiagnostics.filter(d => d.cache_hit).length }, toc: detectedToc, glossary: detectedGlossary };
+  const completedChunks = chunks.length - failedChunks.length;
+  return {
+    nodes: mergedNodes,
+    llm_usage: { ...usageTotals, model: GEMINI_MODEL, chunks: chunks.length, cache_hits: chunkDiagnostics.filter(d => d.cache_hit).length },
+    toc: detectedToc,
+    glossary: detectedGlossary,
+    total_chunks: chunks.length,
+    completed_chunks: completedChunks,
+    chunk_errors: failedChunks,
+  };
 }
 
 // Generate realistic mock data if Gemini API is disabled
@@ -1394,15 +1418,19 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
     if (process.env.ARANGO_URL) {
       const existing = await arangoClient.findDocumentByHash(fileHash);
       if (existing) {
-        if (!options.force) {
-          const skippedError = new Error(`Document already ingested (hash ${fileHash.slice(0, 12)}…). Use --force to re-ingest.`);
-          skippedError.code = 'ALREADY_INGESTED';
-          skippedError.existingDoc = existing;
-          throw skippedError;
+          if (!options.force) {
+            const skippedError = new Error(`Document already ingested (hash ${fileHash.slice(0, 12)}…). Use --force to re-ingest.`);
+            skippedError.code = 'ALREADY_INGESTED';
+            skippedError.existingDoc = existing;
+            throw skippedError;
+          }
+          if (existing.ingestion_status === 'partial') {
+            addPipelineLog('warn', `--force: re-ingesting partially-ingested document ${existing._key} (${existing.completed_chunks || 0}/${existing.total_chunks || '?'} chunks completed)`);
+          } else {
+            addPipelineLog('warn', `--force: deleting existing document ${existing._key} before re-ingesting…`);
+          }
+          await arangoClient.deleteDocumentAndNodes(existing._key);
         }
-        addPipelineLog('warn', `--force: deleting existing document ${existing._key} before re-ingesting…`);
-        await arangoClient.deleteDocumentAndNodes(existing._key);
-      }
     }
   }
 
@@ -1447,6 +1475,22 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
     throw rateLimitError;
   }
 
+  // Determine ingestion status from chunk processing results
+  const totalChunks = parsedLayoutJSON?.total_chunks ?? 0;
+  const completedChunks = parsedLayoutJSON?.completed_chunks ?? 0;
+  const chunkErrors = parsedLayoutJSON?.chunk_errors ?? [];
+  let ingestionStatus = 'complete';
+  let ingestionError = null;
+  if (totalChunks > 0 && completedChunks < totalChunks) {
+    if (completedChunks === 0) {
+      ingestionStatus = 'failed';
+      ingestionError = `All ${totalChunks} chunk(s) failed: ${chunkErrors.map(e => e.error).join('; ')}`;
+    } else {
+      ingestionStatus = 'partial';
+      ingestionError = `LLM processing failed for ${totalChunks - completedChunks} of ${totalChunks} chunk(s)`;
+    }
+  }
+
   // Extract and carry llm_usage, toc, glossary separately; parsedLayoutJSON itself only needs the nodes
   const llmUsage = parsedLayoutJSON?.llm_usage || null;
   const detectedToc = parsedLayoutJSON?.toc || null;
@@ -1485,6 +1529,10 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
           toc_source: detectedToc?.source || null,
           toc_entries: detectedToc?.entries || [],
           glossary_entries: detectedGlossary?.entries || [],
+          ingestion_status: ingestionStatus,
+          ingestion_error: ingestionError,
+          total_chunks: totalChunks || null,
+          completed_chunks: completedChunks || null,
         });
 
         const docHandle = inserted._id || `documents/${inserted._key}`;
@@ -1681,7 +1729,7 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
         throw err;
       }
     } else {
-      const insertedDoc = arangoDb.insertDocument({ _key: doc.id, source_file: doc.source_file, parser_engine: doc.parser_engine, title: doc.title, file_size: doc.file_size || '350 KB', upload_time: new Date().toISOString(), toc_raw: detectedToc?.raw || null, toc_source: detectedToc?.source || null, toc_entries: detectedToc?.entries || [], glossary_entries: detectedGlossary?.entries || [] });
+      const insertedDoc = arangoDb.insertDocument({ _key: doc.id, source_file: doc.source_file, parser_engine: doc.parser_engine, title: doc.title, file_size: doc.file_size || '350 KB', upload_time: new Date().toISOString(), toc_raw: detectedToc?.raw || null, toc_source: detectedToc?.source || null, toc_entries: detectedToc?.entries || [], glossary_entries: detectedGlossary?.entries || [], ingestion_status: ingestionStatus, ingestion_error: ingestionError, total_chunks: totalChunks || null, completed_chunks: completedChunks || null });
 
       const docsSections = transformedDocs.sections.filter(s => s.document_id === doc.id);
       docsSections.forEach(sec => { arangoDb.insertSection({ _key: sec.id, document_id: insertedDoc._key, title: sec.title, level: sec.level }); nodeCount += 1; });
@@ -1703,5 +1751,9 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
     documents: docsForThisFile.length,
     nodes: nodeCount,
     llm_usage: llmUsage || null,
+    ingestion_status: ingestionStatus,
+    ingestion_error: ingestionError,
+    total_chunks: totalChunks || null,
+    completed_chunks: completedChunks || null,
   };
 }
