@@ -7,6 +7,7 @@ import { getArangoDBSimulator } from '../db/simulator.js';
 import { cacheKeyFor, readCacheAsync, writeCache, readCacheSync, hasCache, credFingerprint, getCacheDir } from '../cache.js';
 import { chunkMarkdown, readMarkdownFile } from './chunker.js';
 import * as arangoClient from '../db/client.js';
+import { updateEdge as updateArangoEdge } from '../db/client.js';
 import { validateTags } from '../sumo.js';
 import { processNodeEntities, normalizeEntity } from '../entities.js';
 import { PseudoTOCGenerator, GeminiTocLLMClient, GeminiEmbeddingClient } from '../toc.js';
@@ -299,7 +300,8 @@ ${content}
 
   const result = await ai.models.generateContent({
     model: GEMINI_MODEL,
-    contents: prompt
+    contents: prompt,
+    config: { serviceTier: 'flex' },
   });
 
   const parsedText = result.text?.trim() || '{}';
@@ -368,7 +370,7 @@ async function generateFromMarkdown(ai, mdContent, filename) {
   try {
     const promptTemplate = fs.readFileSync(path.join('prompts', 'ingest_document.md'), 'utf-8');
     const prompt = `${promptTemplate}\n\nDOCUMENT_MARKDOWN:\n\n${mdContent}`;
-    const result = await ai.models.generateContent({ model: GEMINI_MODEL, contents: prompt });
+    const result = await ai.models.generateContent({ model: GEMINI_MODEL, contents: prompt, config: { serviceTier: 'flex' } });
     const parsedText = result.text?.trim() || '{}';
     const cleanJson = parsedText.replace(/^```json/gi, '').replace(/^```/gi, '').replace(/```$/gi, '').trim();
     return safeParseJsonFromText(cleanJson);
@@ -582,7 +584,7 @@ async function detectTocWithLLM(ai, firstChunks) {
 
     let parsed = readCacheSync(key);
     if (!parsed) {
-      const resp = await ai.models.generateContent({ model: GEMINI_MODEL, contents: prompt });
+      const resp = await ai.models.generateContent({ model: GEMINI_MODEL, contents: prompt, config: { serviceTier: 'flex' } });
       const raw = (resp.text ?? '').trim().replace(/^```json/i, '').replace(/^```/, '').replace(/```$/, '').trim();
       try { parsed = JSON.parse(raw); } catch { return null; }
       writeCache(key, parsed);
@@ -594,6 +596,44 @@ async function detectTocWithLLM(ai, firstChunks) {
     return { source: tocSource, raw: combinedText.slice(0, 2000), entries };
   } catch (err) {
     addPipelineLog('warn', `LLM TOC detection failed: ${err.message}`);
+    return null;
+  }
+}
+
+// Use LLM to generate a semantic relationship description between two similar documents.
+// Returns { verb, tags, summary } or null on failure.
+// Result is cached by content hash so re-ingesting is free.
+async function enrichCrossDocEdge(ai, docA, docB, snippetsA, snippetsB, sharedEntities) {
+  if (!ai) return null;
+  try {
+    const enrichPrompt = fs.readFileSync(path.join('prompts', 'enrich_cross_doc_edge.md'), 'utf-8').trim();
+    const credFp = credFingerprint();
+
+    const inputPayload = JSON.stringify({
+      docA: { title: docA.title || docA.id, sumo_tags: (docA.sumo_tags || []).slice(0, 8), snippets: snippetsA },
+      docB: { title: docB.title || docB.id, sumo_tags: (docB.sumo_tags || []).slice(0, 8), snippets: snippetsB },
+      shared_entities: sharedEntities.slice(0, 10),
+    });
+
+    const key = cacheKeyFor([enrichPrompt, inputPayload, GEMINI_MODEL, credFp]);
+    let parsed = readCacheSync(key);
+
+    if (!parsed) {
+      const prompt = `${enrichPrompt}\n\nINPUT:\n${inputPayload}`;
+      const resp = await ai.models.generateContent({ model: GEMINI_MODEL, contents: prompt, config: { serviceTier: 'flex' } });
+      const raw = (resp.text ?? '').trim().replace(/^```json\s*/i, '').replace(/^```/, '').replace(/```$/, '').trim();
+      try { parsed = JSON.parse(raw); } catch { return null; }
+      writeCache(key, parsed);
+    }
+
+    if (!parsed?.verb) return null;
+    return {
+      verb: String(parsed.verb).slice(0, 100),
+      tags: Array.isArray(parsed.tags) ? parsed.tags.slice(0, 4).map(String) : [],
+      summary: typeof parsed.summary === 'string' ? parsed.summary.slice(0, 300) : '',
+    };
+  } catch (err) {
+    addPipelineLog('warn', `Cross-doc edge enrichment failed: ${err.message}`);
     return null;
   }
 }
@@ -706,7 +746,7 @@ async function structureMarkdownWithRetries(ai, filename, mdContent) {
         const levelHint = chunk.headingLevel ? `\nHEADING_LEVEL:${chunk.headingLevel}` : '';
         const pageHint  = chunk.startPage != null ? `\nPAGE_RANGE:${chunk.startPage}-${chunk.endPage}` : '';
         const prompt = `${promptNorm}${levelHint}${pageHint}\n\nDOCUMENT_CHUNK_HEADING:${chunk.heading || ''}\n\n${chunk.text}`;
-        const resp = await ai.models.generateContent({ model: modelId, contents: prompt });
+        const resp = await ai.models.generateContent({ model: modelId, contents: prompt, config: { serviceTier: 'flex' } });
         const um = resp.usageMetadata || {};
         diag.usage.prompt_tokens     += um.promptTokenCount     || 0;
         diag.usage.candidates_tokens += um.candidatesTokenCount || 0;
@@ -727,7 +767,7 @@ async function structureMarkdownWithRetries(ai, filename, mdContent) {
           try {
             addPipelineLog('info', `Attempting automated repair for chunk ${chunk.id}`);
             const repairPrompt = `The text below may contain a JSON object mixed with commentary or markdown fences. Extract and return ONLY the JSON object (no explanation, no markdown fences). If multiple objects exist, return the single top-level object.\n\nNOISY_OUTPUT:\n${parsedText}`;
-            const repairResp = await ai.models.generateContent({ model: modelId, contents: repairPrompt });
+            const repairResp = await ai.models.generateContent({ model: modelId, contents: repairPrompt, config: { serviceTier: 'flex' } });
             const rum = repairResp.usageMetadata || {};
             diag.usage.repair_prompt_tokens     += rum.promptTokenCount     || 0;
             diag.usage.repair_candidates_tokens += rum.candidatesTokenCount || 0;
@@ -1771,18 +1811,34 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
             for (const otherDoc of allDocs) {
               if (!Array.isArray(otherDoc.entity_slugs) || otherDoc.entity_slugs.length === 0) continue;
               const otherSet = new Set(otherDoc.entity_slugs);
-              const intersection = entitySlugs.filter(s => otherSet.has(s)).length;
+              const sharedSlugs = entitySlugs.filter(s => otherSet.has(s));
               const union = new Set([...entitySlugs, ...otherDoc.entity_slugs]).size;
-              const jaccard = union > 0 ? intersection / union : 0;
+              const jaccard = union > 0 ? sharedSlugs.length / union : 0;
               if (jaccard >= similarityThreshold) {
                 const otherHandle = `documents/${otherDoc.id}`;
-                await arangoClient.insertEdge({
+                const edgeRes = await arangoClient.insertEdge({
                   _from: docHandle,
                   _to: otherHandle,
                   relation: 'SIMILAR_TO',
                   type: 'SIMILAR_TO',
                   weight: Math.round(jaccard * 1000) / 1000,
-                }).catch(() => {});
+                }).catch(() => null);
+
+                // LLM-enrich the edge with a semantic relationship description
+                if (edgeRes?._id) {
+                  const otherParas = transformedDocs.paragraphs.filter(p => p.document_id === otherDoc.id);
+                  const snippetsA = docsParagraphs
+                    .filter(p => typeof p.content === 'string' && p.content.length > 50)
+                    .slice(0, 3).map(p => p.content.slice(0, 300));
+                  const snippetsB = otherParas
+                    .filter(p => typeof p.content === 'string' && p.content.length > 50)
+                    .slice(0, 3).map(p => p.content.slice(0, 300));
+                  const enrichment = await enrichCrossDocEdge(ai, doc, otherDoc, snippetsA, snippetsB, sharedSlugs);
+                  if (enrichment) {
+                    await updateArangoEdge(edgeRes._id, enrichment).catch(() => {});
+                    addPipelineLog('info', `Cross-doc edge enriched: "${enrichment.verb}" between ${doc.id} ↔ ${otherDoc.id}`);
+                  }
+                }
               }
             }
           }

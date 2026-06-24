@@ -19,10 +19,11 @@ const GEMINI_MODEL = 'gemini-2.5-flash-lite';
 
 // Weight env vars
 const w = () => ({
-  bm25:   parseFloat(process.env.OHARA_BM25_WEIGHT    || '1.0'),
-  sumo:   parseFloat(process.env.OHARA_SUMO_WEIGHT    || '0.4'),
-  entity: parseFloat(process.env.OHARA_ENTITY_PIVOT_WEIGHT || '0.6'),
-  struct: parseFloat(process.env.OHARA_STRUCT_WEIGHT  || '0.3'),
+  bm25:     parseFloat(process.env.OHARA_BM25_WEIGHT          || '1.0'),
+  sumo:     parseFloat(process.env.OHARA_SUMO_WEIGHT          || '0.4'),
+  entity:   parseFloat(process.env.OHARA_ENTITY_PIVOT_WEIGHT  || '0.6'),
+  struct:   parseFloat(process.env.OHARA_STRUCT_WEIGHT        || '0.3'),
+  crossDoc: parseFloat(process.env.OHARA_CROSS_DOC_WEIGHT     || '0.4'),
 });
 
 export class RetrievalEngine {
@@ -69,7 +70,7 @@ Text:
 ${rawInput.slice(0, 2000)}`;
 
     try {
-      const result = await ai.models.generateContent({ model: GEMINI_MODEL, contents: prompt });
+      const result = await ai.models.generateContent({ model: GEMINI_MODEL, contents: prompt, config: { serviceTier: 'flex' } });
       const text = result.text?.trim() || '';
       const json = JSON.parse(text.replace(/^```json\s*/i, '').replace(/```\s*$/, ''));
       return {
@@ -205,6 +206,65 @@ ${rawInput.slice(0, 2000)}`;
     }
   }
 
+  // ── Phase 1c — Cross-Document Edge Expansion ─────────────────────────────────
+  // Follows SIMILAR_TO edges from seed documents to find related paragraphs in
+  // other documents. Uses edge.verb/tags for semantic filtering when available.
+
+  async _phase1cCrossDocEdge(processedQuery, bm25Results, seenIds, limit) {
+    const seedDocIds = [...new Set(
+      bm25Results.slice(0, 5)
+        .map(r => r.node?.document_id)
+        .filter(Boolean)
+        .map(id => id.startsWith('documents/') ? id : `documents/${id}`)
+    )];
+    if (seedDocIds.length === 0) return [];
+
+    const slugSet = new Set(processedQuery.entityHints);
+    for (const r of bm25Results.slice(0, 5)) {
+      for (const s of (r.node.entity_slugs || [])) slugSet.add(s);
+    }
+    const entitySlugs = [...slugSet];
+
+    const queryTags = [
+      ...processedQuery.sumoHints,
+      ...bm25Results.slice(0, 5).flatMap(r => r.node.sumo_tags || []),
+    ];
+
+    try {
+      const rows = await this.db.executeAQL(`
+        LET seed_doc_ids = @seed_doc_ids
+        LET entity_slugs = @entity_slugs
+        LET query_tags   = @query_tags
+        FOR doc_id IN seed_doc_ids
+          FOR edge IN edges
+            FILTER (edge._from == doc_id OR edge._to == doc_id)
+              AND edge.relation == "SIMILAR_TO"
+              AND (
+                edge.weight > 0.3
+                OR LENGTH(INTERSECTION(edge.tags, query_tags)) > 0
+              )
+            LET other_doc_id = (edge._from == doc_id ? edge._to : edge._from)
+            FOR p IN paragraphs
+              FILTER p.document_id == other_doc_id
+                OR CONCAT("documents/", p.document_id) == other_doc_id
+              FILTER p._id NOT IN @seen_ids
+              FILTER LENGTH(entity_slugs) == 0 OR LENGTH(INTERSECTION(p.entity_slugs, entity_slugs)) > 0
+              SORT LENGTH(INTERSECTION(p.entity_slugs, entity_slugs)) DESC
+              LIMIT @limit
+              RETURN {
+                node: p,
+                score: edge.weight,
+                source: "cross_doc_edge",
+                edge_verb: edge.verb,
+                edge_summary: edge.summary
+              }
+      `, { seed_doc_ids: seedDocIds, entity_slugs: entitySlugs, query_tags: queryTags, seen_ids: [...seenIds], limit });
+      return rows;
+    } catch (_) {
+      return [];
+    }
+  }
+
   // ── Phase 4 — Structural Traversal ───────────────────────────────────────────
 
   async _phase4Structural(topNodeId, depth, seenIds) {
@@ -224,8 +284,8 @@ ${rawInput.slice(0, 2000)}`;
 
   // ── Phase 5 — Score Fusion ───────────────────────────────────────────────────
 
-  _fuseResults(bm25, sumo, entity, struct, weights) {
-    const scoreMap = new Map(); // _id → { node, score, sources }
+  _fuseResults(bm25, sumo, entity, crossDoc, struct, weights) {
+    const scoreMap = new Map(); // _id → { node, score, sources, edge_verb }
 
     const add = (results, weight, phase) => {
       for (const r of results) {
@@ -236,15 +296,19 @@ ${rawInput.slice(0, 2000)}`;
           cur.score += weight * r.score;
           cur.sources.push(phase);
         } else {
-          scoreMap.set(id, { node: r.node, score: weight * r.score, sources: [phase] });
+          const entry = { node: r.node, score: weight * r.score, sources: [phase] };
+          if (r.edge_verb) entry.edge_verb = r.edge_verb;
+          if (r.edge_summary) entry.edge_summary = r.edge_summary;
+          scoreMap.set(id, entry);
         }
       }
     };
 
-    add(bm25,   weights.bm25,   'fulltext');
-    add(sumo,   weights.sumo,   'sumo');
-    add(entity, weights.entity, 'entity_pivot');
-    add(struct, weights.struct, 'structural');
+    add(bm25,     weights.bm25,     'fulltext');
+    add(sumo,     weights.sumo,     'sumo');
+    add(entity,   weights.entity,   'entity_pivot');
+    add(crossDoc, weights.crossDoc, 'cross_doc_edge');
+    add(struct,   weights.struct,   'structural');
 
     return [...scoreMap.values()].sort((a, b) => b.score - a.score);
   }
@@ -354,16 +418,21 @@ ${rawInput.slice(0, 2000)}`;
       ...sumoResults.map(r => r.node._id),
     ]);
 
-    const entityResults = await this._phase3EntityPivot(processedQuery, bm25Results, seenAfterPhase2, limit);
+    const crossDocLimit = parseInt(process.env.OHARA_CROSS_DOC_LIMIT || '5', 10);
+    const [entityResults, crossDocResults] = await Promise.all([
+      this._phase3EntityPivot(processedQuery, bm25Results, seenAfterPhase2, limit),
+      this._phase1cCrossDocEdge(processedQuery, bm25Results, seenAfterPhase2, crossDocLimit),
+    ]);
 
     const topNodeId = bm25Results[0]?.node?._id;
     const seenAfterPhase3 = new Set([
       ...seenAfterPhase2,
       ...entityResults.map(r => r.node._id),
+      ...crossDocResults.map(r => r.node._id),
     ]);
     const structResults = await this._phase4Structural(topNodeId, depth, seenAfterPhase3);
 
-    const fused = this._fuseResults(bm25Results, sumoResults, entityResults, structResults, weights);
+    const fused = this._fuseResults(bm25Results, sumoResults, entityResults, crossDocResults, structResults, weights);
     const topK = fused.slice(0, limit);
 
     return {
@@ -372,6 +441,7 @@ ${rawInput.slice(0, 2000)}`;
       // legacy fields for backwards compat with existing server routes
       shallowResults: bm25Results,
       entityPivotResults: entityResults,
+      crossDocResults,
       deepResults: structResults.map(r => r.node),
     };
   }

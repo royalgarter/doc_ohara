@@ -172,7 +172,7 @@ export class GeminiTocLLMClient {
       if (hit?.result != null) return hit.result === 1;
     }
 
-    const resp = await this.ai.models.generateContent({ model: this.model, contents: prompt });
+    const resp = await this.ai.models.generateContent({ model: this.model, contents: prompt, config: { serviceTier: 'flex' } });
     const digit = (resp.text ?? '').trim().charAt(0);
     const result = digit === '1' ? 1 : 0;
 
@@ -193,7 +193,7 @@ export class GeminiTocLLMClient {
       if (hit?.title) return hit.title;
     }
 
-    const resp = await this.ai.models.generateContent({ model: this.model, contents: prompt });
+    const resp = await this.ai.models.generateContent({ model: this.model, contents: prompt, config: { serviceTier: 'flex' } });
     const title = (resp.text ?? '').trim();
 
     if (this.cache) {
