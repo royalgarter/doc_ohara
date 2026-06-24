@@ -72,12 +72,31 @@
           <span>Documents</span>
           <span x-text="docsOpen ? '▾' : '▸'" class="text-gray-600"></span>
         </button>
+        <!-- Select-all toggle -->
+        <div x-show="docsOpen && graphData.documents.length > 0" class="flex items-center gap-2 -mt-1 mb-0.5">
+          <button @click="toggleAllDocs()"
+            class="text-xs text-gray-600 hover:text-gray-300 transition select-none"
+            x-text="selectedDocKeys.size === 0 ? 'select all' : 'clear all'"></button>
+          <span class="text-xs text-gray-700" x-show="selectedDocKeys.size > 0"
+            x-text="selectedDocKeys.size + '/' + graphData.documents.length + ' selected'"></span>
+        </div>
         <div x-show="docsOpen" class="flex flex-col gap-1.5 overflow-y-auto scrollbar-thin" style="max-height:40vh">
           <template x-for="doc in graphData.documents" :key="doc._key || doc.id">
-            <div @click="focusDocument(doc)"
-              class="group p-2 rounded bg-gray-800/50 border border-gray-700/40 cursor-pointer
-                     hover:border-sky-600/50 hover:bg-gray-800 transition text-xs shrink-0">
-              <div class="text-gray-200 truncate group-hover:text-sky-300 transition"
+            <div @click="toggleDocSelection(doc)"
+              :class="selectedDocKeys.has(doc._key || doc.id)
+                ? 'border-sky-500/70 bg-sky-950/30'
+                : 'border-gray-700/40 bg-gray-800/50 hover:border-sky-600/40 hover:bg-gray-800'"
+              class="group p-2 rounded border cursor-pointer transition text-xs shrink-0 relative">
+              <!-- Selection indicator -->
+              <div class="absolute top-2 right-2 w-3 h-3 rounded-sm border flex items-center justify-center shrink-0"
+                :class="selectedDocKeys.has(doc._key || doc.id)
+                  ? 'border-sky-400 bg-sky-500/30'
+                  : 'border-gray-600'">
+                <span x-show="selectedDocKeys.has(doc._key || doc.id)"
+                  class="text-sky-300 leading-none" style="font-size:9px">✓</span>
+              </div>
+              <div class="text-gray-200 truncate pr-5"
+                :class="selectedDocKeys.has(doc._key || doc.id) ? 'text-sky-200' : 'group-hover:text-sky-300'"
                 x-text="doc.title || doc.source_file"></div>
               <div class="flex justify-between mt-0.5">
                 <span class="text-gray-600" x-text="doc.parser_engine || 'LiteParse'"></span>
@@ -334,6 +353,15 @@
       <div class="flex-1 overflow-auto relative bg-gray-950" id="graph-container">
         <svg id="graph-svg" preserveAspectRatio="xMidYMid meet"></svg>
 
+        <!-- Clear selection button overlay -->
+        <div x-show="selectedNode" class="absolute top-2 left-2 z-10 select-none">
+          <button @click="selectedNode = null; renderCurrentGraph()"
+            class="text-xs px-2 py-1 rounded bg-gray-800/90 border border-gray-700/60
+                   text-gray-400 hover:text-white hover:bg-gray-700 hover:border-gray-500 transition">
+            ✕ clear selection
+          </button>
+        </div>
+
         <!-- Zoom controls overlay -->
         <div class="absolute top-2 right-2 flex items-center gap-1 z-10 select-none">
           <button @click="zoomOut()" title="Zoom out (-)"
@@ -484,6 +512,7 @@
 
       graphData: { documents: [], sections: [], paragraphs: [], tables: [], edges: [] },
       expandedNodes: new Set(),
+      selectedDocKeys: new Set(),
       graphSource: '',
       graphLoading: false,
       selectedNode: null,
@@ -611,15 +640,33 @@
       renderCurrentGraph() {
         const self = this;
         const selectedKey = self.selectedNode && (self.selectedNode._key || self.selectedNode.id);
-        renderGraph(this.graphData, this.colorMode, selectedKey, this.graphZoom, (node) => {
-          self.selectedNode = node;
-          self.expandNode(node);
-          self.$nextTick(() => self.renderCurrentGraph());
-        });
+        renderGraph(this.graphData, this.colorMode, selectedKey, this.graphZoom,
+          this.selectedDocKeys,
+          (node) => {
+            self.selectedNode = node;
+            self.expandNode(node);
+            self.$nextTick(() => self.renderCurrentGraph());
+          });
       },
 
-      focusDocument(doc) {
-        pulseDocumentNodes(doc._key || doc.id);
+      toggleDocSelection(doc) {
+        const key = doc._key || doc.id;
+        if (this.selectedDocKeys.has(key)) {
+          this.selectedDocKeys.delete(key);
+        } else {
+          this.selectedDocKeys.add(key);
+        }
+        this.selectedDocKeys = new Set(this.selectedDocKeys); // trigger reactivity
+        this.$nextTick(() => this.renderCurrentGraph());
+      },
+
+      toggleAllDocs() {
+        if (this.selectedDocKeys.size === 0) {
+          this.selectedDocKeys = new Set(this.graphData.documents.map(d => d._key || d.id));
+        } else {
+          this.selectedDocKeys = new Set();
+        }
+        this.$nextTick(() => this.renderCurrentGraph());
       },
 
       highlightResultNode(node) {
@@ -807,12 +854,43 @@
     return FIXED_COLORS[ck] || '#475569';
   }
 
-  function renderGraph(data, colorMode, selectedKey, zoom, onSelect) {
+  function renderGraph(data, colorMode, selectedKey, zoom, selectedDocKeys, onSelect) {
     const svg = document.getElementById('graph-svg');
     if (!svg) return;
     svg.innerHTML = '';
 
-    const { documents, sections, paragraphs, tables, edges } = data;
+    let { documents, sections, paragraphs, tables, edges } = data;
+
+    // Filter by selected documents (empty set = show all)
+    if (selectedDocKeys && selectedDocKeys.size > 0) {
+      const selDocIds = new Set([...selectedDocKeys].map(k => 'documents/' + k));
+      documents = documents.filter(d => selectedDocKeys.has(d._key || d.id));
+
+      // Collect allowed section/paragraph/table IDs via edges
+      const allowedNodeIds = new Set([...selDocIds]);
+      // BFS over HAS_CHILD edges to find all descendant sections
+      let frontier = [...selDocIds];
+      while (frontier.length > 0) {
+        const next = [];
+        for (const edge of edges) {
+          if (frontier.includes(edge._from) && !allowedNodeIds.has(edge._to)) {
+            allowedNodeIds.add(edge._to);
+            next.push(edge._to);
+          }
+        }
+        frontier = next;
+      }
+      // Also include via BELONGS_TO (paragraph → document)
+      for (const edge of edges) {
+        if (edge.relation === 'BELONGS_TO' && selDocIds.has(edge._to)) {
+          allowedNodeIds.add(edge._from);
+        }
+      }
+      sections   = sections.filter(s => allowedNodeIds.has(s._id));
+      paragraphs = paragraphs.filter(p => allowedNodeIds.has(p._id));
+      tables     = tables.filter(t => allowedNodeIds.has(t._id));
+      edges      = edges.filter(e => allowedNodeIds.has(e._from) && allowedNodeIds.has(e._to));
+    }
 
     // ── Build virtual SUMO tag nodes ──────────────────────────────────────
     const tagCounts = {};
