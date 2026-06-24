@@ -9,6 +9,7 @@ import { chunkMarkdown, readMarkdownFile } from './chunker.js';
 import * as arangoClient from '../db/client.js';
 import { validateTags } from '../sumo.js';
 import { processNodeEntities, normalizeEntity } from '../entities.js';
+import { PseudoTOCGenerator, GeminiTocLLMClient, GeminiEmbeddingClient } from '../toc.js';
 
 const GEMINI_MODEL = 'gemini-2.5-flash-lite';
 
@@ -520,6 +521,35 @@ function preDetectSpecialSections(markdown) {
   };
 }
 
+// Use LLM to detect a TOC from the first N chunks of the document.
+// Returns { source: "explicit"|"implicit", raw: string|null, entries: [] } or null on failure.
+async function detectTocWithLLM(ai, firstChunks) {
+  if (!ai || !firstChunks.length) return null;
+  try {
+    const extractTocPrompt = fs.readFileSync(path.join('prompts', 'extract_toc.md'), 'utf-8').trim();
+    const combinedText = firstChunks.map(c => c.text).join('\n\n');
+    const prompt = `${extractTocPrompt}\n\nDOCUMENT_CHUNK:\n${combinedText}`;
+    const credFp = credFingerprint();
+    const key = cacheKeyFor([extractTocPrompt, combinedText, GEMINI_MODEL, credFp]);
+
+    let parsed = readCacheSync(key);
+    if (!parsed) {
+      const resp = await ai.models.generateContent({ model: GEMINI_MODEL, contents: prompt });
+      const raw = (resp.text ?? '').trim().replace(/^```json/i, '').replace(/^```/, '').replace(/```$/, '').trim();
+      try { parsed = JSON.parse(raw); } catch { return null; }
+      writeCache(key, parsed);
+    }
+
+    const tocSource = parsed.toc_source === 'explicit' ? 'explicit' : 'implicit_llm';
+    const entries = (parsed.toc || []).map(e => ({ title: e.title, level: e.level ?? 1, page: e.page ?? null }));
+    addPipelineLog('info', `LLM TOC detection: toc_source=${tocSource}, ${entries.length} entry/entries`);
+    return { source: tocSource, raw: combinedText.slice(0, 2000), entries };
+  } catch (err) {
+    addPipelineLog('warn', `LLM TOC detection failed: ${err.message}`);
+    return null;
+  }
+}
+
 // Structure markdown using chunking + LLM with cache and retries
 async function structureMarkdownWithRetries(ai, filename, mdContent) {
   if (!ai) {
@@ -529,9 +559,12 @@ async function structureMarkdownWithRetries(ai, filename, mdContent) {
   }
 
   // Pre-detect TOC and Glossary before chunking so they are not fed to the LLM as ordinary content.
-  const { cleanedMarkdown, toc: detectedToc, glossary: detectedGlossary } = preDetectSpecialSections(mdContent);
-  if (detectedToc) addPipelineLog('info', `TOC detected: ${detectedToc.entries.length} entry/entries extracted`);
+  const { cleanedMarkdown, toc: heuristicToc, glossary: detectedGlossary } = preDetectSpecialSections(mdContent);
   if (detectedGlossary) addPipelineLog('info', `Glossary detected: ${detectedGlossary.entries.length} term(s) parsed`);
+
+  // Tag heuristic TOC as explicit (it was physically present in the raw document).
+  let detectedToc = heuristicToc ? { ...heuristicToc, source: 'explicit' } : null;
+  if (detectedToc) addPipelineLog('info', `TOC detected (heuristic/explicit): ${detectedToc.entries.length} entry/entries`);
 
   let chunks = chunkMarkdown(cleanedMarkdown, { maxChars: 12000 });
   // test override: limit number of chunks processed when OHARA_TEST_CHUNKS_LIMIT is set
@@ -541,6 +574,40 @@ async function structureMarkdownWithRetries(ai, filename, mdContent) {
     chunks = chunks.slice(0, testLimit);
   }
   addPipelineLog('info', `Markdown split into ${chunks.length} chunk(s) for ${filename}`);
+
+  // If heuristic found no explicit TOC, fall back to LLM TOC detection on the first 3 chunks.
+  if (!detectedToc) {
+    const llmToc = await detectTocWithLLM(ai, chunks.slice(0, 3));
+    if (llmToc) {
+      if (llmToc.source === 'explicit' && llmToc.entries.length > 0) {
+        detectedToc = llmToc;
+      } else {
+        // LLM says no explicit TOC — run PseudoTOC as final fallback.
+        try {
+          addPipelineLog('info', 'No explicit TOC found — running PseudoTOC (DocsRay Algorithm 1)...');
+          const boundaryPrompt = fs.readFileSync(path.join('prompts', 'boundary_detection.md'), 'utf-8').trim();
+          const titlePrompt = fs.readFileSync(path.join('prompts', 'generate_section_title.md'), 'utf-8').trim();
+          const credFp = credFingerprint();
+          const pseudoGen = new PseudoTOCGenerator(
+            new GeminiTocLLMClient(ai, boundaryPrompt, titlePrompt, GEMINI_MODEL, { cacheKeyFor, writeCache, readCacheSync, credFp }),
+            new GeminiEmbeddingClient(ai),
+            null,
+          );
+          const pseudoSections = await pseudoGen.generate(chunks.map(c => ({ text: c.text })));
+          if (pseudoSections.length > 0) {
+            detectedToc = {
+              source: 'implicit_pseudo',
+              raw: null,
+              entries: pseudoSections.map((s, i) => ({ title: s.title || `Section ${i + 1}`, level: 1 })),
+            };
+            addPipelineLog('info', `PseudoTOC generated: ${detectedToc.entries.length} section(s)`);
+          }
+        } catch (pseudoErr) {
+          addPipelineLog('warn', `PseudoTOC generation failed: ${pseudoErr.message}`);
+        }
+      }
+    }
+  }
 
   // parallel pool
   const concurrency = parseInt(process.env.OHARA_INGEST_CONCURRENCY || '4', 10) || 4;
@@ -1341,6 +1408,7 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
           file_hash: fileHash || null,
           llm_usage: llmUsage || null,
           toc_raw: detectedToc?.raw || null,
+          toc_source: detectedToc?.source || null,
           toc_entries: detectedToc?.entries || [],
           glossary_entries: detectedGlossary?.entries || [],
         });
@@ -1539,7 +1607,7 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
         throw err;
       }
     } else {
-      const insertedDoc = arangoDb.insertDocument({ _key: doc.id, source_file: doc.source_file, parser_engine: doc.parser_engine, title: doc.title, file_size: doc.file_size || '350 KB', upload_time: new Date().toISOString(), toc_raw: detectedToc?.raw || null, toc_entries: detectedToc?.entries || [], glossary_entries: detectedGlossary?.entries || [] });
+      const insertedDoc = arangoDb.insertDocument({ _key: doc.id, source_file: doc.source_file, parser_engine: doc.parser_engine, title: doc.title, file_size: doc.file_size || '350 KB', upload_time: new Date().toISOString(), toc_raw: detectedToc?.raw || null, toc_source: detectedToc?.source || null, toc_entries: detectedToc?.entries || [], glossary_entries: detectedGlossary?.entries || [] });
 
       const docsSections = transformedDocs.sections.filter(s => s.document_id === doc.id);
       docsSections.forEach(sec => { arangoDb.insertSection({ _key: sec.id, document_id: insertedDoc._key, title: sec.title, level: sec.level }); nodeCount += 1; });
