@@ -439,8 +439,8 @@ function preDetectSpecialSections(markdown) {
   while (i < lines.length) {
     // --- Detect TOC block ---
     // Look for a heading that signals a TOC, or a run of TOC-matching lines
-    const isTocHeading = /^#{1,4}\s+(table\s+of\s+contents?|contents?|toc)\b/i.test(lines[i]);
-    if (isTocHeading) {
+    const IS_TOC_HEADING = /^#{1,4}\s+(table\s+of\s+contents?|contents?|toc)\b/i;
+    if (IS_TOC_HEADING.test(lines[i])) {
       const blockStart = i;
       const blockLines = [lines[i]];
       i++;
@@ -448,7 +448,7 @@ function preDetectSpecialSections(markdown) {
       let blanks = 0;
       while (i < lines.length) {
         const l = lines[i];
-        if (/^#{1,4}\s+/.test(l) && !isTocHeading) break; // new section
+        if (/^#{1,4}\s+/.test(l) && !IS_TOC_HEADING.test(l)) break; // new section
         if (l.trim() === '') { blanks++; if (blanks > 2) break; }
         else blanks = 0;
         blockLines.push(l);
@@ -783,10 +783,11 @@ async function structureMarkdownWithRetries(ai, filename, mdContent) {
     }
     // Expect parsed to be { nodes: [...] } or { document: { texts: [...] } }
     if (parsed.nodes) {
-      // Tag each node with chunk-derived metadata so transformRawToCollections can
-      // use authoritative heading depth and page range instead of LLM inference alone.
-      if (entry.chunk.headingLevel != null) {
-        parsed.nodes.forEach(n => { n._chunk_heading_level = entry.chunk.headingLevel; });
+      // Tag only the FIRST node with the Markdown heading level from the source chunk.
+      // The LLM is instructed to treat HEADING_LEVEL as authoritative only for the
+      // leading heading node; deeper nodes use the LLM's own metadata.level.
+      if (entry.chunk.headingLevel != null && parsed.nodes.length > 0) {
+        parsed.nodes[0]._chunk_heading_level = entry.chunk.headingLevel;
       }
       if (entry.chunk.startPage != null) {
         parsed.nodes.forEach(n => {
@@ -1101,6 +1102,66 @@ function transformRawToCollections(rawOutputDir) {
                 });
               }
             }
+          } else if (['Title', 'Abstract', 'Preface', 'Foreword', 'Appendix', 'Glossary', 'Index'].includes(ntype)) {
+            const content = node.content || node.title || '';
+            if (!content.trim()) return;
+            dbCollections.paragraphs.push({
+              id: nodeId,
+              document_id: docId,
+              section_id: currentSectionId,
+              node_type: ntype,
+              content: content.trim(),
+              sumo_tags: node.sumo_tags || [],
+              sumo_candidate_tags_raw: node.sumo_candidate_tags_raw || [],
+              sumo_resolved_map: node.sumo_resolved_map || {},
+              entities: node.entities || [],
+            });
+          } else if (ntype === 'Authors') {
+            const agents = node.agents_group?.agents || [];
+            const content = agents.map(a => a.name).filter(Boolean).join(', ');
+            if (!content.trim()) return;
+            dbCollections.paragraphs.push({
+              id: nodeId,
+              document_id: docId,
+              section_id: currentSectionId,
+              node_type: 'Authors',
+              content: content.trim(),
+              sumo_tags: node.sumo_tags || [],
+              sumo_candidate_tags_raw: node.sumo_candidate_tags_raw || [],
+              sumo_resolved_map: node.sumo_resolved_map || {},
+              entities: node.entities || [],
+            });
+          } else if (ntype === 'Bibliography') {
+            const refs = node.references || [];
+            const content = refs.map(r => r.citation_text).filter(Boolean).join('\n');
+            if (!content.trim()) return;
+            dbCollections.paragraphs.push({
+              id: nodeId,
+              document_id: docId,
+              section_id: currentSectionId,
+              node_type: 'Bibliography',
+              content: content.trim(),
+              sumo_tags: node.sumo_tags || [],
+              sumo_candidate_tags_raw: node.sumo_candidate_tags_raw || [],
+              sumo_resolved_map: node.sumo_resolved_map || {},
+              entities: node.entities || [],
+            });
+          } else if (ntype === 'Part') {
+            const level = node.metadata?.level ?? 0;
+            const title = (node.title || '').trim();
+            if (!title) return;
+            const parentSectionId = sectionStack.length > 0 ? sectionStack[sectionStack.length - 1].id : null;
+            sectionStack.push({ id: nodeId, level });
+            currentSectionId = nodeId;
+            sectionDedup.set(`${docId}::L${level}::${title.toLowerCase()}`, nodeId);
+            dbCollections.sections.push({
+              id: nodeId,
+              document_id: docId,
+              parent_section_id: parentSectionId,
+              node_type: 'Part',
+              title,
+              level,
+            });
           }
         });
 
@@ -1235,6 +1296,20 @@ function transformRawToCollections(rawOutputDir) {
       }
     });
   });
+
+  // ── Post-process pass 0: normalize section levels ──────────────────────
+  // Clamp child section levels to parent.level + 1 to prevent LEVEL_GAP warnings
+  // caused by LLM-assigned levels that skip depth (e.g. L1 → L3).
+  const secById = {};
+  for (const sec of dbCollections.sections) secById[sec.id] = sec;
+  for (const sec of dbCollections.sections) {
+    if (sec.parent_section_id && secById[sec.parent_section_id]) {
+      const parent = secById[sec.parent_section_id];
+      if (sec.level - parent.level > 1) {
+        sec.level = parent.level + 1;
+      }
+    }
+  }
 
   // ── Post-process pass 1: strip PDF/Markdown artifacts ───────────────────
   // Artifacts are nodes whose content is structural noise: separator lines,
