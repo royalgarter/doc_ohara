@@ -656,7 +656,8 @@ async function structureMarkdownWithRetries(ai, filename, mdContent) {
       try {
         addPipelineLog('info', `LLM structuring chunk ${chunk.id} (attempt ${attempt}/${maxAttempts})`);
         const levelHint = chunk.headingLevel ? `\nHEADING_LEVEL:${chunk.headingLevel}` : '';
-        const prompt = `${promptNorm}${levelHint}\n\nDOCUMENT_CHUNK_HEADING:${chunk.heading || ''}\n\n${chunk.text}`;
+        const pageHint  = chunk.startPage != null ? `\nPAGE_RANGE:${chunk.startPage}-${chunk.endPage}` : '';
+        const prompt = `${promptNorm}${levelHint}${pageHint}\n\nDOCUMENT_CHUNK_HEADING:${chunk.heading || ''}\n\n${chunk.text}`;
         const resp = await ai.models.generateContent({ model: modelId, contents: prompt });
         const um = resp.usageMetadata || {};
         diag.usage.prompt_tokens     += um.promptTokenCount     || 0;
@@ -795,6 +796,13 @@ async function structureMarkdownWithRetries(ai, filename, mdContent) {
       // leading heading node; deeper nodes use the LLM's own metadata.level.
       if (entry.chunk.headingLevel != null && parsed.nodes.length > 0) {
         parsed.nodes[0]._chunk_heading_level = entry.chunk.headingLevel;
+      }
+      if (entry.chunk.startPage != null) {
+        parsed.nodes.forEach(n => {
+          n._chunk_start_page = entry.chunk.startPage;
+          n._chunk_end_page   = entry.chunk.endPage;
+          n._page_source      = entry.chunk.pageSource;
+        });
       }
       mergedNodes.push(...parsed.nodes);
     } else if (parsed.document && Array.isArray(parsed.document.texts)) {
@@ -997,6 +1005,16 @@ function transformRawToCollections(rawOutputDir) {
           const nodeId = `okf_node_${blockIdx}_${Date.now()}`;
           const ntype = node.type || (node.metadata && node.metadata.type) || 'Paragraph';
 
+          // Resolve page number: trust LLM's value only if it falls within the chunk's known range;
+          // otherwise use chunkStart (from counted ----- markers, or virtual char-offset page).
+          const chunkStart  = node._chunk_start_page ?? 1;
+          const chunkEnd    = node._chunk_end_page   ?? chunkStart;
+          const llmPage     = node.metadata?.page;
+          const resolvedPage = (Number.isInteger(llmPage) && llmPage >= chunkStart && llmPage <= chunkEnd)
+            ? llmPage
+            : chunkStart;
+          const pageSource  = node._page_source ?? 'virtual';
+
           if (SECTION_TYPES.includes(ntype)) {
             // Prefer the Markdown # depth recorded during chunking; fall back to LLM output then type-name map.
             const level = node._chunk_heading_level ?? node.metadata?.level ?? LEVEL_OF[ntype] ?? 2;
@@ -1025,6 +1043,8 @@ function transformRawToCollections(rawOutputDir) {
                 node_type: ntype,
                 title,
                 level,
+                page: resolvedPage,
+                page_source: pageSource,
               });
             }
           } else if (['Paragraph', 'ListItem'].includes(ntype)) {
@@ -1048,6 +1068,8 @@ function transformRawToCollections(rawOutputDir) {
               section_id: currentSectionId,
               node_type: ntype,
               content: content.trim(),
+              page: resolvedPage,
+              page_source: pageSource,
               sumo_tags: node.sumo_tags || [],
               sumo_candidate_tags_raw: node.sumo_candidate_tags_raw || [],
               sumo_resolved_map: node.sumo_resolved_map || {},
@@ -1066,6 +1088,8 @@ function transformRawToCollections(rawOutputDir) {
               section_id: currentSectionId,
               node_type: 'Figure',
               content,
+              page: resolvedPage,
+              page_source: pageSource,
               sumo_tags: node.sumo_tags || [],
               sumo_candidate_tags_raw: node.sumo_candidate_tags_raw || [],
               sumo_resolved_map: node.sumo_resolved_map || {},
@@ -1703,6 +1727,32 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
           }
         }
 
+        // TOC_REF edges: link document → section nodes that match toc_entries by page or title.
+        // Provides a navigable path: document → (TOC_REF) → section for retrieval.
+        if (detectedToc?.entries?.length) {
+          const docSections = transformedDocs.sections.filter(s => s.document_id === doc.id);
+          for (const entry of detectedToc.entries) {
+            const match = docSections.find(s =>
+              (entry.page != null && s.page === entry.page) ||
+              (entry.title && s.title?.toLowerCase().trim() === entry.title.toLowerCase().trim())
+            );
+            if (match) {
+              const secHandle = sectionIdMap.get(match.id);
+              if (secHandle) {
+                await arangoClient.insertEdge({
+                  _from: docHandle,
+                  _to: secHandle,
+                  relation: 'TOC_REF',
+                  type: 'TOC_REF',
+                  toc_title: entry.title,
+                  toc_page: entry.page ?? null,
+                  toc_level: entry.level ?? 1,
+                }).catch(() => {});
+              }
+            }
+          }
+        }
+
         // Insert tables in parallel batches — same pattern as paragraphs
         const docsTables = transformedDocs.tables.filter(t => t.document_id === doc.id);
         await runBatched(docsTables, async (t) => {
@@ -1739,6 +1789,28 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
 
       const docsTables = transformedDocs.tables.filter(t => t.document_id === doc.id);
       docsTables.forEach(t => { arangoDb.insertTable({ _key: t.id, document_id: insertedDoc._key, section_id: t.section_id ? `sections/${t.section_id}` : null, matrix_data: t.matrix_data || [], markdown_representation: t.markdown_representation || '' }); nodeCount += 1; });
+
+      // TOC_REF edges for in-memory simulator path
+      if (detectedToc?.entries?.length) {
+        const docHandle = `documents/${insertedDoc._key}`;
+        for (const entry of detectedToc.entries) {
+          const match = docsSections.find(s =>
+            (entry.page != null && s.page === entry.page) ||
+            (entry.title && s.title?.toLowerCase().trim() === entry.title.toLowerCase().trim())
+          );
+          if (match) {
+            arangoDb.insertEdge?.({
+              _from: docHandle,
+              _to: `sections/${match.id}`,
+              relation: 'TOC_REF',
+              type: 'TOC_REF',
+              toc_title: entry.title,
+              toc_page: entry.page ?? null,
+              toc_level: entry.level ?? 1,
+            });
+          }
+        }
+      }
     }
 
     onProgress(75 + Math.round(((i + 1) / totalDocs) * 20), `Extracting Nodes ${nodeCount}...`);

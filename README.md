@@ -60,6 +60,7 @@ PDF / EPUB / MD
 | `MENTIONS` | paragraph → entity | Named entity occurrence |
 | `RELATED_TO` | entity ↔ entity | Co-occurrence in the same paragraph |
 | `SIMILAR_TO` | document → document | Jaccard similarity of entity sets (threshold-gated) |
+| `TOC_REF` | document → section | TOC entry resolved to a section node (matched by page number then title) |
 
 ---
 
