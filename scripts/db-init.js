@@ -8,6 +8,8 @@ dotenv.config();
     console.log('initArangoClient succeeded');
     const colls = await db.listCollections();
     console.log('collections now:', colls.map(c=>c.name));
+    await client.createSearchViewIfNotExists();
+    console.log('ArangoSearch view ready');
   } catch (e) {
     console.error('init failed:', e.message);
     process.exit(1);

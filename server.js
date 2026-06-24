@@ -52,7 +52,25 @@ async function startServer() {
 
   // Initialize DB
   const dbSim = getArangoDBSimulator();
-  const retrievalEngine = new RetrievalEngine(dbSim);
+
+  // Wire retrieval to real ArangoDB when available, otherwise use simulator shim
+  let retrievalDB;
+  if (process.env.ARANGO_URL) {
+    await arangoClient.initArangoClient();
+    await arangoClient.createSearchViewIfNotExists().catch(err =>
+      console.warn('[server] Could not create ArangoSearch view:', err.message)
+    );
+    retrievalDB = { executeAQL: (q, b) => arangoClient.executeAQL(q, b) };
+  } else {
+    // Simulator shim: executeAQL delegates to dbSim
+    retrievalDB = {
+      executeAQL: (q, b) => {
+        const r = dbSim.executeAQL(q, b);
+        return Promise.resolve(r?.results || []);
+      },
+    };
+  }
+  const retrievalEngine = new RetrievalEngine(retrievalDB);
   const ingestionQueue = getIngestionQueue();
   startWorkerLoop(process.env.GEMINI_API_KEY);
 
@@ -264,14 +282,14 @@ async function startServer() {
     }
   });
 
-  // API: Two-Step Hybrid Retrieval (Shallow + Deep context)
-  app.post('/api/retrieval/query', (req, res) => {
+  // API: Multi-phase Hybrid Retrieval (BM25 + SUMO + Entity + Structural)
+  app.post('/api/retrieval/query', async (req, res) => {
     try {
       const { query, depth, limit } = req.body;
       if (!query) {
         return res.status(400).json({ success: false, error: 'Query is required.' });
       }
-      const result = retrievalEngine.query(query, { depth, limit });
+      const result = await retrievalEngine.query(query, { depth, limit });
       res.json({ success: true, ...result });
     } catch (err) {
       res.status(500).json({ success: false, error: err.message });
@@ -337,11 +355,11 @@ async function startServer() {
   });
 
   // API: Deep graph context for a node (backs the agent's "Focus on Node X" view)
-  app.get('/api/retrieval/context/:nodeId', (req, res) => {
+  app.get('/api/retrieval/context/:nodeId', async (req, res) => {
     try {
       const nodeId = decodeURIComponent(req.params.nodeId);
       const depth = parseInt(req.query.depth, 10) || 2;
-      const context = retrievalEngine.getDeepContext(nodeId, undefined, { depth });
+      const context = await retrievalEngine.getDeepContext(nodeId, undefined, { depth });
       res.json({ success: true, nodeId, context });
     } catch (err) {
       res.status(500).json({ success: false, error: err.message });

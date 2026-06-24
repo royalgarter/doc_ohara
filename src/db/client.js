@@ -236,6 +236,45 @@ export async function getStats() {
   return { documents: docs, sections, paragraphs, tables, edges };
 }
 
+export async function executeAQL(query, bindVars = {}) {
+  if (!initialized) await initArangoClient();
+  const cursor = await db.query({ query, bindVars });
+  return cursor.all();
+}
+
+export async function createSearchViewIfNotExists() {
+  if (!initialized) await initArangoClient();
+  const viewName = 'ohara_search';
+  try {
+    await db.view(viewName).get();
+    // view already exists
+  } catch (_) {
+    await db.createView(viewName, {
+      type: 'arangosearch',
+      links: {
+        paragraphs: {
+          fields: {
+            content: { analyzers: ['text_en'] },
+            sumo_tags: { analyzers: ['identity'] },
+            entity_slugs: { analyzers: ['identity'] },
+          },
+        },
+        sections: {
+          fields: {
+            title: { analyzers: ['text_en'] },
+          },
+        },
+        tables: {
+          fields: {
+            markdown_representation: { analyzers: ['text_en'] },
+          },
+        },
+      },
+    });
+    console.log(`[db] Created ArangoSearch view '${viewName}'`);
+  }
+}
+
 export async function close() {
   db = null;
   initialized = false;
