@@ -63,7 +63,7 @@ candidate_entities: [           # named entities mentioned in this node
 
 ## Instructions
 
-1. **Analyze** the layout and hierarchy of the input chunk. If a `HEADING_LEVEL` prefix is present (e.g. `HEADING_LEVEL:2`), treat it as the authoritative `metadata.level` for the leading heading node of this chunk (1=Chapter, 2=Section, 3=Subsection). Nested headings within the chunk should have incrementally deeper levels.
+1. **Analyze** the layout and hierarchy of the input chunk. If a `HEADING_LEVEL` prefix is present (e.g. `HEADING_LEVEL:2`), treat it as the authoritative `metadata.level` for the leading heading node of this chunk (1=Chapter, 2=Section, 3=Subsection). Nested headings within the chunk should have incrementally deeper levels. If a `PAGE_RANGE:N-M` prefix is present, use `N` as `metadata.page` for the leading node of this chunk unless you can identify a more precise page from the content itself (e.g. from a visible page number in the text).
 2. **Map** every content block to exactly one DoCO type — do not skip sections.
 3. **Preserve** raw text verbatim inside `content`; do not paraphrase or summarize.
 4. **Respect granularity**:
