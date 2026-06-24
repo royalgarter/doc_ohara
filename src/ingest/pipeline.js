@@ -452,13 +452,59 @@ function preDetectSpecialSections(markdown) {
         if (l.trim() === '') { blanks++; if (blanks > 2) break; }
         else blanks = 0;
         blockLines.push(l);
-        // parse entry text from markdown link or plain numbered line
-        const linkMatch = l.match(/\[(.+?)\]\(#.+?\)/);
-        if (linkMatch) tocEntries.push(linkMatch[1].trim());
         i++;
       }
       tocRaw = blockLines.join('\n');
-      addPipelineLog('info', `Pre-detected TOC block (${blockLines.length} lines) — excluded from LLM chunking`);
+
+      // Parse TOC entries from block lines.
+      // Handles several LiteParse-output formats:
+      //   1. Markdown links:  [Title](#anchor)  — page inline or omitted
+      //   2. Numbered bold:   1. **Title. . . .**  — pages appear later as **N** bulk lines
+      //   3. Dotted leaders:  Title . . . . . . 42  — page inline
+      //
+      // Strategy: two passes.
+      //   Pass 1 — collect chapter-level entries (formats 1 & 2) in order, no pages yet.
+      //   Pass 2 — extract all numeric page values from bold/plain page lines in order,
+      //            then zip them onto entries that still lack a page.
+      const chapterEntries = [];
+      const pageCandidates = []; // integers in document order
+
+      for (const l of blockLines) {
+        // Format 1: markdown link with optional inline page
+        const linkMatch = l.match(/\[(.+?)\]\(#.+?\)/);
+        if (linkMatch) { chapterEntries.push({ title: linkMatch[1].trim(), level: 1, page: null }); continue; }
+
+        // Format 2: numbered bold  "N. **Title . . .**"
+        const numberedBold = l.match(/^(\d+)\.\s+\*{1,2}([^*]+?)[.*\s]+\*{0,2}\s*$/);
+        if (numberedBold) { chapterEntries.push({ title: numberedBold[2].trim().replace(/\.+$/, '').trim(), level: 1, page: null }); continue; }
+
+        // Format 3: dotted leader with inline page — treat as sub-entry, keep page
+        const dottedPage = l.match(/^(.+?)\s*[.\s]{4,}\s*(\d+)\s*$/);
+        if (dottedPage) {
+          const title = dottedPage[1].replace(/\*+/g, '').trim();
+          const page = parseInt(dottedPage[2], 10);
+          if (title.length > 1) tocEntries.push({ title, level: 2, page });
+          pageCandidates.push(page);
+          continue;
+        }
+
+        // Bold page line: "**N**" or "**ix N**" (roman prefix + arabic) — extract rightmost integer.
+        // These are chapter-start pages; plain-number lines are sub-section pages — ignore for chapter zipping.
+        const boldPageLine = l.match(/^\*{1,2}[^*]*?(\d+)\s*\*{0,2}\s*$/);
+        if (boldPageLine) { pageCandidates.push(parseInt(boldPageLine[1], 10)); continue; }
+      }
+
+      // Zip collected page numbers onto chapter entries in order
+      let pageIdx = 0;
+      for (const entry of chapterEntries) {
+        while (pageIdx < pageCandidates.length && pageCandidates[pageIdx] < 1) pageIdx++;
+        if (pageIdx < pageCandidates.length) {
+          entry.page = pageCandidates[pageIdx++];
+        }
+        tocEntries.push(entry);
+      }
+
+      addPipelineLog('info', `Pre-detected TOC block (${blockLines.length} lines, ${tocEntries.length} entries) — excluded from LLM chunking`);
       continue; // don't push these lines to keepLines
     }
 
@@ -473,10 +519,12 @@ function preDetectSpecialSections(markdown) {
       if (run.filter(l => TOC_LINE_RE.test(l)).length >= 5) {
         tocRaw = run.join('\n');
         run.filter(l => TOC_LINE_RE.test(l)).forEach(l => {
-          const m = l.match(/\[(.+?)\]/) || l.match(/^\s*\d[\d.]*\s+(.+?)\s*[.\s]{4,}/);
-          if (m) tocEntries.push(m[1].trim());
+          const linkM = l.match(/\[(.+?)\]/);
+          const numM  = l.match(/^\s*\d[\d.]*\s+(.+?)\s*[.\s]{4,}\s*(\d+)\s*$/);
+          if (linkM) tocEntries.push({ title: linkM[1].trim(), level: 1, page: null });
+          else if (numM) tocEntries.push({ title: numM[1].trim(), level: 1, page: parseInt(numM[2], 10) });
         });
-        addPipelineLog('info', `Pre-detected TOC block (heuristic, ${run.length} lines) — excluded from LLM chunking`);
+        addPipelineLog('info', `Pre-detected TOC block (heuristic, ${run.length} lines, ${tocEntries.length} entries) — excluded from LLM chunking`);
         continue;
       } else {
         // Not a TOC run — keep lines
@@ -710,8 +758,9 @@ async function structureMarkdownWithRetries(ai, filename, mdContent) {
       } catch (err) {
         addPipelineLog('warn', `LLM error on chunk ${chunk.id}: ${err.message}`);
         if (attempt < maxAttempts) {
-          addPipelineLog('info', `Retrying chunk ${chunk.id} in 30s...`);
-          await delay(30000);
+          const retryDelay = 5000 * Math.pow(3, attempt - 1); // 5s, 15s, 45s
+          addPipelineLog('info', `Retrying chunk ${chunk.id} in ${retryDelay / 1000}s...`);
+          await delay(retryDelay);
           continue;
         }
         diag.outcome = 'failed';
@@ -825,20 +874,26 @@ async function structureMarkdownWithRetries(ai, filename, mdContent) {
   // Provenance: sumo_candidate_tags (original LLM output) is preserved alongside
   // sumo_tags (validated canonicals) and sumo_resolved_map (alias mappings used).
   try {
+    const sumoDropCounts = {};
     for (const node of mergedNodes) {
       if (node && Array.isArray(node.sumo_candidate_tags)) {
         const { valid, invalid, resolved_map } = validateTags(node.sumo_candidate_tags);
         node.sumo_tags = valid;
-        // keep original candidates for audit; rename to make intent clear
         node.sumo_candidate_tags_raw = node.sumo_candidate_tags;
         delete node.sumo_candidate_tags;
         if (Object.keys(resolved_map).length > 0) {
           node.sumo_resolved_map = resolved_map;
         }
-        if (invalid && invalid.length > 0) {
-          addPipelineLog('warn', `Node SUMO validation dropped ${invalid.length} tag(s): ${invalid.join(', ')}`);
+        for (const tag of (invalid || [])) {
+          sumoDropCounts[tag] = (sumoDropCounts[tag] || 0) + 1;
         }
       }
+    }
+    const totalSumoDrop = Object.values(sumoDropCounts).reduce((s, n) => s + n, 0);
+    if (totalSumoDrop > 0) {
+      const top = Object.entries(sumoDropCounts).sort((a, b) => b[1] - a[1]).slice(0, 8)
+        .map(([t, n]) => `${t}×${n}`).join(', ');
+      addPipelineLog('warn', `SUMO validation dropped ${totalSumoDrop} tag(s) across ${Object.keys(sumoDropCounts).length} distinct term(s) — top: ${top}`);
     }
   } catch (e) {
     addPipelineLog('error', `SUMO tag validation failed: ${e.message}`);
@@ -848,19 +903,21 @@ async function structureMarkdownWithRetries(ai, filename, mdContent) {
   }
 
   // Process candidate_entities from each node — validate types, deduplicate within node.
+  let entityDropTotal = 0;
   for (const node of mergedNodes) {
     if (node && Array.isArray(node.candidate_entities) && node.candidate_entities.length > 0) {
       const { valid, invalid } = processNodeEntities(node.candidate_entities);
       node.entities = valid;
       node.candidate_entities_raw = node.candidate_entities;
       delete node.candidate_entities;
-      if (invalid.length > 0) {
-        addPipelineLog('warn', `Node entity validation dropped ${invalid.length} entity/entities`);
-      }
+      entityDropTotal += invalid.length;
     } else {
       node.entities = [];
       delete node.candidate_entities;
     }
+  }
+  if (entityDropTotal > 0) {
+    addPipelineLog('warn', `Entity validation dropped ${entityDropTotal} entity/entities total across all nodes`);
   }
 
   const completedChunks = chunks.length - failedChunks.length;
@@ -1608,6 +1665,8 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
                 title: sec.title,
                 level: sec.level,
                 node_type: sec.node_type || 'Section',
+                page: sec.page ?? null,
+                page_source: sec.page_source ?? null,
                 // Store the resolved ArangoDB _id so verify/queries can follow the reference
                 parent_section_id: parentHandle || null,
               });
@@ -1640,6 +1699,8 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
             node_type: p.node_type || 'Paragraph',
             content: p.content,
             is_latex: typeof p.content === 'string' && (p.content.includes('\\') || p.content.includes('^') || p.content.includes('_')),
+            page: p.page ?? null,
+            page_source: p.page_source ?? null,
             sumo_tags: p.sumo_tags || [],
             sumo_candidate_tags_raw: p.sumo_candidate_tags_raw || [],
             sumo_resolved_map: p.sumo_resolved_map || {},
@@ -1782,10 +1843,10 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
       const insertedDoc = arangoDb.insertDocument({ _key: doc.id, source_file: doc.source_file, parser_engine: doc.parser_engine, title: doc.title, file_size: doc.file_size || '350 KB', upload_time: new Date().toISOString(), toc_raw: detectedToc?.raw || null, toc_source: detectedToc?.source || null, toc_entries: detectedToc?.entries || [], glossary_entries: detectedGlossary?.entries || [], ingestion_status: ingestionStatus, ingestion_error: ingestionError, total_chunks: totalChunks || null, completed_chunks: completedChunks || null });
 
       const docsSections = transformedDocs.sections.filter(s => s.document_id === doc.id);
-      docsSections.forEach(sec => { arangoDb.insertSection({ _key: sec.id, document_id: insertedDoc._key, title: sec.title, level: sec.level }); nodeCount += 1; });
+      docsSections.forEach(sec => { arangoDb.insertSection({ _key: sec.id, document_id: insertedDoc._key, title: sec.title, level: sec.level, page: sec.page ?? null, page_source: sec.page_source ?? null }); nodeCount += 1; });
 
       const docsParagraphs = transformedDocs.paragraphs.filter(p => p.document_id === doc.id);
-      docsParagraphs.forEach(p => { arangoDb.insertParagraph({ _key: p.id, document_id: insertedDoc._key, section_id: p.section_id ? `sections/${p.section_id}` : null, content: p.content, is_latex: typeof p.content === 'string' && (p.content.includes('\\') || p.content.includes('^') || p.content.includes('_')) }); nodeCount += 1; });
+      docsParagraphs.forEach(p => { arangoDb.insertParagraph({ _key: p.id, document_id: insertedDoc._key, section_id: p.section_id ? `sections/${p.section_id}` : null, content: p.content, is_latex: typeof p.content === 'string' && (p.content.includes('\\') || p.content.includes('^') || p.content.includes('_')), page: p.page ?? null, page_source: p.page_source ?? null }); nodeCount += 1; });
 
       const docsTables = transformedDocs.tables.filter(t => t.document_id === doc.id);
       docsTables.forEach(t => { arangoDb.insertTable({ _key: t.id, document_id: insertedDoc._key, section_id: t.section_id ? `sections/${t.section_id}` : null, matrix_data: t.matrix_data || [], markdown_representation: t.markdown_representation || '' }); nodeCount += 1; });
