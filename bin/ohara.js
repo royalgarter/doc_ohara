@@ -150,7 +150,7 @@ program
         console.log(chalk.dim(`  keywords: ${processedQuery.keywords.join(', ')}`));
       }
       if (processedQuery?.entityHints?.length) {
-        console.log(chalk.dim(`  entity hints: ${processedQuery.entityHints.join(', ')}`));
+        console.log(chalk.dim(`  entity hints: ${processedQuery.entityHints.map(h => typeof h === 'object' ? `${h.slug}(${h.type})` : h).join(', ')}`));
       }
       if (processedQuery?.sumoHints?.length) {
         console.log(chalk.dim(`  SUMO hints: ${processedQuery.sumoHints.join(', ')}`));
