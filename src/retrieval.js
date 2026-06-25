@@ -78,7 +78,7 @@ export class RetrievalEngine {
 
 	async _extractHintsWithGemini(rawInput) {
 		const ai = this._getAI();
-		if (!ai) return { entityHints: [], sumoHints: [] };
+		if (!ai) return { entityHints: [], sumoHints: [], temporalIntent: 'none' };
 
 		const prompt = FINGERPRINT_PROMPT + rawInput.slice(0, 2000);
 
@@ -187,7 +187,17 @@ export class RetrievalEngine {
 					, "text_en")
 					SORT BM25(doc) DESC
 					LIMIT @limit
-					RETURN { node: doc, score: BM25(doc), source: "fulltext" }
+					LET parentDoc = doc.document_id != null
+						? DOCUMENT(CONCAT("documents/", doc.document_id))
+						: null
+					RETURN {
+						node: MERGE(doc, {
+							document_published_date:      parentDoc.published_date,
+							document_effective_decay_class: parentDoc.effective_decay_class
+						}),
+						score: BM25(doc),
+						source: "fulltext"
+					}
 			`, { phrase: raw, limit: limit * 2 });
 			return rows.filter(r => r.score > 0);
 		} catch (err) {
@@ -389,14 +399,14 @@ export class RetrievalEngine {
 		if (isPrincipal) return 0;
 
 		// Layer 3: semantically strong nodes (high BM25 score) are immune
-		const gateFloor = parseFloat(process.env.OHARA_TEMPORAL_GATE_FLOOR || '0.5');
+		const gateFloor = parseFloat(process.env.OHARA_TEMPORAL_GATE_FLOOR || '5.0');
 		const bm25Contribution = entry.contributions?.find(c => c.phase === 'fulltext');
 		const bm25Score = bm25Contribution ? bm25Contribution.score : 0;
 		if (bm25Score > gateFloor) return 0;
 
 		// Layer 4+5: apply decay for weak candidates
 		const doc = entry.node;
-		const decayClass = doc.effective_decay_class || doc.decay_class || 'SCHOLARLY';
+		const decayClass = doc.effective_decay_class || doc.document_effective_decay_class || doc.decay_class || 'SCHOLARLY';
 		const rates = DECAY_RATES();
 		const lambda = rates[decayClass] ?? rates.SCHOLARLY;
 		const publishedDate = doc.published_date || doc.document_published_date || null;

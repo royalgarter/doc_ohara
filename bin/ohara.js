@@ -155,6 +155,9 @@ program
 			if (processedQuery?.sumoHints?.length) {
 				console.log(chalk.dim(`  SUMO hints: ${processedQuery.sumoHints.join(', ')}`));
 			}
+			if (processedQuery?.temporalIntent && processedQuery.temporalIntent !== 'none') {
+				console.log(chalk.dim(`  temporal intent: ${processedQuery.temporalIntent}`));
+			}
 			console.log(chalk.dim(`  ${results.length} result(s) — depth=${opts.depth} limit=${opts.limit}`));
 			console.log('');
 

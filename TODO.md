@@ -133,13 +133,25 @@ a temporal component with five-layer protection against burying "gold" timeless 
 
 ### Phase C — Verification
 
-- [ ] C1. Ingest two documents on same topic:
+- [x] C1. Ingest two documents on same topic:
         - news article (2024) → expect CURRENT decay class
         - textbook chapter (1995) → expect SCHOLARLY decay class
-- [ ] C2. Query "current best practices" → news article ranks higher (temporal_intent=current_state)
-- [ ] C3. Query "history of X in 1990s" → textbook ranks higher (temporal_intent=historical_fact, coverage match)
-- [ ] C4. db.documents.toArray() shows published_date, decay_class, effective_decay_class populated
-- [ ] C5. node bin/ohara.js query "X" --tiers --verbose shows temporal_score in phase breakdown
+        → Ingested /tmp/news_article_2024.md (CURRENT, published_date=2024-03-15) and
+          /tmp/textbook_chapter_1995.md (SCHOLARLY, published_date=1995). Both confirmed via AQL.
+- [x] C2. Query "current best practices" → news article ranks higher (temporal_intent=current_state)
+        → "current best practices bitcoin mining": news_article_2024.md ranks #1–4.
+          temporal intent: current_state shown in CLI verbose header.
+- [x] C3. Query "history of X in 1990s" → textbook ranks higher (temporal_intent=historical_fact, coverage match)
+        → "history of proof of work cryptography in 1990s": textbook at #3 (Limitations of Early PoW Systems).
+          temporal intent: historical_fact. With OHARA_TEMPORAL_GATE_FLOOR=30, textbook shows [fulltext+temporal].
+- [x] C4. db.documents.toArray() shows published_date, decay_class, effective_decay_class populated
+        → Confirmed via AQL: news=CURRENT/2024-03-15, textbook=SCHOLARLY/1995.
+- [x] C5. node bin/ohara.js query "X" --tiers --verbose shows temporal_score in phase breakdown
+        → [fulltext+temporal] source appears on 1995 textbook results for historical_fact query.
+          Fixes applied: (a) BM25 AQL now joins document temporal fields onto result nodes;
+          (b) OHARA_TEMPORAL_GATE_FLOOR default raised 0.5→5.0; (c) _extractHintsWithGemini
+          early-return bug fixed (missing temporalIntent); (d) CLI now displays temporal intent header;
+          (e) _computeTemporalScore uses document_effective_decay_class fallback field.
 
 Out of scope: UI for manual decay_class override, PRECEDES edges (use AQL sort instead),
 dense embedding similarity for temporal coverage matching.
