@@ -5,15 +5,64 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"/>
 
   <title>Doc Ohara</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdn.html-first.com/litewind-2.0.1.css" />
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
   <style>
+    /* Utilities litewind (a fixed-class subset of Tailwind) doesn't ship —
+       kept to the smallest possible set instead of pulling in the full build. */
     [x-cloak] { display: none !important; }
     body { font-family: 'SF Mono', ui-monospace, 'Cascadia Code', monospace; }
     .scrollbar-thin::-webkit-scrollbar { width: 3px; height: 3px; }
     .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
     .scrollbar-thin::-webkit-scrollbar-thumb { background: #334155; border-radius: 2px; }
     .log-line { font-size: 10.5px; line-height: 1.5; }
+    .line-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+    .ml-auto { margin-left: auto; }
+    .mt-auto { margin-top: auto; }
+    .inset-0 { top: 0; right: 0; bottom: 0; left: 0; }
+    .dot-glow { box-shadow: 0 0 6px #38bdf8; }
+    .group:hover .group-hover-sky { color: #7dd3fc; }
+    /* litewind has no alpha-channel background/border utilities — define the
+       handful this UI actually uses as plain rgba rules under the same class names */
+    .bg-gray-800\/50 { background-color: rgba(30,41,59,.5); }
+    .bg-gray-800\/60 { background-color: rgba(30,41,59,.6); }
+    .bg-gray-800\/80 { background-color: rgba(30,41,59,.8); }
+    .bg-gray-800\/90 { background-color: rgba(30,41,59,.9); }
+    .bg-gray-900\/40 { background-color: rgba(15,23,42,.4); }
+    .bg-gray-900\/90 { background-color: rgba(15,23,42,.9); }
+    .bg-yellow-700\/60 { background-color: rgba(161,98,7,.6); }
+    .bg-yellow-800\/50 { background-color: rgba(133,77,14,.5); }
+    .bg-yellow-950\/20 { background-color: rgba(66,32,6,.2); }
+    .bg-red-800\/50 { background-color: rgba(153,27,27,.5); }
+    .bg-red-950\/30 { background-color: rgba(69,10,10,.3); }
+    .bg-green-900\/40 { background-color: rgba(20,83,45,.4); }
+    .bg-green-950\/30 { background-color: rgba(5,46,22,.3); }
+    .bg-green-950\/20 { background-color: rgba(5,46,22,.2); }
+    .bg-sky-700\/70 { background-color: rgba(3,105,161,.7); }
+    .bg-sky-950\/20 { background-color: rgba(8,47,73,.2); }
+    .bg-sky-950\/30 { background-color: rgba(8,47,73,.3); }
+    .border-gray-700\/40 { border-color: rgba(51,65,85,.4); }
+    .border-gray-700\/50 { border-color: rgba(51,65,85,.5); }
+    .border-gray-700\/60 { border-color: rgba(51,65,85,.6); }
+    .border-gray-800\/60 { border-color: rgba(30,41,59,.6); }
+    .border-green-800\/50 { border-color: rgba(22,101,52,.5); }
+    .border-yellow-700\/40 { border-color: rgba(161,98,7,.4); }
+    .border-red-800\/60 { border-color: rgba(153,27,27,.6); }
+    .hover\:bg-yellow-600\/70:hover { background-color: rgba(202,138,4,.7); }
+    .hover\:bg-yellow-700\/60:hover { background-color: rgba(161,98,7,.6); }
+    .hover\:bg-red-700\/60:hover { background-color: rgba(185,28,28,.6); }
+    .hover\:bg-red-900\/50:hover { background-color: rgba(127,29,29,.5); }
+    .text-yellow-400\/70 { color: rgba(250,204,21,.7); }
+    .text-red-400\/80 { color: rgba(248,113,113,.8); }
+    /* litewind ships bg-sky-* but no text-sky-*/border-sky-*/gray-950/hover:text-* — fill the exact shades used */
+    .bg-gray-950 { background-color: #030712; }
+    .text-sky-200 { color: #bae6fd; } .text-sky-300 { color: #7dd3fc; }
+    .text-sky-400 { color: #38bdf8; } .text-sky-500 { color: #0ea5e9; }
+    .border-sky-400 { border-color: #38bdf8; } .border-sky-500 { border-color: #0ea5e9; }
+    .border-sky-600 { border-color: #0284c7; } .border-sky-700 { border-color: #0369a1; }
+    .hover\:text-gray-300:hover { color: #d1d5db; }
+    .hover\:text-gray-400:hover { color: #9ca3af; }
+    .hover\:text-red-400:hover { color: #f87171; }
     #graph-svg .node-g { cursor: pointer; }
     #graph-svg .node-g circle { transition: r 0.1s; }
   </style>
@@ -22,15 +71,16 @@
   class="bg-gray-950 text-gray-100 h-screen flex flex-col overflow-hidden">
 
   <!-- ── Header ─────────────────────────────────────────────────────────────── -->
-  <header class="flex items-center gap-5 px-4 h-10 bg-gray-900 border-b border-gray-800 shrink-0 select-none">
+  <header class="flex items-center gap-5 px-4 h-10 bg-gray-900 border-b border-gray-800 flex-shrink-0 select-none">
     <div class="flex items-center gap-2">
-      <div class="w-2 h-2 rounded-full bg-sky-400 shadow-[0_0_6px_#38bdf8]"></div>
-      <span class="text-xs font-bold text-sky-400 tracking-[0.15em]">DOC OHARA</span>
+      <div class="w-2 h-2 rounded-full bg-sky-400 dot-glow"></div>
+      <span class="text-xs font-bold text-sky-400 tracking-widest">DOC OHARA</span>
     </div>
     <div class="flex gap-4 text-xs text-gray-500">
       <span><span class="text-gray-300" x-text="graphData.documents.length"></span> docs</span>
       <span><span class="text-gray-300" x-text="graphData.sections.length"></span> sections</span>
       <span><span class="text-gray-300" x-text="graphData.paragraphs.length"></span> nodes</span>
+      <span><span class="text-gray-300" x-text="graphData.entities.length"></span> entities</span>
       <span><span class="text-gray-300" x-text="graphData.edges.length"></span> edges</span>
       <span class="text-gray-700" x-text="graphSource ? '[' + graphSource + ']' : ''"></span>
     </div>
@@ -39,7 +89,7 @@
         :class="colorMode==='type' ? 'bg-sky-700/70 text-sky-200' : 'bg-gray-800 text-gray-500 hover:text-gray-300'"
         class="text-sm px-2 py-0.5 rounded transition">by type</button>
       <button @click="colorMode='sumo'; renderCurrentGraph()"
-        :class="colorMode==='sumo' ? 'bg-emerald-800/70 text-emerald-200' : 'bg-gray-800 text-gray-500 hover:text-gray-300'"
+        :class="colorMode==='sumo' ? 'bg-green-800/70 text-green-200' : 'bg-gray-800 text-gray-500 hover:text-gray-300'"
         class="text-sm px-2 py-0.5 rounded transition">by SUMO</button>
       <button @click="loadGraph()"
         class="text-sm px-2 py-0.5 rounded bg-gray-800 text-gray-500 hover:text-gray-300 transition">↺</button>
@@ -50,7 +100,7 @@
   <div class="flex flex-1 min-h-0">
 
     <!-- Vertical tab bar -->
-    <nav class="flex flex-col items-center gap-1 py-2 w-9 bg-gray-900 border-r border-gray-800 shrink-0">
+    <nav class="flex flex-col items-center gap-1 py-2 w-9 bg-gray-900 border-r border-gray-800 flex-shrink-0">
       <template x-for="t in tabs" :key="t.id">
         <button @click="tab = t.id; if(t.id==='jobs') loadJobs()" :title="t.label"
           :class="tab === t.id ? 'bg-gray-700/80 text-sky-400' : 'text-gray-600 hover:text-gray-300'"
@@ -63,7 +113,7 @@
     </nav>
 
     <!-- Left panel -->
-    <div class="flex flex-col bg-gray-900/40 border-r border-gray-800 shrink-0 overflow-hidden" 
+    <div class="flex flex-col bg-gray-900/40 border-r border-gray-800 flex-shrink-0 overflow-hidden" 
         :class="docsOpen ? 'w-64' : 'w-32'">
 
       <!-- GRAPH tab -->
@@ -88,9 +138,9 @@
               :class="selectedDocKeys.has(doc._key || doc.id)
                 ? 'border-sky-500/70 bg-sky-950/30'
                 : 'border-gray-700/40 bg-gray-800/50 hover:border-sky-600/40 hover:bg-gray-800'"
-              class="group p-2 rounded border cursor-pointer transition text-xs shrink-0 relative">
+              class="group p-2 rounded border cursor-pointer transition text-xs flex-shrink-0 relative">
               <!-- Selection indicator -->
-              <div class="absolute top-2 right-2 w-3 h-3 rounded-sm border flex items-center justify-center shrink-0"
+              <div class="absolute top-2 right-2 w-3 h-3 rounded-sm border flex items-center justify-center flex-shrink-0"
                 :class="selectedDocKeys.has(doc._key || doc.id)
                   ? 'border-sky-400 bg-sky-500/30'
                   : 'border-gray-600'">
@@ -98,7 +148,7 @@
                   class="text-sky-300 leading-none" style="font-size:9px">✓</span>
               </div>
               <div class="text-gray-200 truncate pr-5"
-                :class="selectedDocKeys.has(doc._key || doc.id) ? 'text-sky-200' : 'group-hover:text-sky-300'"
+                :class="selectedDocKeys.has(doc._key || doc.id) ? 'text-sky-200' : 'group-hover-sky'"
                 x-text="doc.title || doc.source_file"></div>
               <div class="flex justify-between mt-0.5">
                 <span class="text-gray-600" x-text="doc.parser_engine || 'LiteParse'"></span>
@@ -114,7 +164,7 @@
         <div class="border-t border-gray-800 pt-2.5 grid grid-cols-2 gap-x-3 gap-y-1.5 mt-auto">
           <template x-for="item in legend" :key="item[1]">
             <div class="flex items-center gap-1.5 text-xs text-gray-500">
-              <div class="w-2.5 h-2.5 rounded-full shrink-0" :style="'background:' + item[0]"></div>
+              <div class="w-2.5 h-2.5 rounded-full flex-shrink-0" :style="'background:' + item[0]"></div>
               <span x-text="item[1]"></span>
             </div>
           </template>
@@ -131,9 +181,9 @@
             <template x-for="f in inputFiles" :key="f.name">
               <div class="flex items-center gap-2 text-xs px-2 py-1 rounded bg-gray-800/50 border border-gray-700/40">
                 <span class="flex-1 truncate text-gray-300" x-text="f.name"></span>
-                <span class="text-gray-600 text-sm shrink-0" x-text="f.size"></span>
+                <span class="text-gray-600 text-sm flex-shrink-0" x-text="f.size"></span>
                 <button @click="deleteInputFile(f.name)"
-                  class="text-gray-700 hover:text-red-400 transition shrink-0 leading-none">✕</button>
+                  class="text-gray-700 hover:text-red-400 transition flex-shrink-0 leading-none">✕</button>
               </div>
             </template>
             <div x-show="inputFiles.length === 0"
@@ -149,14 +199,14 @@
         </button>
 
         <div class="flex-1 min-h-0 flex flex-col overflow-hidden rounded border border-gray-800 bg-gray-950">
-          <div class="text-sm text-gray-700 px-2 py-1 border-b border-gray-800 shrink-0">log</div>
+          <div class="text-sm text-gray-700 px-2 py-1 border-b border-gray-800 flex-shrink-0">log</div>
           <div class="flex-1 overflow-y-auto scrollbar-thin p-2 flex flex-col gap-0.5" id="log-console">
             <template x-for="(log, i) in pipelineLogs" :key="i">
               <div class="log-line"
                 :class="{
-                  'text-emerald-400': log.level === 'success',
+                  'text-green-400': log.level === 'success',
                   'text-red-400':     log.level === 'error',
-                  'text-amber-400':   log.level === 'warn',
+                  'text-yellow-400':   log.level === 'warn',
                   'text-gray-500':   log.level === 'info'
                 }"
                 x-text="'[' + log.level + '] ' + log.message"></div>
@@ -176,7 +226,7 @@
             class="flex-1 text-xs bg-gray-800 border border-gray-700/60 rounded px-2.5 py-1.5
                    text-gray-200 placeholder-gray-700 focus:outline-none focus:border-sky-500 transition" />
           <button @click="runQuery()" :disabled="queryLoading"
-            class="text-xs px-2.5 py-1.5 bg-sky-700 hover:bg-sky-600 text-white rounded transition shrink-0">→</button>
+            class="text-xs px-2.5 py-1.5 bg-sky-700 hover:bg-sky-600 text-white rounded transition flex-shrink-0">→</button>
         </div>
 
         <div x-show="queryResults && queryResults.processedQuery && queryResults.processedQuery.keywords && queryResults.processedQuery.keywords.length"
@@ -194,14 +244,14 @@
                      hover:border-sky-600/50 transition">
               <div class="flex justify-between items-center mb-1">
                 <span class="text-sky-500 text-sm font-bold" x-text="'#' + (i + 1)"></span>
-                <span class="text-emerald-400 text-sm"
+                <span class="text-green-400 text-sm"
                   x-text="Math.round(r.score * 100) + '%'"></span>
               </div>
               <div class="text-gray-300 text-base leading-relaxed line-clamp-3"
                 x-text="r.node.content || r.node.title || '—'"></div>
               <div class="flex flex-wrap gap-1 mt-1.5">
                 <template x-for="tag in (r.node.sumo_tags || []).slice(0, 4)" :key="tag">
-                  <span class="text-sm px-1 py-0.5 bg-emerald-900/40 text-emerald-400 rounded"
+                  <span class="text-sm px-1 py-0.5 bg-green-900/40 text-green-400 rounded"
                     x-text="tag"></span>
                 </template>
               </div>
@@ -222,8 +272,8 @@
       <div x-show="tab === 'jobs'" x-init="if(tab==='jobs') loadJobs()" class="flex flex-col h-full overflow-hidden p-3 gap-2">
         <div class="text-sm font-bold text-gray-500 uppercase tracking-widest">Job Queue</div>
 
-        <div class="grid grid-cols-4 gap-1 shrink-0">
-          <template x-for="[key, color] in [['failed','text-red-400'],['waiting','text-amber-400'],['active','text-sky-400'],['completed','text-emerald-400']]" :key="key">
+        <div class="grid grid-cols-4 gap-1 flex-shrink-0">
+          <template x-for="[key, color] in [['failed','text-red-400'],['waiting','text-yellow-400'],['active','text-sky-400'],['completed','text-green-400']]" :key="key">
             <div class="flex flex-col items-center py-1 rounded bg-gray-800/60 border border-gray-700/40">
               <span class="text-xs font-bold" :class="color" x-text="jobStats[key] || 0"></span>
               <span class="text-sm text-gray-600" x-text="key"></span>
@@ -231,9 +281,9 @@
           </template>
         </div>
 
-        <div x-show="jobStats.failed > 0" class="flex gap-1.5 shrink-0">
+        <div x-show="jobStats.failed > 0" class="flex gap-1.5 flex-shrink-0">
           <button @click="retryAllFailed(false)"
-            class="flex-1 text-sm py-1 rounded bg-amber-700/60 hover:bg-amber-600/70 text-amber-200 transition">
+            class="flex-1 text-sm py-1 rounded bg-yellow-700/60 hover:bg-yellow-600/70 text-yellow-200 transition">
             ↺ Retry all failed
           </button>
           <button @click="retryAllFailed(true)"
@@ -247,21 +297,21 @@
             <div class="rounded border p-2 text-xs"
               :class="{
                 'border-red-800/60 bg-red-950/30':   job.status === 'failed',
-                'border-amber-700/40 bg-amber-950/20': job.status === 'waiting',
+                'border-yellow-700/40 bg-yellow-950/20': job.status === 'waiting',
                 'border-sky-700/40 bg-sky-950/20':   job.status === 'active',
                 'border-gray-700/30 bg-gray-800/20': job.status === 'completed',
               }">
               <div class="flex items-center gap-2 mb-1">
-                <div class="w-1.5 h-1.5 rounded-full shrink-0"
+                <div class="w-1.5 h-1.5 rounded-full flex-shrink-0"
                   :style="'background:' + jobStatusColor(job.status)"></div>
                 <span class="font-semibold text-gray-200 truncate flex-1"
                   x-text="job.data && job.data.filename || job.id"></span>
-                <span class="text-sm uppercase font-bold shrink-0"
+                <span class="text-sm uppercase font-bold flex-shrink-0"
                   :class="{
                     'text-red-400':   job.status==='failed',
-                    'text-amber-400': job.status==='waiting',
+                    'text-yellow-400': job.status==='waiting',
                     'text-sky-400':   job.status==='active',
-                    'text-emerald-400': job.status==='completed',
+                    'text-green-400': job.status==='completed',
                   }"
                   x-text="job.status"></span>
               </div>
@@ -275,7 +325,7 @@
                 class="text-sm text-red-400/80 mb-1.5 leading-relaxed break-words"
                 x-text="job.error"></div>
               <div x-show="job.status === 'completed' && job.result && job.result.skipped"
-                class="text-sm text-amber-400/70 mb-1.5"
+                class="text-sm text-yellow-400/70 mb-1.5"
                 x-text="job.result && job.result.reason"></div>
 
               <!-- LLM usage summary -->
@@ -285,11 +335,11 @@
                     x-text="(job.result.llm_usage.model || 'Gemini') + ' · usage'"></div>
                   <div class="grid grid-cols-2 gap-x-4 gap-y-0.5 text-sm text-gray-500">
                     <div>Prompt <span class="text-gray-300 float-right" x-text="job.result.llm_usage.prompt_tokens.toLocaleString()"></span></div>
-                    <div>Generated <span class="text-emerald-400 float-right" x-text="job.result.llm_usage.candidates_tokens.toLocaleString()"></span></div>
+                    <div>Generated <span class="text-green-400 float-right" x-text="job.result.llm_usage.candidates_tokens.toLocaleString()"></span></div>
                     <div>Total tokens <span class="text-sky-400 float-right" x-text="job.result.llm_usage.total_tokens.toLocaleString()"></span></div>
                     <div>Chunks <span class="text-gray-300 float-right" x-text="job.result.llm_usage.chunks + (job.result.llm_usage.cache_hits ? ' (' + job.result.llm_usage.cache_hits + ' cached)' : '')"></span></div>
                     <template x-if="job.result.llm_usage.repair_prompt_tokens > 0">
-                      <div class="col-span-2 text-amber-600">Repair tokens <span class="float-right" x-text="(job.result.llm_usage.repair_prompt_tokens + job.result.llm_usage.repair_candidates_tokens).toLocaleString()"></span></div>
+                      <div class="col-span-2 text-yellow-600">Repair tokens <span class="float-right" x-text="(job.result.llm_usage.repair_prompt_tokens + job.result.llm_usage.repair_candidates_tokens).toLocaleString()"></span></div>
                     </template>
                   </div>
                 </div>
@@ -298,7 +348,7 @@
               <div class="flex items-center gap-2 text-sm text-gray-600">
                 <span x-text="'attempt ' + (job.attempts||0) + '/' + (job.maxAttempts||3)"></span>
                 <span x-text="job.updatedAt ? new Date(job.updatedAt).toLocaleTimeString() : ''"></span>
-                <span x-show="job.data && job.data.force" class="text-amber-600">--force</span>
+                <span x-show="job.data && job.data.force" class="text-yellow-600">--force</span>
               </div>
               <div x-show="job.status === 'failed' || job.status === 'completed'" class="flex gap-1 mt-1.5">
                 <button @click="retryJob(job.id, false)"
@@ -306,7 +356,7 @@
                   ↺ Retry
                 </button>
                 <button @click="retryJob(job.id, true)"
-                  class="text-sm px-2 py-0.5 rounded bg-amber-800/50 hover:bg-amber-700/60 text-amber-300 transition">
+                  class="text-sm px-2 py-0.5 rounded bg-yellow-800/50 hover:bg-yellow-700/60 text-yellow-300 transition">
                   ↺ Force
                 </button>
                 <button @click="deleteJob(job.id)"
@@ -322,7 +372,7 @@
             class="text-base text-gray-600 text-center py-8 animate-pulse">Loading…</div>
         </div>
 
-        <button @click="loadJobs()" class="shrink-0 text-sm py-1 rounded bg-gray-800 text-gray-600 hover:text-gray-400 transition">
+        <button @click="loadJobs()" class="flex-shrink-0 text-sm py-1 rounded bg-gray-800 text-gray-600 hover:text-gray-400 transition">
           ↺ Refresh
         </button>
       </div>
@@ -339,7 +389,7 @@
           <span x-show="wikiExporting" class="animate-spin inline-block">⟳</span>
           <span x-text="wikiExporting ? 'Exporting…' : '⬇ Export to wiki/'"></span>
         </button>
-        <div x-show="wikiMessage" class="text-base text-emerald-400" x-text="wikiMessage"></div>
+        <div x-show="wikiMessage" class="text-base text-green-400" x-text="wikiMessage"></div>
         <div class="flex-1"></div>
         <div class="text-sm text-gray-700 border-t border-gray-800 pt-2">
           Output: <code class="text-gray-600">wiki/*.md</code>
@@ -353,7 +403,9 @@
 
       <!-- SVG canvas -->
       <div class="flex-1 overflow-auto relative bg-gray-950" id="graph-container">
-        <svg id="graph-svg" preserveAspectRatio="xMidYMid meet"></svg>
+        <div id="graph-scale-wrapper" style="position:relative;">
+          <svg id="graph-svg" preserveAspectRatio="xMidYMid meet" style="position:absolute; top:0; left:0; transform-origin:0 0;"></svg>
+        </div>
 
         <!-- Clear selection button overlay -->
         <div x-show="selectedNode" class="absolute top-2 left-2 z-10 select-none">
@@ -389,13 +441,13 @@
 
       <!-- Node inspector strip -->
       <div x-show="selectedNode"
-        class="shrink-0 border-t border-gray-800 bg-gray-900/90 p-3 flex gap-4 items-start"
+        class="flex-shrink-0 border-t border-gray-800 bg-gray-900/90 p-3 flex gap-4 items-start"
         style="max-height: 600px;">
 
         <div class="flex-1 min-w-0 flex flex-col gap-1.5 overflow-hidden">
           <!-- Type + key row -->
           <div class="flex items-center gap-2">
-            <div class="w-2.5 h-2.5 rounded-full shrink-0"
+            <div class="w-2.5 h-2.5 rounded-full flex-shrink-0"
               :style="'background:' + nodeColor(selectedNode)"></div>
             <span class="text-sm font-bold px-1.5 py-0.5 rounded uppercase tracking-wider"
               :style="'background:' + nodeColor(selectedNode) + '22; color:' + nodeColor(selectedNode)"
@@ -406,15 +458,22 @@
             <span x-show="selectedNode && selectedNode._id && !selectedNode._id.startsWith('tags/') && !expandedNodes.has(selectedNode._id)"
               class="text-sm text-gray-500 ml-auto animate-pulse">loading…</span>
             <span x-show="selectedNode && selectedNode._id && !selectedNode._id.startsWith('tags/') && expandedNodes.has(selectedNode._id)"
-              class="text-sm text-emerald-400 ml-auto">expanded</span>
+              class="text-sm text-green-400 ml-auto">expanded</span>
           </div>
           <!-- SUMO tag inspector: tag name + paragraph count -->
           <div x-show="selectedNode && selectedNode._id && selectedNode._id.startsWith('tags/')"
             class="flex flex-col gap-1">
-            <div class="text-xs text-emerald-300 font-semibold"
+            <div class="text-xs text-green-300 font-semibold"
               x-text="selectedNode && ('#' + selectedNode.title)"></div>
             <div class="text-base text-gray-500"
               x-text="selectedNode && selectedNode._tagCount + ' paragraph(s) tagged — full path highlighted in graph'"></div>
+          </div>
+          <!-- Entity inspector: name, type, mention count -->
+          <div x-show="selectedNode && selectedNode._id && selectedNode._id.startsWith('entities/')"
+            class="flex flex-col gap-1">
+            <div class="text-xs text-pink-300 font-semibold" x-text="selectedNode && selectedNode.name"></div>
+            <div class="text-base text-gray-500"
+              x-text="selectedNode && (selectedNode.type + ' · mentioned ' + (selectedNode.mention_count || 0) + ' time(s)')"></div>
           </div>
           <!-- Title (sections / documents) -->
           <div class="text-xs text-gray-200 font-semibold truncate"
@@ -457,21 +516,21 @@
             x-show="selectedNode && !selectedNode._id?.startsWith('tags/') && !selectedNode._id?.startsWith('sections/') && selectedNode.content"
             x-text="selectedNode && (selectedNode.content || '')"></div>
           <!-- Empty content notification for paragraphs that loaded but have no text -->
-          <div class="text-base text-amber-600 italic"
+          <div class="text-base text-yellow-600 italic"
             x-show="selectedNode && selectedNode._id && selectedNode._id.startsWith('paragraphs/') && expandedNodes.has(selectedNode._id) && selectedNode.content === ''">[EMPTY CONTENT]</div>
           <!-- Empty state for structural nodes (not tags, not paragraphs-with-content, not sections) -->
           <div class="text-base text-gray-700 italic"
-            x-show="selectedNode && !selectedNode._id?.startsWith('tags/') && !selectedNode._id?.startsWith('sections/') && !selectedNode.content && !selectedNode.title && !(selectedNode._id?.startsWith('paragraphs/') && expandedNodes.has(selectedNode._id))">—</div>
+            x-show="selectedNode && !selectedNode._id?.startsWith('tags/') && !selectedNode._id?.startsWith('sections/') && !selectedNode._id?.startsWith('entities/') && !selectedNode.content && !selectedNode.title && !(selectedNode._id?.startsWith('paragraphs/') && expandedNodes.has(selectedNode._id))">—</div>
         </div>
 
         <!-- SUMO tags (shown for paragraphs/sections that HAVE tags, not for tag nodes themselves) -->
         <div x-show="selectedNode && !selectedNode._id?.startsWith('tags/') && selectedNode.sumo_tags && selectedNode.sumo_tags.length > 0"
-          class="shrink-0 w-44 flex flex-col gap-1.5">
+          class="flex-shrink-0 w-44 flex flex-col gap-1.5">
           <div class="text-sm font-bold text-gray-600 uppercase tracking-wider">SUMO Tags</div>
           <div class="flex flex-wrap gap-1 overflow-y-auto scrollbar-thin" style="max-height: 140px;">
             <template x-for="tag in (selectedNode && selectedNode.sumo_tags || []).slice(0, 20)" :key="tag">
-              <span class="text-sm px-1.5 py-0.5 bg-emerald-900/40 border border-emerald-800/50
-                           text-emerald-300 rounded" x-text="tag"></span>
+              <span class="text-sm px-1.5 py-0.5 bg-green-900/40 border border-green-800/50
+                           text-green-300 rounded" x-text="tag"></span>
             </template>
           </div>
           <div x-show="selectedNode && (selectedNode.sumo_candidate_tags_raw || []).length > (selectedNode.sumo_tags || []).length"
@@ -481,7 +540,7 @@
         </div>
 
         <button @click="selectedNode = null; renderCurrentGraph()"
-          class="shrink-0 text-gray-700 hover:text-gray-400 transition text-xs mt-0.5">✕</button>
+          class="flex-shrink-0 text-gray-700 hover:text-gray-400 transition text-xs mt-0.5">✕</button>
       </div>
 
     </div>
@@ -509,10 +568,11 @@
         ['#fbbf24', 'Paragraph'],
         ['#c084fc', 'Figure'],
         ['#f472b6', 'Table'],
+        ['#fb7185', 'Entity'],
         ['#4ade80', 'SUMO Tag'],
       ],
 
-      graphData: { documents: [], sections: [], paragraphs: [], tables: [], edges: [] },
+      graphData: { documents: [], sections: [], paragraphs: [], tables: [], entities: [], edges: [] },
       expandedNodes: new Set(),
       selectedDocKeys: new Set(),
       graphSource: '',
@@ -564,14 +624,18 @@
       },
 
       applyZoom() {
+        // Scale via CSS transform (GPU-composited) instead of resizing width/height —
+        // resizing forces the browser to re-rasterize the SVG (incl. blur filters) on
+        // every frame, which is what made zoom feel laggy.
         const svg = document.getElementById('graph-svg');
-        if (!svg) return;
-        const vb = svg.getAttribute('viewBox');
-        if (!vb) return;
-        const parts = vb.trim().split(/\s+/);
-        if (parts.length < 4) return;
-        svg.style.width  = Math.round(parseFloat(parts[2]) * this.graphZoom) + 'px';
-        svg.style.height = Math.round(parseFloat(parts[3]) * this.graphZoom) + 'px';
+        const wrapper = document.getElementById('graph-scale-wrapper');
+        if (!svg || !wrapper) return;
+        const baseW = parseFloat(svg.dataset.baseW || '0');
+        const baseH = parseFloat(svg.dataset.baseH || '0');
+        if (!baseW || !baseH) return;
+        svg.style.transform = 'scale(' + this.graphZoom + ')';
+        wrapper.style.width  = Math.round(baseW * this.graphZoom) + 'px';
+        wrapper.style.height = Math.round(baseH * this.graphZoom) + 'px';
       },
 
       async loadGraph() {
@@ -586,6 +650,7 @@
               sections:   d.sections   || [],
               paragraphs: d.paragraphs || [],
               tables:     d.tables     || [],
+              entities:   d.entities   || [],
               edges:      d.edges      || [],
             };
             this.graphSource = d.source || '';
@@ -822,6 +887,7 @@
     paragraph: '#fbbf24',
     figure:    '#c084fc',
     table:     '#f472b6',
+    entity:    '#fb7185',
     tag:       '#4ade80',
   };
 
@@ -837,6 +903,7 @@
     if (id.startsWith('documents/'))  return 'document';
     if (id.startsWith('paragraphs/')) return (node.node_type || '').toLowerCase() === 'figure' ? 'figure' : 'paragraph';
     if (id.startsWith('tables/'))     return 'table';
+    if (id.startsWith('entities/'))   return 'entity';
     if (id.startsWith('tags/'))       return 'tag';
     if (id.startsWith('sections/'))   return 'section_L' + (node.level || 1);
 
@@ -882,6 +949,7 @@
     svg.innerHTML = '';
 
     let { documents, sections, paragraphs, tables, edges } = data;
+    let entities = data.entities || [];
 
     // Filter by selected documents (empty set = show all)
     if (selectedDocKeys && selectedDocKeys.size > 0) {
@@ -891,15 +959,19 @@
       sections   = sections.filter(s => selectedDocKeys.has(s.document_id));
       paragraphs = paragraphs.filter(p => selectedDocKeys.has(p.document_id));
       tables     = tables.filter(t => selectedDocKeys.has(t.document_id));
+      entities   = entities.filter(e => (e.document_ids || []).some(id => selectedDocKeys.has(id)));
 
       const allowedIds = new Set([
         ...documents.map(d => d._id),
         ...sections.map(s => s._id),
         ...paragraphs.map(p => p._id),
         ...tables.map(t => t._id),
+        ...entities.map(e => e._id),
       ]);
       edges = edges.filter(e => allowedIds.has(e._from) && allowedIds.has(e._to));
     }
+    // Most-mentioned entities first so the column reads top-to-bottom by relevance
+    entities = [...entities].sort((a, b) => (b.mention_count || 0) - (a.mention_count || 0));
 
     // ── Build virtual SUMO tag nodes ──────────────────────────────────────
     const tagCounts = {};
@@ -930,12 +1002,19 @@
     const levelNums = [...sectionsByLevel.keys()].sort((a, b) => a - b);
     const numLevels = levelNums.length || 0;
 
+    // Paragraphs/figures are usually the most numerous node type by far — wrap
+    // them into a few side-by-side sub-columns instead of one very tall column.
+    const PARA_COLS    = sampledPara.length > 40 ? 3 : sampledPara.length > 15 ? 2 : 1;
+    const PARA_SUBGAP  = 26;
+    const paraRows      = Math.ceil(sampledPara.length / PARA_COLS) || 1;
+
     // ── Dynamic column x positions ────────────────────────────────────────
     const DOC_X   = 70;
     const SEC_GAP   = 150;             // gap between level columns
     const SEC_START = DOC_X + SEC_GAP;    // x of first section level column
     const PARA_X  = SEC_START + numLevels * SEC_GAP + 20;
-    const TAG_X   = PARA_X + SEC_GAP;
+    const ENTITY_X = PARA_X + (PARA_COLS - 1) * PARA_SUBGAP + SEC_GAP;
+    const TAG_X   = ENTITY_X + SEC_GAP;
     const svgW    = TAG_X + 115;
 
     const levelToX = {};
@@ -943,7 +1022,7 @@
 
     // Row height: at least 14px so 5px-radius nodes never overlap.
     // The container is overflow-auto so the SVG can be as tall as needed.
-    const columnHeightsPreview = [documents.length, sampledPara.length,
+    const columnHeightsPreview = [documents.length, paraRows, entities.length,
       ...levelNums.map(l => sectionsByLevel.get(l).length)];
     const tallestPreview = Math.max(...columnHeightsPreview, 1);
     const ROW_H = Math.max(14, Math.min(26, Math.floor(2400 / tallestPreview)));
@@ -958,13 +1037,26 @@
       });
     }
 
+    // Wraps nodes across `cols` side-by-side sub-columns (column-major fill)
+    // instead of one tall column — keeps the paragraph block roughly square.
+    function placeColumnWrapped(nodes, colKey, xStart, cols, subGap) {
+      const rows = Math.ceil(nodes.length / cols) || 1;
+      nodes.forEach((node, i) => {
+        const key = node._key || node.id || colKey + '_' + i;
+        const col = Math.floor(i / rows);
+        const row = i % rows;
+        nodePos.set(key, { x: xStart + col * subGap, y: PAD_Y + row * ROW_H, node, colKey });
+      });
+    }
+
     placeColumn(documents,   'document', DOC_X);
     for (const lvl of levelNums) {
       placeColumn(sectionsByLevel.get(lvl), 'section_L' + lvl, levelToX[lvl]);
     }
-    placeColumn(sampledPara, 'paragraph', PARA_X);
-    if (sampledTbl.length > 0) placeColumn(sampledTbl, 'table', PARA_X + 35);
-    placeColumn(tagNodes,    'tag',       TAG_X);
+    placeColumnWrapped(sampledPara, 'paragraph', PARA_X, PARA_COLS, PARA_SUBGAP);
+    if (sampledTbl.length > 0) placeColumn(sampledTbl, 'table', PARA_X + (PARA_COLS - 1) * PARA_SUBGAP + 35);
+    placeColumn(entities,    'entity',     ENTITY_X);
+    placeColumn(tagNodes,    'tag',        TAG_X);
 
     // ── Compute related keys for the selected node ─────────────────────────
 
@@ -1029,7 +1121,7 @@
     }
 
     // ── SVG dimensions ────────────────────────────────────────────────────
-    const columnHeights = [documents.length, sampledPara.length, tagNodes.length,
+    const columnHeights = [documents.length, paraRows, entities.length, tagNodes.length,
       ...levelNums.map(l => sectionsByLevel.get(l).length)];
     const tallest = Math.max(...columnHeights, 1);
     const svgH = Math.max(PAD_Y + tallest * ROW_H + 30, 300);
@@ -1037,6 +1129,14 @@
     svg.setAttribute('viewBox', '0 0 ' + svgW + ' ' + svgH);
     svg.style.width  = Math.round(svgW) + 'px';
     svg.style.height = Math.round(svgH) + 'px';
+    svg.dataset.baseW = svgW;
+    svg.dataset.baseH = svgH;
+    svg.style.transform = 'scale(' + zoom + ')';
+    const wrapper = document.getElementById('graph-scale-wrapper');
+    if (wrapper) {
+      wrapper.style.width  = Math.round(svgW * zoom) + 'px';
+      wrapper.style.height = Math.round(svgH * zoom) + 'px';
+    }
 
 
     // ── Defs ──────────────────────────────────────────────────────────────
@@ -1060,7 +1160,8 @@
         'LEVEL ' + lvl,
         LEVEL_COLORS[(lvl - 1) % LEVEL_COLORS.length],
       ]),
-      [PARA_X, 'PARA/FIG', FIXED_COLORS.paragraph],
+      [PARA_X, 'PARA/FIG' + (PARA_COLS > 1 ? ' (×' + PARA_COLS + ')' : ''), FIXED_COLORS.paragraph],
+      [ENTITY_X, 'ENTITY', FIXED_COLORS.entity],
       [TAG_X,  'SUMO TAG', FIXED_COLORS.tag],
     ];
 
@@ -1117,12 +1218,13 @@
 
     for (const [key, { x, y, node, colKey }] of nodePos) {
       const isTag    = key.startsWith('tag:');
+      const isEntity = colKey === 'entity';
       const isDoc    = colKey === 'document';
       const isSec    = colKey.startsWith('section_L');
       const color    = (colorMode === 'sumo' && !isTag)
         ? getNodeColor(node, 'sumo')
         : getNodeColor(node, 'type');
-      const r        = isDoc ? 7 : isTag ? 4 : 5;
+      const r        = isDoc ? 7 : (isTag || isEntity) ? 4 : 5;
 
       const isSel     = key === selectedKey;
       const isRelated = !isSel && hasSelection && relatedKeys.has(key);
@@ -1148,17 +1250,18 @@
       // section label count threshold: only label if ≤ 25 nodes in that level column
       const secLvl = isSec ? parseInt(colKey.replace('section_L', ''), 10) : null;
       const secCount = secLvl !== null ? (sectionsByLevel.get(secLvl) || []).length : 0;
-      const showLabel = isDoc || isTag || isSec || false; // paragraphs/tables: no label (too many)
+      // entities: only label when the column is short enough to read (else too dense)
+      const showLabel = isDoc || isTag || isSec || (isEntity && entities.length <= 40);
 
       if (showLabel) {
-        const rawLabel = isTag ? '#' + node.title : (node.title || node.source_file || key);
+        const rawLabel = isTag ? '#' + node.title : isEntity ? (node.name || key) : (node.title || node.source_file || key);
         const maxLen   = isDoc ? 60 : isSec ? 40 : 20;
         const label    = rawLabel.length > maxLen ? rawLabel.slice(0, maxLen - 1) + '…' : rawLabel;
         const txt = svgEl('text', {
-          'x': r + 4, 
+          'x': r + 4,
           'y': 4,
           'font-size':  isDoc ? '8' : isSec ? '7' : '6',
-          'fill': isDimmed ? '#1e293b' : isTag ? '#86efac' : isDoc ? '#cbd5e1' : '#94a3b8',
+          'fill': isDimmed ? '#1e293b' : isTag ? '#86efac' : isEntity ? '#fda4af' : isDoc ? '#cbd5e1' : '#94a3b8',
           'font-family': 'ui-monospace,monospace',
           'opacity': isDimmed ? '0.4' : '1',
         });
