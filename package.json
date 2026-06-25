@@ -23,7 +23,15 @@
     "ohara:mcp": "node bin/ohara-mcp.js",
     "build:sumo": "node scripts/build-sumo-index.js",
     "test": "node --test tests/ingest.test.js",
-    "admin": "node scripts/admin-queries.js"
+    "admin": "node scripts/admin-queries.js",
+    "admin:docs": "node scripts/admin-queries.js docs",
+    "admin:sections": "node scripts/admin-queries.js sections",
+    "admin:tags": "node scripts/admin-queries.js tags",
+    "admin:tag-coverage": "node scripts/admin-queries.js tag-coverage",
+    "admin:missing-tags": "node scripts/admin-queries.js missing-tags",
+    "admin:repair-stats": "node scripts/admin-queries.js repair-stats",
+    "admin:missing-temporal": "node scripts/admin-queries.js missing-temporal",
+    "admin:decay-distribution": "node scripts/admin-queries.js decay-distribution"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",
