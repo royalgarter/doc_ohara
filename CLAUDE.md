@@ -37,3 +37,16 @@ Behavioral guidelines to ensure high-quality, maintainable, and minimalistic cod
   - `camelCase`: For variables and functions. Names must be easy to understand. Meaningful abbreviations are encouraged to keep names short but readable (e.g., `handleBtnClick` instead of `handleButtonClickListener`).
   - `UPPER_SNAKE_CASE`: For constants and globals.
   - `_prefix`: Consider for internal/private functions.
+
+---
+
+> [!CRITICAL]
+> ## 🚨 MANDATORY AGENT DIRECTIVE (FOR AI CODING AGENTS)
+> Before modifying or adding any codebase logic, database structures, routes, or design assets:
+> 
+> 1. You **MUST** read this entire `/README.md` document first.
+> 2. You **MUST** update this `/README.md` file reflecting any intended schema, color palette, or logic shifts **BEFORE** modifying the active code.
+> 3. Ensure no custom UI for API keys is generated. Rely instead on standard `.env.example` configurations.
+> 4. Do not delete or rename this file. Maintain all architectural transparency so subsequent developer agents can persist and scale the project with absolute consistency.
+
+---
