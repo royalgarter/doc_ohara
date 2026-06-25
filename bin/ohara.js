@@ -158,6 +158,10 @@ program
 			if (processedQuery?.temporalIntent && processedQuery.temporalIntent !== 'none') {
 				console.log(chalk.dim(`  temporal intent: ${processedQuery.temporalIntent}`));
 			}
+			const dr = processedQuery?.dateRange;
+			if (dr && (dr.from || dr.to)) {
+				console.log(chalk.dim(`  date range: ${dr.from || '—'} → ${dr.to || '—'}`));
+			}
 			console.log(chalk.dim(`  ${results.length} result(s) — depth=${opts.depth} limit=${opts.limit}`));
 			console.log('');
 

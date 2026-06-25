@@ -11,7 +11,8 @@ Return ONLY a JSON object — no markdown fences, no explanation:
     { "canonical": "Bitcoin", "type": "TECH", "slug": "bitcoin" },
     { "canonical": "Satoshi Nakamoto", "type": "PERSON", "slug": "satoshi-nakamoto" }
   ],
-  "temporal_intent": "none"
+  "temporal_intent": "none",
+  "date_range": { "from": null, "to": null }
 }
 
 Valid entity types: PERSON, ORG, LOCATION, DATE, TECH, AMOUNT, EVENT, CONCEPT
@@ -26,5 +27,12 @@ Rules:
   - `"historical_fact"` — query asks about a specific past period or event (contains a year, decade, era, or past-tense historical reference)
   - `"influence_chain"` — query asks about who influenced whom, origins, lineage, or evolution of ideas
   - `"none"` — no clear temporal intent
+- `date_range`: extract explicit or implied date boundaries from the query.
+  - `"from"` and `"to"` must be ISO date strings "YYYY-MM-DD", a year "YYYY", or null.
+  - For queries like "before 2010" → { "from": null, "to": "2010" }
+  - For queries like "in the 1990s" → { "from": "1990", "to": "1999" }
+  - For queries like "after 2020" → { "from": "2020", "to": null }
+  - For queries like "during 2008 financial crisis" → { "from": "2007", "to": "2009" }
+  - If no date range is implied → { "from": null, "to": null }
 
 Query:

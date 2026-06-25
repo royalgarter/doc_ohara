@@ -48,6 +48,23 @@ const DECAY_RATES = () => ({
 	EPHEMERAL: parseFloat(process.env.OHARA_DECAY_RATE_EPHEMERAL  || '0.1'),
 });
 
+// Normalise a LLM-returned date value to "YYYY-MM-DD" or "YYYY", or null.
+function _normaliseDate(val) {
+	if (!val || typeof val !== 'string') return null;
+	const s = val.trim();
+	if (/^\d{4}$/.test(s)) return s;                      // bare year "1995"
+	if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;          // full ISO date
+	if (/^\d{4}-\d{2}$/.test(s)) return s + '-01';        // "YYYY-MM" → day 1
+	return null;
+}
+
+// Convert a date string ("YYYY", "YYYY-MM-DD") to a JS Date or null.
+function _toDate(val) {
+	if (!val) return null;
+	const d = new Date(/^\d{4}$/.test(val) ? `${val}-01-01` : val);
+	return isNaN(d.getTime()) ? null : d;
+}
+
 export class RetrievalEngine {
 	/**
 	 * @param {object} db  — object exposing `executeAQL(query, bindVars)` (real DB or simulator shim)
@@ -106,7 +123,13 @@ export class RetrievalEngine {
 			const validIntents = new Set(['current_state', 'historical_fact', 'influence_chain', 'none']);
 			const temporalIntent = validIntents.has(json.temporal_intent) ? json.temporal_intent : 'none';
 
-			return { entityHints, sumoHints: resolvedSumoTags, temporalIntent };
+			const rawRange = json.date_range || {};
+			const dateRange = {
+				from: _normaliseDate(rawRange.from) || null,
+				to:   _normaliseDate(rawRange.to)   || null,
+			};
+
+			return { entityHints, sumoHints: resolvedSumoTags, temporalIntent, dateRange };
 		} catch (_) {
 			return { entityHints: [], sumoHints: [], temporalIntent: 'none' };
 		}
@@ -150,13 +173,15 @@ export class RetrievalEngine {
 		let entityHints = [];
 		let sumoHints = [];
 		let temporalIntent = 'none';
+		let dateRange = { from: null, to: null };
 
 		// Extract fingerprint for phrase and paragraph queries (not bare keywords)
 		if (inputType === 'phrase' || inputType === 'paragraph') {
-			({ entityHints, sumoHints, temporalIntent } = await this._extractHintsWithGemini(rawInput));
+			({ entityHints, sumoHints, temporalIntent, dateRange = { from: null, to: null } } =
+				await this._extractHintsWithGemini(rawInput));
 		}
 
-		// Heuristic temporal intent for keyword queries (no Gemini call)
+		// Heuristic temporal intent + date range for keyword queries (no Gemini call)
 		if (temporalIntent === 'none' && inputType === 'keyword') {
 			const raw = rawInput.toLowerCase();
 			if (/\b(latest|current|now|today|recent|modern|contemporary)\b/.test(raw)) {
@@ -166,17 +191,31 @@ export class RetrievalEngine {
 			}
 		}
 
-		return { keywords, raw: rawInput, inputType, entityHints, sumoHints, temporalIntent };
+		// Heuristic date range from bare year tokens (e.g. "bitcoin 2012", "crisis before 2008")
+		if (!dateRange.from && !dateRange.to) {
+			const raw = rawInput.toLowerCase();
+			const beforeM = raw.match(/\bbefore\s+((?:19|20)\d{2})\b/);
+			const afterM  = raw.match(/\bafter\s+((?:19|20)\d{2})\b/);
+			const singleY = raw.match(/\b((?:19|20)\d{2})\b/);
+			if (beforeM) dateRange = { from: null, to: beforeM[1] };
+			else if (afterM) dateRange = { from: afterM[1], to: null };
+			else if (singleY && temporalIntent === 'historical_fact') {
+				// centre ±2 years around a single mentioned year
+				const y = parseInt(singleY[1], 10);
+				dateRange = { from: String(y - 2), to: String(y + 2) };
+			}
+		}
+
+		return { keywords, raw: rawInput, inputType, entityHints, sumoHints, temporalIntent, dateRange };
 	}
 
 	// ── Phase 1 — ArangoSearch BM25 ──────────────────────────────────────────────
 
 	async _phase1BM25(processedQuery, limit) {
-		const { keywords, raw } = processedQuery;
+		const { keywords, raw, dateRange } = processedQuery;
 		if (keywords.length === 0) return [];
 
-		// Build a SEARCH expression: BM25 over content/title with TOKENS analyzer
-		const searchTerms = keywords.slice(0, 10); // cap at 10 terms for AQL sanity
+		const hasDateFilter = dateRange && (dateRange.from || dateRange.to);
 
 		try {
 			const rows = await this.db.executeAQL(`
@@ -191,15 +230,29 @@ export class RetrievalEngine {
 					LET parentDoc = doc.document_id != null
 						? DOCUMENT(CONCAT("documents/", doc.document_id))
 						: null
+					LET pubDate = parentDoc.published_date
+					LET covFrom = parentDoc.temporal_coverage_start
+					LET covTo   = parentDoc.temporal_coverage_end
+					FILTER @dateFrom == null OR pubDate == null OR pubDate >= @dateFrom
+						OR covTo   == null OR covTo   >= @dateFrom
+					FILTER @dateTo   == null OR pubDate == null OR pubDate <= @dateTo
+						OR covFrom == null OR covFrom <= @dateTo
 					RETURN {
 						node: MERGE(doc, {
-							document_published_date:      parentDoc.published_date,
-							document_effective_decay_class: parentDoc.effective_decay_class
+							document_published_date:        parentDoc.published_date,
+							document_effective_decay_class: parentDoc.effective_decay_class,
+							document_coverage_start:        parentDoc.temporal_coverage_start,
+							document_coverage_end:          parentDoc.temporal_coverage_end
 						}),
 						score: BM25(doc),
 						source: "fulltext"
 					}
-			`, { phrase: raw, limit: limit * 2 });
+			`, {
+				phrase:   raw,
+				limit:    limit * 2,
+				dateFrom: hasDateFilter ? (dateRange.from || null) : null,
+				dateTo:   hasDateFilter ? (dateRange.to   || null) : null,
+			});
 			return rows.filter(r => r.score > 0);
 		} catch (err) {
 			// ArangoSearch view may not exist yet (simulator fallback)
@@ -457,6 +510,39 @@ export class RetrievalEngine {
 
 	// ── Temporal Scoring ────────────────────────────────────────────────────────
 
+	// Coverage overlap score: how well doc's temporal_coverage_start/end spans the query date range.
+	// Returns [0, 1] — 1 = perfect overlap, 0 = no overlap or missing fields.
+	_computeCoverageScore(doc, queryDateRange) {
+		if (!queryDateRange || (!queryDateRange.from && !queryDateRange.to)) return 0;
+
+		const covStart = _toDate(doc.document_coverage_start || doc.temporal_coverage_start);
+		const covEnd   = _toDate(doc.document_coverage_end   || doc.temporal_coverage_end);
+		const pubDate  = _toDate(doc.document_published_date || doc.published_date);
+
+		// Fall back to published_date as point coverage when explicit range absent
+		const docFrom = covStart || pubDate;
+		const docTo   = covEnd   || pubDate;
+		if (!docFrom && !docTo) return 0;
+
+		const qFrom = _toDate(queryDateRange.from);
+		const qTo   = _toDate(queryDateRange.to);
+
+		// Treat open bounds as very early / very late
+		const EPOCH = new Date('1000-01-01');
+		const FAR   = new Date('3000-01-01');
+		const dF = docFrom  || EPOCH;
+		const dT = docTo    || FAR;
+		const qF = qFrom    || EPOCH;
+		const qT = qTo      || FAR;
+
+		// No overlap
+		if (dT < qF || dF > qT) return 0;
+
+		const overlapMs  = Math.min(dT, qT) - Math.max(dF, qF);
+		const querySpanMs = Math.max(qT - qF, 86400000); // at least 1 day to avoid div/0
+		return Math.min(overlapMs / querySpanMs, 1.0);
+	}
+
 	// Returns a temporal score contribution [0, OHARA_TEMPORAL_WEIGHT] for a fused entry.
 	// Five-layer protection ensures gold articles are not penalised (see refs/brainstorm_space_time.md).
 	_computeTemporalScore(entry, processedQuery, isPrincipal) {
@@ -477,30 +563,46 @@ export class RetrievalEngine {
 		const bm25Score = bm25Contribution ? bm25Contribution.score : 0;
 		if (bm25Score > gateFloor) return 0;
 
-		// Layer 4+5: apply decay for weak candidates
+		// Layer 4+5: apply decay / coverage for weak candidates
 		const doc = entry.node;
 		const decayClass = doc.effective_decay_class || doc.document_effective_decay_class || doc.decay_class || 'SCHOLARLY';
 		const rates = DECAY_RATES();
 		const lambda = rates[decayClass] ?? rates.SCHOLARLY;
 		const publishedDate = doc.published_date || doc.document_published_date || null;
 
-		if (!publishedDate) return 0; // no date → cannot compute decay, skip
+		// T_coverage scoring — applies whenever a date range was extracted from the query,
+		// regardless of temporal_intent. A document whose coverage span overlaps the query
+		// window is boosted; one that doesn't may still score via decay.
+		const dateRange = processedQuery.dateRange || {};
+		const coverageScore = (dateRange.from || dateRange.to)
+			? this._computeCoverageScore(doc, dateRange)
+			: 0;
 
-		const Δdays = (Date.now() - Date.parse(publishedDate)) / 86400000;
-		if (isNaN(Δdays) || Δdays < 0) return 0;
-
-		// For historical_fact queries: age authority uses a fixed slow rate (EVERGREEN-like)
-		// so raw document age determines score, independent of the doc's own decay class.
-		// A 1995 textbook outscores a 2024 news article regardless of their λ values.
 		if (temporalIntent === 'historical_fact') {
-			const AGE_AUTHORITY_LAMBDA = 0.000274; // ≈ 1/10yr half-life: meaningful age range
-			const ageScore = 1 - Math.exp(-AGE_AUTHORITY_LAMBDA * Δdays);
-			return temporalWeight * ageScore; // old = high score
+			// Combine: coverage overlap (primary) + age authority (secondary fallback).
+			// A 1929 newspaper covering 1929 scores near-1 via coverage.
+			// If no coverage dates stored, fall back to age authority (old = higher score).
+			const AGE_AUTHORITY_LAMBDA = 0.000274; // ≈ 1/10yr half-life
+			const Δdays = publishedDate
+				? (Date.now() - Date.parse(publishedDate)) / 86400000
+				: null;
+			const ageScore = (Δdays != null && !isNaN(Δdays) && Δdays >= 0)
+				? 1 - Math.exp(-AGE_AUTHORITY_LAMBDA * Δdays)
+				: 0;
+			// Coverage dominates (0.7) when available; age authority fills in (0.3)
+			const combined = coverageScore > 0
+				? 0.7 * coverageScore + 0.3 * ageScore
+				: ageScore;
+			return temporalWeight * combined;
 		}
 
 		// current_state / influence_chain: standard decay (new = high score)
+		// Coverage bonus added on top when query has an explicit date window
+		if (!publishedDate) return coverageScore > 0 ? temporalWeight * 0.5 * coverageScore : 0;
+		const Δdays = (Date.now() - Date.parse(publishedDate)) / 86400000;
+		if (isNaN(Δdays) || Δdays < 0) return 0;
 		const decayScore = Math.exp(-lambda * Δdays);
-		return temporalWeight * decayScore;
+		return temporalWeight * (decayScore + 0.3 * coverageScore);
 	}
 
 	// ── Phase 5 — Score Fusion ───────────────────────────────────────────────────
