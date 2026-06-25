@@ -79,6 +79,8 @@ export async function initArangoClient() {
     // entity slug uniqueness + normKey lookup for dedup
     db.collection('entities').ensureIndex({ type: 'persistent', fields: ['slug'], unique: true, name: 'idx_entities_slug' }).catch(() => {}),
     db.collection('entities').ensureIndex({ type: 'persistent', fields: ['norm_key'], name: 'idx_entities_norm_key' }).catch(() => {}),
+    // array index on document_ids — backs the /api/graph entity-scoping filter
+    db.collection('entities').ensureIndex({ type: 'persistent', fields: ['document_ids[*]'], name: 'idx_entities_document_ids' }).catch(() => {}),
   ]);
 
   initialized = true;
