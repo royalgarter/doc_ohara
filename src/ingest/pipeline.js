@@ -864,6 +864,7 @@ async function structureMarkdownWithRetries(ai, filename, mdContent) {
   // merge results preserving chunk order
   const mergedNodes = [];
   const failedChunks = [];
+  const temporalCandidates = []; // collect temporal metadata from each chunk; pick highest-confidence
   const chunkIdToIndex = new Map();
   chunks.forEach((c, i) => chunkIdToIndex.set(c.id, i));
   const ordered = resultsArr.sort((a, b) => chunkIdToIndex.get(a.chunk.id) - chunkIdToIndex.get(b.chunk.id));
@@ -878,6 +879,11 @@ async function structureMarkdownWithRetries(ai, filename, mdContent) {
       addPipelineLog('warn', `Empty parsed output for chunk ${entry.chunk.id} — skipping`);
       continue;
     }
+    // Collect temporal metadata from this chunk (document-level, take highest confidence later)
+    if (parsed.temporal && typeof parsed.temporal === 'object') {
+      temporalCandidates.push(parsed.temporal);
+    }
+
     // Expect parsed to be { nodes: [...] } or { document: { texts: [...] } }
     if (parsed.nodes) {
       // Tag only the FIRST node with the Markdown heading level from the source chunk.
@@ -960,9 +966,18 @@ async function structureMarkdownWithRetries(ai, filename, mdContent) {
     addPipelineLog('warn', `Entity validation dropped ${entityDropTotal} entity/entities total across all nodes`);
   }
 
+  // Pick the temporal candidate with highest confidence (first chunk often has front matter / dates)
+  let bestTemporal = null;
+  if (temporalCandidates.length > 0) {
+    bestTemporal = temporalCandidates.reduce((best, t) =>
+      (t.temporal_confidence ?? 0) > (best.temporal_confidence ?? 0) ? t : best
+    , temporalCandidates[0]);
+  }
+
   const completedChunks = chunks.length - failedChunks.length;
   return {
     nodes: mergedNodes,
+    temporal: bestTemporal,
     llm_usage: { ...usageTotals, model: GEMINI_MODEL, chunks: chunks.length, cache_hits: chunkDiagnostics.filter(d => d.cache_hit).length },
     toc: detectedToc,
     glossary: detectedGlossary,
@@ -1612,13 +1627,15 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
     }
   }
 
-  // Extract and carry llm_usage, toc, glossary separately; parsedLayoutJSON itself only needs the nodes
+  // Extract and carry llm_usage, toc, glossary, temporal separately; parsedLayoutJSON itself only needs the nodes
   const llmUsage = parsedLayoutJSON?.llm_usage || null;
   const detectedToc = parsedLayoutJSON?.toc || null;
   const detectedGlossary = parsedLayoutJSON?.glossary || null;
+  const detectedTemporal = parsedLayoutJSON?.temporal || null;
   if (llmUsage) delete parsedLayoutJSON.llm_usage;
   if (parsedLayoutJSON?.toc) delete parsedLayoutJSON.toc;
   if (parsedLayoutJSON?.glossary) delete parsedLayoutJSON.glossary;
+  if (parsedLayoutJSON?.temporal) delete parsedLayoutJSON.temporal;
 
   onProgress(60, 'Writing raw layout output...');
   const rawJsonPath = path.join(targetSubDir, `${filenameNoExt}.json`);
@@ -1638,6 +1655,10 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
       // persist to real ArangoDB
       try {
         await arangoClient.initArangoClient();
+        // Derive temporal_relation mapping for SIMILAR_TO edge enrichment
+        const EXTENDS_VERBS = new Set(['extends', 'builds on', 'is based on', 'expands on', 'derives from', 'elaborates on', 'continues']);
+        const SUPERSEDES_VERBS = new Set(['contradicts', 'supersedes', 'corrects', 'refutes', 'disproves', 'replaces', 'overrides', 'disputes']);
+
         const inserted = await arangoClient.insertDocument({
           source_file: doc.source_file,
           parser_engine: doc.parser_engine,
@@ -1654,6 +1675,16 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
           ingestion_error: ingestionError,
           total_chunks: totalChunks || null,
           completed_chunks: completedChunks || null,
+          // Temporal metadata (LLM-extracted, flagged for human review)
+          published_date: detectedTemporal?.published_date || null,
+          temporal_coverage_start: detectedTemporal?.temporal_coverage_start || null,
+          temporal_coverage_end: detectedTemporal?.temporal_coverage_end || null,
+          temporal_granularity: detectedTemporal?.temporal_granularity || 'year',
+          temporal_confidence: detectedTemporal?.temporal_confidence ?? null,
+          temporal_needs_review: detectedTemporal != null,
+          decay_class: detectedTemporal?.decay_class || 'SCHOLARLY',
+          effective_decay_class: detectedTemporal?.decay_class || 'SCHOLARLY',
+          similar_to_indegree: 0,
         });
 
         const docHandle = inserted._id || `documents/${inserted._key}`;
@@ -1836,8 +1867,29 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
                     .slice(0, 3).map(p => p.content.slice(0, 300));
                   const enrichment = await enrichCrossDocEdge(ai, doc, otherDoc, snippetsA, snippetsB, sharedSlugs);
                   if (enrichment) {
-                    await updateArangoEdge(edgeRes._id, enrichment).catch(() => {});
-                    addPipelineLog('info', `Cross-doc edge enriched: "${enrichment.verb}" between ${doc.id} ↔ ${otherDoc.id}`);
+                    // Derive temporal_relation from the LLM-generated verb (no extra API call)
+                    const verbLower = (enrichment.verb || '').toLowerCase();
+                    let temporalRelation = 'discusses';
+                    if (EXTENDS_VERBS.has(verbLower) || [...EXTENDS_VERBS].some(v => verbLower.includes(v))) {
+                      temporalRelation = 'extends';
+                    } else if (SUPERSEDES_VERBS.has(verbLower) || [...SUPERSEDES_VERBS].some(v => verbLower.includes(v))) {
+                      temporalRelation = 'supersedes';
+                    }
+                    await updateArangoEdge(edgeRes._id, { ...enrichment, temporal_relation: temporalRelation }).catch(() => {});
+                    addPipelineLog('info', `Cross-doc edge enriched: "${enrichment.verb}" (${temporalRelation}) between ${doc.id} ↔ ${otherDoc.id}`);
+
+                    // Increment similar_to_indegree on the target document
+                    await arangoClient.updateDocument(otherDoc.id, {
+                      similar_to_indegree: (otherDoc.similar_to_indegree || 0) + 1,
+                    }).catch(() => {});
+
+                    // Auto-promote to EVERGREEN if in-degree crosses threshold
+                    const evergreenThreshold = parseInt(process.env.OHARA_SIMILAR_TO_EVERGREEN_THRESHOLD || '5', 10);
+                    const newIndegree = (otherDoc.similar_to_indegree || 0) + 1;
+                    if (newIndegree >= evergreenThreshold) {
+                      await arangoClient.updateDocument(otherDoc.id, { effective_decay_class: 'EVERGREEN' }).catch(() => {});
+                      addPipelineLog('info', `Document ${otherDoc.id} auto-promoted to EVERGREEN (similar_to_indegree=${newIndegree})`);
+                    }
                   }
                 }
               }

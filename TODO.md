@@ -78,7 +78,7 @@ a temporal component with five-layer protection against burying "gold" timeless 
 
 ### Phase A — Temporal Metadata (Schema + Ingest)
 
-- [ ] A1. `prompts/ingest_document.md` — add temporal extraction block
+- [x] A1. `prompts/ingest_document.md` — add temporal extraction block
       Ask LLM to output at document level:
         published_date: "YYYY-MM-DD" or "YYYY" or null
         temporal_coverage: { start: "YYYY" | null, end: "YYYY" | null }
@@ -87,16 +87,16 @@ a temporal component with five-layer protection against burying "gold" timeless 
         decay_class: 'EVERGREEN'|'SCHOLARLY'|'CURRENT'|'EPHEMERAL'
       (Same LLM call, extra JSON keys — no added API cost)
 
-- [ ] A2. `src/ingest/pipeline.js` — read and persist temporal fields
+- [x] A2. `src/ingest/pipeline.js` — read and persist temporal fields
       At document node creation (steps 8 + 9), persist all fields from A1.
       Set temporal_needs_review: true (LLM-extracted, needs human confirm).
       Set effective_decay_class = decay_class (will be updated post-ingest in A4).
       Set similar_to_indegree: 0.
 
-- [ ] A3. `scripts/db-init.js` — add ArangoDB persistent index on published_date
+- [x] A3. `scripts/db-init.js` — add ArangoDB persistent index on published_date
       skiplist index on documents.published_date for range queries.
 
-- [ ] A4. `src/ingest/pipeline.js` — post-ingest decay class promotion
+- [x] A4. `src/ingest/pipeline.js` — post-ingest decay class promotion
       After SIMILAR_TO edges are created (step 10):
         - Count incoming SIMILAR_TO edges for the new doc (similar_to_indegree)
         - If indegree > OHARA_SIMILAR_TO_EVERGREEN_THRESHOLD → set effective_decay_class = 'EVERGREEN'
@@ -108,14 +108,14 @@ a temporal component with five-layer protection against burying "gold" timeless 
 
 ### Phase B — Temporal Scoring (Retrieval)
 
-- [ ] B1. `prompts/extract_query_fingerprint.md` — add temporal_intent field
+- [x] B1. `prompts/extract_query_fingerprint.md` — add temporal_intent field
       Add to LLM output:
         temporal_intent: 'current_state'|'historical_fact'|'influence_chain'|'none'
       If date entity detected in query → likely 'historical_fact'.
       If "latest"/"current"/"now"/"today" in query → 'current_state'.
       Default → 'none'.
 
-- [ ] B2. `src/retrieval.js` — _computeTemporalScore(node, queryIntent)
+- [x] B2. `src/retrieval.js` — _computeTemporalScore(node, queryIntent)
       Implement decay formula:
         if temporal_intent == 'none' → return 0
         if node.tier == 'principal' → return 0
@@ -124,7 +124,7 @@ a temporal component with five-layer protection against burying "gold" timeless 
       λ from env vars by effective_decay_class.
       Δt = (Date.now() − Date.parse(doc.published_date)) / 86400000
 
-- [ ] B3. `src/retrieval.js` — inject temporal score into _fuseResults
+- [x] B3. `src/retrieval.js` — inject temporal score into _fuseResults
       After existing weighted sum, add temporal contribution per node.
       For 'historical_fact' queries: also compute coverage_score and add separately.
       New env vars: OHARA_TEMPORAL_WEIGHT, OHARA_TEMPORAL_GATE_FLOOR,

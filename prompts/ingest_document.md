@@ -77,7 +77,7 @@ candidate_entities: [           # named entities mentioned in this node
 5. **Assign `part`** to every node: anything before the first chapter is `front_matter`; bibliography, appendixes, glossary, index are `back_matter`; everything else is `body_matter`.
 6. **Populate `sumo_candidate_tags`** per node with short SUMO concept local names (e.g. `Agent`, `Transaction`, `Text`, `Quantity`). Not full URIs. These are validated against the local SUMO index.
 6b. **Populate `candidate_entities`** per node with every named entity mentioned in the node's text. Use the canonical name for well-known aliases (e.g. "BTC" → canonical `"Bitcoin"`). Only include entities you are confident about. Valid types: `PERSON`, `ORG`, `LOCATION`, `DATE`, `TECH`, `AMOUNT`, `EVENT`, `CONCEPT`. Omit this field entirely if the node has no named entities.
-7. **Output only** a JSON object `{ "nodes": [...] }`. No markdown fences, no commentary.
+7. **Output only** a JSON object `{ "nodes": [...], "temporal": {...} }`. No markdown fences, no commentary.
 8. **Never emit empty nodes**: every Paragraph must have non-empty `content`, every Figure must have a non-empty `caption` or `figure.description`, every Section/Chapter must have a non-empty `title`. Skip any block with no extractable text.
 
 ---
@@ -179,9 +179,35 @@ candidate_entities: [           # named entities mentioned in this node
 
 ---
 
+## Temporal Metadata (document-level, output once as a top-level key alongside `nodes`)
+
+Output a `temporal` object at the top level of your response, alongside `nodes`:
+
+```
+{
+  "nodes": [...],
+  "temporal": {
+    "published_date":          string | null,   // "YYYY-MM-DD", "YYYY-MM", or "YYYY" — from title page, byline, or copyright notice. null if absent.
+    "temporal_coverage_start": string | null,   // earliest year/date the *content* describes, e.g. "1929" for a paper about the Great Depression
+    "temporal_coverage_end":   string | null,   // latest year/date content describes. null if open-ended or same as start
+    "temporal_granularity":    string,          // "day" | "month" | "year" | "decade" | "century" — precision of your date estimates
+    "temporal_confidence":     number,          // 0.0–1.0 — how confident you are in these dates
+    "decay_class":             string           // "EVERGREEN" | "SCHOLARLY" | "CURRENT" | "EPHEMERAL"
+                                                // EVERGREEN: timeless facts, laws, classic literature, mathematics
+                                                // SCHOLARLY: peer-reviewed papers, textbooks, encyclopedias (5–20 year relevance)
+                                                // CURRENT: news articles, blog posts, forum threads, press releases (weeks–months)
+                                                // EPHEMERAL: social posts, changelogs, event announcements (days)
+  }
+}
+```
+
+If you cannot determine a value, use `null`. `temporal_granularity` defaults to `"year"`. `temporal_confidence` defaults to `0.5`.
+
+---
+
 ## Hard Constraints
 
-- Output must start with `{` and end with `}` — pure JSON, no fences.
+- Output must start with `{` and end with `}` — pure JSON, no fences. Top-level keys are `nodes` and `temporal`.
 - Every node must have `type`, `part`, and `metadata`.
 - `Paragraph` nodes must use a flat `content: string` — **never** a `sentences[]` array.
 - `Table` nodes must use `table.content_data` (2-D array), not a flat string.

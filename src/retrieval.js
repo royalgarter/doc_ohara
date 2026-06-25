@@ -39,6 +39,14 @@ const w = () => ({
   crossDoc: parseFloat(process.env.OHARA_CROSS_DOC_WEIGHT     || '0.4'),
 });
 
+// Temporal decay rates by class (λ in exp(−λ·Δdays))
+const DECAY_RATES = () => ({
+  EVERGREEN: parseFloat(process.env.OHARA_DECAY_RATE_EVERGREEN  || '0.000001'),
+  SCHOLARLY: parseFloat(process.env.OHARA_DECAY_RATE_SCHOLARLY  || '0.0001'),
+  CURRENT:   parseFloat(process.env.OHARA_DECAY_RATE_CURRENT    || '0.01'),
+  EPHEMERAL: parseFloat(process.env.OHARA_DECAY_RATE_EPHEMERAL  || '0.1'),
+});
+
 export class RetrievalEngine {
   /**
    * @param {object} db  — object exposing `executeAQL(query, bindVars)` (real DB or simulator shim)
@@ -94,9 +102,12 @@ export class RetrievalEngine {
         .filter(e => e.slug && e.type)
         .map(e => ({ slug: e.slug, type: e.type }));
 
-      return { entityHints, sumoHints: resolvedSumoTags };
+      const validIntents = new Set(['current_state', 'historical_fact', 'influence_chain', 'none']);
+      const temporalIntent = validIntents.has(json.temporal_intent) ? json.temporal_intent : 'none';
+
+      return { entityHints, sumoHints: resolvedSumoTags, temporalIntent };
     } catch (_) {
-      return { entityHints: [], sumoHints: [] };
+      return { entityHints: [], sumoHints: [], temporalIntent: 'none' };
     }
   }
 
@@ -137,13 +148,24 @@ export class RetrievalEngine {
 
     let entityHints = [];
     let sumoHints = [];
+    let temporalIntent = 'none';
 
     // Extract fingerprint for phrase and paragraph queries (not bare keywords)
     if (inputType === 'phrase' || inputType === 'paragraph') {
-      ({ entityHints, sumoHints } = await this._extractHintsWithGemini(rawInput));
+      ({ entityHints, sumoHints, temporalIntent } = await this._extractHintsWithGemini(rawInput));
     }
 
-    return { keywords, raw: rawInput, inputType, entityHints, sumoHints };
+    // Heuristic temporal intent for keyword queries (no Gemini call)
+    if (temporalIntent === 'none' && inputType === 'keyword') {
+      const raw = rawInput.toLowerCase();
+      if (/\b(latest|current|now|today|recent|modern|contemporary)\b/.test(raw)) {
+        temporalIntent = 'current_state';
+      } else if (/\b(19|18|17|16|15)\d{2}\b|\b(history|historical|era|ancient|medieval|century)\b/.test(raw)) {
+        temporalIntent = 'historical_fact';
+      }
+    }
+
+    return { keywords, raw: rawInput, inputType, entityHints, sumoHints, temporalIntent };
   }
 
   // ── Phase 1 — ArangoSearch BM25 ──────────────────────────────────────────────
@@ -348,6 +370,51 @@ export class RetrievalEngine {
     } catch (_) {
       return [];
     }
+  }
+
+  // ── Temporal Scoring ────────────────────────────────────────────────────────
+
+  // Returns a temporal score contribution [0, OHARA_TEMPORAL_WEIGHT] for a fused entry.
+  // Five-layer protection ensures gold articles are not penalised (see refs/brainstorm_space_time.md).
+  _computeTemporalScore(entry, processedQuery, isPrincipal) {
+    const temporalWeight = parseFloat(process.env.OHARA_TEMPORAL_WEIGHT || '0.2');
+    if (temporalWeight === 0) return 0;
+
+    const temporalIntent = processedQuery.temporalIntent || 'none';
+
+    // Layer 1: no temporal intent in query → skip decay entirely
+    if (temporalIntent === 'none') return 0;
+
+    // Layer 2: Principal tier nodes are immune (multi-phase corroboration already proves relevance)
+    if (isPrincipal) return 0;
+
+    // Layer 3: semantically strong nodes (high BM25 score) are immune
+    const gateFloor = parseFloat(process.env.OHARA_TEMPORAL_GATE_FLOOR || '0.5');
+    const bm25Contribution = entry.contributions?.find(c => c.phase === 'fulltext');
+    const bm25Score = bm25Contribution ? bm25Contribution.score : 0;
+    if (bm25Score > gateFloor) return 0;
+
+    // Layer 4+5: apply decay for weak candidates
+    const doc = entry.node;
+    const decayClass = doc.effective_decay_class || doc.decay_class || 'SCHOLARLY';
+    const rates = DECAY_RATES();
+    const lambda = rates[decayClass] ?? rates.SCHOLARLY;
+    const publishedDate = doc.published_date || doc.document_published_date || null;
+
+    if (!publishedDate) return 0; // no date → cannot compute decay, skip
+
+    const Δdays = (Date.now() - Date.parse(publishedDate)) / 86400000;
+    if (isNaN(Δdays) || Δdays < 0) return 0;
+
+    const decayScore = Math.exp(-lambda * Δdays);
+
+    // For historical_fact queries: invert — older primary sources covering the queried period gain authority
+    if (temporalIntent === 'historical_fact') {
+      return temporalWeight * (1 - decayScore); // old = high score
+    }
+
+    // current_state / influence_chain: standard decay (new = high score)
+    return temporalWeight * decayScore;
   }
 
   // ── Phase 5 — Score Fusion ───────────────────────────────────────────────────
@@ -611,6 +678,19 @@ export class RetrievalEngine {
     const structResults = await this._phase4Structural(topNodeId, depth, seenAfterPhase3);
 
     const fused = this._fuseResults(bm25Results, sumoResults, entityResults, crossDocResults, structResults, weights);
+
+    // Apply temporal scoring post-fusion (before tier classification so tiers see adjusted scores)
+    const principalSet = new Set(); // populated below after tier classification; first pass uses empty set
+    for (const entry of fused) {
+      const temporalContrib = this._computeTemporalScore(entry, processedQuery, principalSet.has(entry.node?._id));
+      if (temporalContrib !== 0) {
+        entry.score += temporalContrib;
+        entry.sources.push('temporal');
+        entry.contributions.push({ phase: 'temporal', score: temporalContrib, document_id: entry.node?.document_id });
+      }
+    }
+    fused.sort((a, b) => b.score - a.score);
+
     const topK = fused.slice(0, limit);
 
     const tiers = await this._classifyTiers(fused, processedQuery, crossDocResults, depth, seenAfterPhase3, options);
