@@ -269,6 +269,8 @@ Named entities are first-class graph nodes, not just tags on paragraphs.
 
 **Cross-document dedup**: run `node src/ingest/entity_dedup.js` after batch ingest to merge entity nodes with matching `norm_key`, repointing all `MENTIONS` edges to the surviving canonical node.
 
+**Noise filtering**: `validateEntity` rejects opaque, machine-generated identifier tokens (hashes, UUIDs, addresses, base58/base64-ish strings) via `isOpaqueToken()` — a domain-agnostic heuristic (length, whitespace, vowel ratio), not specific to any one document type. This runs at ingest time on new documents. For already-ingested data, run `node scripts/clean_noise_entities.js --dry-run` to preview, then without `--dry-run` to remove noise entities, their edges, and strip matching slugs from `paragraphs`/`documents` `entity_slugs` rollups (requires a real ArangoDB connection, same as `entity_dedup.js`).
+
 ---
 
 ## SUMO Ontology Tags (`src/sumo.js`)
@@ -427,7 +429,8 @@ node src/ingest/entity_dedup.js
 │   ├── build-sumo-index.js   # Builds sumo_index.json from SUMO.owl
 │   ├── db-init.js            # ArangoDB collection/index setup
 │   ├── admin-queries.js      # Diagnostic AQL queries
-│   └── sync-cache.js         # LLM cache sync utility
+│   ├── sync-cache.js         # LLM cache sync utility
+│   └── clean_noise_entities.js  # Removes opaque-identifier noise entities from existing data
 ├── tests/
 │   └── ingest.test.js        # Node.js built-in test runner
 ├── doc_pipeline/             # Pipeline workspace (raw output, diagnostics)

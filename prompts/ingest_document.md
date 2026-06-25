@@ -25,6 +25,10 @@ candidate_entities: [           # named entities mentioned in this node
     aliases:   [string]         # other known surface forms (optional)
   }
 ]
+# Do NOT extract opaque, machine-generated identifiers as entities — cryptographic
+# addresses, hashes, UUIDs, transaction/serial IDs, API keys, raw code tokens, etc.
+# These are literal example data, not named entities, regardless of the document's
+# subject matter (applies to any domain, not just crypto/technical content).
 
 # ── FRONT MATTER types ───────────────────────────────────────────────
 # Title       title: string (REQUIRED), subtitle?: string

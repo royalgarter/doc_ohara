@@ -19,17 +19,46 @@ function normalizeEntity(canonical) {
 }
 
 /**
+ * Detects opaque, machine-generated identifier tokens (hashes, UUIDs, addresses,
+ * base58/base64-ish strings, etc.) that LLM extraction sometimes mistakes for
+ * named entities. Deliberately domain-agnostic — not specific to any one kind
+ * of document or identifier scheme.
+ */
+function isOpaqueToken(str) {
+  if (typeof str !== 'string') return false;
+  const s = str.trim();
+  if (!s) return false;
+
+  // UUID shape (hyphenated hex) — checked first since it contains hyphens.
+  if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s)) return true;
+
+  if (/\s/.test(s)) return false;          // real names/phrases usually have whitespace
+  if (s.length < 20) return false;          // short tokens are unlikely to be noise
+
+  if (/^[0-9a-f]{16,}$/i.test(s)) return true; // pure hex hash/id
+
+  if (!/^[A-Za-z0-9]+$/.test(s)) return false; // not a single opaque alnum run
+
+  // Vowel-ratio heuristic: real words/phrases carry vowels; base58/base64-style
+  // opaque tokens are vowel-sparse high-entropy runs.
+  const vowels = (s.match(/[aeiou]/gi) || []).length;
+  return (vowels / s.length) < 0.15;
+}
+
+/**
  * Validates and cleans a single raw entity object from LLM output.
- * Returns null if the entity is malformed.
+ * Returns null if the entity is malformed or looks like an opaque identifier.
  */
 function validateEntity(raw) {
   if (!raw || typeof raw.canonical !== 'string' || !raw.canonical.trim()) return null;
   if (!VALID_ENTITY_TYPES.has(raw.type)) return null;
 
   const canonical = raw.canonical.trim();
+  if (isOpaqueToken(canonical)) return null;
+
   const name = (typeof raw.name === 'string' && raw.name.trim()) ? raw.name.trim() : canonical;
   const aliases = Array.isArray(raw.aliases)
-    ? raw.aliases.filter(a => typeof a === 'string' && a.trim()).map(a => a.trim())
+    ? raw.aliases.filter(a => typeof a === 'string' && a.trim() && !isOpaqueToken(a.trim())).map(a => a.trim())
     : [];
 
   return { name, canonical, type: raw.type, aliases, slug: slugify(canonical) };
@@ -112,4 +141,4 @@ function buildDocumentEntityMap(paragraphEntityArrays) {
   return byNorm;
 }
 
-export { slugify, normalizeEntity, validateEntity, processNodeEntities, mergeEntities, buildDocumentEntityMap };
+export { slugify, normalizeEntity, validateEntity, processNodeEntities, mergeEntities, buildDocumentEntityMap, isOpaqueToken };
