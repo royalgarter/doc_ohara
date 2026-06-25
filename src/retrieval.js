@@ -1,12 +1,25 @@
 // Doc_Ohara: 5-Phase Hybrid Retrieval Engine
-// Phase 0: input analysis + optional Gemini extraction (paragraph mode)
+// Phase 0: input analysis + Gemini fingerprint extraction (phrase + paragraph)
 // Phase 1: ArangoSearch BM25 full-text
-// Phase 2: SUMO tag expansion
+// Phase 2: SUMO tag expansion + entity-type affinity
 // Phase 3: entity graph pivot
 // Phase 4: structural graph traversal
 // Phase 5: score fusion & dedup
 
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { GoogleGenAI } from '@google/genai';
+import { validateTags } from './sumo.js';
+import { cacheKeyFor, readCacheSync, writeCache } from './cache.js';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const FINGERPRINT_PROMPT = fs.readFileSync(
+  path.resolve(__dirname, '../prompts/extract_query_fingerprint.md'), 'utf8'
+);
+const INTEGRITY_VERIFY_PROMPT = fs.readFileSync(
+  path.resolve(__dirname, '../prompts/verify_integrity_claim.md'), 'utf8'
+);
 
 const STOPWORDS = new Set([
   'a', 'an', 'the', 'and', 'or', 'of', 'in', 'on', 'to', 'is', 'are', 'how',
@@ -19,10 +32,11 @@ const GEMINI_MODEL = 'gemini-2.5-flash-lite';
 
 // Weight env vars
 const w = () => ({
-  bm25:   parseFloat(process.env.OHARA_BM25_WEIGHT    || '1.0'),
-  sumo:   parseFloat(process.env.OHARA_SUMO_WEIGHT    || '0.4'),
-  entity: parseFloat(process.env.OHARA_ENTITY_PIVOT_WEIGHT || '0.6'),
-  struct: parseFloat(process.env.OHARA_STRUCT_WEIGHT  || '0.3'),
+  bm25:     parseFloat(process.env.OHARA_BM25_WEIGHT          || '1.0'),
+  sumo:     parseFloat(process.env.OHARA_SUMO_WEIGHT          || '0.4'),
+  entity:   parseFloat(process.env.OHARA_ENTITY_PIVOT_WEIGHT  || '0.6'),
+  struct:   parseFloat(process.env.OHARA_STRUCT_WEIGHT        || '0.3'),
+  crossDoc: parseFloat(process.env.OHARA_CROSS_DOC_WEIGHT     || '0.4'),
 });
 
 export class RetrievalEngine {
@@ -57,27 +71,63 @@ export class RetrievalEngine {
   async _extractHintsWithGemini(rawInput) {
     const ai = this._getAI();
     if (!ai) return { entityHints: [], sumoHints: [] };
-    const prompt = `You are a semantic analysis assistant.
-Given the following text, extract:
-1. Named entities (persons, organizations, locations, technologies, concepts, events, amounts, dates).
-2. SUMO ontology concept names that best describe the main topics (short local names like "Agent", "Process", "FinancialTransaction").
 
-Return ONLY a JSON object in this format, no markdown:
-{"entities": [{"name": "...", "type": "PERSON|ORG|LOCATION|DATE|TECH|AMOUNT|EVENT|CONCEPT"}], "sumo_tags": ["Tag1", "Tag2"]}
-
-Text:
-${rawInput.slice(0, 2000)}`;
+    const prompt = FINGERPRINT_PROMPT + rawInput.slice(0, 2000);
 
     try {
-      const result = await ai.models.generateContent({ model: GEMINI_MODEL, contents: prompt });
+      const result = await ai.models.generateContent({
+        model: GEMINI_MODEL,
+        contents: prompt,
+        config: { serviceTier: 'flex' },
+      });
       const text = result.text?.trim() || '';
       const json = JSON.parse(text.replace(/^```json\s*/i, '').replace(/```\s*$/, ''));
-      return {
-        entityHints: (json.entities || []).map(e => e.name?.toLowerCase().replace(/\s+/g, '_')).filter(Boolean),
-        sumoHints: (json.sumo_tags || []).filter(Boolean),
-      };
+
+      // Validate and resolve SUMO tags through the ontology index
+      const rawSumoTags = (json.sumo_tags || []).filter(Boolean);
+      const { valid: resolvedSumoTags } = rawSumoTags.length
+        ? validateTags(rawSumoTags)
+        : { valid: [] };
+
+      // Entities carry { slug, type } for downstream type-affinity scoring
+      const entityHints = (json.entities || [])
+        .filter(e => e.slug && e.type)
+        .map(e => ({ slug: e.slug, type: e.type }));
+
+      return { entityHints, sumoHints: resolvedSumoTags };
     } catch (_) {
       return { entityHints: [], sumoHints: [] };
+    }
+  }
+
+  // One-shot, temperature-0 Gemini cross-check for an Integrity-tier candidate.
+  // Single system+user turn, no chat history — matches enrich_cross_doc_edge.md call shape.
+  async _verifyIntegrityClaim(claimContent, corroboratingSnippets) {
+    const ai = this._getAI();
+    if (!ai || !claimContent || corroboratingSnippets.length === 0) return { verified: true, reason: 'skipped' };
+
+    const inputPayload = JSON.stringify({
+      claim: claimContent.slice(0, 1000),
+      corroborating_snippets: corroboratingSnippets.slice(0, 3).map(s => s.slice(0, 500)),
+    });
+    const prompt = `${INTEGRITY_VERIFY_PROMPT}\n\nINPUT:\n${inputPayload}`;
+    const key = cacheKeyFor([INTEGRITY_VERIFY_PROMPT, inputPayload, GEMINI_MODEL]);
+    const cached = readCacheSync(key);
+    if (cached) return cached;
+
+    try {
+      const resp = await ai.models.generateContent({
+        model: GEMINI_MODEL,
+        contents: prompt,
+        config: { serviceTier: 'flex', temperature: 0 },
+      });
+      const raw = (resp.text || '').replace(/^```json\s*/i, '').replace(/```\s*$/, '').trim();
+      const parsed = JSON.parse(raw);
+      const result = { verified: !!parsed.verified, reason: String(parsed.reason || '').slice(0, 200) };
+      writeCache(key, result);
+      return result;
+    } catch (_) {
+      return { verified: true, reason: 'verify_call_failed' };
     }
   }
 
@@ -88,7 +138,8 @@ ${rawInput.slice(0, 2000)}`;
     let entityHints = [];
     let sumoHints = [];
 
-    if (inputType === 'paragraph') {
+    // Extract fingerprint for phrase and paragraph queries (not bare keywords)
+    if (inputType === 'phrase' || inputType === 'paragraph') {
       ({ entityHints, sumoHints } = await this._extractHintsWithGemini(rawInput));
     }
 
@@ -148,7 +199,7 @@ ${rawInput.slice(0, 2000)}`;
   // ── Phase 2 — SUMO Tag Expansion ─────────────────────────────────────────────
 
   async _phase2SUMO(processedQuery, bm25Results, limit) {
-    // Gather SUMO tags from hints + top BM25 results
+    // Query-derived SUMO tags first; BM25 result tags as supplementary signal
     const sumoSet = new Set(processedQuery.sumoHints);
     for (const r of bm25Results.slice(0, 5)) {
       for (const t of (r.node.sumo_tags || [])) sumoSet.add(t);
@@ -156,16 +207,29 @@ ${rawInput.slice(0, 2000)}`;
     if (sumoSet.size === 0) return [];
     const sumoTags = [...sumoSet];
 
+    // Entity types from query fingerprint for affinity boost
+    const queryEntityTypes = [...new Set(
+      processedQuery.entityHints
+        .map(h => (typeof h === 'object' ? h.type : null))
+        .filter(Boolean)
+    )];
+
     try {
       const rows = await this.db.executeAQL(`
-        LET query_tags = @sumo_tags
+        LET query_tags        = @sumo_tags
+        LET query_entity_types = @entity_types
         FOR p IN paragraphs
-          LET overlap = LENGTH(INTERSECTION(p.sumo_tags, query_tags))
-          FILTER overlap > 0
-          SORT overlap DESC
+          LET tag_overlap  = LENGTH(INTERSECTION(p.sumo_tags, query_tags))
+          FILTER tag_overlap > 0
+          LET type_overlap = LENGTH(query_entity_types) > 0
+            ? LENGTH(INTERSECTION(p.entity_types || [], query_entity_types))
+            : 0
+          LET score = (tag_overlap  / MAX([LENGTH(query_tags),        1]))
+                    + 0.2 * (type_overlap / MAX([LENGTH(query_entity_types), 1]))
+          SORT score DESC
           LIMIT @limit
-          RETURN { node: p, score: overlap / LENGTH(query_tags), source: "sumo" }
-      `, { sumo_tags: sumoTags, limit });
+          RETURN { node: p, score, source: "sumo" }
+      `, { sumo_tags: sumoTags, entity_types: queryEntityTypes, limit });
       return rows;
     } catch (_) {
       return [];
@@ -175,8 +239,10 @@ ${rawInput.slice(0, 2000)}`;
   // ── Phase 3 — Entity Graph Pivot ─────────────────────────────────────────────
 
   async _phase3EntityPivot(processedQuery, bm25Results, seenIds, limit) {
-    // Gather entity slugs from hints + top BM25 result entity_slugs
-    const slugSet = new Set(processedQuery.entityHints);
+    // Gather entity slugs from hints (now {slug,type} objects) + top BM25 result entity_slugs
+    const slugSet = new Set(
+      processedQuery.entityHints.map(h => (typeof h === 'object' ? h.slug : h)).filter(Boolean)
+    );
     for (const r of bm25Results.slice(0, 5)) {
       for (const s of (r.node.entity_slugs || [])) slugSet.add(s);
     }
@@ -205,6 +271,68 @@ ${rawInput.slice(0, 2000)}`;
     }
   }
 
+  // ── Phase 1c — Cross-Document Edge Expansion ─────────────────────────────────
+  // Follows SIMILAR_TO edges from seed documents to find related paragraphs in
+  // other documents. Uses edge.verb/tags for semantic filtering when available.
+
+  async _phase1cCrossDocEdge(processedQuery, bm25Results, seenIds, limit, expandDepth = 1) {
+    const seedDocIds = [...new Set(
+      bm25Results.slice(0, 5)
+        .map(r => r.node?.document_id)
+        .filter(Boolean)
+        .map(id => id.startsWith('documents/') ? id : `documents/${id}`)
+    )];
+    if (seedDocIds.length === 0) return [];
+
+    const slugSet = new Set(
+      processedQuery.entityHints.map(h => (typeof h === 'object' ? h.slug : h)).filter(Boolean)
+    );
+    for (const r of bm25Results.slice(0, 5)) {
+      for (const s of (r.node.entity_slugs || [])) slugSet.add(s);
+    }
+    const entitySlugs = [...slugSet];
+
+    const queryTags = [
+      ...processedQuery.sumoHints,
+      ...bm25Results.slice(0, 5).flatMap(r => r.node.sumo_tags || []),
+    ];
+
+    try {
+      const rows = await this.db.executeAQL(`
+        LET seed_doc_ids = @seed_doc_ids
+        LET entity_slugs = @entity_slugs
+        LET query_tags   = @query_tags
+        FOR doc_id IN seed_doc_ids
+          FOR other_doc, edge, hop_path IN 1..@expand_depth ANY doc_id edges
+            FILTER edge.relation == "SIMILAR_TO"
+              AND (
+                edge.weight > 0.3
+                OR LENGTH(INTERSECTION(edge.tags, query_tags)) > 0
+              )
+            LET other_doc_id = other_doc._id
+            LET last_edge = hop_path.edges[LENGTH(hop_path.edges) - 1]
+            FOR p IN paragraphs
+              FILTER p.document_id == other_doc_id
+                OR CONCAT("documents/", p.document_id) == other_doc_id
+              FILTER p._id NOT IN @seen_ids
+              FILTER LENGTH(entity_slugs) == 0 OR LENGTH(INTERSECTION(p.entity_slugs, entity_slugs)) > 0
+              SORT LENGTH(INTERSECTION(p.entity_slugs, entity_slugs)) DESC
+              LIMIT @limit
+              RETURN {
+                node: p,
+                score: last_edge.weight,
+                source: "cross_doc_edge",
+                edge_verb: last_edge.verb,
+                edge_summary: last_edge.summary,
+                hops: LENGTH(hop_path.edges)
+              }
+      `, { seed_doc_ids: seedDocIds, entity_slugs: entitySlugs, query_tags: queryTags, seen_ids: [...seenIds], limit, expand_depth: expandDepth });
+      return rows;
+    } catch (_) {
+      return [];
+    }
+  }
+
   // ── Phase 4 — Structural Traversal ───────────────────────────────────────────
 
   async _phase4Structural(topNodeId, depth, seenIds) {
@@ -224,29 +352,139 @@ ${rawInput.slice(0, 2000)}`;
 
   // ── Phase 5 — Score Fusion ───────────────────────────────────────────────────
 
-  _fuseResults(bm25, sumo, entity, struct, weights) {
-    const scoreMap = new Map(); // _id → { node, score, sources }
+  _fuseResults(bm25, sumo, entity, crossDoc, struct, weights) {
+    const scoreMap = new Map(); // _id → { node, score, sources, contributions, edge_verb }
 
     const add = (results, weight, phase) => {
       for (const r of results) {
         const id = r.node?._id;
         if (!id) continue;
+        const contribution = {
+          phase,
+          score: weight * r.score,
+          document_id: r.node.document_id,
+          edge_verb: r.edge_verb,
+          hops: r.hops,
+        };
         const cur = scoreMap.get(id);
         if (cur) {
           cur.score += weight * r.score;
           cur.sources.push(phase);
+          cur.contributions.push(contribution);
         } else {
-          scoreMap.set(id, { node: r.node, score: weight * r.score, sources: [phase] });
+          const entry = { node: r.node, score: weight * r.score, sources: [phase], contributions: [contribution] };
+          if (r.edge_verb) entry.edge_verb = r.edge_verb;
+          if (r.edge_summary) entry.edge_summary = r.edge_summary;
+          if (r.hops) entry.hops = r.hops;
+          scoreMap.set(id, entry);
         }
       }
     };
 
-    add(bm25,   weights.bm25,   'fulltext');
-    add(sumo,   weights.sumo,   'sumo');
-    add(entity, weights.entity, 'entity_pivot');
-    add(struct, weights.struct, 'structural');
+    add(bm25,     weights.bm25,     'fulltext');
+    add(sumo,     weights.sumo,     'sumo');
+    add(entity,   weights.entity,   'entity_pivot');
+    add(crossDoc, weights.crossDoc, 'cross_doc_edge');
+    add(struct,   weights.struct,   'structural');
 
     return [...scoreMap.values()].sort((a, b) => b.score - a.score);
+  }
+
+  // ── Tier Classification — Principal / Integrity / Explorer ──────────────────
+  // Principal: compact, corroborated-by-many-angles core answer.
+  // Integrity: Principal + structurally/cross-doc verified entries, with provenance.
+  // Explorer: frontier one hop beyond Integrity, cut off once edge "scent" weakens.
+
+  async _classifyTiers(fused, processedQuery, crossDocResults, depth, seenIds, options) {
+    const principalPctl = options.principalScorePctl
+      ?? parseFloat(process.env.OHARA_PRINCIPAL_SCORE_PCTL || '0.75');
+    const integrityWeightMin = options.integrityWeightMin
+      ?? parseFloat(process.env.OHARA_INTEGRITY_WEIGHT_MIN || '0.6');
+    const explorerStopWeight = options.explorerStopWeight
+      ?? parseFloat(process.env.OHARA_EXPLORER_STOP_WEIGHT || '0.15');
+    const principalLimit = options.principalLimit
+      ?? parseInt(process.env.OHARA_PRINCIPAL_LIMIT || '5', 10);
+
+    const docDiversity = (entry) => new Set(entry.contributions.map(c => c.document_id).filter(Boolean)).size;
+
+    const sortedScores = [...fused].map(e => e.score).sort((a, b) => a - b);
+    const pctlIdx = Math.min(sortedScores.length - 1, Math.max(0, Math.floor(sortedScores.length * principalPctl)));
+    const principalScoreFloor = sortedScores.length ? sortedScores[pctlIdx] : 0;
+
+    const principal = fused
+      .filter(e => e.contributions.length >= 2
+        && (docDiversity(e) >= 2 || e.sources.includes('cross_doc_edge'))
+        && e.score >= principalScoreFloor)
+      .slice(0, principalLimit);
+
+    const principalIds = new Set(principal.map(e => e.node._id));
+
+    const integrityExtra = [];
+    for (const entry of principal) {
+      const structHits = await this._phase4Structural(entry.node._id, depth, seenIds);
+      for (const h of structHits) {
+        if (!h.node?._id || principalIds.has(h.node._id)) continue;
+        integrityExtra.push({ node: h.node, score: h.score, sources: ['structural_verify'], contributions: [{ phase: 'structural_verify', score: h.score, document_id: h.node.document_id }] });
+      }
+    }
+    for (const r of crossDocResults) {
+      if (!r.node?._id || principalIds.has(r.node._id)) continue;
+      if ((r.score || 0) >= integrityWeightMin) {
+        integrityExtra.push({ node: r.node, score: r.score, sources: ['cross_doc_edge'], contributions: [{ phase: 'cross_doc_edge', score: r.score, document_id: r.node.document_id, edge_verb: r.edge_verb, hops: r.hops }], edge_verb: r.edge_verb, edge_summary: r.edge_summary });
+      }
+    }
+
+    let integrity = [
+      ...principal.map(e => ({ ...e, provenance: e.contributions })),
+      ...integrityExtra.map(e => ({ ...e, provenance: e.contributions })),
+    ];
+
+    const llmVerifyEnabled = options.integrityLlmVerify ?? (process.env.OHARA_INTEGRITY_LLM_VERIFY === 'true');
+    if (llmVerifyEnabled) {
+      const verified = [];
+      for (const entry of integrity) {
+        const docDiv = new Set(entry.provenance.map(c => c.document_id).filter(Boolean)).size;
+        if (docDiv < 2) { verified.push(entry); continue; }
+        const claimContent = entry.node.content || entry.node.markdown_representation || '';
+        const corroborating = integrity
+          .filter(o => o !== entry && o.node.document_id !== entry.node.document_id)
+          .map(o => o.node.content || o.node.markdown_representation || '')
+          .filter(Boolean);
+        const verdict = await this._verifyIntegrityClaim(claimContent, corroborating);
+        verified.push({ ...entry, llm_verified: verdict.verified, llm_verify_reason: verdict.reason });
+      }
+      // failed verification drops the node back to Principal-only (not discarded)
+      integrity = verified.filter(e => e.llm_verified !== false || principalIds.has(e.node._id));
+    }
+
+    const integrityIds = new Set(integrity.map(e => e.node._id));
+
+    let frontier = [];
+    let stoppedReason = 'no_principal_seeds';
+    if (principal.length > 0) {
+      const principalSeeds = principal.map(e => ({ node: { document_id: e.node.document_id } }));
+      const crossDocLimit = options.crossDocLimit
+        ?? parseInt(process.env.OHARA_CROSS_DOC_LIMIT || '5', 10);
+      const expandDepth = (options.expandDepth ?? parseInt(process.env.OHARA_CROSS_DOC_EXPAND_DEPTH || '1', 10)) + 1;
+      const frontierSeen = new Set([...seenIds, ...integrityIds]);
+      const frontierResults = await this._phase1cCrossDocEdge(processedQuery, principalSeeds, frontierSeen, crossDocLimit, expandDepth);
+      frontier = frontierResults
+        .filter(r => (r.score || 0) >= explorerStopWeight && (r.score || 0) < integrityWeightMin)
+        .map(r => ({
+          document_id: r.node.document_id,
+          edge_verb: r.edge_verb,
+          edge_summary: r.edge_summary,
+          score: r.score,
+          hops: r.hops,
+        }));
+      stoppedReason = frontier.length ? 'weight_below_threshold' : 'no_candidates_in_band';
+    }
+
+    return {
+      principal: principal.map(e => ({ node: e.node, score: e.score, sources: e.sources })),
+      integrity,
+      explorer: { frontier, stopped_reason: stoppedReason },
+    };
   }
 
   // ── Markdown Reconstruction ──────────────────────────────────────────────────
@@ -342,7 +580,10 @@ ${rawInput.slice(0, 2000)}`;
   async query(rawInput, options = {}) {
     const limit = options.limit || parseInt(process.env.OHARA_RESULT_LIMIT || '20', 10);
     const depth = options.depth || 2;
-    const weights = w();
+    const weights = {
+      ...w(),
+      ...(options.crossDocWeight != null ? { crossDoc: options.crossDocWeight } : {}),
+    };
 
     const processedQuery = await this.preprocessInput(rawInput);
 
@@ -354,24 +595,34 @@ ${rawInput.slice(0, 2000)}`;
       ...sumoResults.map(r => r.node._id),
     ]);
 
-    const entityResults = await this._phase3EntityPivot(processedQuery, bm25Results, seenAfterPhase2, limit);
+    const crossDocLimit = options.crossDocLimit || parseInt(process.env.OHARA_CROSS_DOC_LIMIT || '5', 10);
+    const expandDepth = options.expandDepth || parseInt(process.env.OHARA_CROSS_DOC_EXPAND_DEPTH || '1', 10);
+    const [entityResults, crossDocResults] = await Promise.all([
+      this._phase3EntityPivot(processedQuery, bm25Results, seenAfterPhase2, limit),
+      this._phase1cCrossDocEdge(processedQuery, bm25Results, seenAfterPhase2, crossDocLimit, expandDepth),
+    ]);
 
     const topNodeId = bm25Results[0]?.node?._id;
     const seenAfterPhase3 = new Set([
       ...seenAfterPhase2,
       ...entityResults.map(r => r.node._id),
+      ...crossDocResults.map(r => r.node._id),
     ]);
     const structResults = await this._phase4Structural(topNodeId, depth, seenAfterPhase3);
 
-    const fused = this._fuseResults(bm25Results, sumoResults, entityResults, structResults, weights);
+    const fused = this._fuseResults(bm25Results, sumoResults, entityResults, crossDocResults, structResults, weights);
     const topK = fused.slice(0, limit);
+
+    const tiers = await this._classifyTiers(fused, processedQuery, crossDocResults, depth, seenAfterPhase3, options);
 
     return {
       processedQuery,
       results: topK,
+      tiers,
       // legacy fields for backwards compat with existing server routes
       shallowResults: bm25Results,
       entityPivotResults: entityResults,
+      crossDocResults,
       deepResults: structResults.map(r => r.node),
     };
   }

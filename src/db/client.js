@@ -169,6 +169,12 @@ export async function insertEdge(edge) {
   return { _key: res._key, _id: res._id };
 }
 
+export async function updateEdge(edgeId, patch) {
+  if (!initialized) await initArangoClient();
+  const coll = db.collection('edges');
+  await coll.update(edgeId, patch);
+}
+
 // Returns a {getState()} adapter over real ArangoDB so QuartzExporter works unchanged.
 export function realDBAdapter() {
   return {

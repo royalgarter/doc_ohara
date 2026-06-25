@@ -285,11 +285,11 @@ async function startServer() {
   // API: Multi-phase Hybrid Retrieval (BM25 + SUMO + Entity + Structural)
   app.post('/api/retrieval/query', async (req, res) => {
     try {
-      const { query, depth, limit } = req.body;
+      const { query, depth, limit, expandDepth, crossDocLimit, crossDocWeight } = req.body;
       if (!query) {
         return res.status(400).json({ success: false, error: 'Query is required.' });
       }
-      const result = await retrievalEngine.query(query, { depth, limit });
+      const result = await retrievalEngine.query(query, { depth, limit, expandDepth, crossDocLimit, crossDocWeight });
       res.json({ success: true, ...result });
     } catch (err) {
       res.status(500).json({ success: false, error: err.message });
