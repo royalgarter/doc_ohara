@@ -1,12 +1,21 @@
 // Doc_Ohara: 5-Phase Hybrid Retrieval Engine
-// Phase 0: input analysis + optional Gemini extraction (paragraph mode)
+// Phase 0: input analysis + Gemini fingerprint extraction (phrase + paragraph)
 // Phase 1: ArangoSearch BM25 full-text
-// Phase 2: SUMO tag expansion
+// Phase 2: SUMO tag expansion + entity-type affinity
 // Phase 3: entity graph pivot
 // Phase 4: structural graph traversal
 // Phase 5: score fusion & dedup
 
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { GoogleGenAI } from '@google/genai';
+import { validateTags } from './sumo.js';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const FINGERPRINT_PROMPT = fs.readFileSync(
+  path.resolve(__dirname, '../prompts/extract_query_fingerprint.md'), 'utf8'
+);
 
 const STOPWORDS = new Set([
   'a', 'an', 'the', 'and', 'or', 'of', 'in', 'on', 'to', 'is', 'are', 'how',
@@ -58,25 +67,30 @@ export class RetrievalEngine {
   async _extractHintsWithGemini(rawInput) {
     const ai = this._getAI();
     if (!ai) return { entityHints: [], sumoHints: [] };
-    const prompt = `You are a semantic analysis assistant.
-Given the following text, extract:
-1. Named entities (persons, organizations, locations, technologies, concepts, events, amounts, dates).
-2. SUMO ontology concept names that best describe the main topics (short local names like "Agent", "Process", "FinancialTransaction").
 
-Return ONLY a JSON object in this format, no markdown:
-{"entities": [{"name": "...", "type": "PERSON|ORG|LOCATION|DATE|TECH|AMOUNT|EVENT|CONCEPT"}], "sumo_tags": ["Tag1", "Tag2"]}
-
-Text:
-${rawInput.slice(0, 2000)}`;
+    const prompt = FINGERPRINT_PROMPT + rawInput.slice(0, 2000);
 
     try {
-      const result = await ai.models.generateContent({ model: GEMINI_MODEL, contents: prompt, config: { serviceTier: 'flex' } });
+      const result = await ai.models.generateContent({
+        model: GEMINI_MODEL,
+        contents: prompt,
+        config: { serviceTier: 'flex' },
+      });
       const text = result.text?.trim() || '';
       const json = JSON.parse(text.replace(/^```json\s*/i, '').replace(/```\s*$/, ''));
-      return {
-        entityHints: (json.entities || []).map(e => e.name?.toLowerCase().replace(/\s+/g, '_')).filter(Boolean),
-        sumoHints: (json.sumo_tags || []).filter(Boolean),
-      };
+
+      // Validate and resolve SUMO tags through the ontology index
+      const rawSumoTags = (json.sumo_tags || []).filter(Boolean);
+      const { valid: resolvedSumoTags } = rawSumoTags.length
+        ? validateTags(rawSumoTags)
+        : { valid: [] };
+
+      // Entities carry { slug, type } for downstream type-affinity scoring
+      const entityHints = (json.entities || [])
+        .filter(e => e.slug && e.type)
+        .map(e => ({ slug: e.slug, type: e.type }));
+
+      return { entityHints, sumoHints: resolvedSumoTags };
     } catch (_) {
       return { entityHints: [], sumoHints: [] };
     }
@@ -89,7 +103,8 @@ ${rawInput.slice(0, 2000)}`;
     let entityHints = [];
     let sumoHints = [];
 
-    if (inputType === 'paragraph') {
+    // Extract fingerprint for phrase and paragraph queries (not bare keywords)
+    if (inputType === 'phrase' || inputType === 'paragraph') {
       ({ entityHints, sumoHints } = await this._extractHintsWithGemini(rawInput));
     }
 
@@ -149,7 +164,7 @@ ${rawInput.slice(0, 2000)}`;
   // ── Phase 2 — SUMO Tag Expansion ─────────────────────────────────────────────
 
   async _phase2SUMO(processedQuery, bm25Results, limit) {
-    // Gather SUMO tags from hints + top BM25 results
+    // Query-derived SUMO tags first; BM25 result tags as supplementary signal
     const sumoSet = new Set(processedQuery.sumoHints);
     for (const r of bm25Results.slice(0, 5)) {
       for (const t of (r.node.sumo_tags || [])) sumoSet.add(t);
@@ -157,16 +172,29 @@ ${rawInput.slice(0, 2000)}`;
     if (sumoSet.size === 0) return [];
     const sumoTags = [...sumoSet];
 
+    // Entity types from query fingerprint for affinity boost
+    const queryEntityTypes = [...new Set(
+      processedQuery.entityHints
+        .map(h => (typeof h === 'object' ? h.type : null))
+        .filter(Boolean)
+    )];
+
     try {
       const rows = await this.db.executeAQL(`
-        LET query_tags = @sumo_tags
+        LET query_tags        = @sumo_tags
+        LET query_entity_types = @entity_types
         FOR p IN paragraphs
-          LET overlap = LENGTH(INTERSECTION(p.sumo_tags, query_tags))
-          FILTER overlap > 0
-          SORT overlap DESC
+          LET tag_overlap  = LENGTH(INTERSECTION(p.sumo_tags, query_tags))
+          FILTER tag_overlap > 0
+          LET type_overlap = LENGTH(query_entity_types) > 0
+            ? LENGTH(INTERSECTION(p.entity_types || [], query_entity_types))
+            : 0
+          LET score = (tag_overlap  / MAX([LENGTH(query_tags),        1]))
+                    + 0.2 * (type_overlap / MAX([LENGTH(query_entity_types), 1]))
+          SORT score DESC
           LIMIT @limit
-          RETURN { node: p, score: overlap / LENGTH(query_tags), source: "sumo" }
-      `, { sumo_tags: sumoTags, limit });
+          RETURN { node: p, score, source: "sumo" }
+      `, { sumo_tags: sumoTags, entity_types: queryEntityTypes, limit });
       return rows;
     } catch (_) {
       return [];
@@ -176,8 +204,10 @@ ${rawInput.slice(0, 2000)}`;
   // ── Phase 3 — Entity Graph Pivot ─────────────────────────────────────────────
 
   async _phase3EntityPivot(processedQuery, bm25Results, seenIds, limit) {
-    // Gather entity slugs from hints + top BM25 result entity_slugs
-    const slugSet = new Set(processedQuery.entityHints);
+    // Gather entity slugs from hints (now {slug,type} objects) + top BM25 result entity_slugs
+    const slugSet = new Set(
+      processedQuery.entityHints.map(h => (typeof h === 'object' ? h.slug : h)).filter(Boolean)
+    );
     for (const r of bm25Results.slice(0, 5)) {
       for (const s of (r.node.entity_slugs || [])) slugSet.add(s);
     }
@@ -219,7 +249,9 @@ ${rawInput.slice(0, 2000)}`;
     )];
     if (seedDocIds.length === 0) return [];
 
-    const slugSet = new Set(processedQuery.entityHints);
+    const slugSet = new Set(
+      processedQuery.entityHints.map(h => (typeof h === 'object' ? h.slug : h)).filter(Boolean)
+    );
     for (const r of bm25Results.slice(0, 5)) {
       for (const s of (r.node.entity_slugs || [])) slugSet.add(s);
     }

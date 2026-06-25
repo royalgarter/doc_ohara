@@ -8,31 +8,58 @@ Doc Ohara is a document transformation and retrieval engine that converts unstru
 
 ## Architecture Overview
 
-```
-PDF / EPUB / MD
-      │
-      ▼  LiteParse / Gemini
-  Markdown chunks
-      │
-      ▼  Gemini (gemini-2.5-flash-lite)
-  Structured nodes (DoCO schema)
-      │
-      ├─ SUMO tag validation    src/sumo.js
-      ├─ Entity extraction      src/entities.js
-      └─ Graph persistence      src/db/client.js
-             │
-             ▼
-        ArangoDB
-        ┌──────────────────────────────────────────────────┐
-        │  documents  sections  paragraphs  tables  entities│
-        │              edges (HAS_CHILD, MENTIONS, ...)     │
-        └──────────────────────────────────────────────────┘
-             │
-             ▼  src/retrieval.js
-  Five-phase retrieval (BM25 → SUMO → cross-doc edge → entity-pivot → structural)
-             │
-             ▼  src/exporter.js
-  Quartz / Wiki.js export
+```mermaid
+flowchart TD
+    SRC["📄 PDF / EPUB / DOCX / MD"]
+
+    subgraph INGEST["① Ingest Pipeline  —  src/ingest/pipeline.js"]
+        direction TB
+        I1["Preflight\nvalidate API keys + lit CLI"]
+        I2["Dedup\nSHA-256 hash → skip if seen"]
+        I3["Parse\nLiteParse → Markdown chunks"]
+        I4["LLM Structuring\nGemini → DoCO nodes\n(Chapter / Section / Paragraph / Table…)"]
+        I5["SUMO Validation\n22,700-entry ontology index\nexact → insensitive → alias"]
+        I6["Entity Extraction\nPERSON / ORG / TECH / CONCEPT…\ncanonical dedup"]
+        I7["Collection Transform\nnormalise + artifact filter\n+ fragment reattach"]
+        I8["Persist to ArangoDB\nHAS_CHILD · NEXT_SIBLING\nBELONGS_TO · MENTIONS · RELATED_TO"]
+        I9["Document Rollup\nunion entity_slugs + sumo_tags\nonto document node"]
+        I10["Cross-Doc Similarity\nJaccard on entity sets\n→ SIMILAR_TO edges"]
+        I11["Edge Enrichment\nGemini → verb + tags + summary\non each SIMILAR_TO edge"]
+        I1-->I2-->I3-->I4-->I5-->I6-->I7-->I8-->I9-->I10-->I11
+    end
+
+    subgraph DB["ArangoDB Space-Time Graph"]
+        direction LR
+        C1[documents]
+        C2[sections]
+        C3[paragraphs]
+        C4[tables]
+        C5[entities]
+        C6[edges]
+    end
+
+    subgraph RETRIEVE["② Retrieval Engine  —  src/retrieval.js"]
+        direction TB
+        R0["Phase 0 · Input Parsing\ntokenise · classify\nkeyword / phrase / paragraph"]
+        R0a["Phase 0a · Query Fingerprint\nGemini → sumo_tags + entity hints\n(fires for phrase + paragraph queries)"]
+        R1["Phase 1 · BM25 Full-text\nArangoSearch over content + title"]
+        R2["Phase 1b · SUMO Expansion\ntag overlap + entity-type affinity\nscore = tag_overlap + 0.2×type_overlap"]
+        R3a["Phase 1c · Cross-Doc Edges\nfollow SIMILAR_TO from seed docs\nfilter by weight > 0.3 or tag overlap"]
+        R3b["Phase 2 · Entity Pivot\nshared entity_slugs across all docs\ndamped by OHARA_ENTITY_PIVOT_WEIGHT"]
+        R4["Phase 3 · Structural Traversal\nAQL graph outbound from top node\nHAS_CHILD · NEXT_SIBLING · BELONGS_TO"]
+        R5["Phase 4 · Score Fusion\nweighted sum · dedup by _id\nsort descending"]
+
+        R0-->R0a-->R1-->R2
+        R2-->R3a & R3b
+        R3a & R3b-->R4-->R5
+    end
+
+    OUT["🔍 Ranked results\n{ node, score, sources, edge_verb, edge_summary }"]
+    WIKI["📚 Quartz / Obsidian wiki export\nsrc/exporter.js"]
+
+    SRC --> INGEST --> DB
+    DB --> RETRIEVE --> OUT
+    DB --> WIKI
 ```
 
 ---
@@ -66,6 +93,51 @@ PDF / EPUB / MD
 
 ## Ingest Pipeline
 
+```mermaid
+flowchart TD
+    FILE["📄 Input File\nPDF · EPUB · DOCX · MD"]
+
+    FILE --> PRE
+
+    PRE["① Preflight\nCheck GEMINI_API_KEY · ARANGO_URL · lit CLI"]
+    PRE --> DEDUP
+
+    DEDUP{"② Dedup\nSHA-256 hash\nalready ingested?"}
+    DEDUP -- "yes (no --force)" --> SKIP["⏭ Skip"]
+    DEDUP -- "no / --force" --> PARSE
+
+    PARSE["③ Parse\nLiteParse → Markdown\n.md files pass through directly"]
+    PARSE --> CHUNK
+
+    CHUNK["Chunk\nMarkdown chunker\nsplit by heading / size"]
+    CHUNK --> LLM
+
+    LLM["④ LLM Structuring\nGemini gemini-2.5-flash-lite · Flex Inference\nparallel batches (OHARA_INGEST_CONCURRENCY=4)\noutput: DoCO nodes\nChapter · Section · Paragraph · Table · Figure…\n— cached by content hash —"]
+    LLM --> SUMO
+
+    SUMO["⑤ SUMO Tag Validation  src/sumo.js\n22,700-entry ontology index\n1. exact match\n2. case + separator-insensitive\n3. alias table (~100 entries)\ninvalid tags dropped + logged"]
+    SUMO --> ENT
+
+    ENT["⑥ Entity Extraction  src/entities.js\nvalidate candidate_entities from LLM\nPERSON · ORG · LOCATION · DATE\nTECH · AMOUNT · EVENT · CONCEPT\ncanonical dedup within node\nbuild entity_slugs + entity_types arrays"]
+    ENT --> XFORM
+
+    XFORM["⑦ Collection Transform\nnormalise → documents · sections · paragraphs · tables\nartifact filter: remove separator lines + TOC noise + short nodes\nfragment reattach: merge orphaned short paragraphs"]
+    XFORM --> PERSIST
+
+    PERSIST["⑧ Persist to ArangoDB  src/db/client.js\ninsert nodes into collections\nstructural edges:\nHAS_CHILD · NEXT_SIBLING · BELONGS_TO\nsemantic edges:\nMENTIONS · RELATED_TO"]
+    PERSIST --> ROLLUP
+
+    ROLLUP["⑨ Document Rollup\nunion all paragraph entity_slugs + sumo_tags\nonto the document root node\nenables O(docs) pre-filtering at query time"]
+    ROLLUP --> SIM
+
+    SIM["⑩ Cross-Doc Similarity\nJaccard similarity of entity sets\nvs. all existing documents\ncreate SIMILAR_TO edge if ≥ OHARA_SIMILARITY_THRESHOLD (0.1)"]
+    SIM --> ENRICH
+
+    ENRICH["⑪ Edge Enrichment\nfor each new SIMILAR_TO edge:\nGemini → verb · tags · summary (≤60 words)\ncached · stored on edge\nprompt: prompts/enrich_cross_doc_edge.md"]
+
+    ENRICH --> DONE["✅ Document ingested\nready for retrieval"]
+```
+
 ### Stages (`src/ingest/pipeline.js`)
 
 1. **Preflight** — validates `GEMINI_API_KEY`, `ARANGO_URL`, and the `lit` CLI (LiteParse).
@@ -97,6 +169,45 @@ content / title / table / figure / agents_group / references   # type-specific f
 
 ## Retrieval Engine (`src/retrieval.js`)
 
+```mermaid
+flowchart TD
+    Q["🔍 Raw Query String"]
+
+    Q --> P0
+
+    P0["Phase 0 · Input Parsing\ntokenise: lowercase · [a-z0-9]+ · strip stopwords\nclassify: keyword ≤3 · phrase 4-30 · paragraph >30 tokens"]
+    P0 --> P0A
+
+    P0A{"phrase or\nparagraph?"}
+    P0A -- "keyword only" --> P1
+    P0A -- "phrase / paragraph" --> GEM
+
+    GEM["Phase 0a · Query Fingerprint  prompts/extract_query_fingerprint.md\nGemini → { sumo_tags, entities:[{slug,type}] }\nsumo_tags resolved via validateTags() · cached"]
+    GEM --> P1
+
+    P1["Phase 1 · BM25 Full-text\nArangoSearch over content + title + markdown_representation\nfallback: term-overlap scan when view unavailable\ntop N results (OHARA_RESULT_LIMIT=20)"]
+    P1 --> P1B
+
+    P1B["Phase 1b · SUMO Tag Expansion\nsumoSet = query sumo_hints ∪ top-5 BM25 result tags\nAQL: INTERSECTION(p.sumo_tags, sumoSet)\nscore = tag_overlap/tag_count\n      + 0.2 × entity_type_overlap/type_count"]
+
+    P1 --> P1C & P2
+    P1B --> P1C & P2
+
+    P1C["Phase 1c · Cross-Doc Edge Expansion\nfollow SIMILAR_TO from seed documents\nfilter: edge.weight > 0.3 OR tag overlap\nresult carries edge_verb + edge_summary"]
+
+    P2["Phase 2 · Entity Pivot\nslugSet = query entity_hints ∪ top-5 BM25 entity_slugs\nfind paragraphs sharing those entities across all docs\nweight: OHARA_ENTITY_PIVOT_WEIGHT (0.6)"]
+
+    P1C --> P3
+    P2  --> P3
+
+    P3["Phase 3 · Structural Traversal\nAQL outbound from top-scored node\nedge types: HAS_CHILD · NEXT_SIBLING · BELONGS_TO\ndepth: 2 (configurable)"]
+    P3 --> FUSE
+
+    FUSE["Phase 4 · Score Fusion\nmerge all phase results by node _id\nweighted sum:\nBM25×1.0 · SUMO×0.4 · entity×0.6\ncross-doc×0.4 · structural×0.3\nsort descending · top-K slice"]
+
+    FUSE --> OUT["📦 Results\n{ processedQuery, results[ {node, score, sources,\nedge_verb, edge_summary} ],\nshallowResults, entityPivotResults,\ncrossDocResults, deepResults }"]
+```
+
 Four sequential phases via `RetrievalEngine.query(rawInput, options)`:
 
 ### Phase 0 — Input Parsing
@@ -106,13 +217,13 @@ Tokenizes raw input: lowercase, `[a-z0-9]+` regex, strips stopwords, drops token
 ArangoSearch BM25 full-text search over `content`, `title`, and `markdown_representation`. Returns top N results (default 20). Falls back to term-overlap scoring when the ArangoSearch view is unavailable.
 
 ### Phase 1b — SUMO Tag Expansion
-Finds paragraphs whose `sumo_tags` overlap with the query's SUMO hints or the top BM25 results' tags. Scored by overlap ratio.
+Finds paragraphs whose `sumo_tags` overlap with the query's SUMO hints or the top BM25 results' tags. For phrase and paragraph queries (≥ 4 tokens), SUMO hints and entity types are extracted from the raw query via Gemini (`prompts/extract_query_fingerprint.md`) before this phase runs. Score = `tag_overlap / query_tag_count + 0.2 × entity_type_overlap / query_entity_type_count`.
 
 ### Phase 1c — Cross-Document Edge Expansion
 Follows `SIMILAR_TO` edges from the seed documents (top 5 BM25 hits) to retrieve related paragraphs from other documents. Edges are filtered by `weight > 0.3` or overlapping `edge.tags`. Each result carries `edge_verb` and `edge_summary` from the ingest-time LLM enrichment, indicating *why* the document was pulled in (e.g. `"extends the argument of"`). Runs in parallel with Phase 3. Controlled by `OHARA_CROSS_DOC_WEIGHT` (default 0.4) and `OHARA_CROSS_DOC_LIMIT` (default 5).
 
 ### Phase 2 (formerly 1b) — Entity Pivot
-From the top seed paragraphs' `entity_slugs`, finds other paragraphs across all documents that share those entities. Scores with a damped weight (`OHARA_ENTITY_PIVOT_WEIGHT`, default 0.6). Runs in parallel with Phase 1c.
+From the top seed paragraphs' `entity_slugs`, finds other paragraphs across all documents that share those entities. Scores with a damped weight (`OHARA_ENTITY_PIVOT_WEIGHT`, default 0.6). Runs in parallel with Phase 1c. Entity hints now carry `{ slug, type }` objects; paragraph nodes store a parallel `entity_types` array at ingest time to enable type-affinity scoring in Phase 1b without extra AQL joins.
 
 ### Phase 3 — Structural Traversal
 AQL graph traversal outbound from the top-scored node via `HAS_CHILD`, `NEXT_SIBLING`, `BELONGS_TO` edge types. Depth defaults to 2.

@@ -1745,6 +1745,7 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
             sumo_candidate_tags_raw: p.sumo_candidate_tags_raw || [],
             sumo_resolved_map: p.sumo_resolved_map || {},
             entity_slugs: (p.entities || []).map(e => e.slug),
+            entity_types: (p.entities || []).map(e => e.type),
           });
           nodeCount += 1;
           const paraHandle = paraRes._id || `paragraphs/${paraRes._key}`;
