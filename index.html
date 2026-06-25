@@ -437,6 +437,11 @@
           <span class="text-gray-700 text-sm">No data</span>
           <span class="text-gray-800 text-xs">Run the pipeline from the Ingest tab</span>
         </div>
+        <div x-show="!graphLoading && graphData.documents.length > 0 && selectedDocKeys.size === 0"
+          class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none gap-2">
+          <span class="text-gray-700 text-sm">No document selected</span>
+          <span class="text-gray-800 text-xs">Select a document from the left panel to view its graph</span>
+        </div>
       </div>
 
       <!-- Node inspector strip -->
@@ -598,7 +603,7 @@
       wikiMessage: '',
 
       async init() {
-        await Promise.all([this.loadGraph(), this.loadInputFiles(), this.loadJobs()]);
+        await Promise.all([this.loadDocuments(), this.loadInputFiles(), this.loadJobs()]);
         setInterval(() => this.pollPipeline(), 2500);
         setInterval(() => this.loadJobs(), 5000);
 
@@ -638,26 +643,73 @@
         wrapper.style.height = Math.round(baseH * this.graphZoom) + 'px';
       },
 
-      async loadGraph() {
+      // Initial page-load fetch: documents list only. The full graph (sections/
+      // paragraphs/tables) loads per-document on selection; entities/SUMO tags/
+      // edges load per-node on click — see loadDocGraph() and expandNode().
+      async loadDocuments() {
         this.graphLoading = true;
-        this.expandedNodes = new Set();
         try {
-          const r = await fetch('/api/graph');
+          const r = await fetch('/api/documents');
           const d = await r.json();
           if (d.success) {
             this.graphData = {
-              documents:  d.documents  || [],
-              sections:   d.sections   || [],
-              paragraphs: d.paragraphs || [],
-              tables:     d.tables     || [],
-              entities:   d.entities   || [],
-              edges:      d.edges      || [],
+              documents:  d.documents || [],
+              sections: [], paragraphs: [], tables: [], entities: [], edges: [],
             };
             this.graphSource = d.source || '';
-            this.$nextTick(() => this.renderCurrentGraph());
           }
-        } catch(e) { console.error('loadGraph:', e); }
+        } catch(e) { console.error('loadDocuments:', e); }
         this.graphLoading = false;
+        this.$nextTick(() => this.renderCurrentGraph());
+      },
+
+      // Fetches the structural graph (sections/paragraphs/tables) for the current
+      // selectedDocKeys. Empty selection just clears everything back to the
+      // "select a document" empty-state — no fetch.
+      async loadDocGraph() {
+        this.expandedNodes = new Set();
+        if (this.selectedDocKeys.size === 0) {
+          this.graphData.sections = [];
+          this.graphData.paragraphs = [];
+          this.graphData.tables = [];
+          this.graphData.entities = [];
+          this.graphData.edges = [];
+          this.selectedNode = null;
+          this.$nextTick(() => this.renderCurrentGraph());
+          return;
+        }
+        this.graphLoading = true;
+        try {
+          const docKeys = [...this.selectedDocKeys].join(',');
+          const r = await fetch('/api/graph?docKeys=' + encodeURIComponent(docKeys));
+          const d = await r.json();
+          if (d.success) {
+            this.graphData.sections   = d.sections   || [];
+            this.graphData.paragraphs = d.paragraphs || [];
+            this.graphData.tables     = d.tables     || [];
+            // Entities/edges only ever come from expandNode (per-node, on click) —
+            // drop whatever was attributed to docs no longer in the selection.
+            this.graphData.entities = this.graphData.entities.filter(
+              e => (e.document_ids || []).some(id => this.selectedDocKeys.has(id)));
+            const keptIds = new Set([
+              ...this.graphData.sections.map(s => s._id),
+              ...this.graphData.paragraphs.map(p => p._id),
+              ...this.graphData.tables.map(t => t._id),
+              ...this.graphData.entities.map(e => e._id),
+              ...this.graphData.documents.map(doc => doc._id),
+            ]);
+            this.graphData.edges = this.graphData.edges.filter(
+              e => keptIds.has(e._from) && keptIds.has(e._to));
+          }
+        } catch(e) { console.error('loadDocGraph:', e); }
+        this.graphLoading = false;
+        this.$nextTick(() => this.renderCurrentGraph());
+      },
+
+      // Reload button: refresh the doc list, then refresh the current selection if any.
+      async loadGraph() {
+        await this.loadDocuments();
+        if (this.selectedDocKeys.size > 0) await this.loadDocGraph();
       },
 
       async expandNode(node) {
@@ -689,6 +741,8 @@
             if (existingTableMap.has(t._id)) Object.assign(existingTableMap.get(t._id), t);
             else this.graphData.tables.push(t);
           }
+          const existingEntityIds = new Set(this.graphData.entities.map(e => e._id));
+          for (const e of (d.entities || [])) if (!existingEntityIds.has(e._id)) this.graphData.entities.push(e);
           for (const s of (d.sections || [])) if (!existingSecIds.has(s._id))   this.graphData.sections.push(s);
           for (const e of (d.edges    || [])) if (!existingEdgeIds.has(e._id))  this.graphData.edges.push(e);
           this.$nextTick(() => this.renderCurrentGraph());
@@ -744,7 +798,7 @@
           this.selectedDocKeys.add(key);
         }
         this.selectedDocKeys = new Set(this.selectedDocKeys); // trigger reactivity
-        this.$nextTick(() => this.renderCurrentGraph());
+        this.loadDocGraph();
       },
 
       toggleAllDocs() {
@@ -753,13 +807,22 @@
         } else {
           this.selectedDocKeys = new Set();
         }
-        this.$nextTick(() => this.renderCurrentGraph());
+        this.loadDocGraph();
       },
 
-      highlightResultNode(node) {
+      async highlightResultNode(node) {
+        // Query results can reference a doc that hasn't been selected/loaded yet —
+        // pull it in first so the node actually exists in graphData to highlight.
+        const docId = node.document_id;
+        if (docId && !this.selectedDocKeys.has(docId)) {
+          this.selectedDocKeys = new Set([...this.selectedDocKeys, docId]);
+          await this.loadDocGraph();
+        }
         this.selectedNode = node;
-        this.$nextTick(() => this.renderCurrentGraph());
-        pulseNode(node._key || (node._id && node._id.split('/')[1]));
+        this.$nextTick(() => {
+          this.renderCurrentGraph();
+          pulseNode(node._key || (node._id && node._id.split('/')[1]));
+        });
       },
 
       async loadInputFiles() {
@@ -951,24 +1014,11 @@
     let { documents, sections, paragraphs, tables, edges } = data;
     let entities = data.entities || [];
 
-    // Filter by selected documents (empty set = show all)
+    // sections/paragraphs/tables/entities are already scoped server-side to the
+    // current selection (see loadDocGraph/expandNode) — only the document column
+    // (always the full doc list) still needs filtering down to what's selected.
     if (selectedDocKeys && selectedDocKeys.size > 0) {
       documents = documents.filter(d => selectedDocKeys.has(d._key || d.id));
-
-      // Use document_id field on sections/paragraphs/tables directly — much faster than BFS
-      sections   = sections.filter(s => selectedDocKeys.has(s.document_id));
-      paragraphs = paragraphs.filter(p => selectedDocKeys.has(p.document_id));
-      tables     = tables.filter(t => selectedDocKeys.has(t.document_id));
-      entities   = entities.filter(e => (e.document_ids || []).some(id => selectedDocKeys.has(id)));
-
-      const allowedIds = new Set([
-        ...documents.map(d => d._id),
-        ...sections.map(s => s._id),
-        ...paragraphs.map(p => p._id),
-        ...tables.map(t => t._id),
-        ...entities.map(e => e._id),
-      ]);
-      edges = edges.filter(e => allowedIds.has(e._from) && allowedIds.has(e._to));
     }
     // Most-mentioned entities first so the column reads top-to-bottom by relevance
     entities = [...entities].sort((a, b) => (b.mention_count || 0) - (a.mention_count || 0));

@@ -87,23 +87,42 @@ async function startServer() {
     }
   });
 
-  // API: Graph data for the UI — queries real ArangoDB when available, falls back to simulator
-  app.get('/api/graph', async (req, res) => {
+  // API: Document list only — cheap, used for the initial page load before any
+  // document is selected (the full graph is no longer fetched eagerly).
+  app.get('/api/documents', async (req, res) => {
     try {
       if (process.env.ARANGO_URL) {
         const db = await arangoClient.initArangoClient();
-        const [docs, sections, paragraphs, tables, entities, edges] = await Promise.all([
-          db.query('FOR d IN documents SORT d._key DESC RETURN d').then(c => c.all()),
-          db.query('FOR s IN sections SORT s.level ASC, s._key ASC RETURN {_key:s._key,_id:s._id,title:s.title,document_id:s.document_id,level:s.level,node_type:s.node_type,parent_section_id:s.parent_section_id}').then(c => c.all()),
-          db.query('LET docKeys = (FOR d IN documents RETURN d._key) FOR p IN paragraphs FILTER p.document_id IN docKeys RETURN {_key:p._key,_id:p._id,document_id:p.document_id,section_id:p.section_id,node_type:p.node_type,entity_slugs:p.entity_slugs}').then(c => c.all()),
-          db.query('LET docKeys = (FOR d IN documents RETURN d._key) FOR t IN tables FILTER t.document_id IN docKeys RETURN {_key:t._key,_id:t._id,document_id:t.document_id,section_id:t.section_id,node_type:t.node_type}').then(c => c.all()),
-          db.query('LET docKeys = (FOR d IN documents RETURN d._key) FOR e IN entities FILTER LENGTH(INTERSECTION(e.document_ids, docKeys)) > 0 RETURN {_key:e._key,_id:e._id,name:e.name,type:e.type,mention_count:e.mention_count,document_ids:e.document_ids}').then(c => c.all()),
-          db.query('LET docKeys = (FOR d IN documents RETURN d._key) LET validIds = UNION((FOR d IN documents RETURN d._id),(FOR s IN sections FILTER s.document_id IN docKeys RETURN s._id),(FOR p IN paragraphs FILTER p.document_id IN docKeys RETURN p._id),(FOR t IN tables FILTER t.document_id IN docKeys RETURN t._id),(FOR e IN entities FILTER LENGTH(INTERSECTION(e.document_ids, docKeys)) > 0 RETURN e._id)) FOR e IN edges FILTER e._from IN validIds OR e._to IN validIds RETURN {_key:e._key,_id:e._id,_from:e._from,_to:e._to,relation:e.relation}').then(c => c.all()),
-        ]);
-        return res.json({ success: true, source: 'arangodb', documents: docs, sections, paragraphs, tables, entities, edges });
+        const docs = await db.query('FOR d IN documents SORT d._key DESC RETURN d').then(c => c.all());
+        return res.json({ success: true, source: 'arangodb', documents: docs });
       }
+      res.json({ success: true, source: 'simulator', documents: dbSim.getState().documents || [] });
+    } catch (err) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
+  // API: Structural graph (sections/paragraphs/tables) for a set of selected documents.
+  // Entities, SUMO tags, and edges are intentionally NOT included here — those are
+  // only ever fetched per-node via /api/graph/node/:collection/:key/neighbors, on click.
+  app.get('/api/graph', async (req, res) => {
+    try {
+      if (process.env.ARANGO_URL) {
+        const docKeys = (req.query.docKeys || '').split(',').map(s => s.trim()).filter(Boolean);
+        if (docKeys.length === 0) {
+          return res.status(400).json({ success: false, error: 'docKeys query param is required' });
+        }
+        const db = await arangoClient.initArangoClient();
+        const [sections, paragraphs, tables] = await Promise.all([
+          db.query('FOR s IN sections FILTER s.document_id IN @docKeys SORT s.level ASC, s._key ASC RETURN {_key:s._key,_id:s._id,title:s.title,document_id:s.document_id,level:s.level,node_type:s.node_type,parent_section_id:s.parent_section_id}', { docKeys }).then(c => c.all()),
+          db.query('FOR p IN paragraphs FILTER p.document_id IN @docKeys RETURN {_key:p._key,_id:p._id,document_id:p.document_id,section_id:p.section_id,node_type:p.node_type}', { docKeys }).then(c => c.all()),
+          db.query('FOR t IN tables FILTER t.document_id IN @docKeys RETURN {_key:t._key,_id:t._id,document_id:t.document_id,section_id:t.section_id,node_type:t.node_type}', { docKeys }).then(c => c.all()),
+        ]);
+        return res.json({ success: true, source: 'arangodb', sections, paragraphs, tables });
+      }
+      // Simulator is tiny/in-memory — not the perf problem, so it isn't scoped by docKeys.
       const state = dbSim.getState();
-      res.json({ success: true, source: 'simulator', ...state });
+      res.json({ success: true, source: 'simulator', sections: state.sections, paragraphs: state.paragraphs, tables: state.tables });
     } catch (err) {
       res.status(500).json({ success: false, error: err.message });
     }
@@ -134,6 +153,7 @@ async function startServer() {
       const paraIds    = [...neighborIds].filter(id => id.startsWith('paragraphs/'));
       const tableIds   = [...neighborIds].filter(id => id.startsWith('tables/'));
       const sectionIds = [...neighborIds].filter(id => id.startsWith('sections/'));
+      const entityIds  = [...neighborIds].filter(id => id.startsWith('entities/'));
 
       // If the clicked node is a paragraph/table, fetch its own full content too
       const selfParaIds  = nodeId.startsWith('paragraphs/') ? [nodeId] : [];
@@ -141,7 +161,7 @@ async function startServer() {
       const allParaIds   = [...new Set([...paraIds,  ...selfParaIds])];
       const allTableIds  = [...new Set([...tableIds, ...selfTableIds])];
 
-      const [paragraphs, tables, sections] = await Promise.all([
+      const [paragraphs, tables, sections, entities] = await Promise.all([
         allParaIds.length
           ? db.query('FOR p IN paragraphs FILTER p._id IN @ids RETURN {_key:p._key,_id:p._id,content:p.content,document_id:p.document_id,section_id:p.section_id,node_type:p.node_type,sumo_tags:p.sumo_tags,sumo_candidate_tags_raw:p.sumo_candidate_tags_raw}', { ids: allParaIds }).then(c=>c.all())
           : [],
@@ -151,9 +171,12 @@ async function startServer() {
         sectionIds.length
           ? db.query('FOR s IN sections FILTER s._id IN @ids RETURN {_key:s._key,_id:s._id,title:s.title,document_id:s.document_id,level:s.level,node_type:s.node_type,parent_section_id:s.parent_section_id}', { ids: sectionIds }).then(c=>c.all())
           : [],
+        entityIds.length
+          ? db.query('FOR e IN entities FILTER e._id IN @ids RETURN {_key:e._key,_id:e._id,name:e.name,type:e.type,mention_count:e.mention_count,document_ids:e.document_ids}', { ids: entityIds }).then(c=>c.all())
+          : [],
       ]);
 
-      res.json({ success: true, paragraphs, tables, sections, edges });
+      res.json({ success: true, paragraphs, tables, sections, entities, edges });
     } catch (err) {
       res.status(500).json({ success: false, error: err.message });
     }
