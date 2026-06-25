@@ -68,7 +68,13 @@ export async function readCacheAsync(key) {
 			await arangoClient.initArangoClient();
 			const db = (await arangoClient.initArangoClient());
 			const coll = db.collection('llm_cache');
-			const cursor = await db.query('FOR c IN llm_cache FILTER c._key == @k LIMIT 1 RETURN c', { k: key });
+			const cursor = await db.query(
+				`FOR c IN llm_cache
+				FILTER c._key == @k
+				LIMIT 1
+				RETURN c`,
+				{ k: key }
+			);
 			const rows = await cursor.all();
 			if (rows && rows.length > 0) return rows[0];
 		} catch (err) {

@@ -211,8 +211,8 @@ export class RetrievalEngine {
 	async _fallbackTermOverlap(keywords, limit) {
 		// Used when ArangoSearch view is unavailable (e.g. simulator)
 		try {
-			const paragraphs = await this.db.executeAQL('FOR p IN paragraphs RETURN p');
-			const sections = await this.db.executeAQL('FOR s IN sections RETURN s');
+			const paragraphs = await this.db.executeAQL(`FOR p IN paragraphs RETURN p`);
+			const sections = await this.db.executeAQL(`FOR s IN sections RETURN s`);
 			const candidates = [...paragraphs, ...sections];
 			return candidates
 				.map(node => {
@@ -671,7 +671,9 @@ export class RetrievalEngine {
 		try {
 			if (docIds.length) {
 				const docs = await this.db.executeAQL(
-					'FOR d IN documents FILTER d._key IN @ids OR d._id IN @ids RETURN d',
+					`FOR d IN documents
+					FILTER d._key IN @ids OR d._id IN @ids
+					RETURN d`,
 					{ ids: docIds }
 				);
 				for (const d of docs) {
@@ -684,7 +686,9 @@ export class RetrievalEngine {
 		try {
 			if (secIds.length) {
 				const secs = await this.db.executeAQL(
-					'FOR s IN sections FILTER s._id IN @ids RETURN s',
+					`FOR s IN sections
+					FILTER s._id IN @ids
+					RETURN s`,
 					{ ids: secIds }
 				);
 				for (const s of secs) secsById[s._id] = s;

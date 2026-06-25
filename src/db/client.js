@@ -183,12 +183,12 @@ export function realDBAdapter() {
 		async getState() {
 			await initArangoClient();
 			const [documents, sections, paragraphs, tables, edges, entities] = await Promise.all([
-				db.query('FOR d IN documents RETURN d').then(c => c.all()),
-				db.query('FOR s IN sections RETURN s').then(c => c.all()),
-				db.query('FOR p IN paragraphs RETURN p').then(c => c.all()),
-				db.query('FOR t IN tables RETURN t').then(c => c.all()),
-				db.query('FOR e IN edges RETURN e').then(c => c.all()),
-				db.query('FOR e IN entities RETURN e').then(c => c.all()),
+				db.query(`FOR d IN documents RETURN d`).then(c => c.all()),
+				db.query(`FOR s IN sections RETURN s`).then(c => c.all()),
+				db.query(`FOR p IN paragraphs RETURN p`).then(c => c.all()),
+				db.query(`FOR t IN tables RETURN t`).then(c => c.all()),
+				db.query(`FOR e IN edges RETURN e`).then(c => c.all()),
+				db.query(`FOR e IN entities RETURN e`).then(c => c.all()),
 			]);
 			return { documents, sections, paragraphs, tables, edges, entities };
 		},
@@ -198,7 +198,10 @@ export function realDBAdapter() {
 export async function findDocumentByHash(fileHash) {
 	if (!initialized) await initArangoClient();
 	const cursor = await db.query(
-		'FOR d IN documents FILTER d.file_hash == @hash LIMIT 1 RETURN d',
+		`FOR d IN documents
+		FILTER d.file_hash == @hash
+		LIMIT 1
+		RETURN d`,
 		{ hash: fileHash }
 	);
 	return cursor.next();
@@ -206,7 +209,11 @@ export async function findDocumentByHash(fileHash) {
 
 export async function listDocuments() {
 	if (!initialized) await initArangoClient();
-	const cursor = await db.query('FOR d IN documents SORT d._key DESC RETURN d');
+	const cursor = await db.query(`
+		FOR d IN documents
+		SORT d._key DESC
+		RETURN d
+	`);
 	return cursor.all();
 }
 
@@ -225,9 +232,9 @@ export async function deleteDocumentAndNodes(docKey) {
 			REMOVE e IN edges
 	`, { k: docKey }).catch(() => {});
 	// Remove the child collections
-	await db.query('FOR p IN paragraphs FILTER p.document_id == @k REMOVE p IN paragraphs', { k: docKey }).catch(() => {});
-	await db.query('FOR s IN sections  FILTER s.document_id == @k REMOVE s IN sections',  { k: docKey }).catch(() => {});
-	await db.query('FOR t IN tables    FILTER t.document_id == @k REMOVE t IN tables',    { k: docKey }).catch(() => {});
+	await db.query(`FOR p IN paragraphs FILTER p.document_id == @k REMOVE p IN paragraphs`, { k: docKey }).catch(() => {});
+	await db.query(`FOR s IN sections  FILTER s.document_id == @k REMOVE s IN sections`,  { k: docKey }).catch(() => {});
+	await db.query(`FOR t IN tables    FILTER t.document_id == @k REMOVE t IN tables`,    { k: docKey }).catch(() => {});
 	await db.collection('documents').remove(docKey).catch(() => {});
 	return true;
 }
@@ -235,11 +242,11 @@ export async function deleteDocumentAndNodes(docKey) {
 export async function getStats() {
 	if (!initialized) await initArangoClient();
 	const [docs, sections, paragraphs, tables, edges] = await Promise.all([
-		db.query('RETURN LENGTH(documents)').then(c => c.next()),
-		db.query('RETURN LENGTH(sections)').then(c => c.next()),
-		db.query('RETURN LENGTH(paragraphs)').then(c => c.next()),
-		db.query('RETURN LENGTH(tables)').then(c => c.next()),
-		db.query('RETURN LENGTH(edges)').then(c => c.next()),
+		db.query(`RETURN LENGTH(documents)`).then(c => c.next()),
+		db.query(`RETURN LENGTH(sections)`).then(c => c.next()),
+		db.query(`RETURN LENGTH(paragraphs)`).then(c => c.next()),
+		db.query(`RETURN LENGTH(tables)`).then(c => c.next()),
+		db.query(`RETURN LENGTH(edges)`).then(c => c.next()),
 	]);
 	return { documents: docs, sections, paragraphs, tables, edges };
 }

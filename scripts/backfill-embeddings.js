@@ -50,7 +50,10 @@ async function main() {
 			for (let j = 0; j < batch.length; j++) {
 				const vec = embeddings[j]?.values;
 				if (!vec) continue;
-				await db.query('UPDATE @key WITH { embedding: @vec } IN paragraphs', { key: batch[j].key, vec });
+				await db.query(
+					`UPDATE @key WITH { embedding: @vec } IN paragraphs`,
+					{ key: batch[j].key, vec }
+				);
 				done++;
 			}
 			process.stdout.write(`\r  ${done}/${paras.length} embedded`);

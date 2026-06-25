@@ -24,7 +24,7 @@ async function getDB() {
 export async function loadEnvFromDB() {
 	try {
 		const { db } = await getDB();
-		const cursor = await db.query('FOR e IN @@col RETURN e', { '@col': COLLECTION });
+		const cursor = await db.query(`FOR e IN @@col RETURN e`, { '@col': COLLECTION });
 		const rows = await cursor.all();
 		for (const row of rows) {
 			// Never overwrite vars already set by .env (ARANGO_URL / GEMINI_API_KEY)
@@ -43,7 +43,9 @@ export async function loadEnvFromDB() {
 export async function listEnv() {
 	const { db } = await getDB();
 	const cursor = await db.query(
-		'FOR e IN @@col SORT e._key ASC RETURN {key: e._key, value: e.value}',
+		`FOR e IN @@col
+		SORT e._key ASC
+		RETURN { key: e._key, value: e.value }`,
 		{ '@col': COLLECTION }
 	);
 	return cursor.all();
