@@ -29,7 +29,7 @@ PDF / EPUB / MD
         └──────────────────────────────────────────────────┘
              │
              ▼  src/retrieval.js
-  Three-phase retrieval (keyword → entity-pivot → graph traversal)
+  Five-phase retrieval (BM25 → SUMO → cross-doc edge → entity-pivot → structural)
              │
              ▼  src/exporter.js
   Quartz / Wiki.js export
@@ -59,7 +59,7 @@ PDF / EPUB / MD
 | `BELONGS_TO` | paragraph / table → document | Ownership |
 | `MENTIONS` | paragraph → entity | Named entity occurrence |
 | `RELATED_TO` | entity ↔ entity | Co-occurrence in the same paragraph |
-| `SIMILAR_TO` | document → document | Jaccard similarity of entity sets (threshold-gated) |
+| `SIMILAR_TO` | document → document | Jaccard similarity of entity sets (threshold-gated); enriched with LLM-generated `verb`, `tags`, `summary` |
 | `TOC_REF` | document → section | TOC entry resolved to a section node (matched by page number then title) |
 
 ---
@@ -71,13 +71,14 @@ PDF / EPUB / MD
 1. **Preflight** — validates `GEMINI_API_KEY`, `ARANGO_URL`, and the `lit` CLI (LiteParse).
 2. **Dedup** — SHA-256 hashes the file; skips if already ingested (override with `--force`).
 3. **Parsing** — LiteParse converts PDF/EPUB/DOCX to Markdown; plain `.md` files pass through directly.
-4. **LLM structuring** — Gemini (`gemini-2.5-flash-lite`) maps Markdown chunks to DoCO nodes (`Chapter`, `Section`, `Paragraph`, `Table`, `Figure`, `Authors`, `Bibliography`, …). Responses are cached by content hash. Parallel batches (default 4, `OHARA_INGEST_CONCURRENCY`).
+4. **LLM structuring** — Gemini (`gemini-2.5-flash-lite`, Flex Inference) maps Markdown chunks to DoCO nodes (`Chapter`, `Section`, `Paragraph`, `Table`, `Figure`, `Authors`, `Bibliography`, …). Responses are cached by content hash. Parallel batches (default 4, `OHARA_INGEST_CONCURRENCY`).
 5. **SUMO tag validation** — resolves `sumo_candidate_tags` against the SUMO ontology index (22,700 entries). Three-stage resolution: exact match → case/separator-insensitive → alias table. Duplicates collapsed. Invalid tags logged and dropped.
 6. **Entity extraction** — validates `candidate_entities` from the LLM. Supported types: `PERSON`, `ORG`, `LOCATION`, `DATE`, `TECH`, `AMOUNT`, `EVENT`, `CONCEPT`. Canonical deduplication within each node.
 7. **Collection transform** — normalizes nodes into `documents`, `sections`, `paragraphs`, `tables`. Artifact filter removes separator lines, TOC noise, and very short nodes. Fragment reattachment merges orphaned short paragraphs.
 8. **Persistence** — inserts into ArangoDB with `HAS_CHILD`, `NEXT_SIBLING`, `BELONGS_TO` structural edges; upserts entity nodes and inserts `MENTIONS` / `RELATED_TO` edges.
 9. **Document rollup** — after all paragraphs are inserted, unions `entity_slugs` and `sumo_tags` onto the `documents` record for O(docs) pre-filtering.
 10. **Cross-document similarity** — computes Jaccard similarity between the new document's entity set and all existing documents. Creates `SIMILAR_TO` edges where similarity ≥ `OHARA_SIMILARITY_THRESHOLD` (default 0.1).
+11. **Cross-document edge enrichment** — for each new `SIMILAR_TO` edge, calls Gemini (Flex Inference, cached) with representative snippets from both documents to generate a `verb` (e.g. `"extends the argument of"`), `tags` (1–4 SUMO-style concept tags), and `summary` (≤ 60 words). Result is stored on the edge for use at retrieval time. Prompt: `prompts/enrich_cross_doc_edge.md`.
 
 ### Prompt Schema (`prompts/ingest_document.md`)
 
@@ -102,15 +103,24 @@ Four sequential phases via `RetrievalEngine.query(rawInput, options)`:
 Tokenizes raw input: lowercase, `[a-z0-9]+` regex, strips stopwords, drops tokens ≤ 2 chars. Returns `{ keywords, raw }`.
 
 ### Phase 1 — Shallow Context
-Scores all sections and paragraphs by keyword term-overlap ratio (BM25-style). Returns top N results (default 10) with scores.
+ArangoSearch BM25 full-text search over `content`, `title`, and `markdown_representation`. Returns top N results (default 20). Falls back to term-overlap scoring when the ArangoSearch view is unavailable.
 
-### Phase 1b — Entity Pivot
-From the top seed paragraphs' `entity_slugs`, finds other paragraphs across all documents that share those entities. Scores with a damped weight (`OHARA_ENTITY_PIVOT_WEIGHT`, default 0.5). This is the cross-document "see also" expansion.
+### Phase 1b — SUMO Tag Expansion
+Finds paragraphs whose `sumo_tags` overlap with the query's SUMO hints or the top BM25 results' tags. Scored by overlap ratio.
 
-### Phase 2 — Deep Context
-AQL graph traversal outbound from the top-scored node via `has_section`, `contains_paragraph`, `belongs_to` edge types. Depth defaults to 2.
+### Phase 1c — Cross-Document Edge Expansion
+Follows `SIMILAR_TO` edges from the seed documents (top 5 BM25 hits) to retrieve related paragraphs from other documents. Edges are filtered by `weight > 0.3` or overlapping `edge.tags`. Each result carries `edge_verb` and `edge_summary` from the ingest-time LLM enrichment, indicating *why* the document was pulled in (e.g. `"extends the argument of"`). Runs in parallel with Phase 3. Controlled by `OHARA_CROSS_DOC_WEIGHT` (default 0.4) and `OHARA_CROSS_DOC_LIMIT` (default 5).
 
-Returns `{ processedQuery, shallowResults, entityPivotResults, deepResults }`.
+### Phase 2 (formerly 1b) — Entity Pivot
+From the top seed paragraphs' `entity_slugs`, finds other paragraphs across all documents that share those entities. Scores with a damped weight (`OHARA_ENTITY_PIVOT_WEIGHT`, default 0.6). Runs in parallel with Phase 1c.
+
+### Phase 3 — Structural Traversal
+AQL graph traversal outbound from the top-scored node via `HAS_CHILD`, `NEXT_SIBLING`, `BELONGS_TO` edge types. Depth defaults to 2.
+
+### Phase 4 — Score Fusion
+All phase results are merged by node `_id`. Scores are weighted and summed; results sorted descending. Cross-doc results propagate `edge_verb`/`edge_summary` to the fused entry.
+
+Returns `{ processedQuery, results, shallowResults, entityPivotResults, crossDocResults, deepResults }`.
 
 ---
 
@@ -199,7 +209,9 @@ All tunables are set via environment variables. Copy `.env.example` to `.env`:
 | `OHARA_LLM_CACHE_DIR` | — | Directory for LLM response cache |
 | `OHARA_SIMILARITY_THRESHOLD` | `0.1` | Min Jaccard score to create a `SIMILAR_TO` doc–doc edge |
 | `OHARA_ENTITY_PIVOT_LIMIT` | `5` | Max cross-document paragraphs from entity-pivot phase |
-| `OHARA_ENTITY_PIVOT_WEIGHT` | `0.5` | Score multiplier for entity-pivot results |
+| `OHARA_ENTITY_PIVOT_WEIGHT` | `0.6` | Score multiplier for entity-pivot results |
+| `OHARA_CROSS_DOC_WEIGHT` | `0.4` | Score multiplier for cross-document edge expansion results |
+| `OHARA_CROSS_DOC_LIMIT` | `5` | Max paragraphs returned per cross-document edge expansion |
 
 ---
 
@@ -274,7 +286,8 @@ node src/ingest/entity_dedup.js
 │       ├── chunker.js        # Markdown chunker
 │       └── entity_dedup.js   # Cross-document entity merge worker
 ├── prompts/
-│   ├── ingest_document.md    # Main LLM prompt (DoCO structuring + entities + SUMO)
+│   ├── ingest_document.md        # Main LLM prompt (DoCO structuring + entities + SUMO)
+│   ├── enrich_cross_doc_edge.md  # LLM prompt for SIMILAR_TO edge verb/tags/summary
 │   ├── extract_toc.md
 │   ├── extract_tags.md
 │   ├── extract_entities.md
