@@ -70,9 +70,9 @@ flowchart TD
 
 | Collection | Contents |
 |---|---|
-| `documents` | Metadata root: source file, parser, title, upload time, entity_slugs, sumo_tags |
+| `documents` | Metadata root: source file, parser, title, upload time, entity_slugs, sumo_tags, published_date, temporal_coverage, temporal_granularity, temporal_confidence, decay_class, effective_decay_class, similar_to_indegree |
 | `sections` | Structural hierarchy: chapter, section, subsection with level and title |
-| `paragraphs` | Content nodes: body text, figures, list items with sumo_tags, entity_slugs |
+| `paragraphs` | Content nodes: body text, figures, list items with sumo_tags, entity_slugs, entity_types |
 | `tables` | 2-D matrix data with markdown representation |
 | `entities` | Named entities: canonical name, type, aliases, description, document_ids |
 | `edges` | All relations (single collection, typed by `relation` field) |
@@ -150,7 +150,7 @@ flowchart TD
 8. **Persistence** — inserts into ArangoDB with `HAS_CHILD`, `NEXT_SIBLING`, `BELONGS_TO` structural edges; upserts entity nodes and inserts `MENTIONS` / `RELATED_TO` edges.
 9. **Document rollup** — after all paragraphs are inserted, unions `entity_slugs` and `sumo_tags` onto the `documents` record for O(docs) pre-filtering.
 10. **Cross-document similarity** — computes Jaccard similarity between the new document's entity set and all existing documents. Creates `SIMILAR_TO` edges where similarity ≥ `OHARA_SIMILARITY_THRESHOLD` (default 0.1).
-11. **Cross-document edge enrichment** — for each new `SIMILAR_TO` edge, calls Gemini (Flex Inference, cached) with representative snippets from both documents to generate a `verb` (e.g. `"extends the argument of"`), `tags` (1–4 SUMO-style concept tags), and `summary` (≤ 60 words). Result is stored on the edge for use at retrieval time. Prompt: `prompts/enrich_cross_doc_edge.md`.
+11. **Cross-document edge enrichment** — for each new `SIMILAR_TO` edge, calls Gemini (Flex Inference, cached) with representative snippets from both documents to generate a `verb` (e.g. `"extends the argument of"`), `tags` (1–4 SUMO-style concept tags), and `summary` (≤ 60 words). Result is stored on the edge for use at retrieval time. Prompt: `prompts/enrich_cross_doc_edge.md`. A `temporal_relation` field (`extends` | `supersedes` | `discusses`) is also set on the edge from the verb — no extra LLM call. After all `SIMILAR_TO` edges are created, `similar_to_indegree` is computed for the new document; if it exceeds `OHARA_SIMILAR_TO_EVERGREEN_THRESHOLD`, `effective_decay_class` is promoted to `EVERGREEN`.
 
 ### Prompt Schema (`prompts/ingest_document.md`)
 
@@ -163,6 +163,13 @@ metadata          # { page, level }
 sumo_candidate_tags   # short SUMO local names e.g. ["Agent", "Transaction"]
 candidate_entities    # [{ name, canonical, type, aliases? }]
 content / title / table / figure / agents_group / references   # type-specific fields
+
+# document-level temporal fields (extracted once per doc, not per chunk):
+published_date        # "YYYY-MM-DD" | "YYYY" | null
+temporal_coverage     # { start: "YYYY"|null, end: "YYYY"|null }
+temporal_granularity  # 'day'|'month'|'year'|'decade'|'century'
+temporal_confidence   # 0.0–1.0
+decay_class           # 'EVERGREEN'|'SCHOLARLY'|'CURRENT'|'EPHEMERAL'
 ```
 
 ---
@@ -217,19 +224,19 @@ Tokenizes raw input: lowercase, `[a-z0-9]+` regex, strips stopwords, drops token
 ArangoSearch BM25 full-text search over `content`, `title`, and `markdown_representation`. Returns top N results (default 20). Falls back to term-overlap scoring when the ArangoSearch view is unavailable.
 
 ### Phase 1b — SUMO Tag Expansion
-Finds paragraphs whose `sumo_tags` overlap with the query's SUMO hints or the top BM25 results' tags. For phrase and paragraph queries (≥ 4 tokens), SUMO hints and entity types are extracted from the raw query via Gemini (`prompts/extract_query_fingerprint.md`) before this phase runs. Score = `tag_overlap / query_tag_count + 0.2 × entity_type_overlap / query_entity_type_count`.
+Finds paragraphs whose `sumo_tags` overlap with the query's SUMO hints or the top BM25 results' tags. For phrase and paragraph queries (≥ 4 tokens), SUMO hints and entity types are extracted from the raw query via Gemini (`prompts/extract_query_fingerprint.md`) before this phase runs. The fingerprint also returns `temporal_intent` (`current_state` | `historical_fact` | `influence_chain` | `none`) which gates temporal scoring. Score = `tag_overlap / query_tag_count + 0.2 × entity_type_overlap / query_entity_type_count`.
 
 ### Phase 1c — Cross-Document Edge Expansion
 Follows `SIMILAR_TO` edges from the seed documents (top 5 BM25 hits) to retrieve related paragraphs from other documents, up to `expandDepth` hops (graph traversal, `1..expandDepth ANY` over `SIMILAR_TO` edges). Edges are filtered by `weight > 0.3` or overlapping `edge.tags`. Each result carries `edge_verb`/`edge_summary` from the closest hop's ingest-time LLM enrichment, plus `hops` indicating how many SIMILAR_TO edges were traversed to reach it. Runs in parallel with Phase 3. Controlled by `OHARA_CROSS_DOC_WEIGHT` (default 0.4), `OHARA_CROSS_DOC_LIMIT` (default 5), and `OHARA_CROSS_DOC_EXPAND_DEPTH` (default 1). All three can be overridden per call via `query(text, { crossDocWeight, crossDocLimit, expandDepth })`.
 
 ### Phase 2 (formerly 1b) — Entity Pivot
-From the top seed paragraphs' `entity_slugs`, finds other paragraphs across all documents that share those entities. Scores with a damped weight (`OHARA_ENTITY_PIVOT_WEIGHT`, default 0.6). Runs in parallel with Phase 1c. Entity hints now carry `{ slug, type }` objects; paragraph nodes store a parallel `entity_types` array at ingest time to enable type-affinity scoring in Phase 1b without extra AQL joins.
+From the top seed paragraphs' `entity_slugs`, finds other paragraphs across all documents that share those entities. Scores with a damped weight (`OHARA_ENTITY_PIVOT_WEIGHT`, default 0.6). Runs in parallel with Phase 1c. Entity hints carry `{ slug, type }` objects; paragraph nodes store a parallel `entity_types` array (built alongside `entity_slugs` at ingest time) to enable type-affinity scoring in Phase 1b without extra AQL joins. Old paragraphs without `entity_types` score 0 on type-affinity — backward-compatible.
 
 ### Phase 3 — Structural Traversal
 AQL graph traversal outbound from the top-scored node via `HAS_CHILD`, `NEXT_SIBLING`, `BELONGS_TO` edge types. Depth defaults to 2.
 
 ### Phase 4 — Score Fusion
-All phase results are merged by node `_id`. Scores are weighted and summed; results sorted descending. Cross-doc results propagate `edge_verb`/`edge_summary` to the fused entry.
+All phase results are merged by node `_id`. Scores are weighted and summed; results sorted descending. Cross-doc results propagate `edge_verb`/`edge_summary` to the fused entry. A temporal score is added per node when `temporal_intent ≠ 'none'`, using an exponential decay formula: `OHARA_TEMPORAL_WEIGHT × exp(−λ × Δt)`. λ is drawn from the document's `effective_decay_class` env var. The temporal contribution is skipped for `principal`-tier nodes and nodes whose BM25 score exceeds `OHARA_TEMPORAL_GATE_FLOOR` (protects high-relevance docs from recency bias).
 
 Returns `{ processedQuery, results, tiers, shallowResults, entityPivotResults, crossDocResults, deepResults }`.
 
@@ -422,8 +429,9 @@ node src/ingest/entity_dedup.js
 │       ├── chunker.js        # Markdown chunker
 │       └── entity_dedup.js   # Cross-document entity merge worker
 ├── prompts/
-│   ├── ingest_document.md        # Main LLM prompt (DoCO structuring + entities + SUMO)
-│   ├── enrich_cross_doc_edge.md  # LLM prompt for SIMILAR_TO edge verb/tags/summary
+│   ├── ingest_document.md            # Main LLM prompt (DoCO structuring + entities + SUMO + temporal metadata)
+│   ├── enrich_cross_doc_edge.md      # LLM prompt for SIMILAR_TO edge verb/tags/summary
+│   ├── extract_query_fingerprint.md  # Lightweight prompt for short queries: sumo_tags + entities + temporal_intent
 │   ├── extract_toc.md
 │   ├── extract_tags.md
 │   ├── extract_entities.md

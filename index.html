@@ -1,1405 +1,1405 @@
 <!DOCTYPE html>
 <html lang="en" class="h-full">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"/>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"/>
 
-  <title>Doc Ohara</title>
-  <link rel="stylesheet" href="https://cdn.html-first.com/litewind-2.0.1.css" />
-  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-  <style>
-    /* Utilities litewind (a fixed-class subset of Tailwind) doesn't ship —
-       kept to the smallest possible set instead of pulling in the full build. */
-    [x-cloak] { display: none !important; }
-    body { font-family: 'SF Mono', ui-monospace, 'Cascadia Code', monospace; }
-    .scrollbar-thin::-webkit-scrollbar { width: 3px; height: 3px; }
-    .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
-    .scrollbar-thin::-webkit-scrollbar-thumb { background: #334155; border-radius: 2px; }
-    .log-line { font-size: 10.5px; line-height: 1.5; }
-    .line-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-    .ml-auto { margin-left: auto; }
-    .mt-auto { margin-top: auto; }
-    .inset-0 { top: 0; right: 0; bottom: 0; left: 0; }
-    .dot-glow { box-shadow: 0 0 6px #38bdf8; }
-    .group:hover .group-hover-sky { color: #7dd3fc; }
-    /* litewind has no alpha-channel background/border utilities — define the
-       handful this UI actually uses as plain rgba rules under the same class names */
-    .bg-gray-800\/50 { background-color: rgba(30,41,59,.5); }
-    .bg-gray-800\/60 { background-color: rgba(30,41,59,.6); }
-    .bg-gray-800\/80 { background-color: rgba(30,41,59,.8); }
-    .bg-gray-800\/90 { background-color: rgba(30,41,59,.9); }
-    .bg-gray-900\/40 { background-color: rgba(15,23,42,.4); }
-    .bg-gray-900\/90 { background-color: rgba(15,23,42,.9); }
-    .bg-yellow-700\/60 { background-color: rgba(161,98,7,.6); }
-    .bg-yellow-800\/50 { background-color: rgba(133,77,14,.5); }
-    .bg-yellow-950\/20 { background-color: rgba(66,32,6,.2); }
-    .bg-red-800\/50 { background-color: rgba(153,27,27,.5); }
-    .bg-red-950\/30 { background-color: rgba(69,10,10,.3); }
-    .bg-green-900\/40 { background-color: rgba(20,83,45,.4); }
-    .bg-green-950\/30 { background-color: rgba(5,46,22,.3); }
-    .bg-green-950\/20 { background-color: rgba(5,46,22,.2); }
-    .bg-sky-700\/70 { background-color: rgba(3,105,161,.7); }
-    .bg-sky-950\/20 { background-color: rgba(8,47,73,.2); }
-    .bg-sky-950\/30 { background-color: rgba(8,47,73,.3); }
-    .border-gray-700\/40 { border-color: rgba(51,65,85,.4); }
-    .border-gray-700\/50 { border-color: rgba(51,65,85,.5); }
-    .border-gray-700\/60 { border-color: rgba(51,65,85,.6); }
-    .border-gray-800\/60 { border-color: rgba(30,41,59,.6); }
-    .border-green-800\/50 { border-color: rgba(22,101,52,.5); }
-    .border-yellow-700\/40 { border-color: rgba(161,98,7,.4); }
-    .border-red-800\/60 { border-color: rgba(153,27,27,.6); }
-    .hover\:bg-yellow-600\/70:hover { background-color: rgba(202,138,4,.7); }
-    .hover\:bg-yellow-700\/60:hover { background-color: rgba(161,98,7,.6); }
-    .hover\:bg-red-700\/60:hover { background-color: rgba(185,28,28,.6); }
-    .hover\:bg-red-900\/50:hover { background-color: rgba(127,29,29,.5); }
-    .text-yellow-400\/70 { color: rgba(250,204,21,.7); }
-    .text-red-400\/80 { color: rgba(248,113,113,.8); }
-    /* litewind ships bg-sky-* but no text-sky-*/border-gray-*/gray-950/hover:text-* — fill the exact shades used */
-    .bg-gray-950 { background-color: #030712; }
-    .text-sky-200 { color: #bae6fd; } .text-sky-300 { color: #7dd3fc; }
-    .text-sky-400 { color: #38bdf8; } .text-sky-500 { color: #0ea5e9; }
-    .border-gray-400 { border-color: #38bdf8; } .border-gray-500 { border-color: #0ea5e9; }
-    .border-gray-600 { border-color: #0284c7; } .border-gray-700 { border-color: #0369a1; }
-    .hover\:text-gray-300:hover { color: #d1d5db; }
-    .hover\:text-gray-400:hover { color: #9ca3af; }
-    .hover\:text-red-400:hover { color: #f87171; }
-    #graph-svg .node-g { cursor: pointer; }
-    #graph-svg .node-g circle { transition: r 0.1s; }
-  </style>
+	<title>Doc Ohara</title>
+	<link rel="stylesheet" href="https://cdn.html-first.com/litewind-2.0.1.css" />
+	<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+	<style>
+		/* Utilities litewind (a fixed-class subset of Tailwind) doesn't ship —
+			 kept to the smallest possible set instead of pulling in the full build. */
+		[x-cloak] { display: none !important; }
+		body { font-family: 'SF Mono', ui-monospace, 'Cascadia Code', monospace; }
+		.scrollbar-thin::-webkit-scrollbar { width: 3px; height: 3px; }
+		.scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+		.scrollbar-thin::-webkit-scrollbar-thumb { background: #334155; border-radius: 2px; }
+		.log-line { font-size: 10.5px; line-height: 1.5; }
+		.line-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+		.ml-auto { margin-left: auto; }
+		.mt-auto { margin-top: auto; }
+		.inset-0 { top: 0; right: 0; bottom: 0; left: 0; }
+		.dot-glow { box-shadow: 0 0 6px #38bdf8; }
+		.group:hover .group-hover-sky { color: #7dd3fc; }
+		/* litewind has no alpha-channel background/border utilities — define the
+			 handful this UI actually uses as plain rgba rules under the same class names */
+		.bg-gray-800\/50 { background-color: rgba(30,41,59,.5); }
+		.bg-gray-800\/60 { background-color: rgba(30,41,59,.6); }
+		.bg-gray-800\/80 { background-color: rgba(30,41,59,.8); }
+		.bg-gray-800\/90 { background-color: rgba(30,41,59,.9); }
+		.bg-gray-900\/40 { background-color: rgba(15,23,42,.4); }
+		.bg-gray-900\/90 { background-color: rgba(15,23,42,.9); }
+		.bg-yellow-700\/60 { background-color: rgba(161,98,7,.6); }
+		.bg-yellow-800\/50 { background-color: rgba(133,77,14,.5); }
+		.bg-yellow-950\/20 { background-color: rgba(66,32,6,.2); }
+		.bg-red-800\/50 { background-color: rgba(153,27,27,.5); }
+		.bg-red-950\/30 { background-color: rgba(69,10,10,.3); }
+		.bg-green-900\/40 { background-color: rgba(20,83,45,.4); }
+		.bg-green-950\/30 { background-color: rgba(5,46,22,.3); }
+		.bg-green-950\/20 { background-color: rgba(5,46,22,.2); }
+		.bg-sky-700\/70 { background-color: rgba(3,105,161,.7); }
+		.bg-sky-950\/20 { background-color: rgba(8,47,73,.2); }
+		.bg-sky-950\/30 { background-color: rgba(8,47,73,.3); }
+		.border-gray-700\/40 { border-color: rgba(51,65,85,.4); }
+		.border-gray-700\/50 { border-color: rgba(51,65,85,.5); }
+		.border-gray-700\/60 { border-color: rgba(51,65,85,.6); }
+		.border-gray-800\/60 { border-color: rgba(30,41,59,.6); }
+		.border-green-800\/50 { border-color: rgba(22,101,52,.5); }
+		.border-yellow-700\/40 { border-color: rgba(161,98,7,.4); }
+		.border-red-800\/60 { border-color: rgba(153,27,27,.6); }
+		.hover\:bg-yellow-600\/70:hover { background-color: rgba(202,138,4,.7); }
+		.hover\:bg-yellow-700\/60:hover { background-color: rgba(161,98,7,.6); }
+		.hover\:bg-red-700\/60:hover { background-color: rgba(185,28,28,.6); }
+		.hover\:bg-red-900\/50:hover { background-color: rgba(127,29,29,.5); }
+		.text-yellow-400\/70 { color: rgba(250,204,21,.7); }
+		.text-red-400\/80 { color: rgba(248,113,113,.8); }
+		/* litewind ships bg-sky-* but no text-sky-*/border-gray-*/gray-950/hover:text-* — fill the exact shades used */
+		.bg-gray-950 { background-color: #030712; }
+		.text-sky-200 { color: #bae6fd; } .text-sky-300 { color: #7dd3fc; }
+		.text-sky-400 { color: #38bdf8; } .text-sky-500 { color: #0ea5e9; }
+		.border-gray-400 { border-color: #38bdf8; } .border-gray-500 { border-color: #0ea5e9; }
+		.border-gray-600 { border-color: #0284c7; } .border-gray-700 { border-color: #0369a1; }
+		.hover\:text-gray-300:hover { color: #d1d5db; }
+		.hover\:text-gray-400:hover { color: #9ca3af; }
+		.hover\:text-red-400:hover { color: #f87171; }
+		#graph-svg .node-g { cursor: pointer; }
+		#graph-svg .node-g circle { transition: r 0.1s; }
+	</style>
 </head>
 <body x-data="app()" x-init="init()" x-cloak
-  class="bg-gray-950 text-gray-100 h-screen flex flex-col overflow-hidden">
-
-  <!-- ── Header ─────────────────────────────────────────────────────────────── -->
-  <header class="flex items-center gap-5 px-4 h-10 bg-gray-900 border-b border-gray-800 flex-shrink-0 select-none">
-    <div class="flex items-center gap-2">
-      <div class="w-2 h-2 rounded-full bg-sky-400 dot-glow"></div>
-      <span class="text-xs font-bold text-sky-400 tracking-widest">DOC OHARA</span>
-    </div>
-    <div class="flex gap-4 text-xs text-gray-500">
-      <span><span class="text-gray-300" x-text="graphData.documents.length"></span> docs</span>
-      <span><span class="text-gray-300" x-text="graphData.sections.length"></span> sections</span>
-      <span><span class="text-gray-300" x-text="graphData.paragraphs.length"></span> nodes</span>
-      <span><span class="text-gray-300" x-text="graphData.entities.length"></span> entities</span>
-      <span><span class="text-gray-300" x-text="graphData.edges.length"></span> edges</span>
-      <span class="text-gray-700" x-text="graphSource ? '[' + graphSource + ']' : ''"></span>
-    </div>
-    <div class="ml-auto flex items-center gap-2">
-      <button @click="colorMode='type'; renderCurrentGraph()"
-        :class="colorMode==='type' ? 'bg-sky-700/70 text-sky-200' : 'bg-gray-800 text-gray-500 hover:text-gray-300'"
-        class="text-sm px-2 py-0.5 rounded transition">by type</button>
-      <button @click="colorMode='sumo'; renderCurrentGraph()"
-        :class="colorMode==='sumo' ? 'bg-green-800/70 text-green-200' : 'bg-gray-800 text-gray-500 hover:text-gray-300'"
-        class="text-sm px-2 py-0.5 rounded transition">by SUMO</button>
-      <button @click="loadGraph()"
-        class="text-sm px-2 py-0.5 rounded bg-gray-800 text-gray-500 hover:text-gray-300 transition">↺</button>
-    </div>
-  </header>
-
-  <!-- ── Body ──────────────────────────────────────────────────────────────── -->
-  <div class="flex flex-1 min-h-0">
-
-    <!-- Vertical tab bar -->
-    <nav class="flex flex-col items-center gap-1 py-2 w-9 bg-gray-900 border-r border-gray-800 flex-shrink-0">
-      <template x-for="t in tabs" :key="t.id">
-        <button @click="tab = t.id; if(t.id==='jobs') loadJobs()" :title="t.label"
-          :class="tab === t.id ? 'bg-gray-700 text-sky-400' : 'text-gray-600 hover:text-gray-300'"
-          class="relative w-7 h-7 flex items-center justify-center rounded text-sm transition"
-          x-text="t.icon">
-          <span x-show="t.id === 'jobs' && jobStats.failed > 0"
-            class="absolute top-0.5 right-0.5 w-1.5 h-1.5 rounded-full bg-red-500 pointer-events-none"></span>
-        </button>
-      </template>
-    </nav>
-
-    <!-- Left panel -->
-    <div class="flex flex-col border-r border-gray-800 flex-shrink-0 overflow-hidden bg-gray-400" 
-        :class="docsOpen ? 'w-64' : 'w-32'">
-
-      <!-- GRAPH tab -->
-      <div x-show="tab === 'graph'" class="flex flex-col h-full overflow-hidden p-3 gap-3">
-        <!-- Documents header with fold toggle -->
-        <button @click="docsOpen = !docsOpen"
-          class="flex items-center justify-between text-sm font-bold text-gray-500 uppercase tracking-widest hover:text-gray-300 transition select-none">
-          <span>Documents</span>
-          <span x-text="docsOpen ? '◄' : '►'" class="text-gray-600"></span>
-        </button>
-        <!-- Select-all toggle -->
-        <div x-show="docsOpen && graphData.documents.length > 0" class="flex items-center gap-2 -mt-1 mb-0.5">
-          <button @click="toggleAllDocs()"
-            class="text-xs text-gray-600 hover:text-gray-300 transition select-none"
-            x-text="selectedDocKeys.size === 0 ? 'select all' : 'clear all'"></button>
-          <span class="text-xs text-gray-700" x-show="selectedDocKeys.size > 0"
-            x-text="selectedDocKeys.size + '/' + graphData.documents.length + ' selected'"></span>
-        </div>
-        <div class="flex flex-col gap-1.5 overflow-y-auto scrollbar-thin" style="max-height:40vh">
-          <template x-for="doc in graphData.documents" :key="doc._key || doc.id">
-            <div @click="toggleDocSelection(doc)"
-              :class="selectedDocKeys.has(doc._key || doc.id)
-                ? 'border-gray-500 bg-sky-950/30'
-                : 'border-gray-700 bg-gray-700 hover:border-gray-600 hover:bg-gray-500'"
-              class="group p-2 rounded border cursor-pointer transition text-xs flex-shrink-0 relative">
-              <!-- Selection indicator -->
-              <div class="absolute top-2 right-2 w-3 h-3 rounded-sm border flex items-center justify-center flex-shrink-0"
-                :class="selectedDocKeys.has(doc._key || doc.id)
-                  ? 'border-gray-400 bg-sky-500/30'
-                  : 'border-gray-600'">
-                <span x-show="selectedDocKeys.has(doc._key || doc.id)"
-                  class="text-sky-300 leading-none" style="font-size:9px">✓</span>
-              </div>
-              <div class="text-gray-200 truncate pr-5"
-                :class="selectedDocKeys.has(doc._key || doc.id) ? 'text-sky-200' : 'group-hover-sky'"
-                x-text="doc.title || doc.source_file"></div>
-              <div class="flex justify-between mt-0.5">
-                <span class="text-gray-600" x-text="doc.parser_engine || 'LiteParse'"></span>
-                <span class="text-gray-600 text-sm"
-                  x-text="doc.upload_time ? new Date(doc.upload_time).toLocaleDateString() : ''"></span>
-              </div>
-            </div>
-          </template>
-          <div x-show="graphData.documents.length === 0"
-            class="text-xs text-gray-700 text-center py-6">No documents yet</div>
-        </div>
-        <!-- Legend -->
-        <div class="border-t border-gray-800 pt-2.5 grid grid-cols-2 gap-x-3 gap-y-1.5 mt-auto">
-          <template x-for="item in legend" :key="item[1]">
-            <div class="flex items-center gap-1.5 text-xs text-gray-500">
-              <div class="w-2.5 h-2.5 rounded-full flex-shrink-0" :style="'background:' + item[0]"></div>
-              <span x-text="item[1]"></span>
-            </div>
-          </template>
-        </div>
-      </div>
-
-      <!-- INGEST tab -->
-      <div x-show="tab === 'ingest'" class="flex flex-col h-full overflow-hidden p-3 gap-3">
-        <div class="text-sm font-bold text-gray-500 uppercase tracking-widest">Pipeline Control</div>
-
-        <div class="flex flex-col gap-1">
-          <div class="text-sm text-gray-600 mb-0.5">Staged input files</div>
-          <div class="flex flex-col gap-1 max-h-36 overflow-y-auto scrollbar-thin">
-            <template x-for="f in inputFiles" :key="f.name">
-              <div class="flex items-center gap-2 text-xs px-2 py-1 rounded bg-gray-800 border border-gray-700">
-                <span class="flex-1 truncate text-gray-300" x-text="f.name"></span>
-                <span class="text-gray-600 text-sm flex-shrink-0" x-text="f.size"></span>
-                <button @click="deleteInputFile(f.name)"
-                  class="text-gray-700 hover:text-red-400 transition flex-shrink-0 leading-none">✕</button>
-              </div>
-            </template>
-            <div x-show="inputFiles.length === 0"
-              class="text-sm text-gray-700 text-center py-2">No files staged</div>
-          </div>
-        </div>
-
-        <button @click="runPipeline()" :disabled="pipelineActive"
-          :class="pipelineActive ? 'bg-gray-800 text-gray-600 cursor-not-allowed' : 'bg-sky-700 hover:bg-sky-600 text-white'"
-          class="text-xs font-semibold py-1.5 rounded transition flex items-center justify-center gap-2">
-          <span x-show="pipelineActive" class="animate-spin inline-block">⟳</span>
-          <span x-text="pipelineActive ? 'Running…' : '▶ Run Pipeline'"></span>
-        </button>
-
-        <div class="flex-1 min-h-0 flex flex-col overflow-hidden rounded border border-gray-800 bg-gray-950">
-          <div class="text-sm text-gray-700 px-2 py-1 border-b border-gray-800 flex-shrink-0">log</div>
-          <div class="flex-1 overflow-y-auto scrollbar-thin p-2 flex flex-col gap-0.5" id="log-console">
-            <template x-for="(log, i) in pipelineLogs" :key="i">
-              <div class="log-line"
-                :class="{
-                  'text-green-400': log.level === 'success',
-                  'text-red-400':     log.level === 'error',
-                  'text-yellow-400':   log.level === 'warn',
-                  'text-gray-500':   log.level === 'info'
-                }"
-                x-text="'[' + log.level + '] ' + log.message"></div>
-            </template>
-            <div x-show="pipelineLogs.length === 0" class="text-sm text-gray-800 py-1">idle</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- QUERY tab -->
-      <div x-show="tab === 'query'" class="flex flex-col h-full overflow-hidden p-3 gap-3">
-        <div class="text-sm font-bold text-gray-500 uppercase tracking-widest">Hybrid Retrieval</div>
-
-        <div class="flex gap-1.5">
-          <input x-model="queryInput" @keydown.enter="runQuery()"
-            placeholder="Search the graph…"
-            class="flex-1 text-xs bg-gray-800 border border-gray-700 rounded px-2.5 py-1.5
-                   text-gray-200 placeholder-gray-700 focus:outline-none focus:border-gray-500 transition" />
-          <button @click="runQuery()" :disabled="queryLoading"
-            class="text-xs px-2.5 py-1.5 bg-sky-700 hover:bg-sky-600 text-white rounded transition flex-shrink-0">→</button>
-        </div>
-
-        <div x-show="queryResults && queryResults.processedQuery && queryResults.processedQuery.keywords && queryResults.processedQuery.keywords.length"
-          class="flex flex-wrap gap-1">
-          <template x-for="kw in (queryResults && queryResults.processedQuery && queryResults.processedQuery.keywords || [])" :key="kw">
-            <span class="text-sm px-1.5 py-0.5 bg-gray-800 border border-gray-700 text-gray-400 rounded"
-              x-text="kw"></span>
-          </template>
-        </div>
-
-        <div class="flex-1 min-h-0 overflow-y-auto scrollbar-thin flex flex-col gap-2">
-          <template x-for="(r, i) in (queryResults && queryResults.shallowResults || [])" :key="i">
-            <div @click="highlightResultNode(r.node)"
-              class="text-xs p-2 rounded bg-gray-800 border border-gray-700 cursor-pointer
-                     hover:border-gray-600 transition">
-              <div class="flex justify-between items-center mb-1">
-                <span class="text-sky-500 text-sm font-bold" x-text="'#' + (i + 1)"></span>
-                <span class="text-green-400 text-sm"
-                  x-text="Math.round(r.score * 100) + '%'"></span>
-              </div>
-              <div class="text-gray-300 text-base leading-relaxed line-clamp-3"
-                x-text="r.node.content || r.node.title || '—'"></div>
-              <div class="flex flex-wrap gap-1 mt-1.5">
-                <template x-for="tag in (r.node.sumo_tags || []).slice(0, 4)" :key="tag">
-                  <span class="text-sm px-1 py-0.5 bg-green-900/40 text-green-400 rounded"
-                    x-text="tag"></span>
-                </template>
-              </div>
-            </div>
-          </template>
-          <div x-show="queryResults && !(queryResults.shallowResults && queryResults.shallowResults.length)"
-            class="text-xs text-gray-700 text-center py-6">No results</div>
-          <div x-show="!queryResults && !queryLoading"
-            class="text-base text-gray-700 text-center py-6 leading-relaxed">
-            Enter a keyword or phrase<br>to search the knowledge graph
-          </div>
-          <div x-show="queryLoading"
-            class="text-xs text-gray-600 text-center py-6 animate-pulse">Searching…</div>
-        </div>
-      </div>
-
-      <!-- JOBS tab -->
-      <div x-show="tab === 'jobs'" x-init="if(tab==='jobs') loadJobs()" class="flex flex-col h-full overflow-hidden p-3 gap-2">
-        <div class="text-sm font-bold text-gray-500 uppercase tracking-widest">Job Queue</div>
-
-        <div class="grid grid-cols-4 gap-1 flex-shrink-0">
-          <template x-for="[key, color] in [['failed','text-red-400'],['waiting','text-yellow-400'],['active','text-sky-400'],['completed','text-green-400']]" :key="key">
-            <div class="flex flex-col items-center py-1 rounded bg-gray-800 border border-gray-700">
-              <span class="text-xs font-bold" :class="color" x-text="jobStats[key] || 0"></span>
-              <span class="text-sm text-gray-600" x-text="key"></span>
-            </div>
-          </template>
-        </div>
-
-        <div x-show="jobStats.failed > 0" class="flex gap-1.5 flex-shrink-0">
-          <button @click="retryAllFailed(false)"
-            class="flex-1 text-sm py-1 rounded bg-yellow-700/60 hover:bg-yellow-600/70 text-yellow-200 transition">
-            ↺ Retry all failed
-          </button>
-          <button @click="retryAllFailed(true)"
-            class="flex-1 text-sm py-1 rounded bg-red-800/50 hover:bg-red-700/60 text-red-300 transition">
-            ↺ Force retry all
-          </button>
-        </div>
-
-        <div class="flex-1 min-h-0 overflow-y-auto scrollbar-thin flex flex-col gap-1.5">
-          <template x-for="job in jobs" :key="job.id">
-            <div class="rounded border p-2 text-xs"
-              :class="{
-                'border-red-800/60 bg-red-950/30':   job.status === 'failed',
-                'border-yellow-700/40 bg-yellow-950/20': job.status === 'waiting',
-                'border-gray-700 bg-sky-950/20':   job.status === 'active',
-                'border-gray-700 bg-gray-800': job.status === 'completed',
-              }">
-              <div class="flex items-center gap-2 mb-1">
-                <div class="w-1.5 h-1.5 rounded-full flex-shrink-0"
-                  :style="'background:' + jobStatusColor(job.status)"></div>
-                <span class="font-semibold text-gray-200 truncate flex-1"
-                  x-text="job.data && job.data.filename || job.id"></span>
-                <span class="text-sm uppercase font-bold flex-shrink-0"
-                  :class="{
-                    'text-red-400':   job.status==='failed',
-                    'text-yellow-400': job.status==='waiting',
-                    'text-sky-400':   job.status==='active',
-                    'text-green-400': job.status==='completed',
-                  }"
-                  x-text="job.status"></span>
-              </div>
-              <div x-show="job.status === 'active'" class="mb-1">
-                <div class="h-1 bg-gray-800 rounded overflow-hidden">
-                  <div class="h-full bg-sky-500 transition-all" :style="'width:' + (job.progress||0) + '%'"></div>
-                </div>
-                <div class="text-sm text-gray-500 mt-0.5" x-text="job.progressMessage || ''"></div>
-              </div>
-              <div x-show="job.status === 'failed' && job.error"
-                class="text-sm text-red-400/80 mb-1.5 leading-relaxed break-words"
-                x-text="job.error"></div>
-              <div x-show="job.status === 'completed' && job.result && job.result.skipped"
-                class="text-sm text-yellow-400/70 mb-1.5"
-                x-text="job.result && job.result.reason"></div>
-
-              <!-- LLM usage summary -->
-              <template x-if="job.status === 'completed' && job.result && job.result.llm_usage && job.result.llm_usage.total_tokens > 0">
-                <div class="mt-1 mb-1.5 rounded border border-gray-800 px-2 py-1.5 bg-gray-900">
-                  <div class="text-sm font-bold text-gray-600 uppercase tracking-wider mb-1"
-                    x-text="(job.result.llm_usage.model || 'Gemini') + ' · usage'"></div>
-                  <div class="grid grid-cols-2 gap-x-4 gap-y-0.5 text-sm text-gray-500">
-                    <div>Prompt <span class="text-gray-300 float-right" x-text="job.result.llm_usage.prompt_tokens.toLocaleString()"></span></div>
-                    <div>Generated <span class="text-green-400 float-right" x-text="job.result.llm_usage.candidates_tokens.toLocaleString()"></span></div>
-                    <div>Total tokens <span class="text-sky-400 float-right" x-text="job.result.llm_usage.total_tokens.toLocaleString()"></span></div>
-                    <div>Chunks <span class="text-gray-300 float-right" x-text="job.result.llm_usage.chunks + (job.result.llm_usage.cache_hits ? ' (' + job.result.llm_usage.cache_hits + ' cached)' : '')"></span></div>
-                    <template x-if="job.result.llm_usage.repair_prompt_tokens > 0">
-                      <div class="col-span-2 text-yellow-600">Repair tokens <span class="float-right" x-text="(job.result.llm_usage.repair_prompt_tokens + job.result.llm_usage.repair_candidates_tokens).toLocaleString()"></span></div>
-                    </template>
-                  </div>
-                </div>
-              </template>
-
-              <div class="flex items-center gap-2 text-sm text-gray-600">
-                <span x-text="'attempt ' + (job.attempts||0) + '/' + (job.maxAttempts||3)"></span>
-                <span x-text="job.updatedAt ? new Date(job.updatedAt).toLocaleTimeString() : ''"></span>
-                <span x-show="job.data && job.data.force" class="text-yellow-600">--force</span>
-              </div>
-              <div x-show="job.status === 'failed' || job.status === 'completed'" class="flex gap-1 mt-1.5">
-                <button @click="retryJob(job.id, false)"
-                  class="text-sm px-2 py-0.5 rounded bg-gray-700 hover:bg-gray-600 text-gray-300 transition">
-                  ↺ Retry
-                </button>
-                <button @click="retryJob(job.id, true)"
-                  class="text-sm px-2 py-0.5 rounded bg-yellow-800/50 hover:bg-yellow-700/60 text-yellow-300 transition">
-                  ↺ Force
-                </button>
-                <button @click="deleteJob(job.id)"
-                  class="text-sm px-2 py-0.5 rounded bg-gray-800 hover:bg-red-900/50 text-gray-600 hover:text-red-400 transition ml-auto">
-                  ✕
-                </button>
-              </div>
-            </div>
-          </template>
-          <div x-show="!jobsLoading && jobs.length === 0"
-            class="text-base text-gray-700 text-center py-8">No jobs yet</div>
-          <div x-show="jobsLoading && jobs.length === 0"
-            class="text-base text-gray-600 text-center py-8 animate-pulse">Loading…</div>
-        </div>
-
-        <button @click="loadJobs()" class="flex-shrink-0 text-sm py-1 rounded bg-gray-800 text-gray-600 hover:text-gray-400 transition">
-          ↺ Refresh
-        </button>
-      </div>
-
-      <!-- WIKI tab -->
-      <div x-show="tab === 'wiki'" class="flex flex-col h-full overflow-hidden p-3 gap-3">
-        <div class="text-sm font-bold text-gray-500 uppercase tracking-widest">Wiki Export</div>
-        <p class="text-base text-gray-600 leading-relaxed">
-          Compile graph nodes into Quartz-compatible markdown files for publishing.
-        </p>
-        <button @click="exportWiki()" :disabled="wikiExporting"
-          class="text-xs py-1.5 px-3 rounded border border-gray-700 hover:border-gray-500
-                 text-gray-300 hover:text-white transition flex items-center justify-center gap-2">
-          <span x-show="wikiExporting" class="animate-spin inline-block">⟳</span>
-          <span x-text="wikiExporting ? 'Exporting…' : '⬇ Export to wiki/'"></span>
-        </button>
-        <div x-show="wikiMessage" class="text-base text-green-400" x-text="wikiMessage"></div>
-        <div class="flex-1"></div>
-        <div class="text-sm text-gray-700 border-t border-gray-800 pt-2">
-          Output: <code class="text-gray-600">wiki/*.md</code>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- ── Right: graph canvas + inspector ────────────────────────────────── -->
-    <div class="flex flex-col flex-1 min-w-0 overflow-hidden bg-gray-200">
-
-      <!-- SVG canvas -->
-      <div class="flex-1 overflow-auto relative bg-gray-950" id="graph-container">
-        <div id="graph-scale-wrapper" style="position:relative;">
-          <svg id="graph-svg" preserveAspectRatio="xMidYMid meet" style="position:absolute; top:0; left:0; transform-origin:0 0;"></svg>
-        </div>
-
-        <!-- Clear selection button overlay -->
-        <div x-show="selectedNode" class="absolute top-2 left-2 z-10 select-none">
-          <button @click="selectedNode = null; renderCurrentGraph()"
-            class="text-xs px-2 py-1 rounded bg-gray-800 border border-gray-700
-                   text-gray-400 hover:text-white hover:bg-gray-700 hover:border-gray-500 transition">
-            ✕ clear selection
-          </button>
-        </div>
-
-        <!-- Zoom controls overlay -->
-        <div class="absolute top-2 right-2 flex items-center gap-1 z-10 select-none">
-          <button @click="zoomOut()" title="Zoom out (-)"
-            class="w-6 h-6 flex items-center justify-center rounded bg-gray-800 border border-gray-700
-                   text-gray-400 hover:text-white hover:bg-gray-700 transition text-sm leading-none">−</button>
-          <span class="text-sm text-gray-600 w-10 text-center"
-            x-text="Math.round(graphZoom * 100) + '%'"></span>
-          <button @click="zoomIn()" title="Zoom in (+)"
-            class="w-6 h-6 flex items-center justify-center rounded bg-gray-800 border border-gray-700
-                   text-gray-400 hover:text-white hover:bg-gray-700 transition text-sm leading-none">+</button>
-        </div>
-
-        <div x-show="graphLoading"
-          class="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <span class="text-xs text-gray-600 animate-pulse">Loading graph…</span>
-        </div>
-        <div x-show="!graphLoading && graphData.documents.length === 0"
-          class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none gap-2">
-          <span class="text-gray-700 text-sm">No data</span>
-          <span class="text-gray-800 text-xs">Run the pipeline from the Ingest tab</span>
-        </div>
-        <div x-show="!graphLoading && graphData.documents.length > 0 && selectedDocKeys.size === 0"
-          class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none gap-2">
-          <span class="text-gray-700 text-sm">No document selected</span>
-          <span class="text-gray-800 text-xs">Select a document from the left panel to view its graph</span>
-        </div>
-      </div>
-
-      <!-- Node inspector strip -->
-      <div x-show="selectedNode"
-        class="flex-shrink-0 border-t border-gray-800 bg-gray-900 p-3 flex gap-4 items-start"
-        style="max-height: 600px;">
-
-        <div class="flex-1 min-w-0 flex flex-col gap-1.5 overflow-hidden">
-          <!-- Type + key row -->
-          <div class="flex items-center gap-2">
-            <div class="w-2.5 h-2.5 rounded-full flex-shrink-0"
-              :style="'background:' + nodeColor(selectedNode)"></div>
-            <span class="text-sm font-bold px-1.5 py-0.5 rounded uppercase tracking-wider"
-              :style="'background:' + nodeColor(selectedNode) + '22; color:' + nodeColor(selectedNode)"
-              x-text="selectedNode && (selectedNode.node_type || selectedNode.type || (selectedNode._id && selectedNode._id.split('/')[0]))"></span>
-            <span class="text-sm text-gray-600"
-              x-text="selectedNode && (selectedNode._key || selectedNode.id)"></span>
-            <!-- Loading indicator: only for real DB nodes that haven't been expanded yet -->
-            <span x-show="selectedNode && selectedNode._id && !selectedNode._id.startsWith('tags/') && !expandedNodes.has(selectedNode._id)"
-              class="text-sm text-gray-500 ml-auto animate-pulse">loading…</span>
-            <span x-show="selectedNode && selectedNode._id && !selectedNode._id.startsWith('tags/') && expandedNodes.has(selectedNode._id)"
-              class="text-sm text-green-400 ml-auto">expanded</span>
-          </div>
-          <!-- SUMO tag inspector: tag name + paragraph count -->
-          <div x-show="selectedNode && selectedNode._id && selectedNode._id.startsWith('tags/')"
-            class="flex flex-col gap-1">
-            <div class="text-xs text-green-300 font-semibold"
-              x-text="selectedNode && ('#' + selectedNode.title)"></div>
-            <div class="text-base text-gray-500"
-              x-text="selectedNode && selectedNode._tagCount + ' paragraph(s) tagged — full path highlighted in graph'"></div>
-          </div>
-          <!-- Entity inspector: name, type, mention count -->
-          <div x-show="selectedNode && selectedNode._id && selectedNode._id.startsWith('entities/')"
-            class="flex flex-col gap-1">
-            <div class="text-xs text-pink-300 font-semibold" x-text="selectedNode && selectedNode.name"></div>
-            <div class="text-base text-gray-500"
-              x-text="selectedNode && (selectedNode.type + ' · mentioned ' + (selectedNode.mention_count || 0) + ' time(s)')"></div>
-          </div>
-          <!-- Title (sections / documents) -->
-          <div class="text-xs text-gray-200 font-semibold truncate"
-            x-show="selectedNode && !selectedNode._id?.startsWith('tags/') && (selectedNode.title || selectedNode.source_file)"
-            x-text="selectedNode && (selectedNode.title || selectedNode.source_file || '')"></div>
-          <!-- Section children: show all child paragraph/table content with node ID annotations -->
-          <div x-show="selectedNode && selectedNode._id && selectedNode._id.startsWith('sections/')"
-            class="overflow-y-auto scrollbar-thin flex-1 flex flex-col gap-3"
-            style="max-height: 300px;">
-            <template x-if="sectionChildren(selectedNode).length === 0">
-              <div class="text-base text-gray-700 italic">
-                <span x-show="!expandedNodes.has(selectedNode && selectedNode._id)" class="animate-pulse">loading children…</span>
-                <span x-show="expandedNodes.has(selectedNode && selectedNode._id)">no content nodes found</span>
-              </div>
-            </template>
-            <template x-for="child in sectionChildren(selectedNode)" :key="child.node._id">
-              <div class="flex flex-col gap-0.5">
-                <!-- Child node ID annotation -->
-                <div class="flex items-center gap-1.5">
-                  <span class="text-xs font-mono text-gray-700" x-text="child.node._id"></span>
-                  <span class="text-xs px-1 rounded"
-                    :style="'background:' + (child.kind === 'table' ? '#f472b622' : '#fbbf2422') + '; color:' + (child.kind === 'table' ? '#f472b6' : '#fbbf24')"
-                    x-text="child.node.node_type || child.kind"></span>
-                </div>
-                <!-- Paragraph content -->
-                <div x-show="child.kind === 'paragraph'"
-                  class="text-sm text-gray-400 leading-relaxed"
-                  style="white-space: pre-wrap; word-break: break-word;"
-                  x-text="child.node.content || (expandedNodes.has(child.node._id) ? '[empty]' : '…')"></div>
-                <!-- Table: render as simple grid summary -->
-                <div x-show="child.kind === 'table'" class="text-sm text-gray-500 font-mono">
-                  <span x-text="child.node.markdown_representation || ('[table ' + ((child.node.matrix_data || []).length) + ' rows]')"></span>
-                </div>
-              </div>
-            </template>
-          </div>
-          <!-- Content (paragraph / figure text — non-section nodes) -->
-          <div class="text-base text-gray-400 overflow-y-auto scrollbar-thin leading-relaxed flex-1"
-            style="max-height: 500px; white-space: pre-wrap; word-break: break-word;"
-            x-show="selectedNode && !selectedNode._id?.startsWith('tags/') && !selectedNode._id?.startsWith('sections/') && selectedNode.content"
-            x-text="selectedNode && (selectedNode.content || '')"></div>
-          <!-- Empty content notification for paragraphs that loaded but have no text -->
-          <div class="text-base text-yellow-600 italic"
-            x-show="selectedNode && selectedNode._id && selectedNode._id.startsWith('paragraphs/') && expandedNodes.has(selectedNode._id) && selectedNode.content === ''">[EMPTY CONTENT]</div>
-          <!-- Empty state for structural nodes (not tags, not paragraphs-with-content, not sections) -->
-          <div class="text-base text-gray-700 italic"
-            x-show="selectedNode && !selectedNode._id?.startsWith('tags/') && !selectedNode._id?.startsWith('sections/') && !selectedNode._id?.startsWith('entities/') && !selectedNode.content && !selectedNode.title && !(selectedNode._id?.startsWith('paragraphs/') && expandedNodes.has(selectedNode._id))">—</div>
-        </div>
-
-        <!-- SUMO tags (shown for paragraphs/sections that HAVE tags, not for tag nodes themselves) -->
-        <div x-show="selectedNode && !selectedNode._id?.startsWith('tags/') && selectedNode.sumo_tags && selectedNode.sumo_tags.length > 0"
-          class="flex-shrink-0 w-44 flex flex-col gap-1.5">
-          <div class="text-sm font-bold text-gray-600 uppercase tracking-wider">SUMO Tags</div>
-          <div class="flex flex-wrap gap-1 overflow-y-auto scrollbar-thin" style="max-height: 140px;">
-            <template x-for="tag in (selectedNode && selectedNode.sumo_tags || []).slice(0, 20)" :key="tag">
-              <span class="text-sm px-1.5 py-0.5 bg-green-900/40 border border-green-800/50
-                           text-green-300 rounded" x-text="tag"></span>
-            </template>
-          </div>
-          <div x-show="selectedNode && (selectedNode.sumo_candidate_tags_raw || []).length > (selectedNode.sumo_tags || []).length"
-            class="text-sm text-gray-700"
-            x-text="selectedNode ? '+' + ((selectedNode.sumo_candidate_tags_raw || []).length - (selectedNode.sumo_tags || []).length) + ' dropped' : ''">
-          </div>
-        </div>
-
-        <button @click="selectedNode = null; renderCurrentGraph()"
-          class="flex-shrink-0 text-gray-700 hover:text-gray-400 transition text-xs mt-0.5">✕</button>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- ── Alpine App + SVG Graph Logic ─────────────────────────────────────── -->
-  <script>
-  function app() {
-    return {
-      tab: 'graph',
-      tabs: [
-        { id: 'graph',  icon: '⬡', label: 'Graph'  },
-        { id: 'ingest', icon: '⬆', label: 'Ingest' },
-        { id: 'query',  icon: '⌕', label: 'Query'  },
-        { id: 'jobs',   icon: '⚠', label: 'Jobs'   },
-        { id: 'wiki',   icon: '◈', label: 'Wiki'   },
-      ],
-      legend: [
-        ['#38bdf8', 'Document'],
-        ['#818cf8', 'Section L1'],
-        ['#2dd4bf', 'Section L2'],
-        ['#67e8f9', 'Section L3'],
-        ['#a78bfa', 'Section L4'],
-        ['#f0abfc', 'Section L5'],
-        ['#fbbf24', 'Paragraph'],
-        ['#c084fc', 'Figure'],
-        ['#f472b6', 'Table'],
-        ['#fb7185', 'Entity'],
-        ['#4ade80', 'Tag'],
-      ],
-
-      graphData: { documents: [], sections: [], paragraphs: [], tables: [], entities: [], edges: [] },
-      expandedNodes: new Set(),
-      selectedDocKeys: new Set(),
-      graphSource: '',
-      graphLoading: false,
-      selectedNode: null,
-      colorMode: 'type',
-      docsOpen: true,
-      graphZoom: 1.0,
-
-      pipelineActive: false,
-      pipelineLogs: [],
-      inputFiles: [],
-
-      queryInput: '',
-      queryResults: null,
-      queryLoading: false,
-
-      jobs: [],
-      jobStats: { waiting: 0, active: 0, completed: 0, failed: 0, total: 0 },
-      jobsLoading: false,
-
-      wikiExporting: false,
-      wikiMessage: '',
-
-      async init() {
-        await Promise.all([this.loadDocuments(), this.loadInputFiles(), this.loadJobs()]);
-        setInterval(() => this.pollPipeline(), 2500);
-        setInterval(() => this.loadJobs(), 5000);
-
-        // Zoom keyboard shortcuts: + / = to zoom in, - to zoom out
-        window.addEventListener('keydown', (e) => {
-          if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-          if (e.key === '+' || e.key === '=') { e.preventDefault(); this.zoomIn(); }
-          else if (e.key === '-') { e.preventDefault(); this.zoomOut(); }
-          else if (e.key === '0') { e.preventDefault(); this.graphZoom = 1.0; this.renderCurrentGraph(); }
-        });
-      },
-
-      _zoomTimer: null,
-      zoomIn()  { this.graphZoom = Math.min(this.graphZoom + 0.2, 4.0); this.scheduleZoom(); },
-      zoomOut() { this.graphZoom = Math.max(this.graphZoom - 0.2, 0.2); this.scheduleZoom(); },
-
-      scheduleZoom() {
-        if (this._zoomTimer) cancelAnimationFrame(this._zoomTimer);
-        this._zoomTimer = requestAnimationFrame(() => {
-          this._zoomTimer = null;
-          this.applyZoom();
-        });
-      },
-
-      applyZoom() {
-        // Scale via CSS transform (GPU-composited) instead of resizing width/height —
-        // resizing forces the browser to re-rasterize the SVG (incl. blur filters) on
-        // every frame, which is what made zoom feel laggy.
-        const svg = document.getElementById('graph-svg');
-        const wrapper = document.getElementById('graph-scale-wrapper');
-        if (!svg || !wrapper) return;
-        const baseW = parseFloat(svg.dataset.baseW || '0');
-        const baseH = parseFloat(svg.dataset.baseH || '0');
-        if (!baseW || !baseH) return;
-        svg.style.transform = 'scale(' + this.graphZoom + ')';
-        wrapper.style.width  = Math.round(baseW * this.graphZoom) + 'px';
-        wrapper.style.height = Math.round(baseH * this.graphZoom) + 'px';
-      },
-
-      // Initial page-load fetch: documents list only. The full graph (sections/
-      // paragraphs/tables) loads per-document on selection; entities/SUMO tags/
-      // edges load per-node on click — see loadDocGraph() and expandNode().
-      async loadDocuments() {
-        this.graphLoading = true;
-        try {
-          const r = await fetch('/api/documents');
-          const d = await r.json();
-          if (d.success) {
-            this.graphData = {
-              documents:  d.documents || [],
-              sections: [], paragraphs: [], tables: [], entities: [], edges: [],
-            };
-            this.graphSource = d.source || '';
-          }
-        } catch(e) { console.error('loadDocuments:', e); }
-        this.graphLoading = false;
-        this.$nextTick(() => this.renderCurrentGraph());
-      },
-
-      // Fetches the structural graph (sections/paragraphs/tables) for the current
-      // selectedDocKeys. Empty selection just clears everything back to the
-      // "select a document" empty-state — no fetch.
-      async loadDocGraph() {
-        this.expandedNodes = new Set();
-        if (this.selectedDocKeys.size === 0) {
-          this.graphData.sections = [];
-          this.graphData.paragraphs = [];
-          this.graphData.tables = [];
-          this.graphData.entities = [];
-          this.graphData.edges = [];
-          this.selectedNode = null;
-          this.$nextTick(() => this.renderCurrentGraph());
-          return;
-        }
-        this.graphLoading = true;
-        try {
-          const docKeys = [...this.selectedDocKeys].join(',');
-          const r = await fetch('/api/graph?docKeys=' + encodeURIComponent(docKeys));
-          const d = await r.json();
-          if (d.success) {
-            this.graphData.sections   = d.sections   || [];
-            this.graphData.paragraphs = d.paragraphs || [];
-            this.graphData.tables     = d.tables     || [];
-            // Entities/edges only ever come from expandNode (per-node, on click) —
-            // drop whatever was attributed to docs no longer in the selection.
-            this.graphData.entities = this.graphData.entities.filter(
-              e => (e.document_ids || []).some(id => this.selectedDocKeys.has(id)));
-            const keptIds = new Set([
-              ...this.graphData.sections.map(s => s._id),
-              ...this.graphData.paragraphs.map(p => p._id),
-              ...this.graphData.tables.map(t => t._id),
-              ...this.graphData.entities.map(e => e._id),
-              ...this.graphData.documents.map(doc => doc._id),
-            ]);
-            this.graphData.edges = this.graphData.edges.filter(
-              e => keptIds.has(e._from) && keptIds.has(e._to));
-          }
-        } catch(e) { console.error('loadDocGraph:', e); }
-        this.graphLoading = false;
-        this.$nextTick(() => this.renderCurrentGraph());
-      },
-
-      // Reload button: refresh the doc list, then refresh the current selection if any.
-      async loadGraph() {
-        await this.loadDocuments();
-        if (this.selectedDocKeys.size > 0) await this.loadDocGraph();
-      },
-
-      async expandNode(node) {
-        const nodeId = node._id || (node.id ? node.id : null);
-        if (!nodeId || this.expandedNodes.has(nodeId)) return;
-        // SUMO tags are virtual nodes built client-side — they have no DB record.
-        // Skip the neighbors fetch; highlighting is handled purely by renderGraph.
-        if (nodeId.startsWith('tags/')) return;
-        this.expandedNodes.add(nodeId);
-        try {
-          const [collection, key] = nodeId.split('/');
-          const r = await fetch(`/api/graph/node/${collection}/${key}/neighbors`);
-          const d = await r.json();
-          if (!d.success) return;
-          // Merge new nodes/edges into graphData; for paragraphs, UPDATE stubs with content
-          const existingParaMap  = new Map(this.graphData.paragraphs.map(p => [p._id, p]));
-          const existingSecIds   = new Set(this.graphData.sections.map(s => s._id));
-          const existingEdgeIds  = new Set(this.graphData.edges.map(e => e._id));
-          for (const p of (d.paragraphs || [])) {
-            if (existingParaMap.has(p._id)) {
-              // Update stub with full content
-              Object.assign(existingParaMap.get(p._id), p);
-            } else {
-              this.graphData.paragraphs.push(p);
-            }
-          }
-          const existingTableMap = new Map(this.graphData.tables.map(t => [t._id, t]));
-          for (const t of (d.tables || [])) {
-            if (existingTableMap.has(t._id)) Object.assign(existingTableMap.get(t._id), t);
-            else this.graphData.tables.push(t);
-          }
-          const existingEntityIds = new Set(this.graphData.entities.map(e => e._id));
-          for (const e of (d.entities || [])) if (!existingEntityIds.has(e._id)) this.graphData.entities.push(e);
-          for (const s of (d.sections || [])) if (!existingSecIds.has(s._id))   this.graphData.sections.push(s);
-          for (const e of (d.edges    || [])) if (!existingEdgeIds.has(e._id))  this.graphData.edges.push(e);
-          this.$nextTick(() => this.renderCurrentGraph());
-        } catch(e) { console.error('expandNode:', e); }
-      },
-
-      // Returns ordered children (paragraphs + tables) of the given section node,
-      // using HAS_CHILD / contains_paragraph / contains_table edges in graphData.
-      sectionChildren(node) {
-        if (!node || !node._id) return [];
-        const sectionId = node._id;
-        const childEdgeTypes = new Set(['HAS_CHILD', 'contains_paragraph', 'contains_table']);
-        const childIds = new Set(
-          this.graphData.edges
-            .filter(e => e._from === sectionId && childEdgeTypes.has(e.relation || e.type))
-            .map(e => e._to)
-        );
-        if (childIds.size === 0) return [];
-
-        const paraMap = new Map(this.graphData.paragraphs.map(p => [p._id, p]));
-        const tableMap = new Map(this.graphData.tables.map(t => [t._id, t]));
-
-        const children = [];
-        for (const id of childIds) {
-          if (paraMap.has(id)) children.push({ kind: 'paragraph', node: paraMap.get(id) });
-          else if (tableMap.has(id)) children.push({ kind: 'table', node: tableMap.get(id) });
-        }
-        // Stable sort: paragraphs before tables, then by _key lexicographic order
-        children.sort((a, b) => {
-          if (a.kind !== b.kind) return a.kind === 'paragraph' ? -1 : 1;
-          return (a.node._key || '').localeCompare(b.node._key || '');
-        });
-        return children;
-      },
-
-      renderCurrentGraph() {
-        const self = this;
-        const selectedKey = self.selectedNode && (self.selectedNode._key || self.selectedNode.id);
-        renderGraph(this.graphData, this.colorMode, selectedKey, this.graphZoom,
-          this.selectedDocKeys,
-          (node) => {
-            self.selectedNode = node;
-            self.expandNode(node);
-            self.$nextTick(() => self.renderCurrentGraph());
-          });
-      },
-
-      toggleDocSelection(doc) {
-        const key = doc._key || doc.id;
-        if (this.selectedDocKeys.has(key)) {
-          this.selectedDocKeys.delete(key);
-        } else {
-          this.selectedDocKeys.add(key);
-        }
-        this.selectedDocKeys = new Set(this.selectedDocKeys); // trigger reactivity
-        this.loadDocGraph();
-      },
-
-      toggleAllDocs() {
-        if (this.selectedDocKeys.size === 0) {
-          this.selectedDocKeys = new Set(this.graphData.documents.map(d => d._key || d.id));
-        } else {
-          this.selectedDocKeys = new Set();
-        }
-        this.loadDocGraph();
-      },
-
-      async highlightResultNode(node) {
-        // Query results can reference a doc that hasn't been selected/loaded yet —
-        // pull it in first so the node actually exists in graphData to highlight.
-        const docId = node.document_id;
-        if (docId && !this.selectedDocKeys.has(docId)) {
-          this.selectedDocKeys = new Set([...this.selectedDocKeys, docId]);
-          await this.loadDocGraph();
-        }
-        this.selectedNode = node;
-        this.$nextTick(() => {
-          this.renderCurrentGraph();
-          pulseNode(node._key || (node._id && node._id.split('/')[1]));
-        });
-      },
-
-      async loadInputFiles() {
-        try {
-          const r = await fetch('/api/pipeline/input-files');
-          const d = await r.json();
-          if (d.success) this.inputFiles = d.files;
-        } catch(e) {}
-      },
-
-      async deleteInputFile(name) {
-        if (!confirm('Remove "' + name + '" from staging?')) return;
-        await fetch('/api/pipeline/input-files/' + encodeURIComponent(name), { method: 'DELETE' });
-        await this.loadInputFiles();
-      },
-
-      async runPipeline() {
-        this.pipelineLogs = [];
-        try {
-          const r = await fetch('/api/pipeline/run', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: '{}',
-          });
-          const d = await r.json();
-          if (d.success) this.pipelineActive = true;
-        } catch(e) {}
-      },
-
-      async pollPipeline() {
-        if (!this.pipelineActive && this.tab !== 'ingest') return;
-        try {
-          const r = await fetch('/api/pipeline/status');
-          const d = await r.json();
-          this.pipelineLogs = d.logs || [];
-          const wasActive = this.pipelineActive;
-          this.pipelineActive = !!d.active;
-          if (wasActive && !d.active) {
-            await this.loadGraph();
-            await this.loadInputFiles();
-          }
-          this.$nextTick(() => {
-            const el = document.getElementById('log-console');
-            if (el) el.scrollTop = el.scrollHeight;
-          });
-        } catch(e) {}
-      },
-
-      async runQuery() {
-        const q = this.queryInput.trim();
-        if (!q) return;
-        this.queryLoading = true;
-        this.queryResults = null;
-        try {
-          const r = await fetch('/api/retrieval/query', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ query: q }),
-          });
-          const d = await r.json();
-          if (d.success) this.queryResults = d;
-        } catch(e) {}
-        this.queryLoading = false;
-      },
-
-      async exportWiki() {
-        this.wikiExporting = true;
-        this.wikiMessage = '';
-        try {
-          const r = await fetch('/api/quartz/export', { method: 'POST' });
-          const d = await r.json();
-          this.wikiMessage = d.success ? '✓ Exported to wiki/' : 'Error: ' + d.error;
-        } catch(e) { this.wikiMessage = 'Export failed'; }
-        this.wikiExporting = false;
-      },
-
-      async loadJobs() {
-        this.jobsLoading = true;
-        try {
-          const r = await fetch('/api/queue/jobs');
-          const d = await r.json();
-          if (d.success) {
-            const order = { failed: 0, waiting: 1, active: 2, completed: 3 };
-            this.jobs = (d.jobs || []).sort((a, b) => (order[a.status] ?? 9) - (order[b.status] ?? 9));
-            this.jobStats = d.stats || {};
-          }
-        } catch(e) {}
-        this.jobsLoading = false;
-      },
-
-      async retryJob(id, force) {
-        await fetch('/api/queue/jobs/' + id + '/retry', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ force: !!force }),
-        });
-        await this.loadJobs();
-      },
-
-      async deleteJob(id) {
-        await fetch('/api/queue/jobs/' + id, { method: 'DELETE' });
-        await this.loadJobs();
-      },
-
-      async retryAllFailed(force) {
-        const failed = this.jobs.filter(j => j.status === 'failed');
-        await Promise.all(failed.map(j => this.retryJob(j.id, force)));
-      },
-
-      jobStatusColor(status) {
-        return { failed: '#f87171', waiting: '#fbbf24', active: '#38bdf8', completed: '#4ade80' }[status] || '#94a3b8';
-      },
-
-      nodeColor(node) { return getNodeColor(node, this.colorMode); },
-    };
-  }
-
-  // ── SVG Graph Renderer ────────────────────────────────────────────────────
-
-  // One color per section level (index 0 = level 1, etc.)
-  const LEVEL_COLORS = ['#818cf8','#2dd4bf','#67e8f9','#a78bfa','#f0abfc','#fb923c','#34d399'];
-
-  const FIXED_COLORS = {
-    document:  '#38bdf8',
-    paragraph: '#fbbf24',
-    figure:    '#c084fc',
-    table:     '#f472b6',
-    entity:    '#fb7185',
-    tag:       '#4ade80',
-  };
-
-  const CLUSTER_PALETTE = [
-    '#38bdf8','#2dd4bf','#a78bfa','#f472b6',
-    '#fb923c','#4ade80','#facc15','#e879f9',
-  ];
-
-  // Returns a stable colKey string for a node.
-  // For sections, colKey = 'section_L<level>' so each level gets its own column.
-  function colKeyOf(node) {
-    const id = node._id || '';
-    if (id.startsWith('documents/'))  return 'document';
-    if (id.startsWith('paragraphs/')) return (node.node_type || '').toLowerCase() === 'figure' ? 'figure' : 'paragraph';
-    if (id.startsWith('tables/'))     return 'table';
-    if (id.startsWith('entities/'))   return 'entity';
-    if (id.startsWith('tags/'))       return 'tag';
-    if (id.startsWith('sections/'))   return 'section_L' + (node.level || 1);
-
-    // legacy / simulator nodes — use type/node_type
-    const nt = (node.node_type || node.type || '').toLowerCase();
-    if (nt === 'chapter')    return 'section_L1';
-    if (nt === 'subsection') return 'section_L3';
-    if (['section'].includes(nt)) return 'section_L2';
-    if (['paragraph','listitem','text','code','figure'].includes(nt)) return 'paragraph';
-    if (nt === 'table')    return 'table';
-    if (nt === 'document') return 'document';
-    return 'paragraph';
-  }
-
-  function sectionLevel(node) {
-    // parse level from colKey
-    const ck = colKeyOf(node);
-    const m = ck.match(/section_L(\d+)/);
-    return m ? parseInt(m[1], 10) : null;
-  }
-
-  function getNodeColor(node, colorMode) {
-    if (!node) return '#475569';
-    if (colorMode === 'sumo') {
-      const tags = node.sumo_tags || [];
-      if (tags.length > 0) {
-        let h = 0;
-        for (const c of tags[0]) h = (h * 31 + c.charCodeAt(0)) & 0xffff;
-        return CLUSTER_PALETTE[h % CLUSTER_PALETTE.length];
-      }
-    }
-    const ck = colKeyOf(node);
-    if (ck.startsWith('section_L')) {
-      const lvl = parseInt(ck.replace('section_L', ''), 10);
-      return LEVEL_COLORS[(lvl - 1) % LEVEL_COLORS.length];
-    }
-    return FIXED_COLORS[ck] || '#475569';
-  }
-
-  function renderGraph(data, colorMode, selectedKey, zoom, selectedDocKeys, onSelect) {
-    const svg = document.getElementById('graph-svg');
-    if (!svg) return;
-    svg.innerHTML = '';
-
-    let { documents, sections, paragraphs, tables, edges } = data;
-    let entities = data.entities || [];
-
-    // sections/paragraphs/tables/entities are already scoped server-side to the
-    // current selection (see loadDocGraph/expandNode) — only the document column
-    // (always the full doc list) still needs filtering down to what's selected.
-    if (selectedDocKeys && selectedDocKeys.size > 0) {
-      documents = documents.filter(d => selectedDocKeys.has(d._key || d.id));
-    }
-    // Most-mentioned entities first so the column reads top-to-bottom by relevance
-    entities = [...entities].sort((a, b) => (b.mention_count || 0) - (a.mention_count || 0));
-
-    // ── Build virtual SUMO tag nodes ──────────────────────────────────────
-    const tagCounts = {};
-    for (const p of paragraphs) {
-      for (const t of (p.sumo_tags || [])) tagCounts[t] = (tagCounts[t] || 0) + 1;
-    }
-    const tagNodes = Object.entries(tagCounts)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 25)
-      .map(([name, count]) => ({
-        _key: 'tag:' + name, _id: 'tags/' + name, type: 'tag', title: name, _tagCount: count,
-      }));
-
-    // ── Compute distinct section levels present in data ────────────────────
-    // Sections: render all (lazy load means this set is already correct)
-    // Paragraphs/tables: render all loaded (they arrive incrementally via neighbor fetch)
-    const sampledSec  = sections;
-    const sampledPara = paragraphs;
-    const sampledTbl  = tables;
-
-    // group sections by level
-    const sectionsByLevel = new Map(); // level(int) → section[]
-    for (const s of sampledSec) {
-      const lvl = s.level || 1;
-      if (!sectionsByLevel.has(lvl)) sectionsByLevel.set(lvl, []);
-      sectionsByLevel.get(lvl).push(s);
-    }
-    const levelNums = [...sectionsByLevel.keys()].sort((a, b) => a - b);
-    const numLevels = levelNums.length || 0;
-
-    // Paragraphs/figures and entities are usually the most numerous node types
-    // by far — wrap each into a few side-by-side sub-columns instead of one
-    // very tall column.
-    function wrapCols(n) {
-      if (n > 200) return 5;
-      if (n > 80)  return 4;
-      if (n > 40)  return 3;
-      if (n > 15)  return 2;
-      return 1;
-    }
-    const PARA_COLS    = wrapCols(sampledPara.length);
-    const PARA_SUBGAP  = 26;
-    const paraRows      = Math.ceil(sampledPara.length / PARA_COLS) || 1;
-
-    const ENTITY_COLS   = wrapCols(entities.length);
-    const ENTITY_SUBGAP = 26;
-    const entityRows     = Math.ceil(entities.length / ENTITY_COLS) || 1;
-
-    // ── Dynamic column x positions ────────────────────────────────────────
-    const DOC_X   = 70;
-    const SEC_GAP   = 150;             // gap between level columns
-    const SEC_START = DOC_X + SEC_GAP;    // x of first section level column
-    const PARA_X  = SEC_START + numLevels * SEC_GAP + 20;
-    const ENTITY_X = PARA_X + (PARA_COLS - 1) * PARA_SUBGAP + SEC_GAP;
-    const TAG_X   = ENTITY_X + (ENTITY_COLS - 1) * ENTITY_SUBGAP + SEC_GAP;
-    const svgW    = TAG_X + 115;
-
-    const levelToX = {};
-    levelNums.forEach((lvl, i) => { levelToX[lvl] = SEC_START + i * SEC_GAP; });
-
-    // Row height: at least 14px so 5px-radius nodes never overlap.
-    // The container is overflow-auto so the SVG can be as tall as needed.
-    const columnHeightsPreview = [documents.length, paraRows, entityRows,
-      ...levelNums.map(l => sectionsByLevel.get(l).length)];
-    const tallestPreview = Math.max(...columnHeightsPreview, 1);
-    const ROW_H = Math.max(14, Math.min(26, Math.floor(2400 / tallestPreview)));
-    const PAD_Y = 100;
-
-    const nodePos = new Map();
-
-    function placeColumn(nodes, colKey, x) {
-      nodes.forEach((node, i) => {
-        const key = node._key || node.id || colKey + '_' + i;
-        nodePos.set(key, { x, y: PAD_Y + i * ROW_H, node, colKey });
-      });
-    }
-
-    // Wraps nodes across `cols` side-by-side sub-columns (column-major fill)
-    // instead of one tall column — keeps the paragraph block roughly square.
-    function placeColumnWrapped(nodes, colKey, xStart, cols, subGap) {
-      const rows = Math.ceil(nodes.length / cols) || 1;
-      nodes.forEach((node, i) => {
-        const key = node._key || node.id || colKey + '_' + i;
-        const col = Math.floor(i / rows);
-        const row = i % rows;
-        nodePos.set(key, { x: xStart + col * subGap, y: PAD_Y + row * ROW_H, node, colKey });
-      });
-    }
-
-    placeColumn(documents,   'document', DOC_X);
-    for (const lvl of levelNums) {
-      placeColumn(sectionsByLevel.get(lvl), 'section_L' + lvl, levelToX[lvl]);
-    }
-    placeColumnWrapped(sampledPara, 'paragraph', PARA_X, PARA_COLS, PARA_SUBGAP);
-    if (sampledTbl.length > 0) placeColumn(sampledTbl, 'table', PARA_X + (PARA_COLS - 1) * PARA_SUBGAP + 35);
-    placeColumnWrapped(entities, 'entity', ENTITY_X, ENTITY_COLS, ENTITY_SUBGAP);
-    placeColumn(tagNodes,    'tag',        TAG_X);
-
-    // ── Compute related keys for the selected node ─────────────────────────
-
-    // Pre-build parent-chain lookup from HAS_CHILD edges so we can walk
-    // from any node all the way up to the root document in O(depth).
-    const parentOf = new Map(); // childKey → { key: parentKey, edgeId }
-    for (const edge of edges) {
-      if (edge.relation === 'HAS_CHILD') {
-        const fk  = (edge._from || '').split('/')[1];
-        const tk  = (edge._to   || '').split('/')[1];
-        const eid = edge._key || (edge._from + '→' + edge._to);
-        if (fk && tk) parentOf.set(tk, { key: fk, edgeId: eid });
-      }
-    }
-
-    // Walk every ancestor of startKey, adding them to relatedKeys/relatedEdgeIds.
-    function addAncestors(startKey) {
-      let cur = startKey;
-      while (parentOf.has(cur)) {
-        const { key: pk, edgeId } = parentOf.get(cur);
-        relatedKeys.add(pk);
-        relatedEdgeIds.add(edgeId);
-        cur = pk;
-      }
-    }
-
-    const relatedKeys    = new Set();
-    const relatedEdgeIds = new Set();
-    if (selectedKey) {
-      // 1. Direct 1-hop neighbors via all real edges
-      for (const edge of edges) {
-        const fk  = (edge._from || '').split('/')[1];
-        const tk  = (edge._to   || '').split('/')[1];
-        const eid = edge._key || (edge._from + '→' + edge._to);
-        if (fk === selectedKey || tk === selectedKey) {
-          relatedKeys.add(fk === selectedKey ? tk : fk);
-          relatedEdgeIds.add(eid);
-        }
-      }
-
-      // 2. Walk the full ancestor chain up to the root document
-      addAncestors(selectedKey);
-
-      // 3. Virtual tag edges: paragraph → its SUMO tags
-      for (const p of sampledPara) {
-        if (p._key !== selectedKey) continue;
-        for (const tagName of (p.sumo_tags || [])) relatedKeys.add('tag:' + tagName);
-      }
-
-      // 4. SUMO tag selected: highlight all paragraphs with that tag AND their
-      //    full chains (paragraph → section → … → document)
-      const selEntry = nodePos.get(selectedKey);
-      if (selEntry && selEntry.colKey === 'tag') {
-        const tagName = selectedKey.replace('tag:', '');
-        for (const p of sampledPara) {
-          if ((p.sumo_tags || []).includes(tagName)) {
-            relatedKeys.add(p._key);
-            addAncestors(p._key);
-          }
-        }
-      }
-    }
-
-    // ── SVG dimensions ────────────────────────────────────────────────────
-    const columnHeights = [documents.length, paraRows, entityRows, tagNodes.length,
-      ...levelNums.map(l => sectionsByLevel.get(l).length)];
-    const tallest = Math.max(...columnHeights, 1);
-    const svgH = Math.max(PAD_Y + tallest * ROW_H + 30, 300);
-
-    svg.setAttribute('viewBox', '0 0 ' + svgW + ' ' + svgH);
-    svg.style.width  = Math.round(svgW) + 'px';
-    svg.style.height = Math.round(svgH) + 'px';
-    svg.dataset.baseW = svgW;
-    svg.dataset.baseH = svgH;
-    svg.style.transform = 'scale(' + zoom + ')';
-    const wrapper = document.getElementById('graph-scale-wrapper');
-    if (wrapper) {
-      wrapper.style.width  = Math.round(svgW * zoom) + 'px';
-      wrapper.style.height = Math.round(svgH * zoom) + 'px';
-    }
-
-
-    // ── Defs ──────────────────────────────────────────────────────────────
-    const defs = svgEl('defs');
-    const mkFilter = (id, std) => {
-      const f = svgEl('filter', { id, x: '-50%', y: '-50%', width: '200%', height: '200%' });
-      f.innerHTML = `<feGaussianBlur stdDeviation="${std}" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>`;
-      return f;
-    };
-    defs.appendChild(mkFilter('glow', '2.5'));
-    defs.appendChild(mkFilter('glow-soft', '1.5'));
-    svg.appendChild(defs);
-
-    // ── Column guide lines + headers ──────────────────────────────────────
-    const guideG = svgEl('g');
-
-    const colDefs = [
-      [DOC_X, 'DOCUMENT', FIXED_COLORS.document],
-      ...levelNums.map(lvl => [
-        levelToX[lvl],
-        'LEVEL ' + lvl,
-        LEVEL_COLORS[(lvl - 1) % LEVEL_COLORS.length],
-      ]),
-      [PARA_X, 'PARA/FIG' + (PARA_COLS > 1 ? ' (×' + PARA_COLS + ')' : ''), FIXED_COLORS.paragraph],
-      [ENTITY_X, 'ENTITY' + (ENTITY_COLS > 1 ? ' (×' + ENTITY_COLS + ')' : ''), FIXED_COLORS.entity],
-      [TAG_X,  'SUMO TAG', FIXED_COLORS.tag],
-    ];
-
-    for (const [x, label, col] of colDefs) {
-      guideG.appendChild(svgEl('line', { x1: x, y1: 28, x2: x, y2: svgH - 8,
-        stroke: '#1e293b', 'stroke-width': '1' }));
-      const txt = svgEl('text', { x, y: 16, 'text-anchor': 'middle',
-        'font-size': '7', fill: col, opacity: '0.55', 'font-weight': '700',
-        'letter-spacing': '1', 'font-family': 'ui-monospace,monospace' });
-      txt.textContent = label;
-      guideG.appendChild(txt);
-    }
-    svg.appendChild(guideG);
-
-    // ── Edges ─────────────────────────────────────────────────────────────
-    const edgeG = svgEl('g', { id: 'edges' });
-    const hasSelection = !!selectedKey;
-
-    for (const edge of edges) {
-      const fk = (edge._from || '').split('/')[1];
-      const tk = (edge._to   || '').split('/')[1];
-      const fp = nodePos.get(fk);
-      const tp = nodePos.get(tk);
-      if (!fp || !tp) continue;
-
-      const edgeId      = edge._key || (edge._from + '→' + edge._to);
-      const isConnected = hasSelection && relatedEdgeIds.has(edgeId);
-
-      edgeG.appendChild(bezierEdge(fp.x, fp.y, tp.x, tp.y,
-        isConnected ? '#60a5fa' : '#334155',
-        isConnected ? '0.75' : (hasSelection ? '0.07' : '0.28'),
-        isConnected ? '1.2' : '0.7'));
-    }
-
-    // virtual tag edges
-    for (const p of sampledPara) {
-      const pp = nodePos.get(p._key);
-      if (!pp) continue;
-      for (const tagName of (p.sumo_tags || []).slice(0, 3)) {
-        const tp = nodePos.get('tag:' + tagName);
-        if (!tp) continue;
-        const isRel = hasSelection && (p._key === selectedKey || relatedKeys.has(p._key) || relatedKeys.has('tag:' + tagName));
-        edgeG.appendChild(bezierEdge(pp.x, pp.y, tp.x, tp.y,
-          isRel ? '#86efac' : '#4ade80',
-          isRel ? '0.5' : (hasSelection ? '0.04' : '0.1'),
-          '0.6'));
-      }
-    }
-
-    svg.appendChild(edgeG);
-
-    // ── Nodes ─────────────────────────────────────────────────────────────
-    const nodeG = svgEl('g', { id: 'nodes' });
-
-    for (const [key, { x, y, node, colKey }] of nodePos) {
-      const isTag    = key.startsWith('tag:');
-      const isEntity = colKey === 'entity';
-      const isDoc    = colKey === 'document';
-      const isSec    = colKey.startsWith('section_L');
-      const color    = (colorMode === 'sumo' && !isTag)
-        ? getNodeColor(node, 'sumo')
-        : getNodeColor(node, 'type');
-      const r        = isDoc ? 7 : (isTag || isEntity) ? 4 : 5;
-
-      const isSel     = key === selectedKey;
-      const isRelated = !isSel && hasSelection && relatedKeys.has(key);
-      const isDimmed  = hasSelection && !isSel && !isRelated;
-
-      const g = svgEl('g', { class: 'node-g', transform: 'translate(' + x + ',' + y + ')' });
-
-      if (isSel) {
-        g.appendChild(svgEl('circle', { r: r + 6, fill: color, opacity: '0.15', filter: 'url(#glow)' }));
-        g.appendChild(svgEl('circle', { r: r + 2.5, fill: 'none', stroke: color, 'stroke-width': '1.5', opacity: '0.8' }));
-      }
-      if (isRelated) {
-        g.appendChild(svgEl('circle', { r: r + 3.5, fill: 'none', stroke: color, 'stroke-width': '1', opacity: '0.5', filter: 'url(#glow-soft)' }));
-      }
-
-      const fillOpacity = isSel ? '1' : isRelated ? '0.9' : isDimmed ? '0.12' : '0.65';
-      const circle = svgEl('circle', {
-        r, fill: color, 'fill-opacity': fillOpacity,
-        stroke: isSel ? color : 'none', 'stroke-width': '1.5',
-      });
-      g.appendChild(circle);
-
-      // section label count threshold: only label if ≤ 25 nodes in that level column
-      const secLvl = isSec ? parseInt(colKey.replace('section_L', ''), 10) : null;
-      const secCount = secLvl !== null ? (sectionsByLevel.get(secLvl) || []).length : 0;
-      // entities: only label when the column is short enough to read (else too dense)
-      const showLabel = isDoc || isTag || isSec || (isEntity && entityRows <= 40);
-
-      if (showLabel) {
-        const rawLabel = isTag ? '#' + node.title : isEntity ? (node.name || key) : (node.title || node.source_file || key);
-        const maxLen   = isDoc ? 60 : isSec ? 40 : 20;
-        const label    = rawLabel.length > maxLen ? rawLabel.slice(0, maxLen - 1) + '…' : rawLabel;
-        const txt = svgEl('text', {
-          'x': r + 4,
-          'y': 4,
-          'font-size':  isDoc ? '8' : isSec ? '7' : '6',
-          'fill': isDimmed ? '#1e293b' : isTag ? '#86efac' : isEntity ? '#fda4af' : isDoc ? '#cbd5e1' : '#94a3b8',
-          'font-family': 'ui-monospace,monospace',
-          'opacity': isDimmed ? '0.4' : '1',
-        });
-        txt.textContent = label;
-        g.appendChild(txt);
-      }
-
-      g.addEventListener('mouseenter', () => {
-        if (!isSel) { circle.setAttribute('r', r + 2); circle.setAttribute('fill-opacity', '1'); }
-      });
-      g.addEventListener('mouseleave', () => {
-        circle.setAttribute('r', r);
-        circle.setAttribute('fill-opacity', fillOpacity);
-      });
-      g.addEventListener('click', () => {
-        const payload = isTag
-          ? { type: 'SumoTag', _key: key, _id: 'tags/' + node.title, title: node.title, sumo_tags: [], _tagCount: node._tagCount }
-          : node;
-        onSelect(payload);
-      });
-
-      g.dataset.nodeKey = key;
-      nodeG.appendChild(g);
-    }
-
-    svg.appendChild(nodeG);
-  }
-
-  // ── Helpers ───────────────────────────────────────────────────────────────
-
-  function svgEl(tag, attrs) {
-    const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
-    if (attrs) for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
-    return el;
-  }
-
-  function bezierEdge(x1, y1, x2, y2, stroke, opacity, width) {
-    const mx = (x1 + x2) / 2;
-    return svgEl('path', {
-      d: 'M' + x1 + ',' + y1 + ' C' + mx + ',' + y1 + ' ' + mx + ',' + y2 + ' ' + x2 + ',' + y2,
-      fill: 'none', stroke, 'stroke-width': width, opacity,
-    });
-  }
-
-  function sampleEvenly(arr, max) {
-    if (arr.length <= max) return arr;
-    const step = arr.length / max;
-    return Array.from({ length: max }, (_, i) => arr[Math.floor(i * step)]);
-  }
-
-  function pulseNode(key) {
-    const g = document.querySelector('[data-node-key="' + key + '"]');
-    if (!g) return;
-    const circle = g.querySelector('circle');
-    if (!circle) return;
-    const orig = circle.getAttribute('r');
-    circle.setAttribute('r', parseFloat(orig) + 6);
-    circle.setAttribute('fill-opacity', '1');
-    setTimeout(() => {
-      circle.setAttribute('r', orig);
-      circle.setAttribute('fill-opacity', '0.65');
-    }, 700);
-  }
-
-  function pulseDocumentNodes(docKey) {
-    document.querySelectorAll('[data-node-key]').forEach(g => {
-      const c = g.querySelector('circle');
-      if (c) c.setAttribute('fill-opacity', '0.08');
-    });
-    setTimeout(() => {
-      document.querySelectorAll('[data-node-key]').forEach(g => {
-        const c = g.querySelector('circle');
-        if (c) c.setAttribute('fill-opacity', '0.65');
-      });
-    }, 800);
-  }
-  </script>
+	class="bg-gray-950 text-gray-100 h-screen flex flex-col overflow-hidden">
+
+	<!-- ── Header ─────────────────────────────────────────────────────────────── -->
+	<header class="flex items-center gap-5 px-4 h-10 bg-gray-900 border-b border-gray-800 flex-shrink-0 select-none">
+		<div class="flex items-center gap-2">
+			<div class="w-2 h-2 rounded-full bg-sky-400 dot-glow"></div>
+			<span class="text-xs font-bold text-sky-400 tracking-widest">DOC OHARA</span>
+		</div>
+		<div class="flex gap-4 text-xs text-gray-500">
+			<span><span class="text-gray-300" x-text="graphData.documents.length"></span> docs</span>
+			<span><span class="text-gray-300" x-text="graphData.sections.length"></span> sections</span>
+			<span><span class="text-gray-300" x-text="graphData.paragraphs.length"></span> nodes</span>
+			<span><span class="text-gray-300" x-text="graphData.entities.length"></span> entities</span>
+			<span><span class="text-gray-300" x-text="graphData.edges.length"></span> edges</span>
+			<span class="text-gray-700" x-text="graphSource ? '[' + graphSource + ']' : ''"></span>
+		</div>
+		<div class="ml-auto flex items-center gap-2">
+			<button @click="colorMode='type'; renderCurrentGraph()"
+				:class="colorMode==='type' ? 'bg-sky-700/70 text-sky-200' : 'bg-gray-800 text-gray-500 hover:text-gray-300'"
+				class="text-sm px-2 py-0.5 rounded transition">by type</button>
+			<button @click="colorMode='sumo'; renderCurrentGraph()"
+				:class="colorMode==='sumo' ? 'bg-green-800/70 text-green-200' : 'bg-gray-800 text-gray-500 hover:text-gray-300'"
+				class="text-sm px-2 py-0.5 rounded transition">by SUMO</button>
+			<button @click="loadGraph()"
+				class="text-sm px-2 py-0.5 rounded bg-gray-800 text-gray-500 hover:text-gray-300 transition">↺</button>
+		</div>
+	</header>
+
+	<!-- ── Body ──────────────────────────────────────────────────────────────── -->
+	<div class="flex flex-1 min-h-0">
+
+		<!-- Vertical tab bar -->
+		<nav class="flex flex-col items-center gap-1 py-2 w-9 bg-gray-900 border-r border-gray-800 flex-shrink-0">
+			<template x-for="t in tabs" :key="t.id">
+				<button @click="tab = t.id; if(t.id==='jobs') loadJobs()" :title="t.label"
+					:class="tab === t.id ? 'bg-gray-700 text-sky-400' : 'text-gray-600 hover:text-gray-300'"
+					class="relative w-7 h-7 flex items-center justify-center rounded text-sm transition"
+					x-text="t.icon">
+					<span x-show="t.id === 'jobs' && jobStats.failed > 0"
+						class="absolute top-0.5 right-0.5 w-1.5 h-1.5 rounded-full bg-red-500 pointer-events-none"></span>
+				</button>
+			</template>
+		</nav>
+
+		<!-- Left panel -->
+		<div class="flex flex-col border-r border-gray-800 flex-shrink-0 overflow-hidden bg-gray-400" 
+				:class="docsOpen ? 'w-64' : 'w-32'">
+
+			<!-- GRAPH tab -->
+			<div x-show="tab === 'graph'" class="flex flex-col h-full overflow-hidden p-3 gap-3">
+				<!-- Documents header with fold toggle -->
+				<button @click="docsOpen = !docsOpen"
+					class="flex items-center justify-between text-sm font-bold text-gray-500 uppercase tracking-widest hover:text-gray-300 transition select-none">
+					<span>Documents</span>
+					<span x-text="docsOpen ? '◄' : '►'" class="text-gray-600"></span>
+				</button>
+				<!-- Select-all toggle -->
+				<div x-show="docsOpen && graphData.documents.length > 0" class="flex items-center gap-2 -mt-1 mb-0.5">
+					<button @click="toggleAllDocs()"
+						class="text-xs text-gray-600 hover:text-gray-300 transition select-none"
+						x-text="selectedDocKeys.size === 0 ? 'select all' : 'clear all'"></button>
+					<span class="text-xs text-gray-700" x-show="selectedDocKeys.size > 0"
+						x-text="selectedDocKeys.size + '/' + graphData.documents.length + ' selected'"></span>
+				</div>
+				<div class="flex flex-col gap-1.5 overflow-y-auto scrollbar-thin" style="max-height:40vh">
+					<template x-for="doc in graphData.documents" :key="doc._key || doc.id">
+						<div @click="toggleDocSelection(doc)"
+							:class="selectedDocKeys.has(doc._key || doc.id)
+								? 'border-gray-500 bg-sky-950/30'
+								: 'border-gray-700 bg-gray-700 hover:border-gray-600 hover:bg-gray-500'"
+							class="group p-2 rounded border cursor-pointer transition text-xs flex-shrink-0 relative">
+							<!-- Selection indicator -->
+							<div class="absolute top-2 right-2 w-3 h-3 rounded-sm border flex items-center justify-center flex-shrink-0"
+								:class="selectedDocKeys.has(doc._key || doc.id)
+									? 'border-gray-400 bg-sky-500/30'
+									: 'border-gray-600'">
+								<span x-show="selectedDocKeys.has(doc._key || doc.id)"
+									class="text-sky-300 leading-none" style="font-size:9px">✓</span>
+							</div>
+							<div class="text-gray-200 truncate pr-5"
+								:class="selectedDocKeys.has(doc._key || doc.id) ? 'text-sky-200' : 'group-hover-sky'"
+								x-text="doc.title || doc.source_file"></div>
+							<div class="flex justify-between mt-0.5">
+								<span class="text-gray-600" x-text="doc.parser_engine || 'LiteParse'"></span>
+								<span class="text-gray-600 text-sm"
+									x-text="doc.upload_time ? new Date(doc.upload_time).toLocaleDateString() : ''"></span>
+							</div>
+						</div>
+					</template>
+					<div x-show="graphData.documents.length === 0"
+						class="text-xs text-gray-700 text-center py-6">No documents yet</div>
+				</div>
+				<!-- Legend -->
+				<div class="border-t border-gray-800 pt-2.5 grid grid-cols-2 gap-x-3 gap-y-1.5 mt-auto">
+					<template x-for="item in legend" :key="item[1]">
+						<div class="flex items-center gap-1.5 text-xs text-gray-500">
+							<div class="w-2.5 h-2.5 rounded-full flex-shrink-0" :style="'background:' + item[0]"></div>
+							<span x-text="item[1]"></span>
+						</div>
+					</template>
+				</div>
+			</div>
+
+			<!-- INGEST tab -->
+			<div x-show="tab === 'ingest'" class="flex flex-col h-full overflow-hidden p-3 gap-3">
+				<div class="text-sm font-bold text-gray-500 uppercase tracking-widest">Pipeline Control</div>
+
+				<div class="flex flex-col gap-1">
+					<div class="text-sm text-gray-600 mb-0.5">Staged input files</div>
+					<div class="flex flex-col gap-1 max-h-36 overflow-y-auto scrollbar-thin">
+						<template x-for="f in inputFiles" :key="f.name">
+							<div class="flex items-center gap-2 text-xs px-2 py-1 rounded bg-gray-800 border border-gray-700">
+								<span class="flex-1 truncate text-gray-300" x-text="f.name"></span>
+								<span class="text-gray-600 text-sm flex-shrink-0" x-text="f.size"></span>
+								<button @click="deleteInputFile(f.name)"
+									class="text-gray-700 hover:text-red-400 transition flex-shrink-0 leading-none">✕</button>
+							</div>
+						</template>
+						<div x-show="inputFiles.length === 0"
+							class="text-sm text-gray-700 text-center py-2">No files staged</div>
+					</div>
+				</div>
+
+				<button @click="runPipeline()" :disabled="pipelineActive"
+					:class="pipelineActive ? 'bg-gray-800 text-gray-600 cursor-not-allowed' : 'bg-sky-700 hover:bg-sky-600 text-white'"
+					class="text-xs font-semibold py-1.5 rounded transition flex items-center justify-center gap-2">
+					<span x-show="pipelineActive" class="animate-spin inline-block">⟳</span>
+					<span x-text="pipelineActive ? 'Running…' : '▶ Run Pipeline'"></span>
+				</button>
+
+				<div class="flex-1 min-h-0 flex flex-col overflow-hidden rounded border border-gray-800 bg-gray-950">
+					<div class="text-sm text-gray-700 px-2 py-1 border-b border-gray-800 flex-shrink-0">log</div>
+					<div class="flex-1 overflow-y-auto scrollbar-thin p-2 flex flex-col gap-0.5" id="log-console">
+						<template x-for="(log, i) in pipelineLogs" :key="i">
+							<div class="log-line"
+								:class="{
+									'text-green-400': log.level === 'success',
+									'text-red-400':     log.level === 'error',
+									'text-yellow-400':   log.level === 'warn',
+									'text-gray-500':   log.level === 'info'
+								}"
+								x-text="'[' + log.level + '] ' + log.message"></div>
+						</template>
+						<div x-show="pipelineLogs.length === 0" class="text-sm text-gray-800 py-1">idle</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- QUERY tab -->
+			<div x-show="tab === 'query'" class="flex flex-col h-full overflow-hidden p-3 gap-3">
+				<div class="text-sm font-bold text-gray-500 uppercase tracking-widest">Hybrid Retrieval</div>
+
+				<div class="flex gap-1.5">
+					<input x-model="queryInput" @keydown.enter="runQuery()"
+						placeholder="Search the graph…"
+						class="flex-1 text-xs bg-gray-800 border border-gray-700 rounded px-2.5 py-1.5
+									 text-gray-200 placeholder-gray-700 focus:outline-none focus:border-gray-500 transition" />
+					<button @click="runQuery()" :disabled="queryLoading"
+						class="text-xs px-2.5 py-1.5 bg-sky-700 hover:bg-sky-600 text-white rounded transition flex-shrink-0">→</button>
+				</div>
+
+				<div x-show="queryResults && queryResults.processedQuery && queryResults.processedQuery.keywords && queryResults.processedQuery.keywords.length"
+					class="flex flex-wrap gap-1">
+					<template x-for="kw in (queryResults && queryResults.processedQuery && queryResults.processedQuery.keywords || [])" :key="kw">
+						<span class="text-sm px-1.5 py-0.5 bg-gray-800 border border-gray-700 text-gray-400 rounded"
+							x-text="kw"></span>
+					</template>
+				</div>
+
+				<div class="flex-1 min-h-0 overflow-y-auto scrollbar-thin flex flex-col gap-2">
+					<template x-for="(r, i) in (queryResults && queryResults.shallowResults || [])" :key="i">
+						<div @click="highlightResultNode(r.node)"
+							class="text-xs p-2 rounded bg-gray-800 border border-gray-700 cursor-pointer
+										 hover:border-gray-600 transition">
+							<div class="flex justify-between items-center mb-1">
+								<span class="text-sky-500 text-sm font-bold" x-text="'#' + (i + 1)"></span>
+								<span class="text-green-400 text-sm"
+									x-text="Math.round(r.score * 100) + '%'"></span>
+							</div>
+							<div class="text-gray-300 text-base leading-relaxed line-clamp-3"
+								x-text="r.node.content || r.node.title || '—'"></div>
+							<div class="flex flex-wrap gap-1 mt-1.5">
+								<template x-for="tag in (r.node.sumo_tags || []).slice(0, 4)" :key="tag">
+									<span class="text-sm px-1 py-0.5 bg-green-900/40 text-green-400 rounded"
+										x-text="tag"></span>
+								</template>
+							</div>
+						</div>
+					</template>
+					<div x-show="queryResults && !(queryResults.shallowResults && queryResults.shallowResults.length)"
+						class="text-xs text-gray-700 text-center py-6">No results</div>
+					<div x-show="!queryResults && !queryLoading"
+						class="text-base text-gray-700 text-center py-6 leading-relaxed">
+						Enter a keyword or phrase<br>to search the knowledge graph
+					</div>
+					<div x-show="queryLoading"
+						class="text-xs text-gray-600 text-center py-6 animate-pulse">Searching…</div>
+				</div>
+			</div>
+
+			<!-- JOBS tab -->
+			<div x-show="tab === 'jobs'" x-init="if(tab==='jobs') loadJobs()" class="flex flex-col h-full overflow-hidden p-3 gap-2">
+				<div class="text-sm font-bold text-gray-500 uppercase tracking-widest">Job Queue</div>
+
+				<div class="grid grid-cols-4 gap-1 flex-shrink-0">
+					<template x-for="[key, color] in [['failed','text-red-400'],['waiting','text-yellow-400'],['active','text-sky-400'],['completed','text-green-400']]" :key="key">
+						<div class="flex flex-col items-center py-1 rounded bg-gray-800 border border-gray-700">
+							<span class="text-xs font-bold" :class="color" x-text="jobStats[key] || 0"></span>
+							<span class="text-sm text-gray-600" x-text="key"></span>
+						</div>
+					</template>
+				</div>
+
+				<div x-show="jobStats.failed > 0" class="flex gap-1.5 flex-shrink-0">
+					<button @click="retryAllFailed(false)"
+						class="flex-1 text-sm py-1 rounded bg-yellow-700/60 hover:bg-yellow-600/70 text-yellow-200 transition">
+						↺ Retry all failed
+					</button>
+					<button @click="retryAllFailed(true)"
+						class="flex-1 text-sm py-1 rounded bg-red-800/50 hover:bg-red-700/60 text-red-300 transition">
+						↺ Force retry all
+					</button>
+				</div>
+
+				<div class="flex-1 min-h-0 overflow-y-auto scrollbar-thin flex flex-col gap-1.5">
+					<template x-for="job in jobs" :key="job.id">
+						<div class="rounded border p-2 text-xs"
+							:class="{
+								'border-red-800/60 bg-red-950/30':   job.status === 'failed',
+								'border-yellow-700/40 bg-yellow-950/20': job.status === 'waiting',
+								'border-gray-700 bg-sky-950/20':   job.status === 'active',
+								'border-gray-700 bg-gray-800': job.status === 'completed',
+							}">
+							<div class="flex items-center gap-2 mb-1">
+								<div class="w-1.5 h-1.5 rounded-full flex-shrink-0"
+									:style="'background:' + jobStatusColor(job.status)"></div>
+								<span class="font-semibold text-gray-200 truncate flex-1"
+									x-text="job.data && job.data.filename || job.id"></span>
+								<span class="text-sm uppercase font-bold flex-shrink-0"
+									:class="{
+										'text-red-400':   job.status==='failed',
+										'text-yellow-400': job.status==='waiting',
+										'text-sky-400':   job.status==='active',
+										'text-green-400': job.status==='completed',
+									}"
+									x-text="job.status"></span>
+							</div>
+							<div x-show="job.status === 'active'" class="mb-1">
+								<div class="h-1 bg-gray-800 rounded overflow-hidden">
+									<div class="h-full bg-sky-500 transition-all" :style="'width:' + (job.progress||0) + '%'"></div>
+								</div>
+								<div class="text-sm text-gray-500 mt-0.5" x-text="job.progressMessage || ''"></div>
+							</div>
+							<div x-show="job.status === 'failed' && job.error"
+								class="text-sm text-red-400/80 mb-1.5 leading-relaxed break-words"
+								x-text="job.error"></div>
+							<div x-show="job.status === 'completed' && job.result && job.result.skipped"
+								class="text-sm text-yellow-400/70 mb-1.5"
+								x-text="job.result && job.result.reason"></div>
+
+							<!-- LLM usage summary -->
+							<template x-if="job.status === 'completed' && job.result && job.result.llm_usage && job.result.llm_usage.total_tokens > 0">
+								<div class="mt-1 mb-1.5 rounded border border-gray-800 px-2 py-1.5 bg-gray-900">
+									<div class="text-sm font-bold text-gray-600 uppercase tracking-wider mb-1"
+										x-text="(job.result.llm_usage.model || 'Gemini') + ' · usage'"></div>
+									<div class="grid grid-cols-2 gap-x-4 gap-y-0.5 text-sm text-gray-500">
+										<div>Prompt <span class="text-gray-300 float-right" x-text="job.result.llm_usage.prompt_tokens.toLocaleString()"></span></div>
+										<div>Generated <span class="text-green-400 float-right" x-text="job.result.llm_usage.candidates_tokens.toLocaleString()"></span></div>
+										<div>Total tokens <span class="text-sky-400 float-right" x-text="job.result.llm_usage.total_tokens.toLocaleString()"></span></div>
+										<div>Chunks <span class="text-gray-300 float-right" x-text="job.result.llm_usage.chunks + (job.result.llm_usage.cache_hits ? ' (' + job.result.llm_usage.cache_hits + ' cached)' : '')"></span></div>
+										<template x-if="job.result.llm_usage.repair_prompt_tokens > 0">
+											<div class="col-span-2 text-yellow-600">Repair tokens <span class="float-right" x-text="(job.result.llm_usage.repair_prompt_tokens + job.result.llm_usage.repair_candidates_tokens).toLocaleString()"></span></div>
+										</template>
+									</div>
+								</div>
+							</template>
+
+							<div class="flex items-center gap-2 text-sm text-gray-600">
+								<span x-text="'attempt ' + (job.attempts||0) + '/' + (job.maxAttempts||3)"></span>
+								<span x-text="job.updatedAt ? new Date(job.updatedAt).toLocaleTimeString() : ''"></span>
+								<span x-show="job.data && job.data.force" class="text-yellow-600">--force</span>
+							</div>
+							<div x-show="job.status === 'failed' || job.status === 'completed'" class="flex gap-1 mt-1.5">
+								<button @click="retryJob(job.id, false)"
+									class="text-sm px-2 py-0.5 rounded bg-gray-700 hover:bg-gray-600 text-gray-300 transition">
+									↺ Retry
+								</button>
+								<button @click="retryJob(job.id, true)"
+									class="text-sm px-2 py-0.5 rounded bg-yellow-800/50 hover:bg-yellow-700/60 text-yellow-300 transition">
+									↺ Force
+								</button>
+								<button @click="deleteJob(job.id)"
+									class="text-sm px-2 py-0.5 rounded bg-gray-800 hover:bg-red-900/50 text-gray-600 hover:text-red-400 transition ml-auto">
+									✕
+								</button>
+							</div>
+						</div>
+					</template>
+					<div x-show="!jobsLoading && jobs.length === 0"
+						class="text-base text-gray-700 text-center py-8">No jobs yet</div>
+					<div x-show="jobsLoading && jobs.length === 0"
+						class="text-base text-gray-600 text-center py-8 animate-pulse">Loading…</div>
+				</div>
+
+				<button @click="loadJobs()" class="flex-shrink-0 text-sm py-1 rounded bg-gray-800 text-gray-600 hover:text-gray-400 transition">
+					↺ Refresh
+				</button>
+			</div>
+
+			<!-- WIKI tab -->
+			<div x-show="tab === 'wiki'" class="flex flex-col h-full overflow-hidden p-3 gap-3">
+				<div class="text-sm font-bold text-gray-500 uppercase tracking-widest">Wiki Export</div>
+				<p class="text-base text-gray-600 leading-relaxed">
+					Compile graph nodes into Quartz-compatible markdown files for publishing.
+				</p>
+				<button @click="exportWiki()" :disabled="wikiExporting"
+					class="text-xs py-1.5 px-3 rounded border border-gray-700 hover:border-gray-500
+								 text-gray-300 hover:text-white transition flex items-center justify-center gap-2">
+					<span x-show="wikiExporting" class="animate-spin inline-block">⟳</span>
+					<span x-text="wikiExporting ? 'Exporting…' : '⬇ Export to wiki/'"></span>
+				</button>
+				<div x-show="wikiMessage" class="text-base text-green-400" x-text="wikiMessage"></div>
+				<div class="flex-1"></div>
+				<div class="text-sm text-gray-700 border-t border-gray-800 pt-2">
+					Output: <code class="text-gray-600">wiki/*.md</code>
+				</div>
+			</div>
+
+		</div>
+
+		<!-- ── Right: graph canvas + inspector ────────────────────────────────── -->
+		<div class="flex flex-col flex-1 min-w-0 overflow-hidden bg-gray-200">
+
+			<!-- SVG canvas -->
+			<div class="flex-1 overflow-auto relative bg-gray-950" id="graph-container">
+				<div id="graph-scale-wrapper" style="position:relative;">
+					<svg id="graph-svg" preserveAspectRatio="xMidYMid meet" style="position:absolute; top:0; left:0; transform-origin:0 0;"></svg>
+				</div>
+
+				<!-- Clear selection button overlay -->
+				<div x-show="selectedNode" class="absolute top-2 left-2 z-10 select-none">
+					<button @click="selectedNode = null; renderCurrentGraph()"
+						class="text-xs px-2 py-1 rounded bg-gray-800 border border-gray-700
+									 text-gray-400 hover:text-white hover:bg-gray-700 hover:border-gray-500 transition">
+						✕ clear selection
+					</button>
+				</div>
+
+				<!-- Zoom controls overlay -->
+				<div class="absolute top-2 right-2 flex items-center gap-1 z-10 select-none">
+					<button @click="zoomOut()" title="Zoom out (-)"
+						class="w-6 h-6 flex items-center justify-center rounded bg-gray-800 border border-gray-700
+									 text-gray-400 hover:text-white hover:bg-gray-700 transition text-sm leading-none">−</button>
+					<span class="text-sm text-gray-600 w-10 text-center"
+						x-text="Math.round(graphZoom * 100) + '%'"></span>
+					<button @click="zoomIn()" title="Zoom in (+)"
+						class="w-6 h-6 flex items-center justify-center rounded bg-gray-800 border border-gray-700
+									 text-gray-400 hover:text-white hover:bg-gray-700 transition text-sm leading-none">+</button>
+				</div>
+
+				<div x-show="graphLoading"
+					class="absolute inset-0 flex items-center justify-center pointer-events-none">
+					<span class="text-xs text-gray-600 animate-pulse">Loading graph…</span>
+				</div>
+				<div x-show="!graphLoading && graphData.documents.length === 0"
+					class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none gap-2">
+					<span class="text-gray-700 text-sm">No data</span>
+					<span class="text-gray-800 text-xs">Run the pipeline from the Ingest tab</span>
+				</div>
+				<div x-show="!graphLoading && graphData.documents.length > 0 && selectedDocKeys.size === 0"
+					class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none gap-2">
+					<span class="text-gray-700 text-sm">No document selected</span>
+					<span class="text-gray-800 text-xs">Select a document from the left panel to view its graph</span>
+				</div>
+			</div>
+
+			<!-- Node inspector strip -->
+			<div x-show="selectedNode"
+				class="flex-shrink-0 border-t border-gray-800 bg-gray-900 p-3 flex gap-4 items-start"
+				style="max-height: 600px;">
+
+				<div class="flex-1 min-w-0 flex flex-col gap-1.5 overflow-hidden">
+					<!-- Type + key row -->
+					<div class="flex items-center gap-2">
+						<div class="w-2.5 h-2.5 rounded-full flex-shrink-0"
+							:style="'background:' + nodeColor(selectedNode)"></div>
+						<span class="text-sm font-bold px-1.5 py-0.5 rounded uppercase tracking-wider"
+							:style="'background:' + nodeColor(selectedNode) + '22; color:' + nodeColor(selectedNode)"
+							x-text="selectedNode && (selectedNode.node_type || selectedNode.type || (selectedNode._id && selectedNode._id.split('/')[0]))"></span>
+						<span class="text-sm text-gray-600"
+							x-text="selectedNode && (selectedNode._key || selectedNode.id)"></span>
+						<!-- Loading indicator: only for real DB nodes that haven't been expanded yet -->
+						<span x-show="selectedNode && selectedNode._id && !selectedNode._id.startsWith('tags/') && !expandedNodes.has(selectedNode._id)"
+							class="text-sm text-gray-500 ml-auto animate-pulse">loading…</span>
+						<span x-show="selectedNode && selectedNode._id && !selectedNode._id.startsWith('tags/') && expandedNodes.has(selectedNode._id)"
+							class="text-sm text-green-400 ml-auto">expanded</span>
+					</div>
+					<!-- SUMO tag inspector: tag name + paragraph count -->
+					<div x-show="selectedNode && selectedNode._id && selectedNode._id.startsWith('tags/')"
+						class="flex flex-col gap-1">
+						<div class="text-xs text-green-300 font-semibold"
+							x-text="selectedNode && ('#' + selectedNode.title)"></div>
+						<div class="text-base text-gray-500"
+							x-text="selectedNode && selectedNode._tagCount + ' paragraph(s) tagged — full path highlighted in graph'"></div>
+					</div>
+					<!-- Entity inspector: name, type, mention count -->
+					<div x-show="selectedNode && selectedNode._id && selectedNode._id.startsWith('entities/')"
+						class="flex flex-col gap-1">
+						<div class="text-xs text-pink-300 font-semibold" x-text="selectedNode && selectedNode.name"></div>
+						<div class="text-base text-gray-500"
+							x-text="selectedNode && (selectedNode.type + ' · mentioned ' + (selectedNode.mention_count || 0) + ' time(s)')"></div>
+					</div>
+					<!-- Title (sections / documents) -->
+					<div class="text-xs text-gray-200 font-semibold truncate"
+						x-show="selectedNode && !selectedNode._id?.startsWith('tags/') && (selectedNode.title || selectedNode.source_file)"
+						x-text="selectedNode && (selectedNode.title || selectedNode.source_file || '')"></div>
+					<!-- Section children: show all child paragraph/table content with node ID annotations -->
+					<div x-show="selectedNode && selectedNode._id && selectedNode._id.startsWith('sections/')"
+						class="overflow-y-auto scrollbar-thin flex-1 flex flex-col gap-3"
+						style="max-height: 300px;">
+						<template x-if="sectionChildren(selectedNode).length === 0">
+							<div class="text-base text-gray-700 italic">
+								<span x-show="!expandedNodes.has(selectedNode && selectedNode._id)" class="animate-pulse">loading children…</span>
+								<span x-show="expandedNodes.has(selectedNode && selectedNode._id)">no content nodes found</span>
+							</div>
+						</template>
+						<template x-for="child in sectionChildren(selectedNode)" :key="child.node._id">
+							<div class="flex flex-col gap-0.5">
+								<!-- Child node ID annotation -->
+								<div class="flex items-center gap-1.5">
+									<span class="text-xs font-mono text-gray-700" x-text="child.node._id"></span>
+									<span class="text-xs px-1 rounded"
+										:style="'background:' + (child.kind === 'table' ? '#f472b622' : '#fbbf2422') + '; color:' + (child.kind === 'table' ? '#f472b6' : '#fbbf24')"
+										x-text="child.node.node_type || child.kind"></span>
+								</div>
+								<!-- Paragraph content -->
+								<div x-show="child.kind === 'paragraph'"
+									class="text-sm text-gray-400 leading-relaxed"
+									style="white-space: pre-wrap; word-break: break-word;"
+									x-text="child.node.content || (expandedNodes.has(child.node._id) ? '[empty]' : '…')"></div>
+								<!-- Table: render as simple grid summary -->
+								<div x-show="child.kind === 'table'" class="text-sm text-gray-500 font-mono">
+									<span x-text="child.node.markdown_representation || ('[table ' + ((child.node.matrix_data || []).length) + ' rows]')"></span>
+								</div>
+							</div>
+						</template>
+					</div>
+					<!-- Content (paragraph / figure text — non-section nodes) -->
+					<div class="text-base text-gray-400 overflow-y-auto scrollbar-thin leading-relaxed flex-1"
+						style="max-height: 500px; white-space: pre-wrap; word-break: break-word;"
+						x-show="selectedNode && !selectedNode._id?.startsWith('tags/') && !selectedNode._id?.startsWith('sections/') && selectedNode.content"
+						x-text="selectedNode && (selectedNode.content || '')"></div>
+					<!-- Empty content notification for paragraphs that loaded but have no text -->
+					<div class="text-base text-yellow-600 italic"
+						x-show="selectedNode && selectedNode._id && selectedNode._id.startsWith('paragraphs/') && expandedNodes.has(selectedNode._id) && selectedNode.content === ''">[EMPTY CONTENT]</div>
+					<!-- Empty state for structural nodes (not tags, not paragraphs-with-content, not sections) -->
+					<div class="text-base text-gray-700 italic"
+						x-show="selectedNode && !selectedNode._id?.startsWith('tags/') && !selectedNode._id?.startsWith('sections/') && !selectedNode._id?.startsWith('entities/') && !selectedNode.content && !selectedNode.title && !(selectedNode._id?.startsWith('paragraphs/') && expandedNodes.has(selectedNode._id))">—</div>
+				</div>
+
+				<!-- SUMO tags (shown for paragraphs/sections that HAVE tags, not for tag nodes themselves) -->
+				<div x-show="selectedNode && !selectedNode._id?.startsWith('tags/') && selectedNode.sumo_tags && selectedNode.sumo_tags.length > 0"
+					class="flex-shrink-0 w-44 flex flex-col gap-1.5">
+					<div class="text-sm font-bold text-gray-600 uppercase tracking-wider">SUMO Tags</div>
+					<div class="flex flex-wrap gap-1 overflow-y-auto scrollbar-thin" style="max-height: 140px;">
+						<template x-for="tag in (selectedNode && selectedNode.sumo_tags || []).slice(0, 20)" :key="tag">
+							<span class="text-sm px-1.5 py-0.5 bg-green-900/40 border border-green-800/50
+													 text-green-300 rounded" x-text="tag"></span>
+						</template>
+					</div>
+					<div x-show="selectedNode && (selectedNode.sumo_candidate_tags_raw || []).length > (selectedNode.sumo_tags || []).length"
+						class="text-sm text-gray-700"
+						x-text="selectedNode ? '+' + ((selectedNode.sumo_candidate_tags_raw || []).length - (selectedNode.sumo_tags || []).length) + ' dropped' : ''">
+					</div>
+				</div>
+
+				<button @click="selectedNode = null; renderCurrentGraph()"
+					class="flex-shrink-0 text-gray-700 hover:text-gray-400 transition text-xs mt-0.5">✕</button>
+			</div>
+
+		</div>
+	</div>
+
+	<!-- ── Alpine App + SVG Graph Logic ─────────────────────────────────────── -->
+	<script>
+	function app() {
+		return {
+			tab: 'graph',
+			tabs: [
+				{ id: 'graph',  icon: '⬡', label: 'Graph'  },
+				{ id: 'ingest', icon: '⬆', label: 'Ingest' },
+				{ id: 'query',  icon: '⌕', label: 'Query'  },
+				{ id: 'jobs',   icon: '⚠', label: 'Jobs'   },
+				{ id: 'wiki',   icon: '◈', label: 'Wiki'   },
+			],
+			legend: [
+				['#38bdf8', 'Document'],
+				['#818cf8', 'Section L1'],
+				['#2dd4bf', 'Section L2'],
+				['#67e8f9', 'Section L3'],
+				['#a78bfa', 'Section L4'],
+				['#f0abfc', 'Section L5'],
+				['#fbbf24', 'Paragraph'],
+				['#c084fc', 'Figure'],
+				['#f472b6', 'Table'],
+				['#fb7185', 'Entity'],
+				['#4ade80', 'Tag'],
+			],
+
+			graphData: { documents: [], sections: [], paragraphs: [], tables: [], entities: [], edges: [] },
+			expandedNodes: new Set(),
+			selectedDocKeys: new Set(),
+			graphSource: '',
+			graphLoading: false,
+			selectedNode: null,
+			colorMode: 'type',
+			docsOpen: true,
+			graphZoom: 1.0,
+
+			pipelineActive: false,
+			pipelineLogs: [],
+			inputFiles: [],
+
+			queryInput: '',
+			queryResults: null,
+			queryLoading: false,
+
+			jobs: [],
+			jobStats: { waiting: 0, active: 0, completed: 0, failed: 0, total: 0 },
+			jobsLoading: false,
+
+			wikiExporting: false,
+			wikiMessage: '',
+
+			async init() {
+				await Promise.all([this.loadDocuments(), this.loadInputFiles(), this.loadJobs()]);
+				setInterval(() => this.pollPipeline(), 2500);
+				setInterval(() => this.loadJobs(), 5000);
+
+				// Zoom keyboard shortcuts: + / = to zoom in, - to zoom out
+				window.addEventListener('keydown', (e) => {
+					if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+					if (e.key === '+' || e.key === '=') { e.preventDefault(); this.zoomIn(); }
+					else if (e.key === '-') { e.preventDefault(); this.zoomOut(); }
+					else if (e.key === '0') { e.preventDefault(); this.graphZoom = 1.0; this.renderCurrentGraph(); }
+				});
+			},
+
+			_zoomTimer: null,
+			zoomIn()  { this.graphZoom = Math.min(this.graphZoom + 0.2, 4.0); this.scheduleZoom(); },
+			zoomOut() { this.graphZoom = Math.max(this.graphZoom - 0.2, 0.2); this.scheduleZoom(); },
+
+			scheduleZoom() {
+				if (this._zoomTimer) cancelAnimationFrame(this._zoomTimer);
+				this._zoomTimer = requestAnimationFrame(() => {
+					this._zoomTimer = null;
+					this.applyZoom();
+				});
+			},
+
+			applyZoom() {
+				// Scale via CSS transform (GPU-composited) instead of resizing width/height —
+				// resizing forces the browser to re-rasterize the SVG (incl. blur filters) on
+				// every frame, which is what made zoom feel laggy.
+				const svg = document.getElementById('graph-svg');
+				const wrapper = document.getElementById('graph-scale-wrapper');
+				if (!svg || !wrapper) return;
+				const baseW = parseFloat(svg.dataset.baseW || '0');
+				const baseH = parseFloat(svg.dataset.baseH || '0');
+				if (!baseW || !baseH) return;
+				svg.style.transform = 'scale(' + this.graphZoom + ')';
+				wrapper.style.width  = Math.round(baseW * this.graphZoom) + 'px';
+				wrapper.style.height = Math.round(baseH * this.graphZoom) + 'px';
+			},
+
+			// Initial page-load fetch: documents list only. The full graph (sections/
+			// paragraphs/tables) loads per-document on selection; entities/SUMO tags/
+			// edges load per-node on click — see loadDocGraph() and expandNode().
+			async loadDocuments() {
+				this.graphLoading = true;
+				try {
+					const r = await fetch('/api/documents');
+					const d = await r.json();
+					if (d.success) {
+						this.graphData = {
+							documents:  d.documents || [],
+							sections: [], paragraphs: [], tables: [], entities: [], edges: [],
+						};
+						this.graphSource = d.source || '';
+					}
+				} catch(e) { console.error('loadDocuments:', e); }
+				this.graphLoading = false;
+				this.$nextTick(() => this.renderCurrentGraph());
+			},
+
+			// Fetches the structural graph (sections/paragraphs/tables) for the current
+			// selectedDocKeys. Empty selection just clears everything back to the
+			// "select a document" empty-state — no fetch.
+			async loadDocGraph() {
+				this.expandedNodes = new Set();
+				if (this.selectedDocKeys.size === 0) {
+					this.graphData.sections = [];
+					this.graphData.paragraphs = [];
+					this.graphData.tables = [];
+					this.graphData.entities = [];
+					this.graphData.edges = [];
+					this.selectedNode = null;
+					this.$nextTick(() => this.renderCurrentGraph());
+					return;
+				}
+				this.graphLoading = true;
+				try {
+					const docKeys = [...this.selectedDocKeys].join(',');
+					const r = await fetch('/api/graph?docKeys=' + encodeURIComponent(docKeys));
+					const d = await r.json();
+					if (d.success) {
+						this.graphData.sections   = d.sections   || [];
+						this.graphData.paragraphs = d.paragraphs || [];
+						this.graphData.tables     = d.tables     || [];
+						// Entities/edges only ever come from expandNode (per-node, on click) —
+						// drop whatever was attributed to docs no longer in the selection.
+						this.graphData.entities = this.graphData.entities.filter(
+							e => (e.document_ids || []).some(id => this.selectedDocKeys.has(id)));
+						const keptIds = new Set([
+							...this.graphData.sections.map(s => s._id),
+							...this.graphData.paragraphs.map(p => p._id),
+							...this.graphData.tables.map(t => t._id),
+							...this.graphData.entities.map(e => e._id),
+							...this.graphData.documents.map(doc => doc._id),
+						]);
+						this.graphData.edges = this.graphData.edges.filter(
+							e => keptIds.has(e._from) && keptIds.has(e._to));
+					}
+				} catch(e) { console.error('loadDocGraph:', e); }
+				this.graphLoading = false;
+				this.$nextTick(() => this.renderCurrentGraph());
+			},
+
+			// Reload button: refresh the doc list, then refresh the current selection if any.
+			async loadGraph() {
+				await this.loadDocuments();
+				if (this.selectedDocKeys.size > 0) await this.loadDocGraph();
+			},
+
+			async expandNode(node) {
+				const nodeId = node._id || (node.id ? node.id : null);
+				if (!nodeId || this.expandedNodes.has(nodeId)) return;
+				// SUMO tags are virtual nodes built client-side — they have no DB record.
+				// Skip the neighbors fetch; highlighting is handled purely by renderGraph.
+				if (nodeId.startsWith('tags/')) return;
+				this.expandedNodes.add(nodeId);
+				try {
+					const [collection, key] = nodeId.split('/');
+					const r = await fetch(`/api/graph/node/${collection}/${key}/neighbors`);
+					const d = await r.json();
+					if (!d.success) return;
+					// Merge new nodes/edges into graphData; for paragraphs, UPDATE stubs with content
+					const existingParaMap  = new Map(this.graphData.paragraphs.map(p => [p._id, p]));
+					const existingSecIds   = new Set(this.graphData.sections.map(s => s._id));
+					const existingEdgeIds  = new Set(this.graphData.edges.map(e => e._id));
+					for (const p of (d.paragraphs || [])) {
+						if (existingParaMap.has(p._id)) {
+							// Update stub with full content
+							Object.assign(existingParaMap.get(p._id), p);
+						} else {
+							this.graphData.paragraphs.push(p);
+						}
+					}
+					const existingTableMap = new Map(this.graphData.tables.map(t => [t._id, t]));
+					for (const t of (d.tables || [])) {
+						if (existingTableMap.has(t._id)) Object.assign(existingTableMap.get(t._id), t);
+						else this.graphData.tables.push(t);
+					}
+					const existingEntityIds = new Set(this.graphData.entities.map(e => e._id));
+					for (const e of (d.entities || [])) if (!existingEntityIds.has(e._id)) this.graphData.entities.push(e);
+					for (const s of (d.sections || [])) if (!existingSecIds.has(s._id))   this.graphData.sections.push(s);
+					for (const e of (d.edges    || [])) if (!existingEdgeIds.has(e._id))  this.graphData.edges.push(e);
+					this.$nextTick(() => this.renderCurrentGraph());
+				} catch(e) { console.error('expandNode:', e); }
+			},
+
+			// Returns ordered children (paragraphs + tables) of the given section node,
+			// using HAS_CHILD / contains_paragraph / contains_table edges in graphData.
+			sectionChildren(node) {
+				if (!node || !node._id) return [];
+				const sectionId = node._id;
+				const childEdgeTypes = new Set(['HAS_CHILD', 'contains_paragraph', 'contains_table']);
+				const childIds = new Set(
+					this.graphData.edges
+						.filter(e => e._from === sectionId && childEdgeTypes.has(e.relation || e.type))
+						.map(e => e._to)
+				);
+				if (childIds.size === 0) return [];
+
+				const paraMap = new Map(this.graphData.paragraphs.map(p => [p._id, p]));
+				const tableMap = new Map(this.graphData.tables.map(t => [t._id, t]));
+
+				const children = [];
+				for (const id of childIds) {
+					if (paraMap.has(id)) children.push({ kind: 'paragraph', node: paraMap.get(id) });
+					else if (tableMap.has(id)) children.push({ kind: 'table', node: tableMap.get(id) });
+				}
+				// Stable sort: paragraphs before tables, then by _key lexicographic order
+				children.sort((a, b) => {
+					if (a.kind !== b.kind) return a.kind === 'paragraph' ? -1 : 1;
+					return (a.node._key || '').localeCompare(b.node._key || '');
+				});
+				return children;
+			},
+
+			renderCurrentGraph() {
+				const self = this;
+				const selectedKey = self.selectedNode && (self.selectedNode._key || self.selectedNode.id);
+				renderGraph(this.graphData, this.colorMode, selectedKey, this.graphZoom,
+					this.selectedDocKeys,
+					(node) => {
+						self.selectedNode = node;
+						self.expandNode(node);
+						self.$nextTick(() => self.renderCurrentGraph());
+					});
+			},
+
+			toggleDocSelection(doc) {
+				const key = doc._key || doc.id;
+				if (this.selectedDocKeys.has(key)) {
+					this.selectedDocKeys.delete(key);
+				} else {
+					this.selectedDocKeys.add(key);
+				}
+				this.selectedDocKeys = new Set(this.selectedDocKeys); // trigger reactivity
+				this.loadDocGraph();
+			},
+
+			toggleAllDocs() {
+				if (this.selectedDocKeys.size === 0) {
+					this.selectedDocKeys = new Set(this.graphData.documents.map(d => d._key || d.id));
+				} else {
+					this.selectedDocKeys = new Set();
+				}
+				this.loadDocGraph();
+			},
+
+			async highlightResultNode(node) {
+				// Query results can reference a doc that hasn't been selected/loaded yet —
+				// pull it in first so the node actually exists in graphData to highlight.
+				const docId = node.document_id;
+				if (docId && !this.selectedDocKeys.has(docId)) {
+					this.selectedDocKeys = new Set([...this.selectedDocKeys, docId]);
+					await this.loadDocGraph();
+				}
+				this.selectedNode = node;
+				this.$nextTick(() => {
+					this.renderCurrentGraph();
+					pulseNode(node._key || (node._id && node._id.split('/')[1]));
+				});
+			},
+
+			async loadInputFiles() {
+				try {
+					const r = await fetch('/api/pipeline/input-files');
+					const d = await r.json();
+					if (d.success) this.inputFiles = d.files;
+				} catch(e) {}
+			},
+
+			async deleteInputFile(name) {
+				if (!confirm('Remove "' + name + '" from staging?')) return;
+				await fetch('/api/pipeline/input-files/' + encodeURIComponent(name), { method: 'DELETE' });
+				await this.loadInputFiles();
+			},
+
+			async runPipeline() {
+				this.pipelineLogs = [];
+				try {
+					const r = await fetch('/api/pipeline/run', {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: '{}',
+					});
+					const d = await r.json();
+					if (d.success) this.pipelineActive = true;
+				} catch(e) {}
+			},
+
+			async pollPipeline() {
+				if (!this.pipelineActive && this.tab !== 'ingest') return;
+				try {
+					const r = await fetch('/api/pipeline/status');
+					const d = await r.json();
+					this.pipelineLogs = d.logs || [];
+					const wasActive = this.pipelineActive;
+					this.pipelineActive = !!d.active;
+					if (wasActive && !d.active) {
+						await this.loadGraph();
+						await this.loadInputFiles();
+					}
+					this.$nextTick(() => {
+						const el = document.getElementById('log-console');
+						if (el) el.scrollTop = el.scrollHeight;
+					});
+				} catch(e) {}
+			},
+
+			async runQuery() {
+				const q = this.queryInput.trim();
+				if (!q) return;
+				this.queryLoading = true;
+				this.queryResults = null;
+				try {
+					const r = await fetch('/api/retrieval/query', {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({ query: q }),
+					});
+					const d = await r.json();
+					if (d.success) this.queryResults = d;
+				} catch(e) {}
+				this.queryLoading = false;
+			},
+
+			async exportWiki() {
+				this.wikiExporting = true;
+				this.wikiMessage = '';
+				try {
+					const r = await fetch('/api/quartz/export', { method: 'POST' });
+					const d = await r.json();
+					this.wikiMessage = d.success ? '✓ Exported to wiki/' : 'Error: ' + d.error;
+				} catch(e) { this.wikiMessage = 'Export failed'; }
+				this.wikiExporting = false;
+			},
+
+			async loadJobs() {
+				this.jobsLoading = true;
+				try {
+					const r = await fetch('/api/queue/jobs');
+					const d = await r.json();
+					if (d.success) {
+						const order = { failed: 0, waiting: 1, active: 2, completed: 3 };
+						this.jobs = (d.jobs || []).sort((a, b) => (order[a.status] ?? 9) - (order[b.status] ?? 9));
+						this.jobStats = d.stats || {};
+					}
+				} catch(e) {}
+				this.jobsLoading = false;
+			},
+
+			async retryJob(id, force) {
+				await fetch('/api/queue/jobs/' + id + '/retry', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ force: !!force }),
+				});
+				await this.loadJobs();
+			},
+
+			async deleteJob(id) {
+				await fetch('/api/queue/jobs/' + id, { method: 'DELETE' });
+				await this.loadJobs();
+			},
+
+			async retryAllFailed(force) {
+				const failed = this.jobs.filter(j => j.status === 'failed');
+				await Promise.all(failed.map(j => this.retryJob(j.id, force)));
+			},
+
+			jobStatusColor(status) {
+				return { failed: '#f87171', waiting: '#fbbf24', active: '#38bdf8', completed: '#4ade80' }[status] || '#94a3b8';
+			},
+
+			nodeColor(node) { return getNodeColor(node, this.colorMode); },
+		};
+	}
+
+	// ── SVG Graph Renderer ────────────────────────────────────────────────────
+
+	// One color per section level (index 0 = level 1, etc.)
+	const LEVEL_COLORS = ['#818cf8','#2dd4bf','#67e8f9','#a78bfa','#f0abfc','#fb923c','#34d399'];
+
+	const FIXED_COLORS = {
+		document:  '#38bdf8',
+		paragraph: '#fbbf24',
+		figure:    '#c084fc',
+		table:     '#f472b6',
+		entity:    '#fb7185',
+		tag:       '#4ade80',
+	};
+
+	const CLUSTER_PALETTE = [
+		'#38bdf8','#2dd4bf','#a78bfa','#f472b6',
+		'#fb923c','#4ade80','#facc15','#e879f9',
+	];
+
+	// Returns a stable colKey string for a node.
+	// For sections, colKey = 'section_L<level>' so each level gets its own column.
+	function colKeyOf(node) {
+		const id = node._id || '';
+		if (id.startsWith('documents/'))  return 'document';
+		if (id.startsWith('paragraphs/')) return (node.node_type || '').toLowerCase() === 'figure' ? 'figure' : 'paragraph';
+		if (id.startsWith('tables/'))     return 'table';
+		if (id.startsWith('entities/'))   return 'entity';
+		if (id.startsWith('tags/'))       return 'tag';
+		if (id.startsWith('sections/'))   return 'section_L' + (node.level || 1);
+
+		// legacy / simulator nodes — use type/node_type
+		const nt = (node.node_type || node.type || '').toLowerCase();
+		if (nt === 'chapter')    return 'section_L1';
+		if (nt === 'subsection') return 'section_L3';
+		if (['section'].includes(nt)) return 'section_L2';
+		if (['paragraph','listitem','text','code','figure'].includes(nt)) return 'paragraph';
+		if (nt === 'table')    return 'table';
+		if (nt === 'document') return 'document';
+		return 'paragraph';
+	}
+
+	function sectionLevel(node) {
+		// parse level from colKey
+		const ck = colKeyOf(node);
+		const m = ck.match(/section_L(\d+)/);
+		return m ? parseInt(m[1], 10) : null;
+	}
+
+	function getNodeColor(node, colorMode) {
+		if (!node) return '#475569';
+		if (colorMode === 'sumo') {
+			const tags = node.sumo_tags || [];
+			if (tags.length > 0) {
+				let h = 0;
+				for (const c of tags[0]) h = (h * 31 + c.charCodeAt(0)) & 0xffff;
+				return CLUSTER_PALETTE[h % CLUSTER_PALETTE.length];
+			}
+		}
+		const ck = colKeyOf(node);
+		if (ck.startsWith('section_L')) {
+			const lvl = parseInt(ck.replace('section_L', ''), 10);
+			return LEVEL_COLORS[(lvl - 1) % LEVEL_COLORS.length];
+		}
+		return FIXED_COLORS[ck] || '#475569';
+	}
+
+	function renderGraph(data, colorMode, selectedKey, zoom, selectedDocKeys, onSelect) {
+		const svg = document.getElementById('graph-svg');
+		if (!svg) return;
+		svg.innerHTML = '';
+
+		let { documents, sections, paragraphs, tables, edges } = data;
+		let entities = data.entities || [];
+
+		// sections/paragraphs/tables/entities are already scoped server-side to the
+		// current selection (see loadDocGraph/expandNode) — only the document column
+		// (always the full doc list) still needs filtering down to what's selected.
+		if (selectedDocKeys && selectedDocKeys.size > 0) {
+			documents = documents.filter(d => selectedDocKeys.has(d._key || d.id));
+		}
+		// Most-mentioned entities first so the column reads top-to-bottom by relevance
+		entities = [...entities].sort((a, b) => (b.mention_count || 0) - (a.mention_count || 0));
+
+		// ── Build virtual SUMO tag nodes ──────────────────────────────────────
+		const tagCounts = {};
+		for (const p of paragraphs) {
+			for (const t of (p.sumo_tags || [])) tagCounts[t] = (tagCounts[t] || 0) + 1;
+		}
+		const tagNodes = Object.entries(tagCounts)
+			.sort((a, b) => b[1] - a[1])
+			.slice(0, 25)
+			.map(([name, count]) => ({
+				_key: 'tag:' + name, _id: 'tags/' + name, type: 'tag', title: name, _tagCount: count,
+			}));
+
+		// ── Compute distinct section levels present in data ────────────────────
+		// Sections: render all (lazy load means this set is already correct)
+		// Paragraphs/tables: render all loaded (they arrive incrementally via neighbor fetch)
+		const sampledSec  = sections;
+		const sampledPara = paragraphs;
+		const sampledTbl  = tables;
+
+		// group sections by level
+		const sectionsByLevel = new Map(); // level(int) → section[]
+		for (const s of sampledSec) {
+			const lvl = s.level || 1;
+			if (!sectionsByLevel.has(lvl)) sectionsByLevel.set(lvl, []);
+			sectionsByLevel.get(lvl).push(s);
+		}
+		const levelNums = [...sectionsByLevel.keys()].sort((a, b) => a - b);
+		const numLevels = levelNums.length || 0;
+
+		// Paragraphs/figures and entities are usually the most numerous node types
+		// by far — wrap each into a few side-by-side sub-columns instead of one
+		// very tall column.
+		function wrapCols(n) {
+			if (n > 200) return 5;
+			if (n > 80)  return 4;
+			if (n > 40)  return 3;
+			if (n > 15)  return 2;
+			return 1;
+		}
+		const PARA_COLS    = wrapCols(sampledPara.length);
+		const PARA_SUBGAP  = 26;
+		const paraRows      = Math.ceil(sampledPara.length / PARA_COLS) || 1;
+
+		const ENTITY_COLS   = wrapCols(entities.length);
+		const ENTITY_SUBGAP = 26;
+		const entityRows     = Math.ceil(entities.length / ENTITY_COLS) || 1;
+
+		// ── Dynamic column x positions ────────────────────────────────────────
+		const DOC_X   = 70;
+		const SEC_GAP   = 150;             // gap between level columns
+		const SEC_START = DOC_X + SEC_GAP;    // x of first section level column
+		const PARA_X  = SEC_START + numLevels * SEC_GAP + 20;
+		const ENTITY_X = PARA_X + (PARA_COLS - 1) * PARA_SUBGAP + SEC_GAP;
+		const TAG_X   = ENTITY_X + (ENTITY_COLS - 1) * ENTITY_SUBGAP + SEC_GAP;
+		const svgW    = TAG_X + 115;
+
+		const levelToX = {};
+		levelNums.forEach((lvl, i) => { levelToX[lvl] = SEC_START + i * SEC_GAP; });
+
+		// Row height: at least 14px so 5px-radius nodes never overlap.
+		// The container is overflow-auto so the SVG can be as tall as needed.
+		const columnHeightsPreview = [documents.length, paraRows, entityRows,
+			...levelNums.map(l => sectionsByLevel.get(l).length)];
+		const tallestPreview = Math.max(...columnHeightsPreview, 1);
+		const ROW_H = Math.max(14, Math.min(26, Math.floor(2400 / tallestPreview)));
+		const PAD_Y = 100;
+
+		const nodePos = new Map();
+
+		function placeColumn(nodes, colKey, x) {
+			nodes.forEach((node, i) => {
+				const key = node._key || node.id || colKey + '_' + i;
+				nodePos.set(key, { x, y: PAD_Y + i * ROW_H, node, colKey });
+			});
+		}
+
+		// Wraps nodes across `cols` side-by-side sub-columns (column-major fill)
+		// instead of one tall column — keeps the paragraph block roughly square.
+		function placeColumnWrapped(nodes, colKey, xStart, cols, subGap) {
+			const rows = Math.ceil(nodes.length / cols) || 1;
+			nodes.forEach((node, i) => {
+				const key = node._key || node.id || colKey + '_' + i;
+				const col = Math.floor(i / rows);
+				const row = i % rows;
+				nodePos.set(key, { x: xStart + col * subGap, y: PAD_Y + row * ROW_H, node, colKey });
+			});
+		}
+
+		placeColumn(documents,   'document', DOC_X);
+		for (const lvl of levelNums) {
+			placeColumn(sectionsByLevel.get(lvl), 'section_L' + lvl, levelToX[lvl]);
+		}
+		placeColumnWrapped(sampledPara, 'paragraph', PARA_X, PARA_COLS, PARA_SUBGAP);
+		if (sampledTbl.length > 0) placeColumn(sampledTbl, 'table', PARA_X + (PARA_COLS - 1) * PARA_SUBGAP + 35);
+		placeColumnWrapped(entities, 'entity', ENTITY_X, ENTITY_COLS, ENTITY_SUBGAP);
+		placeColumn(tagNodes,    'tag',        TAG_X);
+
+		// ── Compute related keys for the selected node ─────────────────────────
+
+		// Pre-build parent-chain lookup from HAS_CHILD edges so we can walk
+		// from any node all the way up to the root document in O(depth).
+		const parentOf = new Map(); // childKey → { key: parentKey, edgeId }
+		for (const edge of edges) {
+			if (edge.relation === 'HAS_CHILD') {
+				const fk  = (edge._from || '').split('/')[1];
+				const tk  = (edge._to   || '').split('/')[1];
+				const eid = edge._key || (edge._from + '→' + edge._to);
+				if (fk && tk) parentOf.set(tk, { key: fk, edgeId: eid });
+			}
+		}
+
+		// Walk every ancestor of startKey, adding them to relatedKeys/relatedEdgeIds.
+		function addAncestors(startKey) {
+			let cur = startKey;
+			while (parentOf.has(cur)) {
+				const { key: pk, edgeId } = parentOf.get(cur);
+				relatedKeys.add(pk);
+				relatedEdgeIds.add(edgeId);
+				cur = pk;
+			}
+		}
+
+		const relatedKeys    = new Set();
+		const relatedEdgeIds = new Set();
+		if (selectedKey) {
+			// 1. Direct 1-hop neighbors via all real edges
+			for (const edge of edges) {
+				const fk  = (edge._from || '').split('/')[1];
+				const tk  = (edge._to   || '').split('/')[1];
+				const eid = edge._key || (edge._from + '→' + edge._to);
+				if (fk === selectedKey || tk === selectedKey) {
+					relatedKeys.add(fk === selectedKey ? tk : fk);
+					relatedEdgeIds.add(eid);
+				}
+			}
+
+			// 2. Walk the full ancestor chain up to the root document
+			addAncestors(selectedKey);
+
+			// 3. Virtual tag edges: paragraph → its SUMO tags
+			for (const p of sampledPara) {
+				if (p._key !== selectedKey) continue;
+				for (const tagName of (p.sumo_tags || [])) relatedKeys.add('tag:' + tagName);
+			}
+
+			// 4. SUMO tag selected: highlight all paragraphs with that tag AND their
+			//    full chains (paragraph → section → … → document)
+			const selEntry = nodePos.get(selectedKey);
+			if (selEntry && selEntry.colKey === 'tag') {
+				const tagName = selectedKey.replace('tag:', '');
+				for (const p of sampledPara) {
+					if ((p.sumo_tags || []).includes(tagName)) {
+						relatedKeys.add(p._key);
+						addAncestors(p._key);
+					}
+				}
+			}
+		}
+
+		// ── SVG dimensions ────────────────────────────────────────────────────
+		const columnHeights = [documents.length, paraRows, entityRows, tagNodes.length,
+			...levelNums.map(l => sectionsByLevel.get(l).length)];
+		const tallest = Math.max(...columnHeights, 1);
+		const svgH = Math.max(PAD_Y + tallest * ROW_H + 30, 300);
+
+		svg.setAttribute('viewBox', '0 0 ' + svgW + ' ' + svgH);
+		svg.style.width  = Math.round(svgW) + 'px';
+		svg.style.height = Math.round(svgH) + 'px';
+		svg.dataset.baseW = svgW;
+		svg.dataset.baseH = svgH;
+		svg.style.transform = 'scale(' + zoom + ')';
+		const wrapper = document.getElementById('graph-scale-wrapper');
+		if (wrapper) {
+			wrapper.style.width  = Math.round(svgW * zoom) + 'px';
+			wrapper.style.height = Math.round(svgH * zoom) + 'px';
+		}
+
+
+		// ── Defs ──────────────────────────────────────────────────────────────
+		const defs = svgEl('defs');
+		const mkFilter = (id, std) => {
+			const f = svgEl('filter', { id, x: '-50%', y: '-50%', width: '200%', height: '200%' });
+			f.innerHTML = `<feGaussianBlur stdDeviation="${std}" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>`;
+			return f;
+		};
+		defs.appendChild(mkFilter('glow', '2.5'));
+		defs.appendChild(mkFilter('glow-soft', '1.5'));
+		svg.appendChild(defs);
+
+		// ── Column guide lines + headers ──────────────────────────────────────
+		const guideG = svgEl('g');
+
+		const colDefs = [
+			[DOC_X, 'DOCUMENT', FIXED_COLORS.document],
+			...levelNums.map(lvl => [
+				levelToX[lvl],
+				'LEVEL ' + lvl,
+				LEVEL_COLORS[(lvl - 1) % LEVEL_COLORS.length],
+			]),
+			[PARA_X, 'PARA/FIG' + (PARA_COLS > 1 ? ' (×' + PARA_COLS + ')' : ''), FIXED_COLORS.paragraph],
+			[ENTITY_X, 'ENTITY' + (ENTITY_COLS > 1 ? ' (×' + ENTITY_COLS + ')' : ''), FIXED_COLORS.entity],
+			[TAG_X,  'SUMO TAG', FIXED_COLORS.tag],
+		];
+
+		for (const [x, label, col] of colDefs) {
+			guideG.appendChild(svgEl('line', { x1: x, y1: 28, x2: x, y2: svgH - 8,
+				stroke: '#1e293b', 'stroke-width': '1' }));
+			const txt = svgEl('text', { x, y: 16, 'text-anchor': 'middle',
+				'font-size': '7', fill: col, opacity: '0.55', 'font-weight': '700',
+				'letter-spacing': '1', 'font-family': 'ui-monospace,monospace' });
+			txt.textContent = label;
+			guideG.appendChild(txt);
+		}
+		svg.appendChild(guideG);
+
+		// ── Edges ─────────────────────────────────────────────────────────────
+		const edgeG = svgEl('g', { id: 'edges' });
+		const hasSelection = !!selectedKey;
+
+		for (const edge of edges) {
+			const fk = (edge._from || '').split('/')[1];
+			const tk = (edge._to   || '').split('/')[1];
+			const fp = nodePos.get(fk);
+			const tp = nodePos.get(tk);
+			if (!fp || !tp) continue;
+
+			const edgeId      = edge._key || (edge._from + '→' + edge._to);
+			const isConnected = hasSelection && relatedEdgeIds.has(edgeId);
+
+			edgeG.appendChild(bezierEdge(fp.x, fp.y, tp.x, tp.y,
+				isConnected ? '#60a5fa' : '#334155',
+				isConnected ? '0.75' : (hasSelection ? '0.07' : '0.28'),
+				isConnected ? '1.2' : '0.7'));
+		}
+
+		// virtual tag edges
+		for (const p of sampledPara) {
+			const pp = nodePos.get(p._key);
+			if (!pp) continue;
+			for (const tagName of (p.sumo_tags || []).slice(0, 3)) {
+				const tp = nodePos.get('tag:' + tagName);
+				if (!tp) continue;
+				const isRel = hasSelection && (p._key === selectedKey || relatedKeys.has(p._key) || relatedKeys.has('tag:' + tagName));
+				edgeG.appendChild(bezierEdge(pp.x, pp.y, tp.x, tp.y,
+					isRel ? '#86efac' : '#4ade80',
+					isRel ? '0.5' : (hasSelection ? '0.04' : '0.1'),
+					'0.6'));
+			}
+		}
+
+		svg.appendChild(edgeG);
+
+		// ── Nodes ─────────────────────────────────────────────────────────────
+		const nodeG = svgEl('g', { id: 'nodes' });
+
+		for (const [key, { x, y, node, colKey }] of nodePos) {
+			const isTag    = key.startsWith('tag:');
+			const isEntity = colKey === 'entity';
+			const isDoc    = colKey === 'document';
+			const isSec    = colKey.startsWith('section_L');
+			const color    = (colorMode === 'sumo' && !isTag)
+				? getNodeColor(node, 'sumo')
+				: getNodeColor(node, 'type');
+			const r        = isDoc ? 7 : (isTag || isEntity) ? 4 : 5;
+
+			const isSel     = key === selectedKey;
+			const isRelated = !isSel && hasSelection && relatedKeys.has(key);
+			const isDimmed  = hasSelection && !isSel && !isRelated;
+
+			const g = svgEl('g', { class: 'node-g', transform: 'translate(' + x + ',' + y + ')' });
+
+			if (isSel) {
+				g.appendChild(svgEl('circle', { r: r + 6, fill: color, opacity: '0.15', filter: 'url(#glow)' }));
+				g.appendChild(svgEl('circle', { r: r + 2.5, fill: 'none', stroke: color, 'stroke-width': '1.5', opacity: '0.8' }));
+			}
+			if (isRelated) {
+				g.appendChild(svgEl('circle', { r: r + 3.5, fill: 'none', stroke: color, 'stroke-width': '1', opacity: '0.5', filter: 'url(#glow-soft)' }));
+			}
+
+			const fillOpacity = isSel ? '1' : isRelated ? '0.9' : isDimmed ? '0.12' : '0.65';
+			const circle = svgEl('circle', {
+				r, fill: color, 'fill-opacity': fillOpacity,
+				stroke: isSel ? color : 'none', 'stroke-width': '1.5',
+			});
+			g.appendChild(circle);
+
+			// section label count threshold: only label if ≤ 25 nodes in that level column
+			const secLvl = isSec ? parseInt(colKey.replace('section_L', ''), 10) : null;
+			const secCount = secLvl !== null ? (sectionsByLevel.get(secLvl) || []).length : 0;
+			// entities: only label when the column is short enough to read (else too dense)
+			const showLabel = isDoc || isTag || isSec || (isEntity && entityRows <= 40);
+
+			if (showLabel) {
+				const rawLabel = isTag ? '#' + node.title : isEntity ? (node.name || key) : (node.title || node.source_file || key);
+				const maxLen   = isDoc ? 60 : isSec ? 40 : 20;
+				const label    = rawLabel.length > maxLen ? rawLabel.slice(0, maxLen - 1) + '…' : rawLabel;
+				const txt = svgEl('text', {
+					'x': r + 4,
+					'y': 4,
+					'font-size':  isDoc ? '8' : isSec ? '7' : '6',
+					'fill': isDimmed ? '#1e293b' : isTag ? '#86efac' : isEntity ? '#fda4af' : isDoc ? '#cbd5e1' : '#94a3b8',
+					'font-family': 'ui-monospace,monospace',
+					'opacity': isDimmed ? '0.4' : '1',
+				});
+				txt.textContent = label;
+				g.appendChild(txt);
+			}
+
+			g.addEventListener('mouseenter', () => {
+				if (!isSel) { circle.setAttribute('r', r + 2); circle.setAttribute('fill-opacity', '1'); }
+			});
+			g.addEventListener('mouseleave', () => {
+				circle.setAttribute('r', r);
+				circle.setAttribute('fill-opacity', fillOpacity);
+			});
+			g.addEventListener('click', () => {
+				const payload = isTag
+					? { type: 'SumoTag', _key: key, _id: 'tags/' + node.title, title: node.title, sumo_tags: [], _tagCount: node._tagCount }
+					: node;
+				onSelect(payload);
+			});
+
+			g.dataset.nodeKey = key;
+			nodeG.appendChild(g);
+		}
+
+		svg.appendChild(nodeG);
+	}
+
+	// ── Helpers ───────────────────────────────────────────────────────────────
+
+	function svgEl(tag, attrs) {
+		const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+		if (attrs) for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
+		return el;
+	}
+
+	function bezierEdge(x1, y1, x2, y2, stroke, opacity, width) {
+		const mx = (x1 + x2) / 2;
+		return svgEl('path', {
+			d: 'M' + x1 + ',' + y1 + ' C' + mx + ',' + y1 + ' ' + mx + ',' + y2 + ' ' + x2 + ',' + y2,
+			fill: 'none', stroke, 'stroke-width': width, opacity,
+		});
+	}
+
+	function sampleEvenly(arr, max) {
+		if (arr.length <= max) return arr;
+		const step = arr.length / max;
+		return Array.from({ length: max }, (_, i) => arr[Math.floor(i * step)]);
+	}
+
+	function pulseNode(key) {
+		const g = document.querySelector('[data-node-key="' + key + '"]');
+		if (!g) return;
+		const circle = g.querySelector('circle');
+		if (!circle) return;
+		const orig = circle.getAttribute('r');
+		circle.setAttribute('r', parseFloat(orig) + 6);
+		circle.setAttribute('fill-opacity', '1');
+		setTimeout(() => {
+			circle.setAttribute('r', orig);
+			circle.setAttribute('fill-opacity', '0.65');
+		}, 700);
+	}
+
+	function pulseDocumentNodes(docKey) {
+		document.querySelectorAll('[data-node-key]').forEach(g => {
+			const c = g.querySelector('circle');
+			if (c) c.setAttribute('fill-opacity', '0.08');
+		});
+		setTimeout(() => {
+			document.querySelectorAll('[data-node-key]').forEach(g => {
+				const c = g.querySelector('circle');
+				if (c) c.setAttribute('fill-opacity', '0.65');
+			});
+		}, 800);
+	}
+	</script>
 </body>
 </html>
