@@ -65,3 +65,81 @@ Verification:
   → Phase 1b returns more results; same-query-twice hits cache
 
 Out of scope: SUMO hierarchy distance (OWL parsing), dense embeddings, Phase 3/4 changes.
+
+---
+
+TODO — 2026-06-25: Time Dimension — Space-Time Graph
+
+Full design in `refs/brainstorm_space_time.md`.
+
+Goal: Add the Time axis to Doc Ohara. Each document gets temporal metadata (when published,
+what period it covers) and an influence decay rate by document type. Retrieval scoring gains
+a temporal component with five-layer protection against burying "gold" timeless articles.
+
+### Phase A — Temporal Metadata (Schema + Ingest)
+
+- [ ] A1. `prompts/ingest_document.md` — add temporal extraction block
+      Ask LLM to output at document level:
+        published_date: "YYYY-MM-DD" or "YYYY" or null
+        temporal_coverage: { start: "YYYY" | null, end: "YYYY" | null }
+        temporal_granularity: 'day'|'month'|'year'|'decade'|'century'
+        temporal_confidence: 0.0–1.0
+        decay_class: 'EVERGREEN'|'SCHOLARLY'|'CURRENT'|'EPHEMERAL'
+      (Same LLM call, extra JSON keys — no added API cost)
+
+- [ ] A2. `src/ingest/pipeline.js` — read and persist temporal fields
+      At document node creation (steps 8 + 9), persist all fields from A1.
+      Set temporal_needs_review: true (LLM-extracted, needs human confirm).
+      Set effective_decay_class = decay_class (will be updated post-ingest in A4).
+      Set similar_to_indegree: 0.
+
+- [ ] A3. `scripts/db-init.js` — add ArangoDB persistent index on published_date
+      skiplist index on documents.published_date for range queries.
+
+- [ ] A4. `src/ingest/pipeline.js` — post-ingest decay class promotion
+      After SIMILAR_TO edges are created (step 10):
+        - Count incoming SIMILAR_TO edges for the new doc (similar_to_indegree)
+        - If indegree > OHARA_SIMILAR_TO_EVERGREEN_THRESHOLD → set effective_decay_class = 'EVERGREEN'
+      Also: for each new SIMILAR_TO edge, derive temporal_relation from verb field:
+        'extends'/'builds on'/'is based on' → 'extends'
+        'contradicts'/'supersedes'/'corrects'/'refutes' → 'supersedes'
+        else → 'discusses'
+      Store temporal_relation on the edge (no extra LLM call).
+
+### Phase B — Temporal Scoring (Retrieval)
+
+- [ ] B1. `prompts/extract_query_fingerprint.md` — add temporal_intent field
+      Add to LLM output:
+        temporal_intent: 'current_state'|'historical_fact'|'influence_chain'|'none'
+      If date entity detected in query → likely 'historical_fact'.
+      If "latest"/"current"/"now"/"today" in query → 'current_state'.
+      Default → 'none'.
+
+- [ ] B2. `src/retrieval.js` — _computeTemporalScore(node, queryIntent)
+      Implement decay formula:
+        if temporal_intent == 'none' → return 0
+        if node.tier == 'principal' → return 0
+        if node.bm25_score > TEMPORAL_GATE_FLOOR → return 0
+        else → return OHARA_TEMPORAL_WEIGHT × exp(−λ × Δt)
+      λ from env vars by effective_decay_class.
+      Δt = (Date.now() − Date.parse(doc.published_date)) / 86400000
+
+- [ ] B3. `src/retrieval.js` — inject temporal score into _fuseResults
+      After existing weighted sum, add temporal contribution per node.
+      For 'historical_fact' queries: also compute coverage_score and add separately.
+      New env vars: OHARA_TEMPORAL_WEIGHT, OHARA_TEMPORAL_GATE_FLOOR,
+        OHARA_DECAY_RATE_EVERGREEN/SCHOLARLY/CURRENT/EPHEMERAL,
+        OHARA_SIMILAR_TO_EVERGREEN_THRESHOLD.
+
+### Phase C — Verification
+
+- [ ] C1. Ingest two documents on same topic:
+        - news article (2024) → expect CURRENT decay class
+        - textbook chapter (1995) → expect SCHOLARLY decay class
+- [ ] C2. Query "current best practices" → news article ranks higher (temporal_intent=current_state)
+- [ ] C3. Query "history of X in 1990s" → textbook ranks higher (temporal_intent=historical_fact, coverage match)
+- [ ] C4. db.documents.toArray() shows published_date, decay_class, effective_decay_class populated
+- [ ] C5. node bin/ohara.js query "X" --tiers --verbose shows temporal_score in phase breakdown
+
+Out of scope: UI for manual decay_class override, PRECEDES edges (use AQL sort instead),
+dense embedding similarity for temporal coverage matching.
