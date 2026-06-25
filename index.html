@@ -104,8 +104,8 @@
 			<template x-for="t in tabs" :key="t.id">
 				<button @click="tab = t.id; if(t.id==='jobs') loadJobs()" :title="t.label"
 					:class="tab === t.id ? 'bg-gray-700 text-sky-400' : 'text-gray-600 hover:text-gray-300'"
-					class="relative w-7 h-7 flex items-center justify-center rounded text-sm transition"
-					x-text="t.icon">
+					class="relative w-7 h-7 flex items-center justify-center rounded text-sm transition">
+					<span x-text="t.icon"></span>
 					<span x-show="t.id === 'jobs' && jobStats.failed > 0"
 						class="absolute top-0.5 right-0.5 w-1.5 h-1.5 rounded-full bg-red-500 pointer-events-none"></span>
 				</button>
