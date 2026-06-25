@@ -163,6 +163,135 @@ Elliptic curve cryptography underpins the key generation algorithm used in Bitco
 	});
 });
 
+// ── Unit tests: temporal scoring ─────────────────────────────────────────────
+
+describe('temporal scoring', () => {
+	let RetrievalEngine;
+
+	before(async () => {
+		({ RetrievalEngine } = await import('../src/retrieval.js'));
+	});
+
+	function makeEngine() {
+		// Minimal stub db — temporal scoring doesn't need real DB calls
+		return new RetrievalEngine({
+			executeAQL: async () => [],
+			query: async () => ({ all: async () => [] }),
+		});
+	}
+
+	function makeEntry(overrides = {}) {
+		return {
+			node: {
+				published_date: '2020-01-01',
+				effective_decay_class: 'CURRENT',
+				...overrides.node,
+			},
+			score: 1.0,
+			sources: [],
+			contributions: overrides.contributions ?? [],
+			...overrides.entry,
+		};
+	}
+
+	test('returns 0 when temporal_intent is none', () => {
+		const engine = makeEngine();
+		const entry = makeEntry();
+		const pq = { temporalIntent: 'none' };
+		assert.equal(engine._computeTemporalScore(entry, pq, false), 0);
+	});
+
+	test('returns 0 for Principal-tier node', () => {
+		const engine = makeEngine();
+		const entry = makeEntry();
+		const pq = { temporalIntent: 'current_state' };
+		assert.equal(engine._computeTemporalScore(entry, pq, true), 0);
+	});
+
+	test('returns 0 when BM25 score exceeds gate floor', () => {
+		const engine = makeEngine();
+		const entry = makeEntry({ contributions: [{ phase: 'fulltext', score: 20 }] });
+		const pq = { temporalIntent: 'current_state' };
+		// default gate floor is 5.0; 20 > 5.0 → skip
+		assert.equal(engine._computeTemporalScore(entry, pq, false), 0);
+	});
+
+	test('returns 0 when published_date absent', () => {
+		const engine = makeEngine();
+		const entry = makeEntry({ node: { published_date: null, effective_decay_class: 'CURRENT' } });
+		const pq = { temporalIntent: 'current_state' };
+		assert.equal(engine._computeTemporalScore(entry, pq, false), 0);
+	});
+
+	test('returns positive score for current_state with recent CURRENT doc', () => {
+		const engine = makeEngine();
+		const recentDate = new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10); // 30 days ago
+		const entry = makeEntry({ node: { published_date: recentDate, effective_decay_class: 'CURRENT' } });
+		const pq = { temporalIntent: 'current_state' };
+		const score = engine._computeTemporalScore(entry, pq, false);
+		assert.ok(score > 0, `expected positive temporal score, got ${score}`);
+	});
+
+	test('historical_fact inverts decay: older doc scores higher', () => {
+		const engine = makeEngine();
+		const oldEntry = makeEntry({ node: { published_date: '1995-01-01', effective_decay_class: 'SCHOLARLY' } });
+		const newEntry = makeEntry({ node: { published_date: '2024-01-01', effective_decay_class: 'CURRENT' } });
+		const pq = { temporalIntent: 'historical_fact' };
+		const oldScore = engine._computeTemporalScore(oldEntry, pq, false);
+		const newScore = engine._computeTemporalScore(newEntry, pq, false);
+		assert.ok(oldScore > newScore, `old doc (${oldScore}) should outscore new doc (${newScore}) for historical_fact`);
+	});
+
+	test('uses document_effective_decay_class fallback', () => {
+		const engine = makeEngine();
+		const entry = makeEntry({ node: {
+			published_date: '2020-01-01',
+			document_effective_decay_class: 'EVERGREEN',
+			// no effective_decay_class on node itself
+		}});
+		const pq = { temporalIntent: 'current_state' };
+		// EVERGREEN has near-zero lambda → decay ≈ 1.0 → score ≈ TEMPORAL_WEIGHT
+		const score = engine._computeTemporalScore(entry, pq, false);
+		assert.ok(score > 0);
+	});
+});
+
+// ── Unit tests: query fingerprint temporal_intent ────────────────────────────
+
+describe('query fingerprint heuristics', () => {
+	let RetrievalEngine;
+
+	before(async () => {
+		({ RetrievalEngine } = await import('../src/retrieval.js'));
+	});
+
+	function makeEngine() {
+		return new RetrievalEngine({
+			executeAQL: async () => [],
+			query: async () => ({ all: async () => [] }),
+		});
+	}
+
+	test('keyword query with "latest" gets current_state intent', async () => {
+		const engine = makeEngine();
+		const pq = await engine.preprocessInput('latest bitcoin');
+		assert.equal(pq.inputType, 'keyword');
+		assert.equal(pq.temporalIntent, 'current_state');
+	});
+
+	test('keyword query with year 1990 gets historical_fact intent', async () => {
+		const engine = makeEngine();
+		const pq = await engine.preprocessInput('proof work 1994');
+		assert.equal(pq.temporalIntent, 'historical_fact');
+	});
+
+	test('bare keyword without temporal cues has none intent', async () => {
+		const engine = makeEngine();
+		const pq = await engine.preprocessInput('bitcoin');
+		assert.equal(pq.temporalIntent, 'none');
+	});
+});
+
 // ── Integration test: arangodb simulator state ────────────────────────────────
 
 describe('ArangoDBSimulator', () => {

@@ -236,4 +236,67 @@ export function validateTags(tags) {
 	return { valid: [...new Set(valid)], invalid, resolved_map };
 }
 
-export default { loadSumoIndex, resolveTag, isValidTag, validateTags };
+// ── SUMO hierarchy: ancestor traversal + distance ────────────────────────────
+
+const SUMO_HIERARCHY_PATH = path.join(process.cwd(), 'ontology', 'sumo_hierarchy.json');
+let hierarchyMap = null;
+
+function loadHierarchy() {
+	if (hierarchyMap) return hierarchyMap;
+	try {
+		hierarchyMap = JSON.parse(fs.readFileSync(SUMO_HIERARCHY_PATH, 'utf-8'));
+	} catch (_) {
+		hierarchyMap = {}; // hierarchy file not yet generated — degrade gracefully
+	}
+	return hierarchyMap;
+}
+
+/**
+ * Return all ancestors of `tag` via BFS on the subClassOf hierarchy.
+ * Does NOT include `tag` itself. Returns a Map<ancestor, distance> where
+ * distance is the number of hops from `tag`.
+ * Returns an empty Map if tag not found or hierarchy unavailable.
+ */
+export function sumoAncestors(tag) {
+	const parents = loadHierarchy();
+	const result = new Map(); // ancestor → distance
+	const queue = [[tag, 0]];
+	const visited = new Set([tag]);
+	while (queue.length) {
+		const [cur, dist] = queue.shift();
+		for (const parent of (parents[cur] || [])) {
+			if (visited.has(parent)) continue;
+			visited.add(parent);
+			result.set(parent, dist + 1);
+			queue.push([parent, dist + 1]);
+		}
+	}
+	return result;
+}
+
+/**
+ * Shortest ancestor distance between two tags.
+ * Returns 0 if identical, positive int if one is an ancestor of the other,
+ * or -1 if no relation found (within maxDepth hops).
+ */
+export function sumoDistance(tagA, tagB, maxDepth = 6) {
+	if (tagA === tagB) return 0;
+	const ancsA = sumoAncestors(tagA);
+	// Direct ancestor relationship
+	if (ancsA.has(tagB)) return ancsA.get(tagB);
+	const ancsB = sumoAncestors(tagB);
+	if (ancsB.has(tagA)) return ancsB.get(tagA);
+	// Common ancestor: find minimum sum of distances
+	let minDist = -1;
+	for (const [anc, dA] of ancsA) {
+		if (dA > maxDepth) continue;
+		const dB = ancsB.get(anc);
+		if (dB !== undefined && dB <= maxDepth) {
+			const total = dA + dB;
+			if (minDist === -1 || total < minDist) minDist = total;
+		}
+	}
+	return minDist;
+}
+
+export default { loadSumoIndex, resolveTag, isValidTag, validateTags, sumoAncestors, sumoDistance };

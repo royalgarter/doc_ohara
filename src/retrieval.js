@@ -10,7 +10,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { GoogleGenAI } from '@google/genai';
-import { validateTags } from './sumo.js';
+import { validateTags, sumoAncestors } from './sumo.js';
 import { cacheKeyFor, readCacheSync, writeCache } from './cache.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -37,6 +37,7 @@ const w = () => ({
 	entity:   parseFloat(process.env.OHARA_ENTITY_PIVOT_WEIGHT  || '0.6'),
 	struct:   parseFloat(process.env.OHARA_STRUCT_WEIGHT        || '0.3'),
 	crossDoc: parseFloat(process.env.OHARA_CROSS_DOC_WEIGHT     || '0.4'),
+	vector:   parseFloat(process.env.OHARA_VECTOR_WEIGHT        || '0.5'),
 });
 
 // Temporal decay rates by class (λ in exp(−λ·Δdays))
@@ -237,6 +238,24 @@ export class RetrievalEngine {
 			for (const t of (r.node.sumo_tags || [])) sumoSet.add(t);
 		}
 		if (sumoSet.size === 0) return [];
+
+		// Expand query tags with hierarchy ancestors (up to 3 hops, decaying weight).
+		// ancestorWeights maps tag → max weight across all query tags that share it as ancestor.
+		const SUMO_HIERARCHY_DEPTH = parseInt(process.env.OHARA_SUMO_HIERARCHY_DEPTH || '3', 10);
+		const ancestorWeights = new Map(); // expanded tag → score weight [0,1]
+		if (SUMO_HIERARCHY_DEPTH > 0) {
+			for (const tag of processedQuery.sumoHints) {
+				for (const [anc, dist] of sumoAncestors(tag)) {
+					if (dist > SUMO_HIERARCHY_DEPTH) continue;
+					const w = 1 / (dist + 1); // 1-hop → 0.5, 2-hop → 0.33, 3-hop → 0.25
+					if (!ancestorWeights.has(anc) || ancestorWeights.get(anc) < w) {
+						ancestorWeights.set(anc, w);
+					}
+					sumoSet.add(anc);
+				}
+			}
+		}
+
 		const sumoTags = [...sumoSet];
 
 		// Entity types from query fingerprint for affinity boost
@@ -246,22 +265,37 @@ export class RetrievalEngine {
 				.filter(Boolean)
 		)];
 
+		// Split tags into exact (query-derived) and ancestor-expanded (lower weight)
+		const exactTags = [...new Set(processedQuery.sumoHints)];
+		// Ancestor tags only (not already in exactTags)
+		const ancestorTagEntries = [...ancestorWeights.entries()]
+			.filter(([t]) => !exactTags.includes(t));
+		const ancestorTags = ancestorTagEntries.map(([t]) => t);
+		// Average ancestor weight for scoring (use 0.3 as fallback if no ancestors)
+		const avgAncestorWeight = ancestorTagEntries.length
+			? ancestorTagEntries.reduce((s, [, w]) => s + w, 0) / ancestorTagEntries.length
+			: 0.3;
+
 		try {
 			const rows = await this.db.executeAQL(`
-				LET query_tags        = @sumo_tags
+				LET exact_tags        = @exact_tags
+				LET ancestor_tags     = @ancestor_tags
+				LET ancestor_weight   = @ancestor_weight
 				LET query_entity_types = @entity_types
 				FOR p IN paragraphs
-					LET tag_overlap  = LENGTH(INTERSECTION(p.sumo_tags, query_tags))
-					FILTER tag_overlap > 0
+					LET exact_overlap    = LENGTH(INTERSECTION(p.sumo_tags, exact_tags))
+					LET ancestor_overlap = LENGTH(INTERSECTION(p.sumo_tags, ancestor_tags))
+					FILTER exact_overlap + ancestor_overlap > 0
 					LET type_overlap = LENGTH(query_entity_types) > 0
 						? LENGTH(INTERSECTION(p.entity_types || [], query_entity_types))
 						: 0
-					LET score = (tag_overlap  / MAX([LENGTH(query_tags),        1]))
-										+ 0.2 * (type_overlap / MAX([LENGTH(query_entity_types), 1]))
+					LET denom = MAX([LENGTH(exact_tags) + LENGTH(ancestor_tags), 1])
+					LET score = ((exact_overlap + ancestor_overlap * ancestor_weight) / denom)
+								+ 0.2 * (type_overlap / MAX([LENGTH(query_entity_types), 1]))
 					SORT score DESC
 					LIMIT @limit
 					RETURN { node: p, score, source: "sumo" }
-			`, { sumo_tags: sumoTags, entity_types: queryEntityTypes, limit });
+			`, { exact_tags: exactTags, ancestor_tags: ancestorTags, ancestor_weight: avgAncestorWeight, entity_types: queryEntityTypes, limit });
 			return rows;
 		} catch (_) {
 			return [];
@@ -365,6 +399,45 @@ export class RetrievalEngine {
 		}
 	}
 
+	// ── Phase 1d — Vector Similarity (ANN cosine) ───────────────────────────────
+
+	async _phase1dVector(processedQuery, limit) {
+		if (process.env.OHARA_VECTOR_WEIGHT === '0') return [];
+		const ai = this._getAI();
+		if (!ai) return [];
+
+		const cacheKey = cacheKeyFor(['vec', processedQuery.raw]);
+		let queryVec = readCacheSync(cacheKey);
+		if (!queryVec) {
+			try {
+				const resp = await ai.models.embedContent({
+					model: 'text-embedding-004',
+					contents: processedQuery.raw.slice(0, 2000),
+					config: { taskType: 'RETRIEVAL_QUERY' },
+				});
+				queryVec = resp.embeddings?.[0]?.values;
+				if (queryVec) await writeCache(cacheKey, queryVec);
+			} catch (err) {
+				return [];
+			}
+		}
+		if (!queryVec) return [];
+
+		try {
+			const rows = await this.db.executeAQL(`
+				FOR p IN paragraphs
+					LET dist = APPROX_NEAR_COSINE(@vec, p.embedding)
+					FILTER dist != null
+					SORT dist ASC
+					LIMIT @limit
+					RETURN { node: p, score: 1 - dist, source: "vector" }
+			`, { vec: queryVec, limit });
+			return rows.filter(r => r.score > 0);
+		} catch (_) {
+			return []; // vector index not yet created or no embeddings — degrade gracefully
+		}
+	}
+
 	// ── Phase 4 — Structural Traversal ───────────────────────────────────────────
 
 	async _phase4Structural(topNodeId, depth, seenIds) {
@@ -416,20 +489,23 @@ export class RetrievalEngine {
 		const Δdays = (Date.now() - Date.parse(publishedDate)) / 86400000;
 		if (isNaN(Δdays) || Δdays < 0) return 0;
 
-		const decayScore = Math.exp(-lambda * Δdays);
-
-		// For historical_fact queries: invert — older primary sources covering the queried period gain authority
+		// For historical_fact queries: age authority uses a fixed slow rate (EVERGREEN-like)
+		// so raw document age determines score, independent of the doc's own decay class.
+		// A 1995 textbook outscores a 2024 news article regardless of their λ values.
 		if (temporalIntent === 'historical_fact') {
-			return temporalWeight * (1 - decayScore); // old = high score
+			const AGE_AUTHORITY_LAMBDA = 0.000274; // ≈ 1/10yr half-life: meaningful age range
+			const ageScore = 1 - Math.exp(-AGE_AUTHORITY_LAMBDA * Δdays);
+			return temporalWeight * ageScore; // old = high score
 		}
 
 		// current_state / influence_chain: standard decay (new = high score)
+		const decayScore = Math.exp(-lambda * Δdays);
 		return temporalWeight * decayScore;
 	}
 
 	// ── Phase 5 — Score Fusion ───────────────────────────────────────────────────
 
-	_fuseResults(bm25, sumo, entity, crossDoc, struct, weights) {
+	_fuseResults(bm25, sumo, entity, crossDoc, struct, weights, vector = []) {
 		const scoreMap = new Map(); // _id → { node, score, sources, contributions, edge_verb }
 
 		const add = (results, weight, phase) => {
@@ -463,6 +539,7 @@ export class RetrievalEngine {
 		add(entity,   weights.entity,   'entity_pivot');
 		add(crossDoc, weights.crossDoc, 'cross_doc_edge');
 		add(struct,   weights.struct,   'structural');
+		add(vector,   weights.vector,   'vector');
 
 		return [...scoreMap.values()].sort((a, b) => b.score - a.score);
 	}
@@ -488,9 +565,14 @@ export class RetrievalEngine {
 		const pctlIdx = Math.min(sortedScores.length - 1, Math.max(0, Math.floor(sortedScores.length * principalPctl)));
 		const principalScoreFloor = sortedScores.length ? sortedScores[pctlIdx] : 0;
 
+		// Principal: ≥2 phase contributions + top-quartile score.
+		// Cross-doc diversity (docDiversity >= 2) is a bonus qualifier but not required —
+		// small corpora rarely produce cross-doc hits, yet multi-phase agreement is itself
+		// strong corroboration. Set OHARA_PRINCIPAL_REQUIRE_MULTI_DOC=true to restore strict rule.
+		const requireMultiDoc = process.env.OHARA_PRINCIPAL_REQUIRE_MULTI_DOC === 'true';
 		const principal = fused
 			.filter(e => e.contributions.length >= 2
-				&& (docDiversity(e) >= 2 || e.sources.includes('cross_doc_edge'))
+				&& (!requireMultiDoc || docDiversity(e) >= 2 || e.sources.includes('cross_doc_edge'))
 				&& e.score >= principalScoreFloor)
 			.slice(0, principalLimit);
 
@@ -674,9 +756,11 @@ export class RetrievalEngine {
 
 		const crossDocLimit = options.crossDocLimit || parseInt(process.env.OHARA_CROSS_DOC_LIMIT || '5', 10);
 		const expandDepth = options.expandDepth || parseInt(process.env.OHARA_CROSS_DOC_EXPAND_DEPTH || '1', 10);
-		const [entityResults, crossDocResults] = await Promise.all([
+		const vectorLimit = options.vectorLimit || parseInt(process.env.OHARA_VECTOR_LIMIT || '10', 10);
+		const [entityResults, crossDocResults, vectorResults] = await Promise.all([
 			this._phase3EntityPivot(processedQuery, bm25Results, seenAfterPhase2, limit),
 			this._phase1cCrossDocEdge(processedQuery, bm25Results, seenAfterPhase2, crossDocLimit, expandDepth),
+			this._phase1dVector(processedQuery, vectorLimit),
 		]);
 
 		const topNodeId = bm25Results[0]?.node?._id;
@@ -684,10 +768,11 @@ export class RetrievalEngine {
 			...seenAfterPhase2,
 			...entityResults.map(r => r.node._id),
 			...crossDocResults.map(r => r.node._id),
+			...vectorResults.map(r => r.node._id),
 		]);
 		const structResults = await this._phase4Structural(topNodeId, depth, seenAfterPhase3);
 
-		const fused = this._fuseResults(bm25Results, sumoResults, entityResults, crossDocResults, structResults, weights);
+		const fused = this._fuseResults(bm25Results, sumoResults, entityResults, crossDocResults, structResults, weights, vectorResults);
 
 		// Apply temporal scoring post-fusion (before tier classification so tiers see adjusted scores)
 		const principalSet = new Set(); // populated below after tier classification; first pass uses empty set

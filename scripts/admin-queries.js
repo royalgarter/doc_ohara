@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Admin query scripts for the Doc Ohara Space-Time Graph.
 // Usage: node scripts/admin_queries.js [query-name]
-// Available queries: docs, sections, tags, tag-coverage, missing-tags, repair-stats, all
+// Available queries: docs, sections, tags, tag-coverage, missing-tags, repair-stats, missing-temporal, decay-distribution, all
 import { getArangoDBSimulator } from '../src/db/simulator.js';
 import fs from 'fs';
 import path from 'path';
@@ -72,6 +72,39 @@ const queries = {
       console.log(`    content: ${String(p.content || '').slice(0, 100)}…`);
     });
     console.log(`  Total gaps: ${gaps.length}`);
+  },
+
+  // Show temporal metadata coverage across ingested documents
+  'missing-temporal'() {
+    const { results } = db.executeAQL('FOR d IN documents RETURN d');
+    const missing = results.filter(d => !d.published_date);
+    const present = results.filter(d => d.published_date);
+    console.log('\n=== Temporal Metadata Coverage ===');
+    console.log(`  Total documents:        ${results.length}`);
+    console.log(`  With published_date:    ${present.length}`);
+    console.log(`  Missing published_date: ${missing.length}`);
+    if (missing.length) {
+      console.log('\n  Documents missing temporal metadata:');
+      missing.forEach(d => console.log(`    [${d._key}] ${d.title}`));
+    }
+  },
+
+  // Show decay class distribution across ingested documents
+  'decay-distribution'() {
+    const { results } = db.executeAQL('FOR d IN documents RETURN d');
+    const byCls = {};
+    for (const d of results) {
+      const cls = d.effective_decay_class || d.decay_class || '(unset)';
+      byCls[cls] = (byCls[cls] || []);
+      byCls[cls].push(d.title || d._key);
+    }
+    console.log('\n=== Decay Class Distribution ===');
+    for (const [cls, titles] of Object.entries(byCls)) {
+      console.log(`  ${cls.padEnd(12)} (${titles.length}): ${titles.join(', ')}`);
+    }
+    const withDate = results.filter(d => d.published_date).length;
+    console.log(`\n  published_date populated: ${withDate}/${results.length}`);
+    console.log(`  temporal_confidence avg:  ${(results.reduce((s, d) => s + (d.temporal_confidence || 0), 0) / Math.max(results.length, 1)).toFixed(2)}`);
   },
 
   // Show LLM repair statistics from diagnostics export files

@@ -86,6 +86,17 @@ parser.on('end', () => {
 		const refsPath = new URL('../ontology/sumo_index.json', import.meta.url).pathname;
 		fs.writeFileSync(refsPath, JSON.stringify(indexArr, null, 2));
 		console.log(`Wrote SUMO index to ontology/sumo_index.json (${indexArr.length} entries)`);
+
+		// Build a parent map: child → [parent, parent, …] for ancestor traversal
+		// edges[i] = { _from: child, _to: parent, type: 'is_a' }
+		const parentMap = {};
+		for (const e of edges) {
+			if (!parentMap[e._from]) parentMap[e._from] = [];
+			if (e._to && e._from !== e._to) parentMap[e._from].push(e._to);
+		}
+		const hierarchyPath = new URL('../ontology/sumo_hierarchy.json', import.meta.url).pathname;
+		fs.writeFileSync(hierarchyPath, JSON.stringify(parentMap));
+		console.log(`Wrote SUMO hierarchy to ontology/sumo_hierarchy.json (${Object.keys(parentMap).length} nodes with parents)`);
 	} catch (err) {
 		console.error('Failed to write SUMO index:', err.message);
 	}

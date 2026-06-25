@@ -1821,6 +1821,35 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
 					await Promise.all(edgePromises);
 				});
 
+				// Optional: embed paragraph content with Gemini text-embedding-004 for vector search.
+				// Enabled when OHARA_EMBED_PARAGRAPHS=true. Runs after insertion so it never blocks persist.
+				if (process.env.OHARA_EMBED_PARAGRAPHS === 'true' && ai) {
+					const embedBatch = parseInt(process.env.OHARA_EMBED_BATCH_SIZE || '20', 10);
+					const embeddable = docsParagraphs
+						.filter(p => typeof p.content === 'string' && p.content.length >= 20)
+						.map(p => ({ key: p._key || p.id, text: p.content.slice(0, 8192) }));
+					for (let i = 0; i < embeddable.length; i += embedBatch) {
+						const batch = embeddable.slice(i, i + embedBatch);
+						try {
+							const resp = await ai.models.embedContent({
+								model: 'text-embedding-004',
+								contents: batch.map(b => b.text),
+								config: { taskType: 'RETRIEVAL_DOCUMENT' },
+							});
+							const embeddings = resp.embeddings || [];
+							for (let j = 0; j < batch.length; j++) {
+								const vec = embeddings[j]?.values;
+								if (vec && batch[j].key) {
+									await arangoClient.updateDocument(batch[j].key, { embedding: vec }).catch(() => {});
+								}
+							}
+						} catch (embErr) {
+							addPipelineLog('warn', `Embedding batch ${i}–${i + embedBatch} failed: ${embErr.message}`);
+						}
+					}
+					addPipelineLog('info', `Embeddings generated for ${embeddable.length} paragraph(s) in ${doc.id}`);
+				}
+
 				// Roll up entity_slugs and sumo_tags onto the document record for O(docs) pre-filtering
 				{
 					const entitySlugSet = new Set();

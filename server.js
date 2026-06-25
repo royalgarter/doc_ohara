@@ -102,6 +102,24 @@ async function startServer() {
 		}
 	});
 
+	// API: Patch temporal metadata on a single document (manual override).
+	app.patch('/api/documents/:key', async (req, res) => {
+		const ALLOWED = ['decay_class', 'effective_decay_class', 'published_date', 'temporal_needs_review'];
+		const patch = {};
+		for (const f of ALLOWED) if (req.body[f] !== undefined) patch[f] = req.body[f];
+		if (Object.keys(patch).length === 0) return res.status(400).json({ success: false, error: 'No patchable fields' });
+		try {
+			if (process.env.ARANGO_URL) {
+				const db = await arangoClient.initArangoClient();
+				await db.query('UPDATE @key WITH @patch IN documents', { key: req.params.key, patch });
+				return res.json({ success: true });
+			}
+			res.status(501).json({ success: false, error: 'Patch not supported on simulator' });
+		} catch (err) {
+			res.status(500).json({ success: false, error: err.message });
+		}
+	});
+
 	// API: Structural graph (sections/paragraphs/tables) for a set of selected documents.
 	// Entities, SUMO tags, and edges are intentionally NOT included here — those are
 	// only ever fetched per-node via /api/graph/node/:collection/:key/neighbors, on click.

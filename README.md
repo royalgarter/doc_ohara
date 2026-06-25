@@ -345,9 +345,15 @@ All tunables are set via environment variables. Copy `.env.example` to `.env`:
 | `OHARA_CROSS_DOC_EXPAND_DEPTH` | `1` | Max SIMILAR_TO hops to traverse from seed documents during Phase 1c |
 | `OHARA_PRINCIPAL_SCORE_PCTL` | `0.75` | Score percentile floor (within fused results) for the Principal tier |
 | `OHARA_PRINCIPAL_LIMIT` | `5` | Max entries in the Principal tier |
+| `OHARA_PRINCIPAL_REQUIRE_MULTI_DOC` | `false` | Require cross-document diversity for Principal tier (strict mode; disable for small corpora) |
 | `OHARA_INTEGRITY_WEIGHT_MIN` | `0.6` | Min cross-doc edge weight to count as "verified" in the Integrity tier |
 | `OHARA_INTEGRITY_LLM_VERIFY` | off | Enable optional one-shot Gemini cross-check for Integrity-tier candidates (temperature 0) |
 | `OHARA_EXPLORER_STOP_WEIGHT` | `0.15` | Min edge weight for a candidate to appear in the Explorer frontier (below this, scent too weak) |
+| `OHARA_SUMO_HIERARCHY_DEPTH` | `3` | Max ancestor hops to expand query SUMO tags in Phase 1b; 0 disables hierarchy expansion |
+| `OHARA_EMBED_PARAGRAPHS` | `false` | Generate Gemini `text-embedding-004` vectors during ingest (requires vector index) |
+| `OHARA_EMBED_BATCH_SIZE` | `20` | Paragraph batch size for embedding API calls |
+| `OHARA_VECTOR_WEIGHT` | `0.5` | Score weight for Phase 1d vector similarity results in fusion |
+| `OHARA_VECTOR_LIMIT` | `10` | Max results returned from Phase 1d vector ANN search |
 | `OHARA_TEMPORAL_WEIGHT` | `0.2` | Additive score contribution from temporal decay (0 = disabled) |
 | `OHARA_TEMPORAL_GATE_FLOOR` | `5.0` | BM25 score above which temporal decay is skipped (protects high-relevance documents from recency bias) |
 | `OHARA_DECAY_RATE_EVERGREEN` | `0.000001` | λ decay rate for EVERGREEN documents (laws, classics, math — near-zero decay) |

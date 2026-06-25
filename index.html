@@ -394,6 +394,41 @@
 				<div class="text-sm text-gray-700 border-t border-gray-800 pt-2">
 					Output: <code class="text-gray-600">wiki/*.md</code>
 				</div>
+			<!-- DOCS tab — temporal metadata + decay class override -->
+			<div x-show="tab === 'docs'" x-init="if(tab==='docs') loadDocs()" class="flex flex-col h-full overflow-hidden p-3 gap-3">
+				<div class="text-sm font-bold text-gray-500 uppercase tracking-widest">Documents — Temporal Metadata</div>
+				<div class="flex gap-2">
+					<button @click="loadDocs()" class="text-xs py-1 px-2 rounded bg-gray-800 text-gray-400 hover:text-white transition">↺ Refresh</button>
+				</div>
+				<div class="flex-1 overflow-y-auto space-y-2" x-show="docsAdminList.length > 0">
+					<template x-for="d in docsAdminList" :key="d._key">
+						<div class="rounded border border-gray-800 p-2 space-y-1 bg-gray-900 text-xs">
+							<div class="text-gray-300 font-medium truncate" x-text="d.title || d._key"></div>
+							<div class="text-gray-600 flex gap-4">
+								<span>published: <span class="text-gray-400" x-text="d.published_date || '—'"></span></span>
+								<span>decay: <span class="text-gray-400" x-text="d.decay_class || '—'"></span></span>
+								<span>confidence: <span class="text-gray-400" x-text="d.temporal_confidence != null ? d.temporal_confidence.toFixed(2) : '—'"></span></span>
+							</div>
+							<div class="flex items-center gap-2 mt-1">
+								<span class="text-gray-600">effective_decay_class:</span>
+								<select :id="'decay-'+d._key"
+									class="bg-gray-800 border border-gray-700 text-gray-300 rounded px-1 py-0.5 text-xs"
+									:value="d.effective_decay_class || d.decay_class || 'SCHOLARLY'">
+									<option>EVERGREEN</option>
+									<option>SCHOLARLY</option>
+									<option>CURRENT</option>
+									<option>EPHEMERAL</option>
+								</select>
+								<button @click="patchDecayClass(d._key)"
+									class="text-xs px-2 py-0.5 rounded bg-sky-900 text-sky-300 hover:bg-sky-800 transition">
+									Save
+								</button>
+								<span :id="'decay-status-'+d._key" class="text-green-400 text-xs hidden">✓</span>
+							</div>
+						</div>
+					</template>
+				</div>
+				<div x-show="docsAdminList.length === 0" class="text-gray-700 text-sm">No documents ingested yet.</div>
 			</div>
 
 		</div>
@@ -562,6 +597,7 @@
 				{ id: 'query',  icon: '⌕', label: 'Query'  },
 				{ id: 'jobs',   icon: '⚠', label: 'Jobs'   },
 				{ id: 'wiki',   icon: '◈', label: 'Wiki'   },
+				{ id: 'docs',   icon: '✦', label: 'Docs'   },
 			],
 			legend: [
 				['#38bdf8', 'Document'],
@@ -601,6 +637,8 @@
 
 			wikiExporting: false,
 			wikiMessage: '',
+
+			docsAdminList: [],
 
 			async init() {
 				await Promise.all([this.loadDocuments(), this.loadInputFiles(), this.loadJobs()]);
@@ -888,7 +926,40 @@
 				this.queryLoading = false;
 			},
 
-			async exportWiki() {
+			async loadDocs() {
+			try {
+				const d = await fetch('/api/documents').then(r => r.json());
+				this.docsAdminList = (d.documents || []).map(doc => ({
+					_key: doc._key,
+					title: doc.title,
+					published_date: doc.published_date,
+					decay_class: doc.decay_class,
+					effective_decay_class: doc.effective_decay_class,
+					temporal_confidence: doc.temporal_confidence,
+				}));
+			} catch(e) { console.error('loadDocs failed', e); }
+		},
+
+		async patchDecayClass(key) {
+			const sel = document.getElementById('decay-' + key);
+			if (!sel) return;
+			const val = sel.value;
+			try {
+				const r = await fetch('/api/documents/' + key, {
+					method: 'PATCH',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ effective_decay_class: val }),
+				}).then(r => r.json());
+				const statusEl = document.getElementById('decay-status-' + key);
+				if (statusEl) { statusEl.classList.remove('hidden'); setTimeout(() => statusEl.classList.add('hidden'), 2000); }
+				if (r.success) {
+					const doc = this.docsAdminList.find(d => d._key === key);
+					if (doc) doc.effective_decay_class = val;
+				}
+			} catch(e) { console.error('patchDecayClass failed', e); }
+		},
+
+		async exportWiki() {
 				this.wikiExporting = true;
 				this.wikiMessage = '';
 				try {
