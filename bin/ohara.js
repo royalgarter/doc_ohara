@@ -95,8 +95,12 @@ program
   .option('--json', 'machine-readable output')
   .option('--depth <n>', 'structural traversal depth', '2')
   .option('--limit <n>', 'max results to return', '20')
+  .option('--expand-depth <n>', 'cross-doc SIMILAR_TO hop depth', '1')
+  .option('--cross-doc-limit <n>', 'max cross-doc paragraphs returned')
+  .option('--cross-doc-weight <n>', 'score weight for cross-doc edge results')
   .option('--verbose', 'show per-result source phases and scores')
   .option('--raw', 'show flat scored list instead of reconstructed Markdown')
+  .option('--tiers', 'show Principal / Integrity / Explorer tier breakdown instead of flat results')
   .action(async (text, opts) => {
     let retrievalDB;
     if (useRealDB) {
@@ -123,12 +127,21 @@ program
     const result = await engine.query(text, {
       depth: parseInt(opts.depth, 10),
       limit: parseInt(opts.limit, 10),
+      expandDepth: parseInt(opts.expandDepth, 10),
+      crossDocLimit: opts.crossDocLimit ? parseInt(opts.crossDocLimit, 10) : undefined,
+      crossDocWeight: opts.crossDocWeight ? parseFloat(opts.crossDocWeight) : undefined,
     });
 
-    const markdown = opts.json || opts.raw ? null : await engine.formatAsMarkdown(result.results || []);
+    const markdown = opts.json || opts.raw || opts.tiers ? null : await engine.formatAsMarkdown(result.results || []);
+    const principalMarkdown = opts.tiers && !opts.json
+      ? await engine.formatAsMarkdown((result.tiers?.principal || []).map(e => ({ node: e.node })))
+      : null;
+    const integrityMarkdown = opts.tiers && !opts.json
+      ? await engine.formatAsMarkdown((result.tiers?.integrity || []).map(e => ({ node: e.node })))
+      : null;
 
     emit(opts.json, { success: true, ...result }, async () => {
-      const { results = [], processedQuery } = result;
+      const { results = [], processedQuery, tiers } = result;
 
       // Always print the query summary header
       console.log('');
@@ -147,6 +160,45 @@ program
 
       if (results.length === 0) {
         console.log(chalk.yellow('  (no matches)'));
+        return;
+      }
+
+      if (opts.tiers) {
+        console.log(chalk.bold.cyan('━━ Principal ━━'));
+        if (!tiers?.principal?.length) {
+          console.log(chalk.dim('  (no corroborated-across-sources results)'));
+        } else {
+          if (opts.verbose) {
+            tiers.principal.forEach(({ node, score, sources }) => {
+              console.log(chalk.dim(`  [${chalk.green(score.toFixed(3))} ${(sources||[]).join('+')}] ${node._id}`));
+            });
+          }
+          console.log(principalMarkdown);
+        }
+        console.log('');
+        console.log(chalk.bold.cyan('━━ Integrity ━━'));
+        if (!tiers?.integrity?.length) {
+          console.log(chalk.dim('  (no verified results)'));
+        } else {
+          if (opts.verbose) {
+            tiers.integrity.forEach(({ node, score, provenance }) => {
+              const prov = (provenance || []).map(p => `${p.phase}${p.document_id ? `@${p.document_id}` : ''}`).join(', ');
+              console.log(chalk.dim(`  [${chalk.green((score||0).toFixed(3))}] ${node._id} — provenance: ${prov}`));
+            });
+          }
+          console.log(integrityMarkdown);
+        }
+        console.log('');
+        console.log(chalk.bold.cyan('━━ Explorer ━━'));
+        const frontier = tiers?.explorer?.frontier || [];
+        if (!frontier.length) {
+          console.log(chalk.dim(`  (no frontier candidates — ${tiers?.explorer?.stopped_reason || 'unknown'})`));
+        } else {
+          frontier.forEach((f, i) => {
+            console.log(`  ${chalk.dim(`${i + 1}.`)} ${chalk.green((f.score||0).toFixed(3))}  ${f.edge_verb || 'related to'} — ${f.edge_summary || f.document_id}`);
+          });
+          console.log(chalk.dim(`  stopped: ${tiers?.explorer?.stopped_reason}`));
+        }
         return;
       }
 

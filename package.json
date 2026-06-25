@@ -14,6 +14,7 @@
     "ohara": "node bin/ohara.js",
     "ohara:ingest": "node bin/ohara.js ingest \"sample/Mastering Bitcoin 2nd.pdf\"",
     "ohara:query": "node bin/ohara.js query \"bitcoin theoretical\"",
+    "ohara:query:expand": "node bin/ohara.js query \"bitcoin theoretical\" --expand-depth 2 --cross-doc-limit 10 --cross-doc-weight 0.5",
     "ohara:ls": "node bin/ohara.js ls",
     "ohara:status": "node bin/ohara.js status",
     "ohara:export": "node bin/ohara.js export --format quartz",

@@ -193,7 +193,7 @@ flowchart TD
     P1 --> P1C & P2
     P1B --> P1C & P2
 
-    P1C["Phase 1c · Cross-Doc Edge Expansion\nfollow SIMILAR_TO from seed documents\nfilter: edge.weight > 0.3 OR tag overlap\nresult carries edge_verb + edge_summary"]
+    P1C["Phase 1c · Cross-Doc Edge Expansion\nmulti-hop SIMILAR_TO (1..expandDepth)\nfilter: edge.weight > 0.3 OR tag overlap\nresult carries edge_verb + edge_summary + hops"]
 
     P2["Phase 2 · Entity Pivot\nslugSet = query entity_hints ∪ top-5 BM25 entity_slugs\nfind paragraphs sharing those entities across all docs\nweight: OHARA_ENTITY_PIVOT_WEIGHT (0.6)"]
 
@@ -220,7 +220,7 @@ ArangoSearch BM25 full-text search over `content`, `title`, and `markdown_repres
 Finds paragraphs whose `sumo_tags` overlap with the query's SUMO hints or the top BM25 results' tags. For phrase and paragraph queries (≥ 4 tokens), SUMO hints and entity types are extracted from the raw query via Gemini (`prompts/extract_query_fingerprint.md`) before this phase runs. Score = `tag_overlap / query_tag_count + 0.2 × entity_type_overlap / query_entity_type_count`.
 
 ### Phase 1c — Cross-Document Edge Expansion
-Follows `SIMILAR_TO` edges from the seed documents (top 5 BM25 hits) to retrieve related paragraphs from other documents. Edges are filtered by `weight > 0.3` or overlapping `edge.tags`. Each result carries `edge_verb` and `edge_summary` from the ingest-time LLM enrichment, indicating *why* the document was pulled in (e.g. `"extends the argument of"`). Runs in parallel with Phase 3. Controlled by `OHARA_CROSS_DOC_WEIGHT` (default 0.4) and `OHARA_CROSS_DOC_LIMIT` (default 5).
+Follows `SIMILAR_TO` edges from the seed documents (top 5 BM25 hits) to retrieve related paragraphs from other documents, up to `expandDepth` hops (graph traversal, `1..expandDepth ANY` over `SIMILAR_TO` edges). Edges are filtered by `weight > 0.3` or overlapping `edge.tags`. Each result carries `edge_verb`/`edge_summary` from the closest hop's ingest-time LLM enrichment, plus `hops` indicating how many SIMILAR_TO edges were traversed to reach it. Runs in parallel with Phase 3. Controlled by `OHARA_CROSS_DOC_WEIGHT` (default 0.4), `OHARA_CROSS_DOC_LIMIT` (default 5), and `OHARA_CROSS_DOC_EXPAND_DEPTH` (default 1). All three can be overridden per call via `query(text, { crossDocWeight, crossDocLimit, expandDepth })`.
 
 ### Phase 2 (formerly 1b) — Entity Pivot
 From the top seed paragraphs' `entity_slugs`, finds other paragraphs across all documents that share those entities. Scores with a damped weight (`OHARA_ENTITY_PIVOT_WEIGHT`, default 0.6). Runs in parallel with Phase 1c. Entity hints now carry `{ slug, type }` objects; paragraph nodes store a parallel `entity_types` array at ingest time to enable type-affinity scoring in Phase 1b without extra AQL joins.
@@ -231,7 +231,17 @@ AQL graph traversal outbound from the top-scored node via `HAS_CHILD`, `NEXT_SIB
 ### Phase 4 — Score Fusion
 All phase results are merged by node `_id`. Scores are weighted and summed; results sorted descending. Cross-doc results propagate `edge_verb`/`edge_summary` to the fused entry.
 
-Returns `{ processedQuery, results, shallowResults, entityPivotResults, crossDocResults, deepResults }`.
+Returns `{ processedQuery, results, tiers, shallowResults, entityPivotResults, crossDocResults, deepResults }`.
+
+### Tier Classification — Principal / Integrity / Explorer
+
+Inspired by how people actually research: [Bates' Berrypicking model](https://en.wikipedia.org/wiki/Berrypicking) (info-seeking is incremental, bit-by-bit), [Pirolli's Information Foraging Theory](https://en.wikipedia.org/wiki/Information_foraging) (follow "scent" signals, stop when scent weakens), and journalistic cross-referencing (a claim counts as verified only once corroborated by ≥2 independent sources). `query()`'s `tiers` field classifies the fused result set into three groups, computed by `_classifyTiers` (post-processing, no extra DB pipeline):
+
+- **`tiers.principal`** — compact, corroborated-by-many-angles core answer. A node qualifies if it's hit by ≥2 phases (`contributions.length >= 2`) AND either spans ≥2 distinct documents or was reached via a cross-doc edge, AND its score clears a percentile floor (`OHARA_PRINCIPAL_SCORE_PCTL`, default top quartile). Capped at `OHARA_PRINCIPAL_LIMIT` (default 5).
+- **`tiers.integrity`** — Principal plus "verified" entries: structural-traversal neighbors of Principal nodes, and cross-doc edges with `weight >= OHARA_INTEGRITY_WEIGHT_MIN` (default 0.6). Each entry carries a `provenance` array (phase, document, edge verb/hops) showing what corroborated it. An optional one-shot Gemini cross-check (`OHARA_INTEGRITY_LLM_VERIFY`, off by default) can further validate multi-document candidates — always called with `temperature: 0` and a single-turn prompt (no chat history), matching the existing `prompts/enrich_cross_doc_edge.md` call pattern.
+- **`tiers.explorer`** — a `frontier` of further candidates one hop beyond Integrity (reuses `_phase1cCrossDocEdge` with `expandDepth + 1`), restricted to the band between `OHARA_EXPLORER_STOP_WEIGHT` (default 0.15) and `OHARA_INTEGRITY_WEIGHT_MIN` — the "weakening scent" zone. Returns metadata only (`document_id`, `edge_verb`, `edge_summary`, `score`), not full content — meant as candidate directions for a caller/UI to offer, not a final answer. No interactive multi-turn loop is wired up yet; `stopped_reason` explains why expansion stopped.
+
+CLI: `node bin/ohara.js query "<text>" --tiers [--verbose]`.
 
 ---
 
@@ -323,6 +333,12 @@ All tunables are set via environment variables. Copy `.env.example` to `.env`:
 | `OHARA_ENTITY_PIVOT_WEIGHT` | `0.6` | Score multiplier for entity-pivot results |
 | `OHARA_CROSS_DOC_WEIGHT` | `0.4` | Score multiplier for cross-document edge expansion results |
 | `OHARA_CROSS_DOC_LIMIT` | `5` | Max paragraphs returned per cross-document edge expansion |
+| `OHARA_CROSS_DOC_EXPAND_DEPTH` | `1` | Max SIMILAR_TO hops to traverse from seed documents during Phase 1c |
+| `OHARA_PRINCIPAL_SCORE_PCTL` | `0.75` | Score percentile floor (within fused results) for the Principal tier |
+| `OHARA_PRINCIPAL_LIMIT` | `5` | Max entries in the Principal tier |
+| `OHARA_INTEGRITY_WEIGHT_MIN` | `0.6` | Min cross-doc edge weight to count as "verified" in the Integrity tier |
+| `OHARA_INTEGRITY_LLM_VERIFY` | off | Enable optional one-shot Gemini cross-check for Integrity-tier candidates (temperature 0) |
+| `OHARA_EXPLORER_STOP_WEIGHT` | `0.15` | Min edge weight for a candidate to appear in the Explorer frontier (below this, scent too weak) |
 
 ---
 

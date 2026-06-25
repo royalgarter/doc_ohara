@@ -11,10 +11,14 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { GoogleGenAI } from '@google/genai';
 import { validateTags } from './sumo.js';
+import { cacheKeyFor, readCacheSync, writeCache } from './cache.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const FINGERPRINT_PROMPT = fs.readFileSync(
   path.resolve(__dirname, '../prompts/extract_query_fingerprint.md'), 'utf8'
+);
+const INTEGRITY_VERIFY_PROMPT = fs.readFileSync(
+  path.resolve(__dirname, '../prompts/verify_integrity_claim.md'), 'utf8'
 );
 
 const STOPWORDS = new Set([
@@ -93,6 +97,37 @@ export class RetrievalEngine {
       return { entityHints, sumoHints: resolvedSumoTags };
     } catch (_) {
       return { entityHints: [], sumoHints: [] };
+    }
+  }
+
+  // One-shot, temperature-0 Gemini cross-check for an Integrity-tier candidate.
+  // Single system+user turn, no chat history — matches enrich_cross_doc_edge.md call shape.
+  async _verifyIntegrityClaim(claimContent, corroboratingSnippets) {
+    const ai = this._getAI();
+    if (!ai || !claimContent || corroboratingSnippets.length === 0) return { verified: true, reason: 'skipped' };
+
+    const inputPayload = JSON.stringify({
+      claim: claimContent.slice(0, 1000),
+      corroborating_snippets: corroboratingSnippets.slice(0, 3).map(s => s.slice(0, 500)),
+    });
+    const prompt = `${INTEGRITY_VERIFY_PROMPT}\n\nINPUT:\n${inputPayload}`;
+    const key = cacheKeyFor([INTEGRITY_VERIFY_PROMPT, inputPayload, GEMINI_MODEL]);
+    const cached = readCacheSync(key);
+    if (cached) return cached;
+
+    try {
+      const resp = await ai.models.generateContent({
+        model: GEMINI_MODEL,
+        contents: prompt,
+        config: { serviceTier: 'flex', temperature: 0 },
+      });
+      const raw = (resp.text || '').replace(/^```json\s*/i, '').replace(/```\s*$/, '').trim();
+      const parsed = JSON.parse(raw);
+      const result = { verified: !!parsed.verified, reason: String(parsed.reason || '').slice(0, 200) };
+      writeCache(key, result);
+      return result;
+    } catch (_) {
+      return { verified: true, reason: 'verify_call_failed' };
     }
   }
 
@@ -240,7 +275,7 @@ export class RetrievalEngine {
   // Follows SIMILAR_TO edges from seed documents to find related paragraphs in
   // other documents. Uses edge.verb/tags for semantic filtering when available.
 
-  async _phase1cCrossDocEdge(processedQuery, bm25Results, seenIds, limit) {
+  async _phase1cCrossDocEdge(processedQuery, bm25Results, seenIds, limit, expandDepth = 1) {
     const seedDocIds = [...new Set(
       bm25Results.slice(0, 5)
         .map(r => r.node?.document_id)
@@ -268,14 +303,14 @@ export class RetrievalEngine {
         LET entity_slugs = @entity_slugs
         LET query_tags   = @query_tags
         FOR doc_id IN seed_doc_ids
-          FOR edge IN edges
-            FILTER (edge._from == doc_id OR edge._to == doc_id)
-              AND edge.relation == "SIMILAR_TO"
+          FOR other_doc, edge, hop_path IN 1..@expand_depth ANY doc_id edges
+            FILTER edge.relation == "SIMILAR_TO"
               AND (
                 edge.weight > 0.3
                 OR LENGTH(INTERSECTION(edge.tags, query_tags)) > 0
               )
-            LET other_doc_id = (edge._from == doc_id ? edge._to : edge._from)
+            LET other_doc_id = other_doc._id
+            LET last_edge = hop_path.edges[LENGTH(hop_path.edges) - 1]
             FOR p IN paragraphs
               FILTER p.document_id == other_doc_id
                 OR CONCAT("documents/", p.document_id) == other_doc_id
@@ -285,12 +320,13 @@ export class RetrievalEngine {
               LIMIT @limit
               RETURN {
                 node: p,
-                score: edge.weight,
+                score: last_edge.weight,
                 source: "cross_doc_edge",
-                edge_verb: edge.verb,
-                edge_summary: edge.summary
+                edge_verb: last_edge.verb,
+                edge_summary: last_edge.summary,
+                hops: LENGTH(hop_path.edges)
               }
-      `, { seed_doc_ids: seedDocIds, entity_slugs: entitySlugs, query_tags: queryTags, seen_ids: [...seenIds], limit });
+      `, { seed_doc_ids: seedDocIds, entity_slugs: entitySlugs, query_tags: queryTags, seen_ids: [...seenIds], limit, expand_depth: expandDepth });
       return rows;
     } catch (_) {
       return [];
@@ -317,20 +353,29 @@ export class RetrievalEngine {
   // ── Phase 5 — Score Fusion ───────────────────────────────────────────────────
 
   _fuseResults(bm25, sumo, entity, crossDoc, struct, weights) {
-    const scoreMap = new Map(); // _id → { node, score, sources, edge_verb }
+    const scoreMap = new Map(); // _id → { node, score, sources, contributions, edge_verb }
 
     const add = (results, weight, phase) => {
       for (const r of results) {
         const id = r.node?._id;
         if (!id) continue;
+        const contribution = {
+          phase,
+          score: weight * r.score,
+          document_id: r.node.document_id,
+          edge_verb: r.edge_verb,
+          hops: r.hops,
+        };
         const cur = scoreMap.get(id);
         if (cur) {
           cur.score += weight * r.score;
           cur.sources.push(phase);
+          cur.contributions.push(contribution);
         } else {
-          const entry = { node: r.node, score: weight * r.score, sources: [phase] };
+          const entry = { node: r.node, score: weight * r.score, sources: [phase], contributions: [contribution] };
           if (r.edge_verb) entry.edge_verb = r.edge_verb;
           if (r.edge_summary) entry.edge_summary = r.edge_summary;
+          if (r.hops) entry.hops = r.hops;
           scoreMap.set(id, entry);
         }
       }
@@ -343,6 +388,103 @@ export class RetrievalEngine {
     add(struct,   weights.struct,   'structural');
 
     return [...scoreMap.values()].sort((a, b) => b.score - a.score);
+  }
+
+  // ── Tier Classification — Principal / Integrity / Explorer ──────────────────
+  // Principal: compact, corroborated-by-many-angles core answer.
+  // Integrity: Principal + structurally/cross-doc verified entries, with provenance.
+  // Explorer: frontier one hop beyond Integrity, cut off once edge "scent" weakens.
+
+  async _classifyTiers(fused, processedQuery, crossDocResults, depth, seenIds, options) {
+    const principalPctl = options.principalScorePctl
+      ?? parseFloat(process.env.OHARA_PRINCIPAL_SCORE_PCTL || '0.75');
+    const integrityWeightMin = options.integrityWeightMin
+      ?? parseFloat(process.env.OHARA_INTEGRITY_WEIGHT_MIN || '0.6');
+    const explorerStopWeight = options.explorerStopWeight
+      ?? parseFloat(process.env.OHARA_EXPLORER_STOP_WEIGHT || '0.15');
+    const principalLimit = options.principalLimit
+      ?? parseInt(process.env.OHARA_PRINCIPAL_LIMIT || '5', 10);
+
+    const docDiversity = (entry) => new Set(entry.contributions.map(c => c.document_id).filter(Boolean)).size;
+
+    const sortedScores = [...fused].map(e => e.score).sort((a, b) => a - b);
+    const pctlIdx = Math.min(sortedScores.length - 1, Math.max(0, Math.floor(sortedScores.length * principalPctl)));
+    const principalScoreFloor = sortedScores.length ? sortedScores[pctlIdx] : 0;
+
+    const principal = fused
+      .filter(e => e.contributions.length >= 2
+        && (docDiversity(e) >= 2 || e.sources.includes('cross_doc_edge'))
+        && e.score >= principalScoreFloor)
+      .slice(0, principalLimit);
+
+    const principalIds = new Set(principal.map(e => e.node._id));
+
+    const integrityExtra = [];
+    for (const entry of principal) {
+      const structHits = await this._phase4Structural(entry.node._id, depth, seenIds);
+      for (const h of structHits) {
+        if (!h.node?._id || principalIds.has(h.node._id)) continue;
+        integrityExtra.push({ node: h.node, score: h.score, sources: ['structural_verify'], contributions: [{ phase: 'structural_verify', score: h.score, document_id: h.node.document_id }] });
+      }
+    }
+    for (const r of crossDocResults) {
+      if (!r.node?._id || principalIds.has(r.node._id)) continue;
+      if ((r.score || 0) >= integrityWeightMin) {
+        integrityExtra.push({ node: r.node, score: r.score, sources: ['cross_doc_edge'], contributions: [{ phase: 'cross_doc_edge', score: r.score, document_id: r.node.document_id, edge_verb: r.edge_verb, hops: r.hops }], edge_verb: r.edge_verb, edge_summary: r.edge_summary });
+      }
+    }
+
+    let integrity = [
+      ...principal.map(e => ({ ...e, provenance: e.contributions })),
+      ...integrityExtra.map(e => ({ ...e, provenance: e.contributions })),
+    ];
+
+    const llmVerifyEnabled = options.integrityLlmVerify ?? (process.env.OHARA_INTEGRITY_LLM_VERIFY === 'true');
+    if (llmVerifyEnabled) {
+      const verified = [];
+      for (const entry of integrity) {
+        const docDiv = new Set(entry.provenance.map(c => c.document_id).filter(Boolean)).size;
+        if (docDiv < 2) { verified.push(entry); continue; }
+        const claimContent = entry.node.content || entry.node.markdown_representation || '';
+        const corroborating = integrity
+          .filter(o => o !== entry && o.node.document_id !== entry.node.document_id)
+          .map(o => o.node.content || o.node.markdown_representation || '')
+          .filter(Boolean);
+        const verdict = await this._verifyIntegrityClaim(claimContent, corroborating);
+        verified.push({ ...entry, llm_verified: verdict.verified, llm_verify_reason: verdict.reason });
+      }
+      // failed verification drops the node back to Principal-only (not discarded)
+      integrity = verified.filter(e => e.llm_verified !== false || principalIds.has(e.node._id));
+    }
+
+    const integrityIds = new Set(integrity.map(e => e.node._id));
+
+    let frontier = [];
+    let stoppedReason = 'no_principal_seeds';
+    if (principal.length > 0) {
+      const principalSeeds = principal.map(e => ({ node: { document_id: e.node.document_id } }));
+      const crossDocLimit = options.crossDocLimit
+        ?? parseInt(process.env.OHARA_CROSS_DOC_LIMIT || '5', 10);
+      const expandDepth = (options.expandDepth ?? parseInt(process.env.OHARA_CROSS_DOC_EXPAND_DEPTH || '1', 10)) + 1;
+      const frontierSeen = new Set([...seenIds, ...integrityIds]);
+      const frontierResults = await this._phase1cCrossDocEdge(processedQuery, principalSeeds, frontierSeen, crossDocLimit, expandDepth);
+      frontier = frontierResults
+        .filter(r => (r.score || 0) >= explorerStopWeight && (r.score || 0) < integrityWeightMin)
+        .map(r => ({
+          document_id: r.node.document_id,
+          edge_verb: r.edge_verb,
+          edge_summary: r.edge_summary,
+          score: r.score,
+          hops: r.hops,
+        }));
+      stoppedReason = frontier.length ? 'weight_below_threshold' : 'no_candidates_in_band';
+    }
+
+    return {
+      principal: principal.map(e => ({ node: e.node, score: e.score, sources: e.sources })),
+      integrity,
+      explorer: { frontier, stopped_reason: stoppedReason },
+    };
   }
 
   // ── Markdown Reconstruction ──────────────────────────────────────────────────
@@ -438,7 +580,10 @@ export class RetrievalEngine {
   async query(rawInput, options = {}) {
     const limit = options.limit || parseInt(process.env.OHARA_RESULT_LIMIT || '20', 10);
     const depth = options.depth || 2;
-    const weights = w();
+    const weights = {
+      ...w(),
+      ...(options.crossDocWeight != null ? { crossDoc: options.crossDocWeight } : {}),
+    };
 
     const processedQuery = await this.preprocessInput(rawInput);
 
@@ -450,10 +595,11 @@ export class RetrievalEngine {
       ...sumoResults.map(r => r.node._id),
     ]);
 
-    const crossDocLimit = parseInt(process.env.OHARA_CROSS_DOC_LIMIT || '5', 10);
+    const crossDocLimit = options.crossDocLimit || parseInt(process.env.OHARA_CROSS_DOC_LIMIT || '5', 10);
+    const expandDepth = options.expandDepth || parseInt(process.env.OHARA_CROSS_DOC_EXPAND_DEPTH || '1', 10);
     const [entityResults, crossDocResults] = await Promise.all([
       this._phase3EntityPivot(processedQuery, bm25Results, seenAfterPhase2, limit),
-      this._phase1cCrossDocEdge(processedQuery, bm25Results, seenAfterPhase2, crossDocLimit),
+      this._phase1cCrossDocEdge(processedQuery, bm25Results, seenAfterPhase2, crossDocLimit, expandDepth),
     ]);
 
     const topNodeId = bm25Results[0]?.node?._id;
@@ -467,9 +613,12 @@ export class RetrievalEngine {
     const fused = this._fuseResults(bm25Results, sumoResults, entityResults, crossDocResults, structResults, weights);
     const topK = fused.slice(0, limit);
 
+    const tiers = await this._classifyTiers(fused, processedQuery, crossDocResults, depth, seenAfterPhase3, options);
+
     return {
       processedQuery,
       results: topK,
+      tiers,
       // legacy fields for backwards compat with existing server routes
       shallowResults: bm25Results,
       entityPivotResults: entityResults,
