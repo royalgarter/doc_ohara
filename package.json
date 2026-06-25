@@ -7,6 +7,7 @@
     "ohara": "./bin/ohara.js"
   },
   "scripts": {
+    "help": "node scripts/help.js",
     "dev": "nodemon server.js",
     "build": "echo 'No build step required'",
     "start": "node server.js",
