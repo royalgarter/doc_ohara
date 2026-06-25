@@ -2,7 +2,8 @@
 <html lang="en" class="h-full">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"/>
+
   <title>Doc Ohara</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
@@ -62,7 +63,8 @@
     </nav>
 
     <!-- Left panel -->
-    <div class="w-64 flex flex-col bg-gray-900/40 border-r border-gray-800 shrink-0 overflow-hidden">
+    <div class="flex flex-col bg-gray-900/40 border-r border-gray-800 shrink-0 overflow-hidden" 
+        :class="docsOpen ? 'w-64' : 'w-32'">
 
       <!-- GRAPH tab -->
       <div x-show="tab === 'graph'" class="flex flex-col h-full overflow-hidden p-3 gap-3">
@@ -70,7 +72,7 @@
         <button @click="docsOpen = !docsOpen"
           class="flex items-center justify-between text-sm font-bold text-gray-500 uppercase tracking-widest hover:text-gray-300 transition select-none">
           <span>Documents</span>
-          <span x-text="docsOpen ? '▾' : '▸'" class="text-gray-600"></span>
+          <span x-text="docsOpen ? '◄' : '►'" class="text-gray-600"></span>
         </button>
         <!-- Select-all toggle -->
         <div x-show="docsOpen && graphData.documents.length > 0" class="flex items-center gap-2 -mt-1 mb-0.5">
@@ -80,7 +82,7 @@
           <span class="text-xs text-gray-700" x-show="selectedDocKeys.size > 0"
             x-text="selectedDocKeys.size + '/' + graphData.documents.length + ' selected'"></span>
         </div>
-        <div x-show="docsOpen" class="flex flex-col gap-1.5 overflow-y-auto scrollbar-thin" style="max-height:40vh">
+        <div class="flex flex-col gap-1.5 overflow-y-auto scrollbar-thin" style="max-height:40vh">
           <template x-for="doc in graphData.documents" :key="doc._key || doc.id">
             <div @click="toggleDocSelection(doc)"
               :class="selectedDocKeys.has(doc._key || doc.id)
@@ -111,7 +113,7 @@
         <!-- Legend -->
         <div class="border-t border-gray-800 pt-2.5 grid grid-cols-2 gap-x-3 gap-y-1.5 mt-auto">
           <template x-for="item in legend" :key="item[1]">
-            <div class="flex items-center gap-1.5 text-sm text-gray-500">
+            <div class="flex items-center gap-1.5 text-xs text-gray-500">
               <div class="w-2.5 h-2.5 rounded-full shrink-0" :style="'background:' + item[0]"></div>
               <span x-text="item[1]"></span>
             </div>
@@ -388,7 +390,7 @@
       <!-- Node inspector strip -->
       <div x-show="selectedNode"
         class="shrink-0 border-t border-gray-800 bg-gray-900/90 p-3 flex gap-4 items-start"
-        style="max-height: 400px;">
+        style="max-height: 600px;">
 
         <div class="flex-1 min-w-0 flex flex-col gap-1.5 overflow-hidden">
           <!-- Type + key row -->
@@ -439,7 +441,7 @@
                 </div>
                 <!-- Paragraph content -->
                 <div x-show="child.kind === 'paragraph'"
-                  class="text-base text-gray-400 leading-relaxed"
+                  class="text-sm text-gray-400 leading-relaxed"
                   style="white-space: pre-wrap; word-break: break-word;"
                   x-text="child.node.content || (expandedNodes.has(child.node._id) ? '[empty]' : '…')"></div>
                 <!-- Table: render as simple grid summary -->
@@ -451,7 +453,7 @@
           </div>
           <!-- Content (paragraph / figure text — non-section nodes) -->
           <div class="text-base text-gray-400 overflow-y-auto scrollbar-thin leading-relaxed flex-1"
-            style="max-height: 300px; white-space: pre-wrap; word-break: break-word;"
+            style="max-height: 500px; white-space: pre-wrap; word-break: break-word;"
             x-show="selectedNode && !selectedNode._id?.startsWith('tags/') && !selectedNode._id?.startsWith('sections/') && selectedNode.content"
             x-text="selectedNode && (selectedNode.content || '')"></div>
           <!-- Empty content notification for paragraphs that loaded but have no text -->
@@ -549,8 +551,28 @@
         });
       },
 
-      zoomIn()  { this.graphZoom = Math.min(this.graphZoom + 0.2, 4.0); this.renderCurrentGraph(); },
-      zoomOut() { this.graphZoom = Math.max(this.graphZoom - 0.2, 0.2); this.renderCurrentGraph(); },
+      _zoomTimer: null,
+      zoomIn()  { this.graphZoom = Math.min(this.graphZoom + 0.2, 4.0); this.scheduleZoom(); },
+      zoomOut() { this.graphZoom = Math.max(this.graphZoom - 0.2, 0.2); this.scheduleZoom(); },
+
+      scheduleZoom() {
+        if (this._zoomTimer) cancelAnimationFrame(this._zoomTimer);
+        this._zoomTimer = requestAnimationFrame(() => {
+          this._zoomTimer = null;
+          this.applyZoom();
+        });
+      },
+
+      applyZoom() {
+        const svg = document.getElementById('graph-svg');
+        if (!svg) return;
+        const vb = svg.getAttribute('viewBox');
+        if (!vb) return;
+        const parts = vb.trim().split(/\s+/);
+        if (parts.length < 4) return;
+        svg.style.width  = Math.round(parseFloat(parts[2]) * this.graphZoom) + 'px';
+        svg.style.height = Math.round(parseFloat(parts[3]) * this.graphZoom) + 'px';
+      },
 
       async loadGraph() {
         this.graphLoading = true;
@@ -1013,8 +1035,9 @@
     const svgH = Math.max(PAD_Y + tallest * ROW_H + 30, 300);
 
     svg.setAttribute('viewBox', '0 0 ' + svgW + ' ' + svgH);
-    svg.setAttribute('width',  Math.round(svgW * zoom));
-    svg.setAttribute('height', Math.round(svgH * zoom));
+    svg.style.width  = Math.round(svgW) + 'px';
+    svg.style.height = Math.round(svgH) + 'px';
+
 
     // ── Defs ──────────────────────────────────────────────────────────────
     const defs = svgEl('defs');
