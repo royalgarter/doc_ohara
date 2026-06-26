@@ -1633,6 +1633,7 @@
 			});
 			const finMesh = new THREE.InstancedMesh(finBaseGeo, finMat, clsEntries.length);
 			finMesh.frustumCulled = false;
+			const finCol3 = new THREE.Color();
 			clsEntries.forEach((e, i) => {
 				// Radial angle from disc center → rotate fin to face radially outward
 				const dk = e.node.document_id || (e.colKey === 'document' ? (e.node._key || e.node.id) : null);
@@ -1646,8 +1647,13 @@
 				finDummy.scale.set(e.r * 2.5, cfg.zH, 1);
 				finDummy.updateMatrix();
 				finMesh.setMatrixAt(i, finDummy.matrix);
+				// Per-instance color: use doc color when in 'doc' mode, else decay class color
+				const nodeHex = colorMode === 'doc' && dk && docColorMap.get(dk);
+				finCol3.set(nodeHex || cfg.hex);
+				finMesh.setColorAt(i, finCol3);
 			});
 			finMesh.instanceMatrix.needsUpdate = true;
+			if (finMesh.instanceColor) finMesh.instanceColor.needsUpdate = true;
 			scene.add(finMesh);
 			G3D.auraPoints[cls] = { mat: finMat, baseOp: cfg.op };
 		}
