@@ -720,7 +720,7 @@
 					}
 				} catch(e) { console.error('loadDocGraph:', e); }
 				this.graphLoading = false;
-				this.$nextTick(() => this.renderCurrentGraph());
+				this.$nextTick(() => this.renderCurrentGraph(true));
 			},
 
 			// Reload button: refresh the doc list, then refresh the current selection if any.
@@ -795,7 +795,7 @@
 				return children;
 			},
 
-			renderCurrentGraph() {
+			renderCurrentGraph(autoFit = false) {
 				const self = this;
 				const selectedKey = self.selectedNode && (self.selectedNode._key || self.selectedNode.id);
 				renderGraph(this.graphData, this.colorMode, selectedKey, this.graphZoom,
@@ -805,6 +805,7 @@
 						self.expandNode(node);
 						self.$nextTick(() => self.renderCurrentGraph());
 					});
+				if (autoFit) requestAnimationFrame(() => requestAnimationFrame(_g3dFitScene));
 			},
 
 			toggleDocSelection(doc) {
@@ -1143,7 +1144,7 @@
 		const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
 		renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 		renderer.setSize(w, h);
-		renderer.setClearColor(0x030712, 1);
+		renderer.setClearColor(0x4b5563, 1);
 
 		const scene = new THREE.Scene();
 		const camera = new THREE.PerspectiveCamera(55, w / h, 1, 20000);
@@ -1180,7 +1181,7 @@
 		// Tooltip
 		const tip = document.createElement('div');
 		tip.id = 'g3d-tooltip';
-		tip.style.cssText = 'position:absolute;background:rgba(2,6,23,.92);color:#94a3b8;font:10px ui-monospace,monospace;padding:3px 8px;border-radius:4px;pointer-events:none;white-space:nowrap;display:none;z-index:20;border:1px solid #1e293b;max-width:300px;overflow:hidden;text-overflow:ellipsis;';
+		tip.style.cssText = 'position:absolute;background:rgba(30,41,59,0.95);color:#e2e8f0;font:10px ui-monospace,monospace;padding:3px 8px;border-radius:4px;pointer-events:none;white-space:nowrap;display:none;z-index:20;border:1px solid #64748b;max-width:300px;overflow:hidden;text-overflow:ellipsis;box-shadow:0 2px 8px rgba(0,0,0,0.4);';
 		container.appendChild(tip);
 
 		Object.assign(G3D, { renderer, scene, camera, controls, tooltipEl: tip, initialized: true });
@@ -1197,6 +1198,27 @@
 		if (!G3D.camera || !G3D.controls) return;
 		G3D.camera.position.set(300, 200, G3D.ZOOM_BASE);
 		G3D.controls.target.set(300, 0, 700);
+		G3D.controls.update();
+	}
+
+	function _g3dFitScene() {
+		if (!G3D.nodeMesh || !G3D.camera || !G3D.controls) return;
+		const box = new THREE.Box3().setFromObject(G3D.nodeMesh);
+		if (box.isEmpty()) return;
+		const center = new THREE.Vector3();
+		const size   = new THREE.Vector3();
+		box.getCenter(center);
+		box.getSize(size);
+		const maxDim = Math.max(size.x, size.y, size.z, 1);
+		const fov = G3D.camera.fov * (Math.PI / 180);
+		const camDist = (maxDim / 2) / Math.tan(fov / 2) * 1.6;
+		G3D.controls.target.copy(center);
+		G3D.camera.position.set(
+			center.x + camDist * 0.25,
+			center.y + camDist * 0.35,
+			center.z + camDist
+		);
+		G3D.camera.lookAt(center);
 		G3D.controls.update();
 	}
 
@@ -1441,7 +1463,7 @@
 			const el = document.createElement('div');
 			el.dataset.lk = e.key;
 			const hex = _nodeColorHex(e.node, e.colKey, colorMode);
-			el.style.cssText = `position:absolute;font:8px ui-monospace,monospace;color:${hex};pointer-events:none;white-space:nowrap;transform:translateY(-50%);opacity:0.8;text-shadow:0 0 4px #000;`;
+			el.style.cssText = `position:absolute;font:8px ui-monospace,monospace;color:${hex};pointer-events:none;white-space:nowrap;transform:translateY(-50%);opacity:1;font-weight:bold;text-shadow:0 1px 3px rgba(0,0,0,0.8),0 0 6px rgba(0,0,0,0.6);`;
 			const raw = e.colKey === 'tag' ? '#' + e.node.title : (e.node.title || e.node.source_file || e.key);
 			el.textContent = raw.length > 36 ? raw.slice(0, 35) + '…' : raw;
 			if (labelContainer) labelContainer.appendChild(el);
