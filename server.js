@@ -1,8 +1,8 @@
 import 'dotenv/config';
 import { loadEnvFromDB } from './src/db/env.js';
 import express from 'express';
-import path from 'path';
-import fs from 'fs';
+import path from 'node:path';
+import fs from 'node:fs';
 import * as arangoClient from './src/db/client.js';
 import { getArangoDBSimulator } from './src/db/simulator.js';
 import { QuartzExporter } from './src/exporter.js';

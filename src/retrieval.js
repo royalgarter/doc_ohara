@@ -6,9 +6,9 @@
 // Phase 4: structural graph traversal
 // Phase 5: score fusion & dedup
 
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { GoogleGenAI } from '@google/genai';
 import { validateTags, sumoAncestors } from './sumo.js';
 import { cacheKeyFor, readCacheSync, writeCache } from './cache.js';

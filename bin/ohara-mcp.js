@@ -4,8 +4,8 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { z } from 'zod';
-import fs from 'fs';
-import path from 'path';
+import fs from 'node:fs';
+import path from 'node:path';
 import { getArangoDBSimulator } from '../src/db/simulator.js';
 import { RetrievalEngine } from '../src/retrieval.js';
 import { getIngestionQueue } from '../src/ingest/queue.js';

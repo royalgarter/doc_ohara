@@ -1,9 +1,9 @@
 // Doc_Ohara: Lightweight disk-persisted job queue (BullMQ-shaped API, no Redis dependency).
 // Per project decision: no external broker; jobs persist to doc_pipeline/collections/job_queue.json
 // so `ohara status` and the Agent Dashboard can inspect queue/worker state across processes.
-import fs from 'fs';
-import path from 'path';
-import { EventEmitter } from 'events';
+import fs from 'node:fs';
+import path from 'node:path';
+import { EventEmitter } from 'node:events';
 
 const QUEUE_FILE = 'doc_pipeline/collections/job_queue.json';
 

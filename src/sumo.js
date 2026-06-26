@@ -1,5 +1,5 @@
-import fs from 'fs';
-import path from 'path';
+import fs from 'node:fs';
+import path from 'node:path';
 
 const SUMO_INDEX_PATH = path.join(process.cwd(), 'ontology', 'sumo_index.json');
 let index = null;

@@ -1,0 +1,15 @@
+{
+	"nodeModulesDir": "auto",
+	"tasks": {
+		"start": "deno run --allow-net --allow-env --allow-read --allow-write --allow-run server.js"
+	},
+	"imports": {
+		"express": "npm:express@^4",
+		"arangojs": "npm:arangojs@^8",
+		"@google/genai": "npm:@google/genai",
+		"dotenv": "npm:dotenv",
+		"dotenv/config": "npm:dotenv/config",
+		"commander": "npm:commander",
+		"chalk": "npm:chalk"
+	}
+}

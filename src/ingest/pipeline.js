@@ -1,7 +1,7 @@
-import fs from 'fs';
-import path from 'path';
-import { execSync } from 'child_process';
-import crypto from 'crypto';
+import fs from 'node:fs';
+import path from 'node:path';
+import { execSync } from 'node:child_process';
+import crypto from 'node:crypto';
 import { GoogleGenAI } from '@google/genai';
 import { getArangoDBSimulator } from '../db/simulator.js';
 import { cacheKeyFor, readCacheAsync, writeCache, readCacheSync, hasCache, credFingerprint, getCacheDir } from '../cache.js';

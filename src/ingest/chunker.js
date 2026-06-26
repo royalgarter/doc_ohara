@@ -1,5 +1,5 @@
-import fs from 'fs';
-import path from 'path';
+import fs from 'node:fs';
+import path from 'node:path';
 
 // Simple markdown chunker: split by top-level headings (# and ##). Fallback to size-based splits.
 // Also counts LiteParse page-break markers (-----) to provide authoritative page numbers.
