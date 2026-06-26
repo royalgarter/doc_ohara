@@ -29,9 +29,8 @@ function normalizeUrl(href, baseUrl) {
 		const abs = new URL(href, baseUrl);
 		if (abs.protocol !== 'http:' && abs.protocol !== 'https:') return null;
 		if (abs.hostname !== ROOT_HOST) return null;
-		// Strip fragment and trailing slash inconsistency
+		// Strip fragment only; preserve query string
 		abs.hash = '';
-		abs.search = '';
 		let normalized = abs.href;
 		if (normalized.endsWith('/') && normalized !== `${abs.protocol}//${abs.host}/`) {
 			normalized = normalized.slice(0, -1);
