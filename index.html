@@ -1064,7 +1064,7 @@
 
 	const G3D = {
 		renderer: null, scene: null, camera: null, controls: null,
-		nodeMesh: null, lineMesh: null, auraPoints: {}, selRing: null,
+		nodeMesh: null, lineMesh: null, auraPoints: {}, selRing: null, selEdges: null,
 		labelEls: [], tooltipEl: null,
 		nodeEntries: [], keyToIdx: new Map(),
 		animId: null, onSelect: null,
@@ -1128,7 +1128,7 @@
 			});
 			while (G3D.scene.children.length) G3D.scene.remove(G3D.scene.children[0]);
 		}
-		G3D.nodeMesh = null; G3D.lineMesh = null; G3D.auraPoints = {}; G3D.selRing = null;
+		G3D.nodeMesh = null; G3D.lineMesh = null; G3D.auraPoints = {}; G3D.selRing = null; G3D.selEdges = null;
 		for (const el of G3D.labelEls) el.remove();
 		G3D.labelEls = [];
 		const cv = G3D.renderer && G3D.renderer.domElement;
@@ -1212,11 +1212,12 @@
 		const fov = G3D.camera.fov * (Math.PI / 180);
 		const camDist = (maxDim / 2) / Math.tan(fov / 2) * 1.6;
 		G3D.controls.target.copy(center);
-		// Angle to show all three axes: X=structural depth, Y=time, Z=doc lanes
+		// Tunnel view: viewer outside, looking into +Z (time flows away)
+		const side = size.x / 2 || 100;
 		G3D.camera.position.set(
-			center.x - camDist * 0.3,  // slightly left (shows X depth)
-			center.y + camDist * 0.5,  // above (shows Y time axis)
-			center.z + camDist * 0.9   // front-ish (shows Z lane separation)
+			center.x + side * 1.4,       // offset right to see disc ring structure
+			center.y + side * 1.0,        // slightly above
+			center.z - camDist * 0.65     // in front of tunnel entrance (negative Z)
 		);
 		G3D.camera.lookAt(center);
 		G3D.controls.update();
@@ -1246,99 +1247,126 @@
 		const tagNodes = Object.entries(tagCounts).sort((a, b) => b[1] - a[1]).slice(0, 25)
 			.map(([name, cnt]) => ({ _key: 'tag:' + name, _id: 'tags/' + name, type: 'tag', title: name, sumo_tags: [], _tagCount: cnt }));
 
-		// ── Document-Lane Layout ─────────────────────────────────────────────────
-		// Z = document lane (each doc its own depth band)
-		// X = structural depth (doc → sections → paragraphs → entities → tags)
-		// Y = time (published_date) + per-doc sub-offset to separate same-year docs
+		// ── Tunnel Layout ────────────────────────────────────────────────────────
+		// Tunnel axis = Z (time flows away from viewer).
+		// Each doc = circular disc perpendicular to Z at its temporal Z position.
+		// Within disc: doc center → section rings by level → paragraph outer ring.
+		// Entities/Tags float outside the tunnel in a cylindrical comet shell.
 
-		const Z_DOC_LANE  = 350;   // Z gap between document lanes
-		const X_SEC_BASE  = 160;   // X start for sections
-		const X_LEVEL_GAP = 110;   // X gap per additional section level
-		const X_PARA      = 520;   // paragraphs X
-		const X_ENT       = 720;   // entities X
-		const X_TAG       = 920;   // tags X
-		const ROW_H_SEC   = 15;    // Y spacing between sections within a lane
-		const ROW_H_PARA  = 8;     // Y spacing between paragraphs within a lane
-		const Y_SUB_OFF   = 50;    // always-on Y offset per doc to separate same-date lanes
+		const Z_SPACING = 600;   // distance between doc discs along tunnel
+		const R_DOC     = 12;    // doc node scale
+		const D_SEC     = 10;    // section node diameter for ring math
+		const D_PARA    = 7;     // paragraph node diameter
+		const GAP_SEC   = 5;
+		const GAP_PARA  = 4;
+		const RING_PAD  = 22;    // space between consecutive rings
 
-		// Per-doc lane positions
-		const docLaneZ = new Map(); // docKey → Z
-		const docLaneY = new Map(); // docKey → base Y
-		documents.forEach((d, di) => {
-			const dk = d._key || d.id;
-			const rawY = _dateToY(d.published_date || d.temporal_coverage_start) ?? 0;
-			docLaneZ.set(dk, di * Z_DOC_LANE);
-			docLaneY.set(dk, rawY + di * Y_SUB_OFF);
+		function ringR(count, diam, gap) {
+			return count ? Math.max(35, Math.ceil(count * (diam + gap) / (2 * Math.PI))) : 0;
+		}
+
+		// Sort docs by date for temporal Z ordering
+		const sortedDocs = [...documents].sort((a, b) => {
+			const ya = _dateToY(a.published_date || a.temporal_coverage_start) ?? 0;
+			const yb = _dateToY(b.published_date || b.temporal_coverage_start) ?? 0;
+			return ya - yb;
 		});
-		const centerZ = ((documents.length - 1) / 2) * Z_DOC_LANE;
 
-		// Per-doc rank counters for local Y within a lane
-		const secRankOf  = new Map(); // docKey → next section rank
-		const paraRankOf = new Map(); // docKey → next para rank
-		const tblRankOf  = new Map(); // docKey → next table rank
+		const docDiscZ = new Map();   // docKey → Z position on tunnel axis
+		const docDiscR = new Map();   // docKey → max ring radius
 
 		const nodePos = new Map();
 		function _dc(node) {
 			return node.effective_decay_class || node.document_effective_decay_class || node.decay_class || null;
 		}
 
-		// Documents
-		documents.forEach((d) => {
-			const dk = d._key || d.id;
-			nodePos.set(dk, { x: 0, y: docLaneY.get(dk), z: docLaneZ.get(dk), r: 10, node: d, colKey: 'document', decayClass: _dc(d) });
+		sortedDocs.forEach((d, di) => {
+			const dk    = d._key || d.id;
+			const discZ = di * Z_SPACING;
+			docDiscZ.set(dk, discZ);
+
+			nodePos.set(dk, { x:0, y:0, z:discZ, r:R_DOC, node:d, colKey:'document', decayClass:_dc(d) });
+
+			// Group this doc's sections by level
+			const docSecs = sections.filter(s => s.document_id === dk);
+			const byLevel = {};
+			for (const s of docSecs) {
+				const lvl = s.level || 1;
+				(byLevel[lvl] = byLevel[lvl] || []).push(s);
+			}
+
+			let curR = R_DOC + RING_PAD;
+			for (const lvl of Object.keys(byLevel).map(Number).sort()) {
+				const nodes = byLevel[lvl];
+				const r = Math.max(curR, ringR(nodes.length, D_SEC, GAP_SEC));
+				nodes.forEach((s, i) => {
+					const theta = (2 * Math.PI * i) / nodes.length;
+					nodePos.set(s._key || s.id, {
+						x: r * Math.cos(theta), y: r * Math.sin(theta), z: discZ,
+						r: 5, node: s, colKey: 'section_L' + lvl, decayClass: _dc(s),
+					});
+				});
+				curR = r + D_SEC + RING_PAD;
+			}
+
+			// Paragraphs on outermost ring
+			const docParas = paragraphs.filter(p => p.document_id === dk);
+			const paraR = Math.max(curR, ringR(docParas.length, D_PARA, GAP_PARA));
+			docParas.forEach((p, i) => {
+				const theta = (2 * Math.PI * i) / Math.max(docParas.length, 1);
+				nodePos.set(p._key || p.id, {
+					x: paraR * Math.cos(theta), y: paraR * Math.sin(theta), z: discZ,
+					r: 4, node: p, colKey: 'paragraph', decayClass: _dc(p),
+				});
+			});
+
+			// Tables just outside para ring
+			const docTables = tables.filter(t => t.document_id === dk);
+			const tableR = paraR + D_PARA + 10;
+			docTables.forEach((t, i) => {
+				const theta = (2 * Math.PI * i) / Math.max(docTables.length, 1);
+				nodePos.set(t._key || t.id, {
+					x: tableR * Math.cos(theta), y: tableR * Math.sin(theta), z: discZ,
+					r: 4, node: t, colKey: 'table', decayClass: _dc(t),
+				});
+			});
+
+			docDiscR.set(dk, Math.max(paraR, docTables.length ? tableR : 0, curR) + D_PARA);
 		});
 
-		// Sections — place at X depth by level, Y by rank within doc lane
-		for (const s of sections) {
-			const key = s._key || s.id;
-			const dk  = s.document_id;
-			const laneZ = docLaneZ.get(dk) ?? 0;
-			const laneY = docLaneY.get(dk) ?? 0;
-			const rank  = secRankOf.get(dk) || 0; secRankOf.set(dk, rank + 1);
-			const lvl   = s.level || 1;
-			nodePos.set(key, {
-				x: X_SEC_BASE + (lvl - 1) * X_LEVEL_GAP,
-				y: laneY + rank * ROW_H_SEC,
-				z: laneZ, r: 7, node: s,
-				colKey: 'section_L' + lvl, decayClass: _dc(s),
-			});
+		const maxDiscR = Math.max(...docDiscR.values(), 100);
+		const totalZ   = Math.max((sortedDocs.length - 1) * Z_SPACING, 1);
+
+		// Stable hash → deterministic comet placement
+		function _sh(str) {
+			let h = 0;
+			for (let i = 0; i < str.length; i++) h = (Math.imul(31, h) + str.charCodeAt(i)) | 0;
+			return h >>> 0;
 		}
 
-		// Paragraphs
-		for (const p of paragraphs) {
-			const key = p._key || p.id;
-			const dk  = p.document_id;
-			const laneZ = docLaneZ.get(dk) ?? 0;
-			const laneY = docLaneY.get(dk) ?? 0;
-			const rank  = paraRankOf.get(dk) || 0; paraRankOf.set(dk, rank + 1);
-			nodePos.set(key, {
-				x: X_PARA, y: laneY + rank * ROW_H_PARA, z: laneZ,
-				r: 5, node: p, colKey: 'paragraph', decayClass: _dc(p),
+		// Entities — comet shell outside tunnel
+		const SHELL_MIN = maxDiscR + 80, SHELL_MAX = maxDiscR + 320;
+		entities.forEach((e) => {
+			const h = _sh(e._key || e.id || '');
+			const theta = (h & 0x7fff) / 0x7fff * 2 * Math.PI;
+			const r   = SHELL_MIN + ((h >>> 15) & 0x7fff) / 0x7fff * (SHELL_MAX - SHELL_MIN);
+			const ez  = ((h >>> 8) & 0xff) / 255 * totalZ;
+			nodePos.set(e._key || e.id, {
+				x: r * Math.cos(theta), y: r * Math.sin(theta), z: ez,
+				r: 5, node: e, colKey: 'entity', decayClass: _dc(e),
 			});
-		}
-
-		// Tables
-		for (const t of tables) {
-			const key = t._key || t.id;
-			const dk  = t.document_id;
-			const laneZ = docLaneZ.get(dk) ?? 0;
-			const laneY = docLaneY.get(dk) ?? 0;
-			const rank  = tblRankOf.get(dk) || 0; tblRankOf.set(dk, rank + 1);
-			nodePos.set(key, {
-				x: X_PARA + 40, y: laneY + rank * ROW_H_PARA, z: laneZ,
-				r: 5, node: t, colKey: 'table', decayClass: _dc(t),
-			});
-		}
-
-		// Entities — shared across docs, at centerZ, sorted by mention count
-		entities.forEach((e, ei) => {
-			const key = e._key || e.id;
-			nodePos.set(key, { x: X_ENT, y: ei * 18, z: centerZ, r: 5, node: e, colKey: 'entity', decayClass: _dc(e) });
 		});
 
-		// Tags — at centerZ, sorted by count
-		tagNodes.forEach((t, ti) => {
-			nodePos.set(t._key, { x: X_TAG, y: ti * 18, z: centerZ, r: 5, node: t, colKey: 'tag', decayClass: null });
+		// Tags (virtual top-25) — comet shell, slightly further out
+		tagNodes.forEach((t) => {
+			const h = _sh('tag:' + t.title);
+			const theta = (h & 0x7fff) / 0x7fff * 2 * Math.PI;
+			const r   = SHELL_MIN + 40 + ((h >>> 15) & 0x7fff) / 0x7fff * (SHELL_MAX - SHELL_MIN - 40);
+			const tz  = ((h >>> 8) & 0xff) / 255 * totalZ;
+			nodePos.set(t._key, {
+				x: r * Math.cos(theta), y: r * Math.sin(theta), z: tz,
+				r: 5, node: t, colKey: 'tag', decayClass: null,
+			});
 		});
 
 		// Related-node computation (same logic as SVG version)
@@ -1426,30 +1454,8 @@
 			}
 		}
 
-		// ── LineSegments for edges ─────────────────────────────────────────────────
-		const ePos = [], eCol = [];
-		const addEdge = (fk, tk, virtual) => {
-			const fp = nodePos.get(fk), tp = nodePos.get(tk);
-			if (!fp || !tp) return;
-			const eid = fk + '→' + tk;
-			const isConn = hasSel && (relatedEdgeIds.has(eid) || (virtual && (fk === selectedKey || tk === selectedKey || relatedKeys.has(fk) || relatedKeys.has(tk))));
-			// Visible on smoke-gray bg: default #94a3b8 at 45% opacity; dimmed when selection active
-			const baseCol = isConn ? (virtual ? '#86efac' : '#60a5fa') : '#94a3b8';
-			const alpha   = isConn ? 1.0 : (hasSel ? 0.08 : 0.45);
-			const c = new THREE.Color(baseCol).multiplyScalar(alpha);
-			ePos.push(fp.x, fp.y, fp.z, tp.x, tp.y, tp.z);
-			eCol.push(c.r, c.g, c.b, c.r, c.g, c.b);
-		};
-		for (const e of edges) addEdge((e._from||'').split('/')[1], (e._to||'').split('/')[1], false);
-		for (const p of paragraphs) for (const t of (p.sumo_tags||[]).slice(0,3)) addEdge(p._key, 'tag:'+t, true);
-		if (ePos.length) {
-			const egeo = new THREE.BufferGeometry();
-			egeo.setAttribute('position', new THREE.Float32BufferAttribute(ePos, 3));
-			egeo.setAttribute('color', new THREE.Float32BufferAttribute(eCol, 3));
-			const lines = new THREE.LineSegments(egeo, new THREE.LineBasicMaterial({ vertexColors: true }));
-			scene.add(lines);
-			G3D.lineMesh = lines;
-		}
+		// Edges shown only on selection (built in onclick handler)
+		G3D.lineMesh = null;
 
 		// ── Decay aura Points (additive glow per decay class) ─────────────────────
 		const AURA = {
@@ -1477,98 +1483,86 @@
 			G3D.auraPoints[cls] = { points: ap, mat: amat, baseOp: cfg.op };
 		}
 
-		// ── Per-lane guide rails (rectangle at each doc's Z, spanning actual Y range) ─
-		{
-			const gPos = [], gCols = [];
-			const allY = [...nodePos.values()].map(p => p.y).filter(Number.isFinite);
-			const yLo  = allY.length ? Math.min(...allY) - 20 : -100;
-			const yHi  = allY.length ? Math.max(...allY) + 20 :  100;
-			const laneColor = new THREE.Color('#38bdf8').multiplyScalar(0.3);
-			documents.forEach((d, di) => {
-				const lz = docLaneZ.get(d._key || d.id) ?? (di * Z_DOC_LANE);
-				// Horizontal line at yLo and yHi spanning X: 0 to X_TAG
-				gPos.push(0, yLo, lz, X_TAG + 60, yLo, lz);
-				gPos.push(0, yHi, lz, X_TAG + 60, yHi, lz);
-				// Vertical line at X=0 (doc column spine)
-				gPos.push(0, yLo, lz, 0, yHi, lz);
-				for (let k = 0; k < 6; k++) gCols.push(laneColor.r, laneColor.g, laneColor.b);
-			});
-			// X-depth lines (structural columns) at centerZ
-			const xDepths = [[0,'#38bdf8'],[X_SEC_BASE,'#818cf8'],[X_PARA,'#fbbf24'],[X_ENT,'#fb7185'],[X_TAG,'#4ade80']];
-			for (const [x, hex] of xDepths) {
-				const c = new THREE.Color(hex).multiplyScalar(0.25);
-				gPos.push(x, yLo, centerZ - 30, x, yHi, centerZ - 30);
-				gCols.push(c.r, c.g, c.b, c.r, c.g, c.b);
-			}
-			const ggeo = new THREE.BufferGeometry();
-			ggeo.setAttribute('position', new THREE.Float32BufferAttribute(gPos, 3));
-			ggeo.setAttribute('color', new THREE.Float32BufferAttribute(gCols, 3));
-			scene.add(new THREE.LineSegments(ggeo, new THREE.LineBasicMaterial({ vertexColors: true })));
-		}
-
-		// ── CSS label container (shared by time axis + node labels below) ────────
+		// ── Tunnel visual elements ────────────────────────────────────────────────
 		const labelContainer = document.getElementById('graph-labels');
 
-		// ── Time axis: year ticks + horizontal timeline planes per doc lane ──────
+		// a) Disc ring outlines at each doc's Z
+		sortedDocs.forEach((d, di) => {
+			const dk  = d._key || d.id;
+			const dz  = docDiscZ.get(dk) ?? di * Z_SPACING;
+			const dr  = (docDiscR.get(dk) ?? maxDiscR) + 20;
+			const hex = _nodeColorHex(d, 'document', colorMode);
+			const c   = new THREE.Color(hex).multiplyScalar(0.32);
+			const N   = 64, pts = [], cols = [];
+			for (let i = 0; i < N; i++) {
+				const t1 = 2 * Math.PI * i / N, t2 = 2 * Math.PI * (i + 1) / N;
+				pts.push(dr * Math.cos(t1), dr * Math.sin(t1), dz,  dr * Math.cos(t2), dr * Math.sin(t2), dz);
+				cols.push(c.r, c.g, c.b, c.r, c.g, c.b);
+			}
+			const rgeo = new THREE.BufferGeometry();
+			rgeo.setAttribute('position', new THREE.Float32BufferAttribute(pts, 3));
+			rgeo.setAttribute('color',    new THREE.Float32BufferAttribute(cols, 3));
+			scene.add(new THREE.LineSegments(rgeo, new THREE.LineBasicMaterial({ vertexColors: true, transparent: true, opacity: 0.45 })));
+		});
+
+		// b) Tunnel spine (Z axis line)
 		{
-			const docYVals = [...docLaneY.values()];
-			const yLo = Math.min(...docYVals) - 80;
-			const yHi = Math.max(...docYVals) + 80;
-			const yearLo = Math.floor((yLo / 60) + 2010);
-			const yearHi = Math.ceil( (yHi / 60) + 2010);
-			const span    = yearHi - yearLo;
-			const step    = span > 30 ? 10 : span > 10 ? 5 : span > 4 ? 2 : 1;
-			const tickPts = [], tickCols = [];
-			const tickC   = new THREE.Color('#1e293b').multiplyScalar(0.9);
-			const TICK_X  = -80;
-			for (let yr = Math.ceil(yearLo / step) * step; yr <= yearHi; yr += step) {
-				const ty = (yr - 2010) * 60;
-				tickPts.push(TICK_X, ty, centerZ, TICK_X + 40, ty, centerZ);
-				tickCols.push(tickC.r, tickC.g, tickC.b, tickC.r, tickC.g, tickC.b);
-				const ydiv = document.createElement('div');
-				ydiv.dataset.lk = 'year:' + yr;
-				ydiv.style.cssText = 'position:absolute;font:10px ui-monospace,monospace;color:#1e293b;pointer-events:none;transform:translateY(-50%);font-weight:700;letter-spacing:-0.5px;';
-				ydiv.textContent = yr;
-				if (labelContainer) labelContainer.appendChild(ydiv);
-				G3D.labelEls.push(ydiv);
-				nodePos.set('year:' + yr, { x: TICK_X - 8, y: ty, z: centerZ, r: 0, node: { title: String(yr) }, colKey: '_year' });
+			const spGeo = new THREE.BufferGeometry();
+			spGeo.setAttribute('position', new THREE.Float32BufferAttribute([0, 0, -80,  0, 0, totalZ + 80], 3));
+			scene.add(new THREE.LineSegments(spGeo, new THREE.LineBasicMaterial({ color: 0x475569, transparent: true, opacity: 0.35 })));
+		}
+
+		// c) Entity/Tag tether lines to disc centers
+		{
+			const tetherPts = [], tetherCols = [];
+			const tc = new THREE.Color('#94a3b8').multiplyScalar(0.22);
+			for (const e of entities) {
+				const ep = nodePos.get(e._key || e.id);
+				const docKeys = (e.doc_keys || [e.doc_key || e.document_id]).filter(Boolean);
+				for (const dk of docKeys) {
+					const dz = docDiscZ.get(dk);
+					if (ep != null && dz != null) {
+						tetherPts.push(ep.x, ep.y, ep.z,  0, 0, dz);
+						tetherCols.push(tc.r, tc.g, tc.b,  tc.r, tc.g, tc.b);
+					}
+				}
 			}
-			if (tickPts.length) {
+			for (const p of paragraphs) {
+				const ep = nodePos.get(p._key);
+				if (!ep) continue;
+				for (const tname of (p.sumo_tags || []).slice(0, 3)) {
+					const tp = nodePos.get('tag:' + tname);
+					if (tp) {
+						tetherPts.push(tp.x, tp.y, tp.z,  0, 0, ep.z);
+						tetherCols.push(tc.r, tc.g, tc.b,  tc.r, tc.g, tc.b);
+					}
+				}
+			}
+			if (tetherPts.length) {
 				const tgeo = new THREE.BufferGeometry();
-				tgeo.setAttribute('position', new THREE.Float32BufferAttribute(tickPts, 3));
-				tgeo.setAttribute('color', new THREE.Float32BufferAttribute(tickCols, 3));
-				scene.add(new THREE.LineSegments(tgeo, new THREE.LineBasicMaterial({ vertexColors: true })));
+				tgeo.setAttribute('position', new THREE.Float32BufferAttribute(tetherPts, 3));
+				tgeo.setAttribute('color',    new THREE.Float32BufferAttribute(tetherCols, 3));
+				scene.add(new THREE.LineSegments(tgeo, new THREE.LineBasicMaterial({ vertexColors: true, transparent: true, opacity: 0.28 })));
 			}
-
-			// ── Horizontal timeline planes: semi-transparent slab at each doc's Y ──
-			documents.forEach((d, di) => {
-				const dk    = d._key || d.id;
-				const laneY = docLaneY.get(dk) ?? 0;
-				const laneZ = docLaneZ.get(dk) ?? 0;
-				const hex   = _nodeColorHex(d, 'document', colorMode);
-				const planeW = X_TAG + 180, planeD = Z_DOC_LANE * 0.7;
-				const planeMesh = new THREE.Mesh(
-					new THREE.PlaneGeometry(planeW, planeD),
-					new THREE.MeshBasicMaterial({ color: new THREE.Color(hex), transparent: true, opacity: 0.07, side: THREE.DoubleSide, depthWrite: false })
-				);
-				planeMesh.rotation.x = -Math.PI / 2;
-				planeMesh.position.set(planeW / 2 - 80, laneY, laneZ);
-				scene.add(planeMesh);
-			});
 		}
 
-		// ── CSS labels for docs and tags ──────────────────────────────────────────
-		const labelNodes = entries.filter(e => e.colKey === 'document' || e.colKey === 'tag');
-		for (const e of labelNodes) {
-			const el = document.createElement('div');
-			el.dataset.lk = e.key;
-			const hex = _nodeColorHex(e.node, e.colKey, colorMode);
-			el.style.cssText = `position:absolute;font:8px ui-monospace,monospace;color:${hex};pointer-events:none;white-space:nowrap;transform:translateY(-50%);opacity:1;font-weight:bold;text-shadow:0 1px 3px rgba(0,0,0,0.8),0 0 6px rgba(0,0,0,0.6);`;
-			const raw = e.colKey === 'tag' ? '#' + e.node.title : (e.node.title || e.node.source_file || e.key);
-			el.textContent = raw.length > 36 ? raw.slice(0, 35) + '…' : raw;
-			if (labelContainer) labelContainer.appendChild(el);
+		// d) Doc labels (name + year) beside each disc ring
+		sortedDocs.forEach((d, di) => {
+			const dk   = d._key || d.id;
+			const dz   = docDiscZ.get(dk) ?? di * Z_SPACING;
+			const dr   = (docDiscR.get(dk) ?? maxDiscR) + 35;
+			const hex  = _nodeColorHex(d, 'document', colorMode);
+			const yr   = d.published_date ? new Date(d.published_date).getFullYear()
+			              : d.temporal_coverage_start ? new Date(d.temporal_coverage_start).getFullYear() : '';
+			const el   = document.createElement('div');
+			const lkey = '__lbl__' + dk;
+			el.dataset.lk = lkey;
+			el.style.cssText = `position:absolute;font:9px ui-monospace,monospace;color:${hex};pointer-events:none;white-space:nowrap;font-weight:700;text-shadow:0 1px 4px rgba(0,0,0,0.7);`;
+			el.textContent = (d.title || d.source_file || dk).slice(0, 30) + (yr ? `  [${yr}]` : '');
+			labelContainer.appendChild(el);
 			G3D.labelEls.push(el);
-		}
+			nodePos.set(lkey, { x: dr, y: 0, z: dz, r: 0, node: d, colKey: '_label' });
+		});
 
 		// ── Raycaster + interaction ────────────────────────────────────────────────
 		const canvas = G3D.renderer.domElement;
@@ -1633,6 +1627,26 @@
 				? { type:'SumoTag', _key:e.key, _id:'tags/'+e.node.title, title:e.node.title, sumo_tags:[], _tagCount:e.node._tagCount }
 				: e.node;
 			G3D.onSelect(payload);
+
+			// Build selection edges to related nodes
+			if (G3D.selEdges) { scene.remove(G3D.selEdges); G3D.selEdges.geometry.dispose(); G3D.selEdges = null; }
+			const sPos = nodePos.get(e.key);
+			const rels  = relatedKeys.get(e.key);
+			if (sPos && rels && rels.size) {
+				const sePts = [], seCol = [];
+				const sc = new THREE.Color('#60a5fa');
+				for (const rk of rels) {
+					const rp = nodePos.get(rk);
+					if (rp) { sePts.push(sPos.x, sPos.y, sPos.z,  rp.x, rp.y, rp.z); seCol.push(sc.r, sc.g, sc.b,  sc.r, sc.g, sc.b); }
+				}
+				if (sePts.length) {
+					const segeo = new THREE.BufferGeometry();
+					segeo.setAttribute('position', new THREE.Float32BufferAttribute(sePts, 3));
+					segeo.setAttribute('color',    new THREE.Float32BufferAttribute(seCol, 3));
+					G3D.selEdges = new THREE.LineSegments(segeo, new THREE.LineBasicMaterial({ vertexColors: true }));
+					scene.add(G3D.selEdges);
+				}
+			}
 		};
 
 		// ── Animation loop ────────────────────────────────────────────────────────
