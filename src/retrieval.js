@@ -191,15 +191,23 @@ export class RetrievalEngine {
 			}
 		}
 
-		// Heuristic date range from bare year tokens (e.g. "bitcoin 2012", "crisis before 2008")
+		// Heuristic date range from bare year/decade tokens (no Gemini call).
+		// Examples: "before 2008", "after 2020", "in the 1990s", "bitcoin 2012"
 		if (!dateRange.from && !dateRange.to) {
-			const raw = rawInput.toLowerCase();
-			const beforeM = raw.match(/\bbefore\s+((?:19|20)\d{2})\b/);
-			const afterM  = raw.match(/\bafter\s+((?:19|20)\d{2})\b/);
-			const singleY = raw.match(/\b((?:19|20)\d{2})\b/);
-			if (beforeM) dateRange = { from: null, to: beforeM[1] };
-			else if (afterM) dateRange = { from: afterM[1], to: null };
-			else if (singleY && temporalIntent === 'historical_fact') {
+			const rawLow = rawInput.toLowerCase();
+			const beforeM = rawLow.match(/\bbefore\s+((?:19|20)\d{2})\b/);
+			const afterM  = rawLow.match(/\bafter\s+((?:19|20)\d{2})\b/);
+			const decadeM = rawLow.match(/\b((?:19|20)\d{2})s\b/);   // "1990s", "2000s"
+			const singleY = rawLow.match(/\b((?:19|20)\d{2})\b/);
+			if (beforeM) {
+				dateRange = { from: null, to: beforeM[1] };
+			} else if (afterM) {
+				dateRange = { from: afterM[1], to: null };
+			} else if (decadeM) {
+				// "1990s" → 1990–1999
+				const d = parseInt(decadeM[1], 10);
+				dateRange = { from: String(d), to: String(d + 9) };
+			} else if (singleY && temporalIntent === 'historical_fact') {
 				// centre ±2 years around a single mentioned year
 				const y = parseInt(singleY[1], 10);
 				dateRange = { from: String(y - 2), to: String(y + 2) };
@@ -216,9 +224,14 @@ export class RetrievalEngine {
 		if (keywords.length === 0) return [];
 
 		const hasDateFilter = dateRange && (dateRange.from || dateRange.to);
-		// When strict=true (default), docs with no temporal info are excluded from date-range
-		// queries rather than auto-passing. Relax via OHARA_DATE_FILTER_STRICT=false.
+		// Strict date filter: exclude docs whose temporal window falls outside the query range.
+		// Applies for all intents EXCEPT historical_fact — for that, a 2012 textbook may still
+		// contain authoritative content about the 1990s, so we use coverage SCORING (boost)
+		// rather than hard exclusion. All other intents (current_state, influence_chain, none)
+		// are treated as hard filters when a date range is present.
+		// Disable entirely via OHARA_DATE_FILTER_STRICT=false.
 		const strictDateFilter = hasDateFilter &&
+			processedQuery.temporalIntent !== 'historical_fact' &&
 			(process.env.OHARA_DATE_FILTER_STRICT !== 'false');
 
 		try {
@@ -259,8 +272,10 @@ export class RetrievalEngine {
 			`, {
 				phrase:   raw,
 				limit:    limit * 2,
-				dateFrom: hasDateFilter ? (dateRange.from || null) : null,
-				dateTo:   hasDateFilter ? (dateRange.to   || null) : null,
+				// Pass date bounds to AQL only in strict mode (current_state).
+				// historical_fact uses date range for scoring only — AQL filter stays open.
+				dateFrom: strictDateFilter ? (dateRange.from || null) : null,
+				dateTo:   strictDateFilter ? (dateRange.to   || null) : null,
 				strict:   strictDateFilter,
 			});
 			return rows.filter(r => r.score > 0);
