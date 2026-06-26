@@ -1294,7 +1294,7 @@
 
 		const nodePos = new Map();
 		function _dc(node) {
-			return node.effective_decay_class || node.document_effective_decay_class || node.decay_class || null;
+			return node.effective_decay_class || node.document_effective_decay_class || node.decay_class || 'SCHOLARLY';
 		}
 
 		// ── Temporal Z: real year-based positioning ───────────────────────────────
@@ -1344,8 +1344,11 @@
 			const dk = d._key || d.id;
 			const { cx, cy, cz } = docCenter.get(dk);
 			docDiscZ.set(dk, cz);
+			// Sections/paragraphs/tables don't carry decay_class in graph API response —
+			// inherit from parent document so fins are visible on all disc nodes.
+			const docDecay = _dc(d);
 
-			nodePos.set(dk, { x:cx, y:cy, z:cz, r:R_DOC, node:d, colKey:'document', decayClass:_dc(d) });
+			nodePos.set(dk, { x:cx, y:cy, z:cz, r:R_DOC, node:d, colKey:'document', decayClass:docDecay });
 
 			// Group this doc's sections by level
 			const docSecs = sections.filter(s => s.document_id === dk);
@@ -1363,7 +1366,7 @@
 					const theta = (2 * Math.PI * i) / nodes.length;
 					nodePos.set(s._key || s.id, {
 						x: cx + r * Math.cos(theta), y: cy + r * Math.sin(theta), z: cz,
-						r: 5, node: s, colKey: 'section_L' + lvl, decayClass: _dc(s),
+						r: 5, node: s, colKey: 'section_L' + lvl, decayClass: _dc(s) || docDecay,
 					});
 				});
 				curR = r + D_SEC + RING_PAD;
@@ -1376,7 +1379,7 @@
 				const theta = (2 * Math.PI * i) / Math.max(docParas.length, 1);
 				nodePos.set(p._key || p.id, {
 					x: cx + paraR * Math.cos(theta), y: cy + paraR * Math.sin(theta), z: cz,
-					r: 4, node: p, colKey: 'paragraph', decayClass: _dc(p),
+					r: 4, node: p, colKey: 'paragraph', decayClass: _dc(p) || docDecay,
 				});
 			});
 
@@ -1387,7 +1390,7 @@
 				const theta = (2 * Math.PI * i) / Math.max(docTables.length, 1);
 				nodePos.set(t._key || t.id, {
 					x: cx + tableR * Math.cos(theta), y: cy + tableR * Math.sin(theta), z: cz,
-					r: 4, node: t, colKey: 'table', decayClass: _dc(t),
+					r: 4, node: t, colKey: 'table', decayClass: _dc(t) || docDecay,
 				});
 			});
 
