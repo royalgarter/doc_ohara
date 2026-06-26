@@ -87,6 +87,9 @@
 			<span class="text-gray-700" x-text="graphSource ? '[' + graphSource + ']' : ''"></span>
 		</div>
 		<div class="ml-auto flex items-center gap-2">
+			<button @click="colorMode='doc'; renderCurrentGraph()"
+				:class="colorMode==='doc' ? 'bg-violet-700/70 text-violet-200' : 'bg-gray-800 text-gray-500 hover:text-gray-300'"
+				class="text-sm px-2 py-0.5 rounded transition">by doc</button>
 			<button @click="colorMode='type'; renderCurrentGraph()"
 				:class="colorMode==='type' ? 'bg-sky-700/70 text-sky-200' : 'bg-gray-800 text-gray-500 hover:text-gray-300'"
 				class="text-sm px-2 py-0.5 rounded transition">by type</button>
@@ -628,7 +631,7 @@
 			graphSource: '',
 			graphLoading: false,
 			selectedNode: null,
-			colorMode: 'type',
+			colorMode: 'doc',
 			timelineResolution: 'year',
 			docsOpen: true,
 			graphZoom: 1.0,
@@ -1081,9 +1084,9 @@
 
 	const G3D = {
 		renderer: null, scene: null, camera: null, controls: null,
-		nodeMesh: null, lineMesh: null, auraPoints: {}, selRing: null, selEdges: null, discPlanes: [],
+		nodeMesh: null, nodeMeshes: [], lineMesh: null, auraPoints: {}, selRing: null, selEdges: null, discPlanes: [],
 		labelEls: [], tooltipEl: null,
-		nodeEntries: [], keyToIdx: new Map(),
+		nodeEntries: [], keyToIdx: new Map(), keyToMeshIdx: new Map(),
 		animId: null, onSelect: null,
 		ZOOM_BASE: 2000, initialized: false,
 	};
@@ -1115,7 +1118,20 @@
 		return (d.getFullYear() - 2010) * 60;
 	}
 
-	function _nodeColorHex(node, colKey, colorMode) {
+	function _titleColor(title) {
+		let h = 0;
+		for (const c of (title || '')) h = (h * 31 + c.charCodeAt(0)) & 0x7fffffff;
+		return `hsl(${h % 360},70%,58%)`;
+	}
+
+	function _nodeColorHex(node, colKey, colorMode, docColorMap) {
+		if (colorMode === 'doc' && docColorMap) {
+			if (colKey === 'tag') return '#4ade80';
+			if (colKey === 'entity') return '#fb7185';
+			if (colKey === '_label' || colKey === '_tick') return null;
+			const dk = node && (node.document_id || node._key);
+			return (dk && docColorMap.get(dk)) || '#94a3b8';
+		}
 		if (colorMode === 'sumo') {
 			const tags = node.sumo_tags || [];
 			if (tags.length) {
@@ -1145,7 +1161,7 @@
 			});
 			while (G3D.scene.children.length) G3D.scene.remove(G3D.scene.children[0]);
 		}
-		G3D.nodeMesh = null; G3D.lineMesh = null; G3D.auraPoints = {}; G3D.selRing = null; G3D.selEdges = null; G3D.discPlanes = [];
+		G3D.nodeMesh = null; G3D.nodeMeshes = []; G3D.keyToMeshIdx = new Map(); G3D.lineMesh = null; G3D.auraPoints = {}; G3D.selRing = null; G3D.selEdges = null; G3D.discPlanes = [];
 		for (const el of G3D.labelEls) el.remove();
 		G3D.labelEls = [];
 		const cv = G3D.renderer && G3D.renderer.domElement;
@@ -1218,8 +1234,10 @@
 	}
 
 	function _g3dFitScene() {
-		if (!G3D.nodeMesh || !G3D.camera || !G3D.controls) return;
-		const box = new THREE.Box3().setFromObject(G3D.nodeMesh);
+		if ((!G3D.nodeMeshes || !G3D.nodeMeshes.length) && !G3D.nodeMesh) return;
+		if (!G3D.camera || !G3D.controls) return;
+		const box = new THREE.Box3();
+		(G3D.nodeMeshes && G3D.nodeMeshes.length ? G3D.nodeMeshes : [G3D.nodeMesh]).forEach(m => box.expandByObject(m));
 		if (box.isEmpty()) return;
 		const center = new THREE.Vector3();
 		const size   = new THREE.Vector3();
@@ -1295,6 +1313,10 @@
 			const yb = _dateToY(b.published_date || b.temporal_coverage_start) ?? 0;
 			return ya - yb;
 		});
+
+		// Build per-document color map from title hash
+		const docColorMap = new Map();
+		sortedDocs.forEach(d => docColorMap.set(d._key || d.id, _titleColor(d.title || d.source_file || d._key || '')));
 
 		const docDiscZ = new Map();   // docKey → Z position (kept for tunnel visuals compat)
 		const docDiscR = new Map();   // docKey → max ring radius
@@ -1503,46 +1525,78 @@
 		}
 		const hasSel = !!selectedKey;
 
-		// ── InstancedMesh for all nodes ───────────────────────────────────────────
-		const entries = [...nodePos.entries()].map(([key, p]) => ({ key, ...p }));
+		// ── InstancedMesh per shape bucket ───────────────────────────────────────
+		const SHAPE_GEO = {
+			document:  () => new THREE.SphereGeometry(1, 8, 6),
+			section:   () => new THREE.TetrahedronGeometry(1),
+			paragraph: () => new THREE.BoxGeometry(1, 1, 1),
+			figure:    () => new THREE.SphereGeometry(1, 6, 4),
+			table:     () => new THREE.OctahedronGeometry(1),
+			other:     () => new THREE.BoxGeometry(1, 1, 1),
+		};
+		function _shapeBucket(colKey) {
+			if (colKey === 'document') return 'document';
+			if (colKey.startsWith('section_L')) return 'section';
+			if (colKey === 'paragraph') return 'paragraph';
+			if (colKey === 'figure') return 'figure';
+			if (colKey === 'table') return 'table';
+			return 'other';
+		}
+
+		const entries = [...nodePos.entries()]
+			.filter(([, p]) => p.colKey !== '_label' && p.colKey !== '_tick')
+			.map(([key, p]) => ({ key, ...p }));
 		G3D.nodeEntries = entries;
-		G3D.keyToIdx = new Map(entries.map((e, i) => [e.key, i]));
 
-		const totalN = entries.length;
-		if (totalN === 0) return;
+		// Group by shape bucket
+		const bucketEntries = {};
+		entries.forEach((e, globalIdx) => {
+			const b = _shapeBucket(e.colKey);
+			(bucketEntries[b] = bucketEntries[b] || []).push({ e, globalIdx });
+		});
 
-		const geo = new THREE.BoxGeometry(1.6, 1.6, 1.6);
-		const mat = new THREE.MeshBasicMaterial();
-		const instMesh = new THREE.InstancedMesh(geo, mat, totalN);
-		instMesh.frustumCulled = false;
-
+		G3D.nodeMeshes = [];
+		G3D.keyToMeshIdx = new Map();  // key → { mesh, idx }
 		const dummy = new THREE.Object3D();
 		const col3 = new THREE.Color();
-		for (let i = 0; i < entries.length; i++) {
-			const { x, y, z, r, node, colKey, key } = entries[i];
-			const isSel = key === selectedKey;
-			const isRel = hasSel && relatedKeys.has(key);
-			const isDim = hasSel && !isSel && !isRel;
-			dummy.position.set(x, y, z);
-			dummy.scale.setScalar(isSel ? r * 1.6 : isRel ? r * 1.2 : r);
-			dummy.updateMatrix();
-			instMesh.setMatrixAt(i, dummy.matrix);
-			col3.set(_nodeColorHex(node, colKey, colorMode));
-			// Lerp dimmed nodes toward bg color instead of near-black
-			if (isDim) col3.lerp(new THREE.Color(0x8b99a8), 0.72);
-			instMesh.setColorAt(i, col3);
+
+		for (const [bucket, items] of Object.entries(bucketEntries)) {
+			if (!items.length) continue;
+			const geo = SHAPE_GEO[bucket]();
+			const mat = new THREE.MeshBasicMaterial();
+			const mesh = new THREE.InstancedMesh(geo, mat, items.length);
+			mesh.frustumCulled = false;
+			mesh._nodeKeys = [];  // idx → key for fast hover lookup
+			items.forEach(({ e }, idx) => {
+				const { x, y, z, r, node, colKey, key } = e;
+				const isSel = key === selectedKey;
+				const isRel = hasSel && relatedKeys.has(key);
+				const isDim = hasSel && !isSel && !isRel;
+				dummy.position.set(x, y, z);
+				dummy.scale.setScalar(isSel ? r * 1.6 : isRel ? r * 1.2 : r);
+				dummy.updateMatrix();
+				mesh.setMatrixAt(idx, dummy.matrix);
+				const hex = _nodeColorHex(node, colKey, colorMode, docColorMap);
+				col3.set(hex || '#94a3b8');
+				if (isDim) col3.lerp(new THREE.Color(0x8b99a8), 0.72);
+				mesh.setColorAt(idx, col3);
+				G3D.keyToMeshIdx.set(key, { mesh, idx });
+				mesh._nodeKeys[idx] = key;
+			});
+			mesh.instanceMatrix.needsUpdate = true;
+			mesh.instanceColor.needsUpdate = true;
+			scene.add(mesh);
+			G3D.nodeMeshes.push(mesh);
 		}
-		instMesh.instanceMatrix.needsUpdate = true;
-		instMesh.instanceColor.needsUpdate = true;
-		scene.add(instMesh);
-		G3D.nodeMesh = instMesh;
+		// Legacy alias for raycasting helpers that reference G3D.nodeMesh
+		G3D.nodeMesh = G3D.nodeMeshes[0] || null;
 
 		// ── Selected-node billboard ring ──────────────────────────────────────────
 		if (selectedKey) {
 			const se = nodePos.get(selectedKey);
 			if (se) {
 				const ringGeo = new THREE.RingGeometry(se.r * 1.9, se.r * 2.4, 32);
-				const hex = _nodeColorHex(se.node, se.colKey, colorMode);
+				const hex = _nodeColorHex(se.node, se.colKey, colorMode, docColorMap) || '#94a3b8';
 				const ringMat = new THREE.MeshBasicMaterial({ color: hex, transparent: true, opacity: 0.75, side: THREE.DoubleSide });
 				const ring = new THREE.Mesh(ringGeo, ringMat);
 				ring.position.set(se.x, se.y, se.z);
@@ -1606,7 +1660,7 @@
 			const dk         = d._key || d.id;
 			const { cx, cy, cz } = docCenter.get(dk) ?? { cx:0, cy:0, cz:di*Z_SPACING };
 			const dr  = (docDiscR.get(dk) ?? maxDiscR) + 20;
-			const hex = _nodeColorHex(d, 'document', colorMode);
+			const hex = _nodeColorHex(d, 'document', colorMode, docColorMap) || '#38bdf8';
 			const c   = new THREE.Color(hex).multiplyScalar(0.32);
 			const N   = 64, pts = [], cols = [];
 			for (let i = 0; i < N; i++) {
@@ -1626,7 +1680,7 @@
 			const dk         = d._key || d.id;
 			const { cx, cy, cz } = docCenter.get(dk) ?? { cx:0, cy:0, cz:di*Z_SPACING };
 			const dr  = (docDiscR.get(dk) ?? maxDiscR) + 18;
-			const hex = _nodeColorHex(d, 'document', colorMode);
+			const hex = _nodeColorHex(d, 'document', colorMode, docColorMap) || '#38bdf8';
 			const planeMesh = new THREE.Mesh(
 				new THREE.CircleGeometry(dr, 64),
 				new THREE.MeshBasicMaterial({ color: new THREE.Color(hex), transparent: true, opacity: 0.04, side: THREE.DoubleSide, depthWrite: false })
@@ -1782,9 +1836,10 @@
 			ptr.x = ((ev.clientX - rect.left) / rect.width)  * 2 - 1;
 			ptr.y = -((ev.clientY - rect.top)  / rect.height) * 2 + 1;
 			rc.setFromCamera(ptr, G3D.camera);
-			const hits = rc.intersectObject(G3D.nodeMesh);
+			const hits = rc.intersectObjects(G3D.nodeMeshes, false);
 			if (hits.length && tip) {
-				const e = G3D.nodeEntries[hits[0].instanceId];
+				const hitKey = hits[0].object._nodeKeys && hits[0].object._nodeKeys[hits[0].instanceId];
+				const e = hitKey ? G3D.nodeEntries.find(en => en.key === hitKey) : null;
 				if (e) {
 					const lbl = e.node.title || e.node.content?.slice(0,90) || e.node.name || e.key;
 					tip.textContent = lbl;
@@ -1814,7 +1869,7 @@
 			if (G3D.selEdges) { scene.remove(G3D.selEdges); G3D.selEdges.geometry.dispose(); G3D.selEdges = null; }
 
 			// Check disc planes first (larger target, checked after nodes)
-			const nodeHits = rc.intersectObject(G3D.nodeMesh);
+			const nodeHits = rc.intersectObjects(G3D.nodeMeshes, false);
 			const discHits = G3D.discPlanes.length ? rc.intersectObjects(G3D.discPlanes) : [];
 
 			// Prefer node hit if closer than disc hit
@@ -1830,7 +1885,7 @@
 					for (const [key, p] of nodePos) {
 						if (key === dk || !Number.isFinite(p.z) || Math.abs(p.z - dz) > 1) continue;
 						if (p.colKey === '_label') continue;
-						const dc = new THREE.Color(_nodeColorHex(p.node, p.colKey, colorMode));
+						const dc = new THREE.Color(_nodeColorHex(p.node, p.colKey, colorMode, docColorMap) || '#94a3b8');
 						sePts.push(docP.x, docP.y, docP.z,  p.x, p.y, p.z);
 						seCol.push(dc.r, dc.g, dc.b,  dc.r, dc.g, dc.b);
 					}
@@ -1846,7 +1901,8 @@
 			}
 
 			if (!nodeHits.length || !G3D.onSelect) return;
-			const e = G3D.nodeEntries[nodeHits[0].instanceId];
+			const _hitKey = nodeHits[0].object._nodeKeys && nodeHits[0].object._nodeKeys[nodeHits[0].instanceId];
+			const e = _hitKey ? G3D.nodeEntries.find(en => en.key === _hitKey) : null;
 			if (!e) return;
 			const payload = e.colKey === 'tag'
 				? { type:'SumoTag', _key:e.key, _id:'tags/'+e.node.title, title:e.node.title, sumo_tags:[], _tagCount:e.node._tagCount }
@@ -1860,7 +1916,7 @@
 				for (const rk of relatedKeys) {
 					const rp = nodePos.get(rk);
 					if (!rp) continue;
-					const dc = new THREE.Color(_nodeColorHex(rp.node, rp.colKey, colorMode));
+					const dc = new THREE.Color(_nodeColorHex(rp.node, rp.colKey, colorMode, docColorMap) || '#94a3b8');
 					sePts.push(sPos.x, sPos.y, sPos.z,  rp.x, rp.y, rp.z);
 					seCol.push(dc.r, dc.g, dc.b,  dc.r, dc.g, dc.b);
 				}
@@ -1895,9 +1951,10 @@
 	// ── pulseNode: animate scale on the instanced mesh entry ─────────────────
 
 	function pulseNode(key) {
-		const idx = G3D.keyToIdx && G3D.keyToIdx.get(key);
-		if (idx === undefined || !G3D.nodeMesh) return;
-		const e = G3D.nodeEntries[idx];
+		const mi = G3D.keyToMeshIdx && G3D.keyToMeshIdx.get(key);
+		if (!mi) return;
+		const { mesh, idx } = mi;
+		const e = G3D.nodeEntries && G3D.nodeEntries.find(en => en.key === key);
 		if (!e) return;
 		const dummy = new THREE.Object3D();
 		const origR = e.r;
@@ -1908,14 +1965,14 @@
 			dummy.position.set(e.x, e.y, e.z);
 			dummy.scale.setScalar(s);
 			dummy.updateMatrix();
-			G3D.nodeMesh.setMatrixAt(idx, dummy.matrix);
-			G3D.nodeMesh.instanceMatrix.needsUpdate = true;
+			mesh.setMatrixAt(idx, dummy.matrix);
+			mesh.instanceMatrix.needsUpdate = true;
 			if (t < Math.PI) requestAnimationFrame(step);
 			else {
 				dummy.scale.setScalar(origR);
 				dummy.updateMatrix();
-				G3D.nodeMesh.setMatrixAt(idx, dummy.matrix);
-				G3D.nodeMesh.instanceMatrix.needsUpdate = true;
+				mesh.setMatrixAt(idx, dummy.matrix);
+				mesh.instanceMatrix.needsUpdate = true;
 			}
 		};
 		step();
