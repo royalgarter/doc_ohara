@@ -1132,7 +1132,7 @@
 		for (const el of G3D.labelEls) el.remove();
 		G3D.labelEls = [];
 		const cv = G3D.renderer && G3D.renderer.domElement;
-		if (cv) { cv.onmousemove = null; cv.onmouseleave = null; cv.onclick = null; }
+		if (cv) { cv.onmousemove = null; cv.onmouseleave = null; cv.onclick = null; cv.onpointerdown = null; }
 	}
 
 	function _initG3D() {
@@ -1348,9 +1348,11 @@
 		if (totalN === 0) return;
 
 		const geo = new THREE.SphereGeometry(1, 8, 6);
-		const mat = new THREE.MeshBasicMaterial({ vertexColors: true });
+		// vertexColors must be FALSE — instance colors use a separate shader path (USE_INSTANCING_COLOR)
+		// that is auto-enabled when instanceColor is set; vertexColors:true makes the shader read
+		// per-vertex geometry color instead, which SphereGeometry doesn't have → everything black.
+		const mat = new THREE.MeshBasicMaterial();
 		const instMesh = new THREE.InstancedMesh(geo, mat, totalN);
-		instMesh.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(totalN * 3), 3);
 		instMesh.frustumCulled = false;
 
 		const dummy = new THREE.Object3D();
@@ -1395,8 +1397,10 @@
 			if (!fp || !tp) return;
 			const eid = fk + '→' + tk;
 			const isConn = hasSel && (relatedEdgeIds.has(eid) || (virtual && (fk === selectedKey || tk === selectedKey || relatedKeys.has(fk) || relatedKeys.has(tk))));
-			const dim = isConn ? (virtual ? 0.7 : 0.85) : (hasSel ? 0.03 : 0.18);
-			const c = new THREE.Color(isConn ? (virtual ? '#86efac' : '#60a5fa') : '#1e3a5f').multiplyScalar(dim);
+			// Visible on smoke-gray bg: default #94a3b8 at 45% opacity; dimmed when selection active
+			const baseCol = isConn ? (virtual ? '#86efac' : '#60a5fa') : '#94a3b8';
+			const alpha   = isConn ? 1.0 : (hasSel ? 0.08 : 0.45);
+			const c = new THREE.Color(baseCol).multiplyScalar(alpha);
 			ePos.push(fp.x, fp.y, fp.z, tp.x, tp.y, tp.z);
 			eCol.push(c.r, c.g, c.b, c.r, c.g, c.b);
 		};
@@ -1447,7 +1451,7 @@
 		const allX = entries.map(e => e.x);
 		const xMin = Math.min(0, ...allX), xMax = Math.max(100, ...allX);
 		for (const [z, hex] of colPlanes) {
-			const c = new THREE.Color(hex).multiplyScalar(0.18);
+			const c = new THREE.Color(hex).multiplyScalar(0.45); // visible on smoke-gray
 			gPos.push(xMin, -300, z, xMax, -300, z, xMin, 800, z, xMax, 800, z, xMin, -300, z, xMin, 800, z, xMax, -300, z, xMax, 800, z);
 			for (let k = 0; k < 8; k++) gCol3.push(c.r, c.g, c.b);
 		}
@@ -1455,6 +1459,38 @@
 		ggeo.setAttribute('position', new THREE.Float32BufferAttribute(gPos, 3));
 		ggeo.setAttribute('color', new THREE.Float32BufferAttribute(gCol3, 3));
 		scene.add(new THREE.LineSegments(ggeo, new THREE.LineBasicMaterial({ vertexColors: true })));
+
+		// ── Time axis: horizontal tick lines + year labels ────────────────────────
+		const yVals = [...docYMap.values()].filter(v => v !== 0);
+		if (yVals.length) {
+			const yMin = Math.min(...yVals), yMax = Math.max(...yVals);
+			const yearMin = Math.floor((yMin / 60) + 2010 - 1);
+			const yearMax = Math.ceil((yMax  / 60) + 2010 + 1);
+			const tickPts = [], tickCols = [];
+			const tickColor = new THREE.Color('#e2e8f0').multiplyScalar(0.5);
+			const tickX = xMin - 20;
+			for (let yr = yearMin; yr <= yearMax; yr += 5) {
+				const ty = (yr - 2010) * 60;
+				// Horizontal tick line across DOC column
+				tickPts.push(tickX - 15, ty, Z_DOC, xMax + 10, ty, Z_DOC);
+				for (let k = 0; k < 2; k++) tickCols.push(tickColor.r, tickColor.g, tickColor.b);
+				// CSS label div for year
+				const ydiv = document.createElement('div');
+				ydiv.dataset.lk = 'year:' + yr;
+				ydiv.style.cssText = 'position:absolute;font:9px ui-monospace,monospace;color:#e2e8f0;pointer-events:none;transform:translateY(-50%);opacity:0.7;font-weight:600;';
+				ydiv.textContent = yr;
+				if (labelContainer) labelContainer.appendChild(ydiv);
+				G3D.labelEls.push(ydiv);
+				// Store world pos for projection
+				nodePos.set('year:' + yr, { x: tickX - 22, y: ty, z: Z_DOC, r: 0, node: { title: String(yr) }, colKey: '_year' });
+			}
+			if (tickPts.length) {
+				const tgeo = new THREE.BufferGeometry();
+				tgeo.setAttribute('position', new THREE.Float32BufferAttribute(tickPts, 3));
+				tgeo.setAttribute('color', new THREE.Float32BufferAttribute(tickCols, 3));
+				scene.add(new THREE.LineSegments(tgeo, new THREE.LineBasicMaterial({ vertexColors: true })));
+			}
+		}
 
 		// ── CSS labels for docs and tags ──────────────────────────────────────────
 		const labelContainer = document.getElementById('graph-labels');
@@ -1510,7 +1546,17 @@
 			} else if (tip) tip.style.display = 'none';
 		};
 		canvas.onmouseleave = () => { if (tip) tip.style.display = 'none'; };
+
+		// Drag guard: OrbitControls also handles pointerdown so onclick fires after drags too.
+		// Track pointer-down position and ignore click if moved > 5px.
+		let _pDown = null;
+		canvas.onpointerdown = (ev) => { _pDown = { x: ev.clientX, y: ev.clientY }; };
 		canvas.onclick = (ev) => {
+			if (_pDown) {
+				const dx = ev.clientX - _pDown.x, dy = ev.clientY - _pDown.y;
+				if (dx * dx + dy * dy > 25) { _pDown = null; return; } // was a drag
+			}
+			_pDown = null;
 			const rect = canvas.getBoundingClientRect();
 			ptr.x = ((ev.clientX - rect.left) / rect.width)  * 2 - 1;
 			ptr.y = -((ev.clientY - rect.top)  / rect.height) * 2 + 1;
