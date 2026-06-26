@@ -1064,7 +1064,7 @@
 
 	const G3D = {
 		renderer: null, scene: null, camera: null, controls: null,
-		nodeMesh: null, lineMesh: null, auraPoints: {}, selRing: null, selEdges: null,
+		nodeMesh: null, lineMesh: null, auraPoints: {}, selRing: null, selEdges: null, discPlanes: [],
 		labelEls: [], tooltipEl: null,
 		nodeEntries: [], keyToIdx: new Map(),
 		animId: null, onSelect: null,
@@ -1128,7 +1128,7 @@
 			});
 			while (G3D.scene.children.length) G3D.scene.remove(G3D.scene.children[0]);
 		}
-		G3D.nodeMesh = null; G3D.lineMesh = null; G3D.auraPoints = {}; G3D.selRing = null; G3D.selEdges = null;
+		G3D.nodeMesh = null; G3D.lineMesh = null; G3D.auraPoints = {}; G3D.selRing = null; G3D.selEdges = null; G3D.discPlanes = [];
 		for (const el of G3D.labelEls) el.remove();
 		G3D.labelEls = [];
 		const cv = G3D.renderer && G3D.renderer.domElement;
@@ -1505,6 +1505,23 @@
 			scene.add(new THREE.LineSegments(rgeo, new THREE.LineBasicMaterial({ vertexColors: true, transparent: true, opacity: 0.45 })));
 		});
 
+		// a2) Transparent disc planes (clickable — click shows all edges for that doc)
+		G3D.discPlanes = [];
+		sortedDocs.forEach((d, di) => {
+			const dk  = d._key || d.id;
+			const dz  = docDiscZ.get(dk) ?? di * Z_SPACING;
+			const dr  = (docDiscR.get(dk) ?? maxDiscR) + 18;
+			const hex = _nodeColorHex(d, 'document', colorMode);
+			const planeMesh = new THREE.Mesh(
+				new THREE.CircleGeometry(dr, 64),
+				new THREE.MeshBasicMaterial({ color: new THREE.Color(hex), transparent: true, opacity: 0.04, side: THREE.DoubleSide, depthWrite: false })
+			);
+			planeMesh.position.set(0, 0, dz);
+			planeMesh.userData.docKey = dk;
+			scene.add(planeMesh);
+			G3D.discPlanes.push(planeMesh);
+		});
+
 		// b) Tunnel spine (Z axis line)
 		{
 			const spGeo = new THREE.BufferGeometry();
@@ -1619,17 +1636,50 @@
 			ptr.x = ((ev.clientX - rect.left) / rect.width)  * 2 - 1;
 			ptr.y = -((ev.clientY - rect.top)  / rect.height) * 2 + 1;
 			rc.setFromCamera(ptr, G3D.camera);
-			const hits = rc.intersectObject(G3D.nodeMesh);
-			if (!hits.length || !G3D.onSelect) return;
-			const e = G3D.nodeEntries[hits[0].instanceId];
+			// Clear previous selection edges
+			if (G3D.selEdges) { scene.remove(G3D.selEdges); G3D.selEdges.geometry.dispose(); G3D.selEdges = null; }
+
+			// Check disc planes first (larger target, checked after nodes)
+			const nodeHits = rc.intersectObject(G3D.nodeMesh);
+			const discHits = G3D.discPlanes.length ? rc.intersectObjects(G3D.discPlanes) : [];
+
+			// Prefer node hit if closer than disc hit
+			const useDisc = !nodeHits.length || (discHits.length && discHits[0].distance < nodeHits[0].distance - 5);
+
+			if (useDisc && discHits.length) {
+				// Disc click: show all radial edges for that document
+				const dk    = discHits[0].object.userData.docKey;
+				const dz    = docDiscZ.get(dk);
+				const docP  = nodePos.get(dk);
+				if (docP != null) {
+					const sePts = [], seCol = [];
+					const sc = new THREE.Color('#60a5fa');
+					for (const [key, p] of nodePos) {
+						if (key === dk || !Number.isFinite(p.z) || Math.abs(p.z - dz) > 1) continue;
+						if (p.colKey === '_label') continue;
+						sePts.push(docP.x, docP.y, docP.z,  p.x, p.y, p.z);
+						seCol.push(sc.r, sc.g, sc.b,  sc.r, sc.g, sc.b);
+					}
+					if (sePts.length) {
+						const segeo = new THREE.BufferGeometry();
+						segeo.setAttribute('position', new THREE.Float32BufferAttribute(sePts, 3));
+						segeo.setAttribute('color',    new THREE.Float32BufferAttribute(seCol, 3));
+						G3D.selEdges = new THREE.LineSegments(segeo, new THREE.LineBasicMaterial({ vertexColors: true, transparent: true, opacity: 0.35 }));
+						scene.add(G3D.selEdges);
+					}
+				}
+				return;
+			}
+
+			if (!nodeHits.length || !G3D.onSelect) return;
+			const e = G3D.nodeEntries[nodeHits[0].instanceId];
 			if (!e) return;
 			const payload = e.colKey === 'tag'
 				? { type:'SumoTag', _key:e.key, _id:'tags/'+e.node.title, title:e.node.title, sumo_tags:[], _tagCount:e.node._tagCount }
 				: e.node;
 			G3D.onSelect(payload);
 
-			// Build selection edges to related nodes
-			if (G3D.selEdges) { scene.remove(G3D.selEdges); G3D.selEdges.geometry.dispose(); G3D.selEdges = null; }
+			// Build selection edges to directly related nodes
 			const sPos = nodePos.get(e.key);
 			const rels  = relatedKeys.get(e.key);
 			if (sPos && rels && rels.size) {
