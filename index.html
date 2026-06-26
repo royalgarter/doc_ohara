@@ -1353,7 +1353,7 @@
 			const ez  = ((h >>> 8) & 0xff) / 255 * totalZ;
 			nodePos.set(e._key || e.id, {
 				x: r * Math.cos(theta), y: r * Math.sin(theta), z: ez,
-				r: 5, node: e, colKey: 'entity', decayClass: _dc(e),
+				r: 9, node: e, colKey: 'entity', decayClass: _dc(e),
 			});
 		});
 
@@ -1365,7 +1365,7 @@
 			const tz  = ((h >>> 8) & 0xff) / 255 * totalZ;
 			nodePos.set(t._key, {
 				x: r * Math.cos(theta), y: r * Math.sin(theta), z: tz,
-				r: 5, node: t, colKey: 'tag', decayClass: null,
+				r: 9, node: t, colKey: 'tag', decayClass: null,
 			});
 		});
 
@@ -1653,12 +1653,12 @@
 				const docP  = nodePos.get(dk);
 				if (docP != null) {
 					const sePts = [], seCol = [];
-					const sc = new THREE.Color('#60a5fa');
 					for (const [key, p] of nodePos) {
 						if (key === dk || !Number.isFinite(p.z) || Math.abs(p.z - dz) > 1) continue;
 						if (p.colKey === '_label') continue;
+						const dc = new THREE.Color(_nodeColorHex(p.node, p.colKey, colorMode));
 						sePts.push(docP.x, docP.y, docP.z,  p.x, p.y, p.z);
-						seCol.push(sc.r, sc.g, sc.b,  sc.r, sc.g, sc.b);
+						seCol.push(dc.r, dc.g, dc.b,  dc.r, dc.g, dc.b);
 					}
 					if (sePts.length) {
 						const segeo = new THREE.BufferGeometry();
@@ -1679,15 +1679,16 @@
 				: e.node;
 			G3D.onSelect(payload);
 
-			// Build selection edges to directly related nodes
+			// Build selection edges to directly related nodes (edge color = destination node color)
 			const sPos = nodePos.get(e.key);
-			const rels  = relatedKeys.get(e.key);
-			if (sPos && rels && rels.size) {
+			if (sPos && relatedKeys.size) {
 				const sePts = [], seCol = [];
-				const sc = new THREE.Color('#60a5fa');
-				for (const rk of rels) {
+				for (const rk of relatedKeys) {
 					const rp = nodePos.get(rk);
-					if (rp) { sePts.push(sPos.x, sPos.y, sPos.z,  rp.x, rp.y, rp.z); seCol.push(sc.r, sc.g, sc.b,  sc.r, sc.g, sc.b); }
+					if (!rp) continue;
+					const dc = new THREE.Color(_nodeColorHex(rp.node, rp.colKey, colorMode));
+					sePts.push(sPos.x, sPos.y, sPos.z,  rp.x, rp.y, rp.z);
+					seCol.push(dc.r, dc.g, dc.b,  dc.r, dc.g, dc.b);
 				}
 				if (sePts.length) {
 					const segeo = new THREE.BufferGeometry();
