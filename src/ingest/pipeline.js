@@ -313,8 +313,8 @@ ${content}
 // Attempt to run LiteParse CLI to convert source to Markdown
 function attemptLiteParse(sourcePath, outMdPath) {
 	try {
-		// sample command: lit parse sample/Mastering\ Bitcoin\ 2nd.pdf --format markdown -o mastering_bitcoin_2nd.md
-		const cmd = `lit parse "${sourcePath}" --format markdown -o "${outMdPath}"`;
+		// sample command: npx -y @llamaindex/liteparse parse sample/Mastering\ Bitcoin\ 2nd.pdf --format markdown -o mastering_bitcoin_2nd.md
+		const cmd = `npx -y @llamaindex/liteparse parse '${sourcePath}' --format markdown -o '${outMdPath}'`;
 		execSync(cmd, { stdio: 'ignore' });
 		return fs.existsSync(outMdPath);
 	} catch (err) {
