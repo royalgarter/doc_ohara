@@ -7,6 +7,8 @@
 	<title>Doc Ohara</title>
 	<link rel="stylesheet" href="https://cdn.html-first.com/litewind-2.0.1.css" />
 	<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 	<style>
 		/* Utilities litewind (a fixed-class subset of Tailwind) doesn't ship —
 			 kept to the smallest possible set instead of pulling in the full build. */
@@ -438,11 +440,10 @@
 		<!-- ── Right: graph canvas + inspector ────────────────────────────────── -->
 		<div class="flex flex-col flex-1 min-w-0 overflow-hidden bg-gray-200">
 
-			<!-- SVG canvas -->
-			<div class="flex-1 overflow-auto relative bg-gray-950" id="graph-container">
-				<div id="graph-scale-wrapper" style="position:relative;">
-					<svg id="graph-svg" preserveAspectRatio="xMidYMid meet" style="position:absolute; top:0; left:0; transform-origin:0 0;"></svg>
-				</div>
+			<!-- 3D Space-Time Graph canvas -->
+			<div class="flex-1 overflow-hidden relative bg-gray-950" id="graph-container" style="min-height:300px;">
+				<canvas id="graph-canvas" style="display:block;width:100%;height:100%;"></canvas>
+				<div id="graph-labels" style="position:absolute;inset:0;pointer-events:none;overflow:hidden;"></div>
 
 				<!-- Clear selection button overlay -->
 				<div x-show="selectedNode" class="absolute top-2 left-2 z-10 select-none">
@@ -652,36 +653,12 @@
 					if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
 					if (e.key === '+' || e.key === '=') { e.preventDefault(); this.zoomIn(); }
 					else if (e.key === '-') { e.preventDefault(); this.zoomOut(); }
-					else if (e.key === '0') { e.preventDefault(); this.graphZoom = 1.0; this.renderCurrentGraph(); }
+					else if (e.key === '0') { e.preventDefault(); this.graphZoom = 1.0; _g3dResetCamera(); }
 				});
 			},
 
-			_zoomTimer: null,
-			zoomIn()  { this.graphZoom = Math.min(this.graphZoom + 0.2, 4.0); this.scheduleZoom(); },
-			zoomOut() { this.graphZoom = Math.max(this.graphZoom - 0.2, 0.2); this.scheduleZoom(); },
-
-			scheduleZoom() {
-				if (this._zoomTimer) cancelAnimationFrame(this._zoomTimer);
-				this._zoomTimer = requestAnimationFrame(() => {
-					this._zoomTimer = null;
-					this.applyZoom();
-				});
-			},
-
-			applyZoom() {
-				// Scale via CSS transform (GPU-composited) instead of resizing width/height —
-				// resizing forces the browser to re-rasterize the SVG (incl. blur filters) on
-				// every frame, which is what made zoom feel laggy.
-				const svg = document.getElementById('graph-svg');
-				const wrapper = document.getElementById('graph-scale-wrapper');
-				if (!svg || !wrapper) return;
-				const baseW = parseFloat(svg.dataset.baseW || '0');
-				const baseH = parseFloat(svg.dataset.baseH || '0');
-				if (!baseW || !baseH) return;
-				svg.style.transform = 'scale(' + this.graphZoom + ')';
-				wrapper.style.width  = Math.round(baseW * this.graphZoom) + 'px';
-				wrapper.style.height = Math.round(baseH * this.graphZoom) + 'px';
-			},
+			zoomIn()  { _g3dZoom(0.75); },
+			zoomOut() { _g3dZoom(1.33); },
 
 			// Initial page-load fetch: documents list only. The full graph (sections/
 			// paragraphs/tables) loads per-document on selection; entities/SUMO tags/
@@ -1079,400 +1056,502 @@
 		return FIXED_COLORS[ck] || '#475569';
 	}
 
+	// ── Three.js 3D Space-Time Graph Renderer ────────────────────────────────────
+	// Nodes: InstancedMesh (1 draw call). Edges: LineSegments (1 draw call).
+	// Decay aura: 4× Points with additive blending. OrbitControls for navigation.
+	// Y axis = TIME (published_date). Z axis = structural depth. X = node index.
+
+	const G3D = {
+		renderer: null, scene: null, camera: null, controls: null,
+		nodeMesh: null, lineMesh: null, auraPoints: {}, selRing: null,
+		labelEls: [], tooltipEl: null,
+		nodeEntries: [], keyToIdx: new Map(),
+		animId: null, onSelect: null,
+		ZOOM_BASE: 2000, initialized: false,
+	};
+
+	const _glowCache = {};
+	function _glowTex(hex) {
+		if (_glowCache[hex]) return _glowCache[hex];
+		const sz = 64, c = document.createElement('canvas');
+		c.width = c.height = sz;
+		const ctx = c.getContext('2d'), cx = sz / 2;
+		// Convert #rrggbb hex to r,g,b integers for rgba()
+		const hr = parseInt(hex.slice(1,3),16), hg = parseInt(hex.slice(3,5),16), hb = parseInt(hex.slice(5,7),16);
+		const rgba = (a) => `rgba(${hr},${hg},${hb},${a})`;
+		const g = ctx.createRadialGradient(cx, cx, 0, cx, cx, cx);
+		g.addColorStop(0,   rgba(1));
+		g.addColorStop(0.3, rgba(0.67));
+		g.addColorStop(0.7, rgba(0.2));
+		g.addColorStop(1,   rgba(0));
+		ctx.fillStyle = g; ctx.fillRect(0, 0, sz, sz);
+		const t = new THREE.CanvasTexture(c);
+		_glowCache[hex] = t;
+		return t;
+	}
+
+	function _dateToY(str) {
+		if (!str) return null;
+		const d = new Date(/^\d{4}$/.test(str) ? str + '-07-01' : str);
+		if (isNaN(d)) return null;
+		return (d.getFullYear() - 2010) * 60;
+	}
+
+	function _nodeColorHex(node, colKey, colorMode) {
+		if (colorMode === 'sumo') {
+			const tags = node.sumo_tags || [];
+			if (tags.length) {
+				let h = 0; for (const c of tags[0]) h = (h * 31 + c.charCodeAt(0)) & 0xffff;
+				return CLUSTER_PALETTE[h % CLUSTER_PALETTE.length];
+			}
+		}
+		if (colKey === 'tag') return '#4ade80';
+		if (colKey === 'entity') return '#fb7185';
+		if (colKey === 'document') return '#38bdf8';
+		if (colKey.startsWith('section_L')) {
+			const lvl = parseInt(colKey.replace('section_L',''), 10);
+			return LEVEL_COLORS[(lvl - 1) % LEVEL_COLORS.length];
+		}
+		return FIXED_COLORS[colKey] || '#fbbf24';
+	}
+
+	function _disposeG3D() {
+		if (G3D.animId) { cancelAnimationFrame(G3D.animId); G3D.animId = null; }
+		if (G3D.scene) {
+			G3D.scene.traverse(o => {
+				if (o.geometry) o.geometry.dispose();
+				if (o.material) {
+					const mats = Array.isArray(o.material) ? o.material : [o.material];
+					mats.forEach(m => { if (m.map) m.map.dispose(); m.dispose(); });
+				}
+			});
+			while (G3D.scene.children.length) G3D.scene.remove(G3D.scene.children[0]);
+		}
+		G3D.nodeMesh = null; G3D.lineMesh = null; G3D.auraPoints = {}; G3D.selRing = null;
+		for (const el of G3D.labelEls) el.remove();
+		G3D.labelEls = [];
+		const cv = G3D.renderer && G3D.renderer.domElement;
+		if (cv) { cv.onmousemove = null; cv.onmouseleave = null; cv.onclick = null; }
+	}
+
+	function _initG3D() {
+		const container = document.getElementById('graph-container');
+		const canvas = document.getElementById('graph-canvas');
+		if (!container || !canvas) return;
+		const w = container.clientWidth || 800, h = container.clientHeight || 600;
+
+		const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+		renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+		renderer.setSize(w, h);
+		renderer.setClearColor(0x030712, 1);
+
+		const scene = new THREE.Scene();
+		const camera = new THREE.PerspectiveCamera(55, w / h, 1, 20000);
+		camera.position.set(300, 200, G3D.ZOOM_BASE);
+
+		const controls = new THREE.OrbitControls(camera, renderer.domElement);
+		controls.target.set(300, 0, 700);
+		controls.enableDamping = true;
+		controls.dampingFactor = 0.1;
+		controls.screenSpacePanning = true;
+		controls.minDistance = 80;
+		controls.maxDistance = 9000;
+		controls.update();
+
+		// Update Alpine graphZoom display on camera move
+		controls.addEventListener('change', () => {
+			try {
+				const dist = camera.position.distanceTo(controls.target);
+				const comp = Alpine.$data(document.querySelector('[x-data]'));
+				if (comp) comp.graphZoom = Math.round(G3D.ZOOM_BASE / dist * 10) / 10;
+			} catch(_) {}
+		});
+
+		// Resize observer
+		new ResizeObserver(() => {
+			const w2 = container.clientWidth, h2 = container.clientHeight;
+			if (w2 > 0 && h2 > 0) {
+				renderer.setSize(w2, h2);
+				camera.aspect = w2 / h2;
+				camera.updateProjectionMatrix();
+			}
+		}).observe(container);
+
+		// Tooltip
+		const tip = document.createElement('div');
+		tip.id = 'g3d-tooltip';
+		tip.style.cssText = 'position:absolute;background:rgba(2,6,23,.92);color:#94a3b8;font:10px ui-monospace,monospace;padding:3px 8px;border-radius:4px;pointer-events:none;white-space:nowrap;display:none;z-index:20;border:1px solid #1e293b;max-width:300px;overflow:hidden;text-overflow:ellipsis;';
+		container.appendChild(tip);
+
+		Object.assign(G3D, { renderer, scene, camera, controls, tooltipEl: tip, initialized: true });
+	}
+
+	function _g3dZoom(factor) {
+		if (!G3D.camera || !G3D.controls) return;
+		const dir = G3D.camera.position.clone().sub(G3D.controls.target).multiplyScalar(factor);
+		G3D.camera.position.copy(G3D.controls.target.clone().add(dir));
+		G3D.controls.update();
+	}
+
+	function _g3dResetCamera() {
+		if (!G3D.camera || !G3D.controls) return;
+		G3D.camera.position.set(300, 200, G3D.ZOOM_BASE);
+		G3D.controls.target.set(300, 0, 700);
+		G3D.controls.update();
+	}
+
 	function renderGraph(data, colorMode, selectedKey, zoom, selectedDocKeys, onSelect) {
-		const svg = document.getElementById('graph-svg');
-		if (!svg) return;
-		svg.innerHTML = '';
+		if (!window.THREE) return;
+		if (!G3D.initialized) _initG3D();
+		if (!G3D.renderer) return;
+
+		_disposeG3D();
+
+		G3D.onSelect = onSelect;
+		const { scene, camera, controls } = G3D;
 
 		let { documents, sections, paragraphs, tables, edges } = data;
 		let entities = data.entities || [];
 
-		// sections/paragraphs/tables/entities are already scoped server-side to the
-		// current selection (see loadDocGraph/expandNode) — only the document column
-		// (always the full doc list) still needs filtering down to what's selected.
-		if (selectedDocKeys && selectedDocKeys.size > 0) {
+		if (selectedDocKeys && selectedDocKeys.size > 0)
 			documents = documents.filter(d => selectedDocKeys.has(d._key || d.id));
-		}
-		// Most-mentioned entities first so the column reads top-to-bottom by relevance
+
 		entities = [...entities].sort((a, b) => (b.mention_count || 0) - (a.mention_count || 0));
 
-		// ── Build virtual SUMO tag nodes ──────────────────────────────────────
+		// Virtual SUMO tag nodes
 		const tagCounts = {};
-		for (const p of paragraphs) {
-			for (const t of (p.sumo_tags || [])) tagCounts[t] = (tagCounts[t] || 0) + 1;
+		for (const p of paragraphs) for (const t of (p.sumo_tags || [])) tagCounts[t] = (tagCounts[t] || 0) + 1;
+		const tagNodes = Object.entries(tagCounts).sort((a, b) => b[1] - a[1]).slice(0, 25)
+			.map(([name, cnt]) => ({ _key: 'tag:' + name, _id: 'tags/' + name, type: 'tag', title: name, sumo_tags: [], _tagCount: cnt }));
+
+		// Section levels
+		const secByLvl = new Map();
+		for (const s of sections) { const l = s.level || 1; if (!secByLvl.has(l)) secByLvl.set(l, []); secByLvl.get(l).push(s); }
+		const levelNums = [...secByLvl.keys()].sort((a, b) => a - b);
+
+		// Column wrap counts
+		const wrapCols = n => n > 200 ? 5 : n > 80 ? 4 : n > 40 ? 3 : n > 15 ? 2 : 1;
+		const PCOLS = wrapCols(paragraphs.length);
+		const ECOLS = wrapCols(entities.length);
+
+		// Document Y = time axis
+		const docYMap = new Map();
+		for (const d of documents) {
+			const y = _dateToY(d.published_date || d.temporal_coverage_start);
+			docYMap.set(d._key || d.id, y !== null ? y : 0);
 		}
-		const tagNodes = Object.entries(tagCounts)
-			.sort((a, b) => b[1] - a[1])
-			.slice(0, 25)
-			.map(([name, count]) => ({
-				_key: 'tag:' + name, _id: 'tags/' + name, type: 'tag', title: name, _tagCount: count,
-			}));
 
-		// ── Compute distinct section levels present in data ────────────────────
-		// Sections: render all (lazy load means this set is already correct)
-		// Paragraphs/tables: render all loaded (they arrive incrementally via neighbor fetch)
-		const sampledSec  = sections;
-		const sampledPara = paragraphs;
-		const sampledTbl  = tables;
-
-		// group sections by level
-		const sectionsByLevel = new Map(); // level(int) → section[]
-		for (const s of sampledSec) {
-			const lvl = s.level || 1;
-			if (!sectionsByLevel.has(lvl)) sectionsByLevel.set(lvl, []);
-			sectionsByLevel.get(lvl).push(s);
-		}
-		const levelNums = [...sectionsByLevel.keys()].sort((a, b) => a - b);
-		const numLevels = levelNums.length || 0;
-
-		// Paragraphs/figures and entities are usually the most numerous node types
-		// by far — wrap each into a few side-by-side sub-columns instead of one
-		// very tall column.
-		function wrapCols(n) {
-			if (n > 200) return 5;
-			if (n > 80)  return 4;
-			if (n > 40)  return 3;
-			if (n > 15)  return 2;
-			return 1;
-		}
-		const PARA_COLS    = wrapCols(sampledPara.length);
-		const PARA_SUBGAP  = 26;
-		const paraRows      = Math.ceil(sampledPara.length / PARA_COLS) || 1;
-
-		const ENTITY_COLS   = wrapCols(entities.length);
-		const ENTITY_SUBGAP = 26;
-		const entityRows     = Math.ceil(entities.length / ENTITY_COLS) || 1;
-
-		// ── Dynamic column x positions ────────────────────────────────────────
-		const DOC_X   = 70;
-		const SEC_GAP   = 150;             // gap between level columns
-		const SEC_START = DOC_X + SEC_GAP;    // x of first section level column
-		const PARA_X  = SEC_START + numLevels * SEC_GAP + 20;
-		const ENTITY_X = PARA_X + (PARA_COLS - 1) * PARA_SUBGAP + SEC_GAP;
-		const TAG_X   = ENTITY_X + (ENTITY_COLS - 1) * ENTITY_SUBGAP + SEC_GAP;
-		const svgW    = TAG_X + 115;
-
-		const levelToX = {};
-		levelNums.forEach((lvl, i) => { levelToX[lvl] = SEC_START + i * SEC_GAP; });
-
-		// Row height: at least 14px so 5px-radius nodes never overlap.
-		// The container is overflow-auto so the SVG can be as tall as needed.
-		const columnHeightsPreview = [documents.length, paraRows, entityRows,
-			...levelNums.map(l => sectionsByLevel.get(l).length)];
-		const tallestPreview = Math.max(...columnHeightsPreview, 1);
-		const ROW_H = Math.max(14, Math.min(26, Math.floor(2400 / tallestPreview)));
-		const PAD_Y = 100;
+		// Z column positions (structural depth)
+		const Z_GAP = 220;
+		const Z_DOC   = 0;
+		const Z_SECS  = levelNums.map((_, i) => Z_DOC + (i + 1) * Z_GAP);
+		const Z_PARA  = Z_DOC + (levelNums.length + 1) * Z_GAP;
+		const Z_ENT   = Z_PARA + Z_GAP * 1.6;
+		const Z_TAG   = Z_ENT  + Z_GAP * 1.5;
 
 		const nodePos = new Map();
+		const XS = 20, XSB = 28;
 
-		function placeColumn(nodes, colKey, x) {
+		function placeFlat(nodes, colKey, z) {
 			nodes.forEach((node, i) => {
-				const key = node._key || node.id || colKey + '_' + i;
-				nodePos.set(key, { x, y: PAD_Y + i * ROW_H, node, colKey });
+				const key = node._key || node.id || (colKey + i);
+				const docKey = node.document_id;
+				const dY = docYMap.get(docKey) ?? 0;
+				const r = colKey === 'document' ? 10 : colKey.startsWith('section_L') ? 7 : 5;
+				nodePos.set(key, { x: i * XS, y: dY + i * 0.5, z, r, node, colKey,
+					decayClass: node.effective_decay_class || node.document_effective_decay_class || node.decay_class || null });
 			});
 		}
-
-		// Wraps nodes across `cols` side-by-side sub-columns (column-major fill)
-		// instead of one tall column — keeps the paragraph block roughly square.
-		function placeColumnWrapped(nodes, colKey, xStart, cols, subGap) {
+		function placeWrapped(nodes, colKey, z0, cols) {
 			const rows = Math.ceil(nodes.length / cols) || 1;
 			nodes.forEach((node, i) => {
-				const key = node._key || node.id || colKey + '_' + i;
-				const col = Math.floor(i / rows);
-				const row = i % rows;
-				nodePos.set(key, { x: xStart + col * subGap, y: PAD_Y + row * ROW_H, node, colKey });
+				const key = node._key || node.id || (colKey + i);
+				const col = Math.floor(i / rows), row = i % rows;
+				const docKey = node.document_id;
+				const dY = docYMap.get(docKey) ?? 0;
+				nodePos.set(key, { x: col * XSB, y: dY + row * 3, z: z0, r: 5, node, colKey,
+					decayClass: node.effective_decay_class || node.document_effective_decay_class || node.decay_class || null });
 			});
 		}
 
-		placeColumn(documents,   'document', DOC_X);
-		for (const lvl of levelNums) {
-			placeColumn(sectionsByLevel.get(lvl), 'section_L' + lvl, levelToX[lvl]);
-		}
-		placeColumnWrapped(sampledPara, 'paragraph', PARA_X, PARA_COLS, PARA_SUBGAP);
-		if (sampledTbl.length > 0) placeColumn(sampledTbl, 'table', PARA_X + (PARA_COLS - 1) * PARA_SUBGAP + 35);
-		placeColumnWrapped(entities, 'entity', ENTITY_X, ENTITY_COLS, ENTITY_SUBGAP);
-		placeColumn(tagNodes,    'tag',        TAG_X);
+		placeFlat(documents, 'document', Z_DOC);
+		levelNums.forEach((lvl, i) => placeFlat(secByLvl.get(lvl), 'section_L' + lvl, Z_SECS[i]));
+		placeWrapped(paragraphs, 'paragraph', Z_PARA, PCOLS);
+		if (tables.length) placeFlat(tables, 'table', Z_PARA + 10);
+		placeWrapped(entities, 'entity', Z_ENT, ECOLS);
+		placeFlat(tagNodes, 'tag', Z_TAG);
 
-		// ── Compute related keys for the selected node ─────────────────────────
-
-		// Pre-build parent-chain lookup from HAS_CHILD edges so we can walk
-		// from any node all the way up to the root document in O(depth).
-		const parentOf = new Map(); // childKey → { key: parentKey, edgeId }
-		for (const edge of edges) {
-			if (edge.relation === 'HAS_CHILD') {
-				const fk  = (edge._from || '').split('/')[1];
-				const tk  = (edge._to   || '').split('/')[1];
-				const eid = edge._key || (edge._from + '→' + edge._to);
-				if (fk && tk) parentOf.set(tk, { key: fk, edgeId: eid });
+		// Related-node computation (same logic as SVG version)
+		const parentOf = new Map();
+		for (const e of edges) {
+			if (e.relation === 'HAS_CHILD') {
+				const fk = (e._from || '').split('/')[1], tk = (e._to || '').split('/')[1];
+				if (fk && tk) parentOf.set(tk, fk);
 			}
 		}
-
-		// Walk every ancestor of startKey, adding them to relatedKeys/relatedEdgeIds.
-		function addAncestors(startKey) {
-			let cur = startKey;
-			while (parentOf.has(cur)) {
-				const { key: pk, edgeId } = parentOf.get(cur);
-				relatedKeys.add(pk);
-				relatedEdgeIds.add(edgeId);
-				cur = pk;
-			}
-		}
-
-		const relatedKeys    = new Set();
-		const relatedEdgeIds = new Set();
+		const relatedKeys = new Set(), relatedEdgeIds = new Set();
 		if (selectedKey) {
-			// 1. Direct 1-hop neighbors via all real edges
-			for (const edge of edges) {
-				const fk  = (edge._from || '').split('/')[1];
-				const tk  = (edge._to   || '').split('/')[1];
-				const eid = edge._key || (edge._from + '→' + edge._to);
+			for (const e of edges) {
+				const fk = (e._from || '').split('/')[1], tk = (e._to || '').split('/')[1];
+				const eid = e._key || (e._from + '→' + e._to);
 				if (fk === selectedKey || tk === selectedKey) {
 					relatedKeys.add(fk === selectedKey ? tk : fk);
 					relatedEdgeIds.add(eid);
 				}
 			}
-
-			// 2. Walk the full ancestor chain up to the root document
-			addAncestors(selectedKey);
-
-			// 3. Virtual tag edges: paragraph → its SUMO tags
-			for (const p of sampledPara) {
+			let cur = selectedKey;
+			while (parentOf.has(cur)) { const pk = parentOf.get(cur); relatedKeys.add(pk); cur = pk; }
+			for (const p of paragraphs) {
 				if (p._key !== selectedKey) continue;
-				for (const tagName of (p.sumo_tags || [])) relatedKeys.add('tag:' + tagName);
+				for (const t of (p.sumo_tags || [])) relatedKeys.add('tag:' + t);
 			}
-
-			// 4. SUMO tag selected: highlight all paragraphs with that tag AND their
-			//    full chains (paragraph → section → … → document)
 			const selEntry = nodePos.get(selectedKey);
 			if (selEntry && selEntry.colKey === 'tag') {
 				const tagName = selectedKey.replace('tag:', '');
-				for (const p of sampledPara) {
-					if ((p.sumo_tags || []).includes(tagName)) {
-						relatedKeys.add(p._key);
-						addAncestors(p._key);
-					}
+				for (const p of paragraphs) if ((p.sumo_tags || []).includes(tagName)) {
+					relatedKeys.add(p._key);
+					let c = p._key;
+					while (parentOf.has(c)) { relatedKeys.add(parentOf.get(c)); c = parentOf.get(c); }
 				}
 			}
 		}
+		const hasSel = !!selectedKey;
 
-		// ── SVG dimensions ────────────────────────────────────────────────────
-		const columnHeights = [documents.length, paraRows, entityRows, tagNodes.length,
-			...levelNums.map(l => sectionsByLevel.get(l).length)];
-		const tallest = Math.max(...columnHeights, 1);
-		const svgH = Math.max(PAD_Y + tallest * ROW_H + 30, 300);
+		// ── InstancedMesh for all nodes ───────────────────────────────────────────
+		const entries = [...nodePos.entries()].map(([key, p]) => ({ key, ...p }));
+		G3D.nodeEntries = entries;
+		G3D.keyToIdx = new Map(entries.map((e, i) => [e.key, i]));
 
-		svg.setAttribute('viewBox', '0 0 ' + svgW + ' ' + svgH);
-		svg.style.width  = Math.round(svgW) + 'px';
-		svg.style.height = Math.round(svgH) + 'px';
-		svg.dataset.baseW = svgW;
-		svg.dataset.baseH = svgH;
-		svg.style.transform = 'scale(' + zoom + ')';
-		const wrapper = document.getElementById('graph-scale-wrapper');
-		if (wrapper) {
-			wrapper.style.width  = Math.round(svgW * zoom) + 'px';
-			wrapper.style.height = Math.round(svgH * zoom) + 'px';
+		const totalN = entries.length;
+		if (totalN === 0) return;
+
+		const geo = new THREE.SphereGeometry(1, 8, 6);
+		const mat = new THREE.MeshBasicMaterial({ vertexColors: true });
+		const instMesh = new THREE.InstancedMesh(geo, mat, totalN);
+		instMesh.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(totalN * 3), 3);
+		instMesh.frustumCulled = false;
+
+		const dummy = new THREE.Object3D();
+		const col3 = new THREE.Color();
+		for (let i = 0; i < entries.length; i++) {
+			const { x, y, z, r, node, colKey, key } = entries[i];
+			const isSel = key === selectedKey;
+			const isRel = hasSel && relatedKeys.has(key);
+			const isDim = hasSel && !isSel && !isRel;
+			dummy.position.set(x, y, z);
+			dummy.scale.setScalar(isSel ? r * 1.6 : isRel ? r * 1.2 : r);
+			dummy.updateMatrix();
+			instMesh.setMatrixAt(i, dummy.matrix);
+			col3.set(_nodeColorHex(node, colKey, colorMode));
+			if (isDim) col3.multiplyScalar(0.12);
+			instMesh.setColorAt(i, col3);
+		}
+		instMesh.instanceMatrix.needsUpdate = true;
+		instMesh.instanceColor.needsUpdate = true;
+		scene.add(instMesh);
+		G3D.nodeMesh = instMesh;
+
+		// ── Selected-node billboard ring ──────────────────────────────────────────
+		if (selectedKey) {
+			const se = nodePos.get(selectedKey);
+			if (se) {
+				const ringGeo = new THREE.RingGeometry(se.r * 1.9, se.r * 2.4, 32);
+				const hex = _nodeColorHex(se.node, se.colKey, colorMode);
+				const ringMat = new THREE.MeshBasicMaterial({ color: hex, transparent: true, opacity: 0.75, side: THREE.DoubleSide });
+				const ring = new THREE.Mesh(ringGeo, ringMat);
+				ring.position.set(se.x, se.y, se.z);
+				ring.lookAt(camera.position);
+				scene.add(ring);
+				G3D.selRing = ring;
+			}
 		}
 
-
-		// ── Defs ──────────────────────────────────────────────────────────────
-		const defs = svgEl('defs');
-		const mkFilter = (id, std) => {
-			const f = svgEl('filter', { id, x: '-50%', y: '-50%', width: '200%', height: '200%' });
-			f.innerHTML = `<feGaussianBlur stdDeviation="${std}" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>`;
-			return f;
+		// ── LineSegments for edges ─────────────────────────────────────────────────
+		const ePos = [], eCol = [];
+		const addEdge = (fk, tk, virtual) => {
+			const fp = nodePos.get(fk), tp = nodePos.get(tk);
+			if (!fp || !tp) return;
+			const eid = fk + '→' + tk;
+			const isConn = hasSel && (relatedEdgeIds.has(eid) || (virtual && (fk === selectedKey || tk === selectedKey || relatedKeys.has(fk) || relatedKeys.has(tk))));
+			const dim = isConn ? (virtual ? 0.7 : 0.85) : (hasSel ? 0.03 : 0.18);
+			const c = new THREE.Color(isConn ? (virtual ? '#86efac' : '#60a5fa') : '#1e3a5f').multiplyScalar(dim);
+			ePos.push(fp.x, fp.y, fp.z, tp.x, tp.y, tp.z);
+			eCol.push(c.r, c.g, c.b, c.r, c.g, c.b);
 		};
-		defs.appendChild(mkFilter('glow', '2.5'));
-		defs.appendChild(mkFilter('glow-soft', '1.5'));
-		svg.appendChild(defs);
+		for (const e of edges) addEdge((e._from||'').split('/')[1], (e._to||'').split('/')[1], false);
+		for (const p of paragraphs) for (const t of (p.sumo_tags||[]).slice(0,3)) addEdge(p._key, 'tag:'+t, true);
+		if (ePos.length) {
+			const egeo = new THREE.BufferGeometry();
+			egeo.setAttribute('position', new THREE.Float32BufferAttribute(ePos, 3));
+			egeo.setAttribute('color', new THREE.Float32BufferAttribute(eCol, 3));
+			const lines = new THREE.LineSegments(egeo, new THREE.LineBasicMaterial({ vertexColors: true }));
+			scene.add(lines);
+			G3D.lineMesh = lines;
+		}
 
-		// ── Column guide lines + headers ──────────────────────────────────────
-		const guideG = svgEl('g');
+		// ── Decay aura Points (additive glow per decay class) ─────────────────────
+		const AURA = {
+			EVERGREEN: { hex: '#22d3ee', size: 18, op: 0.38 },
+			SCHOLARLY: { hex: '#818cf8', size: 30, op: 0.30 },
+			CURRENT:   { hex: '#fbbf24', size: 48, op: 0.22 },
+			EPHEMERAL: { hex: '#f87171', size: 72, op: 0.16 },
+		};
+		G3D.auraPoints = {};
+		for (const [cls, cfg] of Object.entries(AURA)) {
+			const pts = entries.filter(e => e.decayClass === cls);
+			if (!pts.length) continue;
+			const pos = new Float32Array(pts.length * 3);
+			pts.forEach((e, i) => { pos[i*3]=e.x; pos[i*3+1]=e.y; pos[i*3+2]=e.z; });
+			const ageo = new THREE.BufferGeometry();
+			ageo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+			const amat = new THREE.PointsMaterial({
+				color: new THREE.Color(cfg.hex), size: cfg.size, sizeAttenuation: true,
+				map: _glowTex(cfg.hex),
+				transparent: true, opacity: cfg.op,
+				blending: THREE.AdditiveBlending, depthWrite: false,
+			});
+			const ap = new THREE.Points(ageo, amat);
+			scene.add(ap);
+			G3D.auraPoints[cls] = { points: ap, mat: amat, baseOp: cfg.op };
+		}
 
-		const colDefs = [
-			[DOC_X, 'DOCUMENT', FIXED_COLORS.document],
-			...levelNums.map(lvl => [
-				levelToX[lvl],
-				'LEVEL ' + lvl,
-				LEVEL_COLORS[(lvl - 1) % LEVEL_COLORS.length],
-			]),
-			[PARA_X, 'PARA/FIG' + (PARA_COLS > 1 ? ' (×' + PARA_COLS + ')' : ''), FIXED_COLORS.paragraph],
-			[ENTITY_X, 'ENTITY' + (ENTITY_COLS > 1 ? ' (×' + ENTITY_COLS + ')' : ''), FIXED_COLORS.entity],
-			[TAG_X,  'SUMO TAG', FIXED_COLORS.tag],
+		// ── Column guide rails (faint vertical lines at each Z plane) ─────────────
+		const gPos = [], gCol3 = [];
+		const colPlanes = [
+			[Z_DOC, '#38bdf8'],
+			...levelNums.map((lvl, i) => [Z_SECS[i], LEVEL_COLORS[(lvl-1) % LEVEL_COLORS.length]]),
+			[Z_PARA, '#fbbf24'], [Z_ENT, '#fb7185'], [Z_TAG, '#4ade80'],
 		];
-
-		for (const [x, label, col] of colDefs) {
-			guideG.appendChild(svgEl('line', { x1: x, y1: 28, x2: x, y2: svgH - 8,
-				stroke: '#1e293b', 'stroke-width': '1' }));
-			const txt = svgEl('text', { x, y: 16, 'text-anchor': 'middle',
-				'font-size': '7', fill: col, opacity: '0.55', 'font-weight': '700',
-				'letter-spacing': '1', 'font-family': 'ui-monospace,monospace' });
-			txt.textContent = label;
-			guideG.appendChild(txt);
+		const allX = entries.map(e => e.x);
+		const xMin = Math.min(0, ...allX), xMax = Math.max(100, ...allX);
+		for (const [z, hex] of colPlanes) {
+			const c = new THREE.Color(hex).multiplyScalar(0.18);
+			gPos.push(xMin, -300, z, xMax, -300, z, xMin, 800, z, xMax, 800, z, xMin, -300, z, xMin, 800, z, xMax, -300, z, xMax, 800, z);
+			for (let k = 0; k < 8; k++) gCol3.push(c.r, c.g, c.b);
 		}
-		svg.appendChild(guideG);
+		const ggeo = new THREE.BufferGeometry();
+		ggeo.setAttribute('position', new THREE.Float32BufferAttribute(gPos, 3));
+		ggeo.setAttribute('color', new THREE.Float32BufferAttribute(gCol3, 3));
+		scene.add(new THREE.LineSegments(ggeo, new THREE.LineBasicMaterial({ vertexColors: true })));
 
-		// ── Edges ─────────────────────────────────────────────────────────────
-		const edgeG = svgEl('g', { id: 'edges' });
-		const hasSelection = !!selectedKey;
-
-		for (const edge of edges) {
-			const fk = (edge._from || '').split('/')[1];
-			const tk = (edge._to   || '').split('/')[1];
-			const fp = nodePos.get(fk);
-			const tp = nodePos.get(tk);
-			if (!fp || !tp) continue;
-
-			const edgeId      = edge._key || (edge._from + '→' + edge._to);
-			const isConnected = hasSelection && relatedEdgeIds.has(edgeId);
-
-			edgeG.appendChild(bezierEdge(fp.x, fp.y, tp.x, tp.y,
-				isConnected ? '#60a5fa' : '#334155',
-				isConnected ? '0.75' : (hasSelection ? '0.07' : '0.28'),
-				isConnected ? '1.2' : '0.7'));
+		// ── CSS labels for docs and tags ──────────────────────────────────────────
+		const labelContainer = document.getElementById('graph-labels');
+		const labelNodes = entries.filter(e => e.colKey === 'document' || e.colKey === 'tag');
+		for (const e of labelNodes) {
+			const el = document.createElement('div');
+			el.dataset.lk = e.key;
+			const hex = _nodeColorHex(e.node, e.colKey, colorMode);
+			el.style.cssText = `position:absolute;font:8px ui-monospace,monospace;color:${hex};pointer-events:none;white-space:nowrap;transform:translateY(-50%);opacity:0.8;text-shadow:0 0 4px #000;`;
+			const raw = e.colKey === 'tag' ? '#' + e.node.title : (e.node.title || e.node.source_file || e.key);
+			el.textContent = raw.length > 36 ? raw.slice(0, 35) + '…' : raw;
+			if (labelContainer) labelContainer.appendChild(el);
+			G3D.labelEls.push(el);
 		}
 
-		// virtual tag edges
-		for (const p of sampledPara) {
-			const pp = nodePos.get(p._key);
-			if (!pp) continue;
-			for (const tagName of (p.sumo_tags || []).slice(0, 3)) {
-				const tp = nodePos.get('tag:' + tagName);
-				if (!tp) continue;
-				const isRel = hasSelection && (p._key === selectedKey || relatedKeys.has(p._key) || relatedKeys.has('tag:' + tagName));
-				edgeG.appendChild(bezierEdge(pp.x, pp.y, tp.x, tp.y,
-					isRel ? '#86efac' : '#4ade80',
-					isRel ? '0.5' : (hasSelection ? '0.04' : '0.1'),
-					'0.6'));
+		// ── Raycaster + interaction ────────────────────────────────────────────────
+		const canvas = G3D.renderer.domElement;
+		const rc = new THREE.Raycaster();
+		const ptr = new THREE.Vector2();
+		const tip = G3D.tooltipEl;
+
+		function project3D(wp) {
+			const v = wp.clone().project(G3D.camera);
+			return { x: (v.x + 1) / 2 * canvas.clientWidth, y: (1 - v.y) / 2 * canvas.clientHeight };
+		}
+
+		function updateLabels() {
+			for (const el of G3D.labelEls) {
+				const key = el.dataset.lk;
+				const e = nodePos.get(key);
+				if (!e) continue;
+				const p = project3D(new THREE.Vector3(e.x, e.y, e.z));
+				el.style.left = (p.x + 10) + 'px';
+				el.style.top  = p.y + 'px';
 			}
 		}
 
-		svg.appendChild(edgeG);
+		canvas.onmousemove = (ev) => {
+			const rect = canvas.getBoundingClientRect();
+			ptr.x = ((ev.clientX - rect.left) / rect.width)  * 2 - 1;
+			ptr.y = -((ev.clientY - rect.top)  / rect.height) * 2 + 1;
+			rc.setFromCamera(ptr, G3D.camera);
+			const hits = rc.intersectObject(G3D.nodeMesh);
+			if (hits.length && tip) {
+				const e = G3D.nodeEntries[hits[0].instanceId];
+				if (e) {
+					const lbl = e.node.title || e.node.content?.slice(0,90) || e.node.name || e.key;
+					tip.textContent = lbl;
+					tip.style.display = 'block';
+					tip.style.left = (ev.clientX - rect.left + 14) + 'px';
+					tip.style.top  = (ev.clientY - rect.top  - 6)  + 'px';
+				}
+			} else if (tip) tip.style.display = 'none';
+		};
+		canvas.onmouseleave = () => { if (tip) tip.style.display = 'none'; };
+		canvas.onclick = (ev) => {
+			const rect = canvas.getBoundingClientRect();
+			ptr.x = ((ev.clientX - rect.left) / rect.width)  * 2 - 1;
+			ptr.y = -((ev.clientY - rect.top)  / rect.height) * 2 + 1;
+			rc.setFromCamera(ptr, G3D.camera);
+			const hits = rc.intersectObject(G3D.nodeMesh);
+			if (!hits.length || !G3D.onSelect) return;
+			const e = G3D.nodeEntries[hits[0].instanceId];
+			if (!e) return;
+			const payload = e.colKey === 'tag'
+				? { type:'SumoTag', _key:e.key, _id:'tags/'+e.node.title, title:e.node.title, sumo_tags:[], _tagCount:e.node._tagCount }
+				: e.node;
+			G3D.onSelect(payload);
+		};
 
-		// ── Nodes ─────────────────────────────────────────────────────────────
-		const nodeG = svgEl('g', { id: 'nodes' });
-
-		for (const [key, { x, y, node, colKey }] of nodePos) {
-			const isTag    = key.startsWith('tag:');
-			const isEntity = colKey === 'entity';
-			const isDoc    = colKey === 'document';
-			const isSec    = colKey.startsWith('section_L');
-			const color    = (colorMode === 'sumo' && !isTag)
-				? getNodeColor(node, 'sumo')
-				: getNodeColor(node, 'type');
-			const r        = isDoc ? 7 : (isTag || isEntity) ? 4 : 5;
-
-			const isSel     = key === selectedKey;
-			const isRelated = !isSel && hasSelection && relatedKeys.has(key);
-			const isDimmed  = hasSelection && !isSel && !isRelated;
-
-			const g = svgEl('g', { class: 'node-g', transform: 'translate(' + x + ',' + y + ')' });
-
-			if (isSel) {
-				g.appendChild(svgEl('circle', { r: r + 6, fill: color, opacity: '0.15', filter: 'url(#glow)' }));
-				g.appendChild(svgEl('circle', { r: r + 2.5, fill: 'none', stroke: color, 'stroke-width': '1.5', opacity: '0.8' }));
+		// ── Animation loop ────────────────────────────────────────────────────────
+		function animate() {
+			G3D.animId = requestAnimationFrame(animate);
+			controls.update();
+			// Pulse EPHEMERAL aura opacity
+			if (G3D.auraPoints.EPHEMERAL) {
+				const t = Date.now() * 0.0018;
+				G3D.auraPoints.EPHEMERAL.mat.opacity = G3D.auraPoints.EPHEMERAL.baseOp * (0.4 + 0.6 * (0.5 + 0.5 * Math.sin(t)));
 			}
-			if (isRelated) {
-				g.appendChild(svgEl('circle', { r: r + 3.5, fill: 'none', stroke: color, 'stroke-width': '1', opacity: '0.5', filter: 'url(#glow-soft)' }));
-			}
-
-			const fillOpacity = isSel ? '1' : isRelated ? '0.9' : isDimmed ? '0.12' : '0.65';
-			const circle = svgEl('circle', {
-				r, fill: color, 'fill-opacity': fillOpacity,
-				stroke: isSel ? color : 'none', 'stroke-width': '1.5',
-			});
-			g.appendChild(circle);
-
-			// section label count threshold: only label if ≤ 25 nodes in that level column
-			const secLvl = isSec ? parseInt(colKey.replace('section_L', ''), 10) : null;
-			const secCount = secLvl !== null ? (sectionsByLevel.get(secLvl) || []).length : 0;
-			// entities: only label when the column is short enough to read (else too dense)
-			const showLabel = isDoc || isTag || isSec || (isEntity && entityRows <= 40);
-
-			if (showLabel) {
-				const rawLabel = isTag ? '#' + node.title : isEntity ? (node.name || key) : (node.title || node.source_file || key);
-				const maxLen   = isDoc ? 60 : isSec ? 40 : 20;
-				const label    = rawLabel.length > maxLen ? rawLabel.slice(0, maxLen - 1) + '…' : rawLabel;
-				const txt = svgEl('text', {
-					'x': r + 4,
-					'y': 4,
-					'font-size':  isDoc ? '8' : isSec ? '7' : '6',
-					'fill': isDimmed ? '#1e293b' : isTag ? '#86efac' : isEntity ? '#fda4af' : isDoc ? '#cbd5e1' : '#94a3b8',
-					'font-family': 'ui-monospace,monospace',
-					'opacity': isDimmed ? '0.4' : '1',
-				});
-				txt.textContent = label;
-				g.appendChild(txt);
-			}
-
-			g.addEventListener('mouseenter', () => {
-				if (!isSel) { circle.setAttribute('r', r + 2); circle.setAttribute('fill-opacity', '1'); }
-			});
-			g.addEventListener('mouseleave', () => {
-				circle.setAttribute('r', r);
-				circle.setAttribute('fill-opacity', fillOpacity);
-			});
-			g.addEventListener('click', () => {
-				const payload = isTag
-					? { type: 'SumoTag', _key: key, _id: 'tags/' + node.title, title: node.title, sumo_tags: [], _tagCount: node._tagCount }
-					: node;
-				onSelect(payload);
-			});
-
-			g.dataset.nodeKey = key;
-			nodeG.appendChild(g);
+			// Keep selection ring facing camera
+			if (G3D.selRing) G3D.selRing.lookAt(G3D.camera.position);
+			updateLabels();
+			G3D.renderer.render(scene, camera);
 		}
+		animate();
 
-		svg.appendChild(nodeG);
-	}
+	}  // end renderGraph
 
-	// ── Helpers ───────────────────────────────────────────────────────────────
-
-	function svgEl(tag, attrs) {
-		const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
-		if (attrs) for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
-		return el;
-	}
-
-	function bezierEdge(x1, y1, x2, y2, stroke, opacity, width) {
-		const mx = (x1 + x2) / 2;
-		return svgEl('path', {
-			d: 'M' + x1 + ',' + y1 + ' C' + mx + ',' + y1 + ' ' + mx + ',' + y2 + ' ' + x2 + ',' + y2,
-			fill: 'none', stroke, 'stroke-width': width, opacity,
-		});
-	}
-
-	function sampleEvenly(arr, max) {
-		if (arr.length <= max) return arr;
-		const step = arr.length / max;
-		return Array.from({ length: max }, (_, i) => arr[Math.floor(i * step)]);
-	}
+	// ── pulseNode: animate scale on the instanced mesh entry ─────────────────
 
 	function pulseNode(key) {
-		const g = document.querySelector('[data-node-key="' + key + '"]');
-		if (!g) return;
-		const circle = g.querySelector('circle');
-		if (!circle) return;
-		const orig = circle.getAttribute('r');
-		circle.setAttribute('r', parseFloat(orig) + 6);
-		circle.setAttribute('fill-opacity', '1');
-		setTimeout(() => {
-			circle.setAttribute('r', orig);
-			circle.setAttribute('fill-opacity', '0.65');
-		}, 700);
+		const idx = G3D.keyToIdx && G3D.keyToIdx.get(key);
+		if (idx === undefined || !G3D.nodeMesh) return;
+		const e = G3D.nodeEntries[idx];
+		if (!e) return;
+		const dummy = new THREE.Object3D();
+		const origR = e.r;
+		let t = 0;
+		const step = () => {
+			t += 0.1;
+			const s = origR * (1 + 2 * Math.sin(t) * Math.max(0, 1 - t / Math.PI));
+			dummy.position.set(e.x, e.y, e.z);
+			dummy.scale.setScalar(s);
+			dummy.updateMatrix();
+			G3D.nodeMesh.setMatrixAt(idx, dummy.matrix);
+			G3D.nodeMesh.instanceMatrix.needsUpdate = true;
+			if (t < Math.PI) requestAnimationFrame(step);
+			else {
+				dummy.scale.setScalar(origR);
+				dummy.updateMatrix();
+				G3D.nodeMesh.setMatrixAt(idx, dummy.matrix);
+				G3D.nodeMesh.instanceMatrix.needsUpdate = true;
+			}
+		};
+		step();
 	}
 
-	function pulseDocumentNodes(docKey) {
-		document.querySelectorAll('[data-node-key]').forEach(g => {
-			const c = g.querySelector('circle');
-			if (c) c.setAttribute('fill-opacity', '0.08');
-		});
-		setTimeout(() => {
-			document.querySelectorAll('[data-node-key]').forEach(g => {
-				const c = g.querySelector('circle');
-				if (c) c.setAttribute('fill-opacity', '0.65');
-			});
-		}, 800);
-	}
+	function pulseDocumentNodes() { /* no-op in 3D — selection highlights handled by renderGraph */ }
+
 	</script>
 </body>
 </html>
