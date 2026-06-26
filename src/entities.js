@@ -46,6 +46,36 @@ function isOpaqueToken(str) {
 }
 
 /**
+ * Repairs mangled canonical names from LLM (e.g., "0-05-bitcoin" → "0.05 Bitcoin").
+ * Handles: decimals-as-hyphens (0-05), possessives (alice-s), multi-word (alice-bitcoin-address).
+ */
+function repairCanonicalName(s) {
+	// Pattern 1: decimal amounts like "0-05" or "0-05-bitcoin" → "0.05" or "0.05 Bitcoin"
+	// Match number-hyphen-2digits at start, then optional continuation
+	let fixed = s.replace(/^(\d+)-(\d{2})(-(.+))?$/, (_, int, dec, _dash, rest) => {
+		const num = `${int}.${dec}`;
+		return rest ? `${num} ${rest}` : num;
+	});
+
+	// Pattern 2: possessive like "alice-s-cafe" → "alice's-cafe" (preserve hyphen flow for title-casing)
+	fixed = fixed.replace(/-s-/g, "'s-");
+	fixed = fixed.replace(/-s$/g, "'s");
+
+	// Pattern 3: title-case all hyphenated tokens to "First Word" style
+	if (fixed.includes('-')) {
+		fixed = fixed.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+	} else if (fixed.includes(' ')) {
+		// spaces already present — title-case each word
+		fixed = fixed.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+	} else if (fixed.length > 0) {
+		// single word — capitalize first letter
+		fixed = fixed.charAt(0).toUpperCase() + fixed.slice(1);
+	}
+
+	return fixed;
+}
+
+/**
  * Validates and cleans a single raw entity object from LLM output.
  * Returns null if the entity is malformed or looks like an opaque identifier.
  */
@@ -53,7 +83,9 @@ function validateEntity(raw) {
 	if (!raw || typeof raw.canonical !== 'string' || !raw.canonical.trim()) return null;
 	if (!VALID_ENTITY_TYPES.has(raw.type)) return null;
 
-	const canonical = raw.canonical.trim();
+	let canonical = raw.canonical.trim();
+	// Repair common LLM mangling patterns in canonical names
+	canonical = repairCanonicalName(canonical);
 	if (isOpaqueToken(canonical)) return null;
 
 	const name = (typeof raw.name === 'string' && raw.name.trim()) ? raw.name.trim() : canonical;
@@ -141,4 +173,4 @@ function buildDocumentEntityMap(paragraphEntityArrays) {
 	return byNorm;
 }
 
-export { slugify, normalizeEntity, validateEntity, processNodeEntities, mergeEntities, buildDocumentEntityMap, isOpaqueToken };
+export { slugify, normalizeEntity, validateEntity, repairCanonicalName, processNodeEntities, mergeEntities, buildDocumentEntityMap, isOpaqueToken };
