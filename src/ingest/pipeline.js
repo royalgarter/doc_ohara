@@ -638,6 +638,26 @@ async function enrichCrossDocEdge(ai, docA, docB, snippetsA, snippetsB, sharedEn
 	}
 }
 
+// Generate a 2-3 sentence document context summary from the first chunk.
+// Result is cached so re-ingest on the same doc is free.
+async function generateDocContext(ai, firstChunkText) {
+	if (!ai || !firstChunkText) return null;
+	const prompt = 'Summarize this document excerpt in 2-3 sentences. Focus on: what type of document this is, who the key participants are, and what the main subject matter is. Be specific about names and roles.\n\nTEXT:\n' + firstChunkText.slice(0, 3000) + '\n\nSUMMARY:';
+	const credFp = credFingerprint();
+	const key = cacheKeyFor(['doc_context_v1', firstChunkText.slice(0, 3000), GEMINI_MODEL, credFp]);
+	const cached = readCacheSync(key);
+	if (cached && typeof cached.summary === 'string') return cached.summary;
+	try {
+		const resp = await ai.models.generateContent({ model: GEMINI_MODEL, contents: prompt, config: { serviceTier: 'flex' } });
+		const summary = (resp.text || '').trim();
+		if (summary) writeCache(key, { summary });
+		return summary || null;
+	} catch (err) {
+		addPipelineLog('warn', `Doc context generation failed: ${err.message}`);
+		return null;
+	}
+}
+
 // Structure markdown using chunking + LLM with cache and retries
 async function structureMarkdownWithRetries(ai, filename, mdContent) {
 	if (!ai) {
@@ -697,6 +717,18 @@ async function structureMarkdownWithRetries(ai, filename, mdContent) {
 		}
 	}
 
+	// Generate a document-level context summary only for multi-chunk documents.
+	// Single-chunk docs and short texts (<8 000 chars total) already have full context in every prompt.
+	const DOC_CONTEXT_MIN_CHARS = 8000;
+	const totalCharsApprox = chunks.reduce((s, c) => s + c.text.length, 0);
+	const needsDocContext = chunks.length > 1 && totalCharsApprox >= DOC_CONTEXT_MIN_CHARS;
+	const docContextSummary = needsDocContext ? await generateDocContext(ai, chunks[0]?.text || '') : null;
+	if (docContextSummary) {
+		addPipelineLog('info', `Doc context summary (${chunks.length} chunks, ~${totalCharsApprox} chars): "${docContextSummary.slice(0, 120)}..."`);
+	} else if (!needsDocContext) {
+		addPipelineLog('info', `Doc context injection skipped (${chunks.length} chunk(s), ~${totalCharsApprox} chars — below threshold)`);
+	}
+
 	// parallel pool
 	const concurrency = parseInt(process.env.OHARA_INGEST_CONCURRENCY || '4', 10) || 4;
 
@@ -725,7 +757,7 @@ async function structureMarkdownWithRetries(ai, filename, mdContent) {
 		const promptNorm = systemPrompt.trim();
 		const modelId = GEMINI_MODEL;
 		const credFp = credFingerprint();
-		const key = cacheKeyFor([promptNorm, chunk.text, modelId, credFp]);
+		const key = cacheKeyFor([promptNorm, chunk.text, modelId, credFp, docContextSummary || '']);
 
 		const cached = await readCacheAsync(key);
 		if (cached && cached.parsed_json) {
@@ -745,7 +777,8 @@ async function structureMarkdownWithRetries(ai, filename, mdContent) {
 				addPipelineLog('info', `LLM structuring chunk ${chunk.id} (attempt ${attempt}/${maxAttempts})`);
 				const levelHint = chunk.headingLevel ? `\nHEADING_LEVEL:${chunk.headingLevel}` : '';
 				const pageHint  = chunk.startPage != null ? `\nPAGE_RANGE:${chunk.startPage}-${chunk.endPage}` : '';
-				const prompt = `${promptNorm}${levelHint}${pageHint}\n\nDOCUMENT_CHUNK_HEADING:${chunk.heading || ''}\n\n${chunk.text}`;
+				const docCtxSection = docContextSummary ? `\nDOCUMENT_CONTEXT (applies to entire document, not just this excerpt):\n${docContextSummary}` : '';
+				const prompt = `${promptNorm}${levelHint}${pageHint}${docCtxSection}\n\nDOCUMENT_CHUNK_HEADING:${chunk.heading || ''}\n\n${chunk.text}`;
 				const resp = await ai.models.generateContent({ model: modelId, contents: prompt, config: { serviceTier: 'flex' } });
 				const um = resp.usageMetadata || {};
 				diag.usage.prompt_tokens     += um.promptTokenCount     || 0;

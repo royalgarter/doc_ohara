@@ -93,7 +93,12 @@ function validateEntity(raw) {
 		? raw.aliases.filter(a => typeof a === 'string' && a.trim() && !isOpaqueToken(a.trim())).map(a => a.trim())
 		: [];
 
-	return { name, canonical, type: raw.type, aliases, slug: slugify(canonical) };
+	const confidence = typeof raw.confidence === 'number' ? Math.min(1, Math.max(0, raw.confidence)) : null;
+	const context = typeof raw.context === 'string' && raw.context.trim() ? raw.context.trim().slice(0, 120) : null;
+	const result = { name, canonical, type: raw.type, aliases, slug: slugify(canonical) };
+	if (confidence !== null) result.confidence = confidence;
+	if (context !== null) result.context = context;
+	return result;
 }
 
 /**

@@ -19,10 +19,12 @@ sumo_candidate_tags: [string]   # short SUMO local names, e.g. ["Agent","Transac
                                 # omit any you are uncertain about
 candidate_entities: [           # named entities mentioned in this node
   {
-    name:      string           # exact surface form as it appears in text
-    canonical: string           # normalized canonical name, e.g. "BTC" → "Bitcoin"
-    type:      string           # one of: PERSON | ORG | LOCATION | DATE | TECH | AMOUNT | EVENT | CONCEPT
-    aliases:   [string]         # other known surface forms (optional)
+    name:       string          # exact surface form as it appears in text
+    canonical:  string          # normalized canonical name, e.g. "BTC" → "Bitcoin"
+    type:       string          # one of: PERSON | ORG | LOCATION | DATE | TECH | AMOUNT | EVENT | CONCEPT
+    confidence: number          # 0.0–1.0 — how clearly the text supports this extraction
+    context:    string          # exact quote from text where this entity appears (≤120 chars)
+    aliases:    [string]        # other known surface forms (optional)
   }
 ]
 # Do NOT extract opaque, machine-generated identifiers as entities — cryptographic
@@ -76,7 +78,7 @@ candidate_entities: [           # named entities mentioned in this node
    - `Figure` must carry a nested `figure` object with a `description` string (not an object within `figure`).
 5. **Assign `part`** to every node: anything before the first chapter is `front_matter`; bibliography, appendixes, glossary, index are `back_matter`; everything else is `body_matter`.
 6. **Populate `sumo_candidate_tags`** per node with short SUMO concept local names (e.g. `Agent`, `Transaction`, `Text`, `Quantity`). Not full URIs. These are validated against the local SUMO index.
-6b. **Populate `candidate_entities`** per node with every named entity mentioned in the node's text. Use the canonical name for well-known aliases (e.g. "BTC" → canonical `"Bitcoin"`). Only include entities you are confident about. Valid types: `PERSON`, `ORG`, `LOCATION`, `DATE`, `TECH`, `AMOUNT`, `EVENT`, `CONCEPT`. Omit this field entirely if the node has no named entities.
+6b. **Populate `candidate_entities`** per node with every named entity mentioned in the node's text. Use the canonical name for well-known aliases (e.g. "BTC" → canonical `"Bitcoin"`). Only include entities you are confident about. Valid types: `PERSON`, `ORG`, `LOCATION`, `DATE`, `TECH`, `AMOUNT`, `EVENT`, `CONCEPT`. Omit this field entirely if the node has no named entities. For each entity set `confidence` (0.0–1.0, how clearly the text supports this extraction) and `context` (a short verbatim quote ≤120 chars from the node text where the entity appears).
 7. **Output only** a JSON object `{ "nodes": [...], "temporal": {...} }`. No markdown fences, no commentary.
 8. **Never emit empty nodes**: every Paragraph must have non-empty `content`, every Figure must have a non-empty `caption` or `figure.description`, every Section/Chapter must have a non-empty `title`. Skip any block with no extractable text.
 
@@ -135,8 +137,8 @@ candidate_entities: [           # named entities mentioned in this node
       "metadata": { "page": 5, "level": 2 },
       "sumo_candidate_tags": ["Currency", "FinancialTransaction", "ComputerNetwork"],
       "candidate_entities": [
-        { "name": "Bitcoin", "canonical": "Bitcoin", "type": "TECH", "aliases": ["BTC", "₿"] },
-        { "name": "bitcoin network", "canonical": "Bitcoin Network", "type": "TECH" }
+        { "name": "Bitcoin", "canonical": "Bitcoin", "type": "TECH", "confidence": 0.98, "context": "Units of currency called bitcoin are used to store and transmit value", "aliases": ["BTC", "₿"] },
+        { "name": "bitcoin network", "canonical": "Bitcoin Network", "type": "TECH", "confidence": 0.95, "context": "participants in the bitcoin network", "aliases": [] }
       ]
     },
     {
@@ -220,4 +222,6 @@ If you cannot determine a value, use `null`. `temporal_granularity` defaults to 
 - Short SUMO local names only — no full URIs, no SUMO namespace prefixes.
 - `candidate_entities` type must be exactly one of: `PERSON`, `ORG`, `LOCATION`, `DATE`, `TECH`, `AMOUNT`, `EVENT`, `CONCEPT`. No other values.
 - `candidate_entities[].canonical` must be the well-known English name, not an abbreviation or symbol.
+- `candidate_entities[].confidence` must be a number 0.0–1.0.
+- `candidate_entities[].context` must be a non-empty verbatim quote (≤120 chars) from the node text.
 - Outputs must be deterministic for identical inputs (cache validity).

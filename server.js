@@ -363,6 +363,19 @@ async function startServer() {
 		}
 	});
 
+	// API: Post-ingest entity resolution — dedup and variant-link entities across all ingested docs
+	app.post('/api/pipeline/resolve-entities', async (req, res) => {
+		try {
+			const apiKey = process.env.GEMINI_API_KEY;
+			if (!apiKey) return res.status(400).json({ success: false, error: 'GEMINI_API_KEY not set.' });
+			const { runEntityResolution } = await import('./src/entity_resolver.js');
+			const manifest = await runEntityResolution(apiKey, FINAL_OUT_DIR);
+			res.json({ success: true, stats: manifest.stats, output: `${FINAL_OUT_DIR}/entity_resolution.json` });
+		} catch (err) {
+			res.status(500).json({ success: false, error: err.message });
+		}
+	});
+
 	// API: Multi-phase Hybrid Retrieval (BM25 + SUMO + Entity + Structural)
 	app.post('/api/retrieval/query', async (req, res) => {
 		try {

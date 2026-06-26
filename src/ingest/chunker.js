@@ -80,7 +80,36 @@ export function chunkMarkdown(mdText, opts = {}) {
 		});
 	}
 
-	return result;
+	// Merge chunks that are too short into their neighbours.
+	// A standalone heading or a 2-sentence section doesn't justify a full LLM call.
+	const minChars = opts.minChunkChars ?? 500;
+	const merged = [];
+	for (const chunk of result) {
+		const prev = merged[merged.length - 1];
+		if (prev && chunk.text.length < minChars && prev.text.length + chunk.text.length <= maxChars) {
+			// short chunk — absorb into previous sibling
+			prev.text += '\n' + chunk.text;
+			prev.endPage = chunk.endPage;
+		} else {
+			merged.push(chunk);
+		}
+	}
+
+	// Forward pass leaves a tiny first chunk unmerged (no previous sibling).
+	// Fix: push it into the second chunk if combined size fits.
+	if (merged.length >= 2 && merged[0].text.length < minChars &&
+		merged[0].text.length + merged[1].text.length <= maxChars) {
+		merged[1].text = merged[0].text + '\n' + merged[1].text;
+		merged[1].startPage = merged[0].startPage;
+		merged[1].heading = merged[1].heading || merged[0].heading;
+		merged[1].headingLevel = merged[1].headingLevel ?? merged[0].headingLevel;
+		merged.shift();
+	}
+
+	// Re-index ids after merge
+	merged.forEach((c, i) => { c.id = `chunk_${i}`; });
+
+	return merged;
 }
 
 export function readMarkdownFile(mdPath) {
