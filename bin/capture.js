@@ -14,15 +14,16 @@ program
 	.option('-t, --type <type>', 'output type: html | pdf | png', 'png')
 	.option('-o, --out <file>', 'output file path (default: stdout for html, ./capture.<ext> for binary)')
 	.option('--timeout <ms>', 'navigation timeout in ms', (v) => parseInt(v, 10), 30000)
+	.option('-b, --browser', 'force Cloak Browser CDP, skip fetch attempt')
 	.parse();
 
 const [url] = program.args;
-const { type, out, timeout } = program.opts();
+const { type, out, timeout, browser: forceBrowser } = program.opts();
 
 const browser = await connectBrowser();
 try {
 	let result;
-	if (type === 'html') {
+	if (type === 'html' && !forceBrowser) {
 		const { html, via } = await fetchHtml(browser, url, timeout);
 		process.stderr.write(`via: ${via}\n`);
 		result = html;
