@@ -1460,6 +1460,9 @@
 		ggeo.setAttribute('color', new THREE.Float32BufferAttribute(gCol3, 3));
 		scene.add(new THREE.LineSegments(ggeo, new THREE.LineBasicMaterial({ vertexColors: true })));
 
+		// ── CSS label container (shared by time axis + node labels below) ────────
+		const labelContainer = document.getElementById('graph-labels');
+
 		// ── Time axis: horizontal tick lines + year labels ────────────────────────
 		const yVals = [...docYMap.values()].filter(v => v !== 0);
 		if (yVals.length) {
@@ -1493,7 +1496,6 @@
 		}
 
 		// ── CSS labels for docs and tags ──────────────────────────────────────────
-		const labelContainer = document.getElementById('graph-labels');
 		const labelNodes = entries.filter(e => e.colKey === 'document' || e.colKey === 'tag');
 		for (const e of labelNodes) {
 			const el = document.createElement('div');
