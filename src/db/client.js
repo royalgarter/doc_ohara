@@ -63,7 +63,7 @@ export async function initArangoClient() {
 	}
 
 	// Ensure indexes for query performance (idempotent — ArangoDB skips if already exists)
-	await Promise.all([
+	Promise.all([
 		// document_id filters on sections/paragraphs/tables (deleteDocumentAndNodes, getState, etc.)
 		db.collection('sections').ensureIndex({ type: 'persistent', fields: ['document_id'], name: 'idx_sections_document_id' }).catch(() => {}),
 		db.collection('paragraphs').ensureIndex({ type: 'persistent', fields: ['document_id'], name: 'idx_paragraphs_document_id' }).catch(() => {}),
@@ -81,7 +81,7 @@ export async function initArangoClient() {
 		db.collection('entities').ensureIndex({ type: 'persistent', fields: ['norm_key'], name: 'idx_entities_norm_key' }).catch(() => {}),
 		// array index on document_ids — backs the /api/graph entity-scoping filter
 		db.collection('entities').ensureIndex({ type: 'persistent', fields: ['document_ids[*]'], name: 'idx_entities_document_ids' }).catch(() => {}),
-	]);
+	]).then().catch(() => {});
 
 	initialized = true;
 	return db;
@@ -209,11 +209,13 @@ export async function findDocumentByHash(fileHash) {
 
 export async function listDocuments() {
 	if (!initialized) await initArangoClient();
+	console.log('listDocuments')
 	const cursor = await db.query(`
 		FOR d IN documents
 		SORT d._key DESC
-		RETURN d
+		RETURN KEEP(d, '_key','file_hash','file_size','parser_engine','title')
 	`);
+	console.log('listDocuments.cursor')
 	return cursor.all();
 }
 
