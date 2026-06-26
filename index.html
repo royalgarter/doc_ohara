@@ -93,6 +93,12 @@
 			<button @click="colorMode='sumo'; renderCurrentGraph()"
 				:class="colorMode==='sumo' ? 'bg-green-800/70 text-green-200' : 'bg-gray-800 text-gray-500 hover:text-gray-300'"
 				class="text-sm px-2 py-0.5 rounded transition">by SUMO</button>
+			<select @change="timelineResolution = $event.target.value; renderCurrentGraph()"
+				class="text-xs bg-gray-800 text-gray-400 border border-gray-700 rounded px-1 py-0.5 transition hover:text-gray-200">
+				<template x-for="r in ['day','week','month','year','decade','century']" :key="r">
+					<option :value="r" :selected="timelineResolution === r" x-text="r"></option>
+				</template>
+			</select>
 			<button @click="loadGraph()"
 				class="text-sm px-2 py-0.5 rounded bg-gray-800 text-gray-500 hover:text-gray-300 transition">↺</button>
 		</div>
@@ -623,6 +629,7 @@
 			graphLoading: false,
 			selectedNode: null,
 			colorMode: 'type',
+			timelineResolution: 'year',
 			docsOpen: true,
 			graphZoom: 1.0,
 
@@ -799,7 +806,7 @@
 				const self = this;
 				const selectedKey = self.selectedNode && (self.selectedNode._key || self.selectedNode.id);
 				renderGraph(this.graphData, this.colorMode, selectedKey, this.graphZoom,
-					this.selectedDocKeys,
+					this.selectedDocKeys, this.timelineResolution,
 					(node) => {
 						self.selectedNode = node;
 						self.expandNode(node);
@@ -1233,7 +1240,7 @@
 		G3D.controls.update();
 	}
 
-	function renderGraph(data, colorMode, selectedKey, zoom, selectedDocKeys, onSelect) {
+	function renderGraph(data, colorMode, selectedKey, zoom, selectedDocKeys, timelineResolution, onSelect) {
 		if (!window.THREE) return;
 		if (!G3D.initialized) _initG3D();
 		if (!G3D.renderer) return;
@@ -1297,22 +1304,49 @@
 			return node.effective_decay_class || node.document_effective_decay_class || node.decay_class || 'SCHOLARLY';
 		}
 
-		// ── Temporal Z: real year-based positioning ───────────────────────────────
-		const docYears = sortedDocs.map(d => {
-			const raw = _dateToY(d.published_date || d.temporal_coverage_start);
-			return raw != null ? Math.round(raw / 60) + 2010 : null;
-		});
-		const validYears = docYears.filter(y => y != null);
-		const minYear = validYears.length ? Math.min(...validYears) : 2020;
-		const maxYear = validYears.length ? Math.max(...validYears) : 2020;
+		// ── Temporal Z: resolution-bucketed positioning ──────────────────────────
+		const RESOLUTION = timelineResolution;
+		// Returns fractional year for a date string
+		function _toFracYear(str) {
+			if (!str) return null;
+			const dt = new Date(/^\d{4}$/.test(str) ? str + '-07-01' : str);
+			if (isNaN(dt)) return null;
+			return dt.getFullYear() + (dt.getMonth() / 12) + (dt.getDate() / 365);
+		}
+		// Bucket a fractional year by resolution → returns bucket key (fractional year at bucket start)
+		function _bucket(fy) {
+			if (fy == null) return null;
+			const yr = Math.floor(fy);
+			const mo = Math.floor((fy - yr) * 12);           // 0-11
+			const dy = Math.floor((fy - yr - mo/12) * 365);  // approx day-of-year
+			switch (RESOLUTION) {
+				case 'day':     return yr + mo/12 + dy/365;
+				case 'week':    return yr + mo/12 + Math.floor(dy/7)*7/365;
+				case 'month':   return yr + mo/12;
+				case 'year':    return yr;
+				case 'decade':  return Math.floor(yr/10)*10;
+				case 'century': return Math.floor(yr/100)*100;
+				default:        return yr;
+			}
+		}
+		const docFracYears = sortedDocs.map(d => _toFracYear(d.published_date || d.temporal_coverage_start));
+		const validFY = docFracYears.filter(y => y != null);
+		const minFY = validFY.length ? Math.min(...validFY) : 2020;
+		const maxFY = validFY.length ? Math.max(...validFY) : 2020;
+		const minBucket = _bucket(minFY) ?? minFY;
+		const maxBucket = _bucket(maxFY) ?? maxFY;
+		const bucketSpan = maxBucket - minBucket;
+		// Also keep minYear/maxYear for backwards-compat (fin/label code)
+		const minYear = Math.floor(minFY);
+		const maxYear = Math.floor(maxFY);
 		const yearSpan = maxYear - minYear;
-		const Z_PER_YEAR = 220;
+		const Z_PER_UNIT = 220;  // units = bucket years
 
 		function _temporalZ(d, di) {
-			if (yearSpan < 2) return di * Z_SPACING;  // same-year fallback: index spacing
-			const raw = _dateToY(d.published_date || d.temporal_coverage_start);
-			const yr = raw != null ? Math.round(raw / 60) + 2010 : minYear;
-			return (yr - minYear) * Z_PER_YEAR;
+			if (bucketSpan < 1e-9) return di * Z_SPACING;
+			const fy = _toFracYear(d.published_date || d.temporal_coverage_start);
+			const bk = _bucket(fy) ?? minBucket;
+			return (bk - minBucket) * Z_PER_UNIT;
 		}
 
 		// Group docs sharing same computed Z → assign radial XY offsets
@@ -1608,6 +1642,65 @@
 			const spGeo = new THREE.BufferGeometry();
 			spGeo.setAttribute('position', new THREE.Float32BufferAttribute([0, 0, -80,  0, 0, totalZ + 80], 3));
 			scene.add(new THREE.LineSegments(spGeo, new THREE.LineBasicMaterial({ color: 0x475569, transparent: true, opacity: 0.35 })));
+		}
+
+		// b2) Timeline axis ticks + labels
+		if (bucketSpan >= 1e-9) {
+			const tickPts = [];
+			const TICK_R = 40;
+			// generate evenly-spaced bucket ticks from minBucket to maxBucket
+			function _tickStep() {
+				switch (RESOLUTION) {
+					case 'day':     return 1/365;
+					case 'week':    return 7/365;
+					case 'month':   return 1/12;
+					case 'year':    return 1;
+					case 'decade':  return 10;
+					case 'century': return 100;
+					default:        return 1;
+				}
+			}
+			function _fmtBucket(bk) {
+				const yr = Math.floor(bk);
+				switch (RESOLUTION) {
+					case 'day': case 'week': {
+						const mo = Math.floor((bk - yr) * 12);
+						const dy = Math.round((bk - yr - mo/12) * 365);
+						return `${yr}-${String(mo+1).padStart(2,'0')}-${String(Math.max(1,dy)).padStart(2,'0')}`;
+					}
+					case 'month': {
+						const mo = Math.round((bk - yr) * 12);
+						return `${yr}-${String(mo+1).padStart(2,'0')}`;
+					}
+					case 'year':    return String(yr);
+					case 'decade':  return yr + 's';
+					case 'century': return yr + 's';
+					default:        return String(yr);
+				}
+			}
+			const step = _tickStep();
+			let cur = minBucket;
+			const maxTicks = 200;
+			let n = 0;
+			while (cur <= maxBucket + step * 0.01 && n++ < maxTicks) {
+				const z = (cur - minBucket) * Z_PER_UNIT;
+				tickPts.push(-TICK_R, 0, z,  TICK_R, 0, z);
+				// HTML label
+				const el = document.createElement('div');
+				const lkey = '__tick__' + cur;
+				el.dataset.lk = lkey;
+				el.style.cssText = 'position:absolute;font:8px ui-monospace,monospace;color:#475569;pointer-events:none;white-space:nowrap;';
+				el.textContent = _fmtBucket(cur);
+				labelContainer.appendChild(el);
+				G3D.labelEls.push(el);
+				nodePos.set(lkey, { x: TICK_R + 8, y: 0, z, r: 0, node: null, colKey: '_tick' });
+				cur = Math.round((cur + step) * 1e9) / 1e9;
+			}
+			if (tickPts.length) {
+				const tgeo = new THREE.BufferGeometry();
+				tgeo.setAttribute('position', new THREE.Float32BufferAttribute(tickPts, 3));
+				scene.add(new THREE.LineSegments(tgeo, new THREE.LineBasicMaterial({ color: 0x374151, transparent: true, opacity: 0.6 })));
+			}
 		}
 
 		// c) Entity/Tag tether lines to disc centers
