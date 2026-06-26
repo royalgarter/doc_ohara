@@ -1212,13 +1212,22 @@ function transformRawToCollections(rawOutputDir) {
 						const hasValidData = Array.isArray(contentData) && contentData.length > 0
 							&& Array.isArray(contentData[0]) && contentData[0].length > 0;
 						if (hasValidData) {
+							// Generate markdown from matrix_data if LLM didn't provide it
+							let mdRep = node.markdown || node.metadata?.markdown || '';
+							if (!mdRep) {
+								const header = contentData[0].map(c => String(c ?? '')).join(' | ');
+								const sep = contentData[0].map(() => '---').join(' | ');
+								const rows = contentData.slice(1).map(r => r.map(c => String(c ?? '')).join(' | '));
+								mdRep = [header, sep, ...rows].join('\n');
+							}
 							dbCollections.tables.push({
 								id: nodeId,
 								document_id: docId,
 								section_id: currentSectionId,
 								node_type: 'Table',
+								caption: node.caption || node.label || null,
 								matrix_data: contentData,
-								markdown_representation: node.markdown || node.metadata?.markdown || '',
+								markdown_representation: mdRep,
 							});
 						} else {
 							// Table data missing or malformed — preserve as raw Paragraph so no content is lost
@@ -1367,12 +1376,20 @@ function transformRawToCollections(rawOutputDir) {
 							content: block.description || block.url || '',
 						});
 					} else if (block.type === "table") {
+						const cells = block.table_cells || [];
+						let mdRep = block.markdown || '';
+						if (!mdRep && cells.length > 0 && Array.isArray(cells[0])) {
+							const header = cells[0].map(c => String(c ?? '')).join(' | ');
+							const sep = cells[0].map(() => '---').join(' | ');
+							const rows = cells.slice(1).map(r => r.map(c => String(c ?? '')).join(' | '));
+							mdRep = [header, sep, ...rows].join('\n');
+						}
 						dbCollections.tables.push({
 							id: nodeId,
 							document_id: docId,
 							section_id: currentSectionId,
-							matrix_data: block.table_cells || [],
-							markdown_representation: block.markdown || "",
+							matrix_data: cells,
+							markdown_representation: mdRep,
 						});
 					}
 				});
