@@ -1530,9 +1530,9 @@
 			CURRENT:   { hex: '#fbbf24', op: 0.10, zH: 150 },
 			EPHEMERAL: { hex: '#f87171', op: 0.08, zH: 190 },
 		};
-		// Base fin geometry: 1×1 in XY, rotated to stand in XZ plane (normal faces Y)
+		// Base fin geometry: 1×1 in XY plane (default). Instance matrix rotates to XZ.
+		// rotX(-90°) via instance: scale.y becomes Z extent, scale.x becomes X extent.
 		const finBaseGeo = new THREE.PlaneGeometry(1, 1);
-		finBaseGeo.applyMatrix4(new THREE.Matrix4().makeRotationX(Math.PI / 2));
 		const finDummy = new THREE.Object3D();
 		G3D.auraPoints = {};
 		for (const [cls, cfg] of Object.entries(DECAY_FIN)) {
@@ -1545,20 +1545,21 @@
 			const finMesh = new THREE.InstancedMesh(finBaseGeo, finMat, clsEntries.length);
 			finMesh.frustumCulled = false;
 			clsEntries.forEach((e, i) => {
-				// Radial angle from disc center to node (for fin orientation)
+				// Radial angle from disc center → rotate fin to face radially outward
 				const dk = e.node.document_id || (e.colKey === 'document' ? (e.node._key || e.node.id) : null);
 				const dc = dk ? docCenter.get(dk) : null;
 				const cx = dc?.cx ?? 0, cy = dc?.cy ?? 0;
-				const angle = Math.atan2(e.y - cy, e.x - cx);
+				const radAngle = Math.atan2(e.y - cy, e.x - cx);
+				// rotation.x = -90° stands fin up in XZ; rotation.y = radAngle aligns radially
 				finDummy.position.set(e.x, e.y, e.z);
-				finDummy.rotation.set(0, 0, angle);
+				finDummy.rotation.set(-Math.PI / 2, radAngle, 0);
+				// scale.x = tangential width, scale.y = Z extent (after rotX, Y maps to Z)
 				finDummy.scale.set(e.r * 2.5, cfg.zH, 1);
 				finDummy.updateMatrix();
 				finMesh.setMatrixAt(i, finDummy.matrix);
 			});
 			finMesh.instanceMatrix.needsUpdate = true;
 			scene.add(finMesh);
-			// Store EPHEMERAL for pulsing in animate()
 			G3D.auraPoints[cls] = { mat: finMat, baseOp: cfg.op };
 		}
 
