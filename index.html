@@ -1151,7 +1151,7 @@
 		camera.position.set(300, 200, G3D.ZOOM_BASE);
 
 		const controls = new THREE.OrbitControls(camera, renderer.domElement);
-		controls.target.set(300, 0, 700);
+		controls.target.set(400, 0, 400);
 		controls.enableDamping = true;
 		controls.dampingFactor = 0.1;
 		controls.screenSpacePanning = true;
@@ -1196,8 +1196,7 @@
 
 	function _g3dResetCamera() {
 		if (!G3D.camera || !G3D.controls) return;
-		G3D.camera.position.set(300, 200, G3D.ZOOM_BASE);
-		G3D.controls.target.set(300, 0, 700);
+		_g3dFitScene(); // re-fit on reset
 		G3D.controls.update();
 	}
 
@@ -1213,10 +1212,11 @@
 		const fov = G3D.camera.fov * (Math.PI / 180);
 		const camDist = (maxDim / 2) / Math.tan(fov / 2) * 1.6;
 		G3D.controls.target.copy(center);
+		// Angle to show all three axes: X=structural depth, Y=time, Z=doc lanes
 		G3D.camera.position.set(
-			center.x + camDist * 0.25,
-			center.y + camDist * 0.35,
-			center.z + camDist
+			center.x - camDist * 0.3,  // slightly left (shows X depth)
+			center.y + camDist * 0.5,  // above (shows Y time axis)
+			center.z + camDist * 0.9   // front-ish (shows Z lane separation)
 		);
 		G3D.camera.lookAt(center);
 		G3D.controls.update();
@@ -1246,62 +1246,100 @@
 		const tagNodes = Object.entries(tagCounts).sort((a, b) => b[1] - a[1]).slice(0, 25)
 			.map(([name, cnt]) => ({ _key: 'tag:' + name, _id: 'tags/' + name, type: 'tag', title: name, sumo_tags: [], _tagCount: cnt }));
 
-		// Section levels
-		const secByLvl = new Map();
-		for (const s of sections) { const l = s.level || 1; if (!secByLvl.has(l)) secByLvl.set(l, []); secByLvl.get(l).push(s); }
-		const levelNums = [...secByLvl.keys()].sort((a, b) => a - b);
+		// ── Document-Lane Layout ─────────────────────────────────────────────────
+		// Z = document lane (each doc its own depth band)
+		// X = structural depth (doc → sections → paragraphs → entities → tags)
+		// Y = time (published_date) + per-doc sub-offset to separate same-year docs
 
-		// Column wrap counts
-		const wrapCols = n => n > 200 ? 5 : n > 80 ? 4 : n > 40 ? 3 : n > 15 ? 2 : 1;
-		const PCOLS = wrapCols(paragraphs.length);
-		const ECOLS = wrapCols(entities.length);
+		const Z_DOC_LANE  = 350;   // Z gap between document lanes
+		const X_SEC_BASE  = 160;   // X start for sections
+		const X_LEVEL_GAP = 110;   // X gap per additional section level
+		const X_PARA      = 520;   // paragraphs X
+		const X_ENT       = 720;   // entities X
+		const X_TAG       = 920;   // tags X
+		const ROW_H_SEC   = 15;    // Y spacing between sections within a lane
+		const ROW_H_PARA  = 8;     // Y spacing between paragraphs within a lane
+		const Y_SUB_OFF   = 50;    // always-on Y offset per doc to separate same-date lanes
 
-		// Document Y = time axis
-		const docYMap = new Map();
-		for (const d of documents) {
-			const y = _dateToY(d.published_date || d.temporal_coverage_start);
-			docYMap.set(d._key || d.id, y !== null ? y : 0);
-		}
+		// Per-doc lane positions
+		const docLaneZ = new Map(); // docKey → Z
+		const docLaneY = new Map(); // docKey → base Y
+		documents.forEach((d, di) => {
+			const dk = d._key || d.id;
+			const rawY = _dateToY(d.published_date || d.temporal_coverage_start) ?? 0;
+			docLaneZ.set(dk, di * Z_DOC_LANE);
+			docLaneY.set(dk, rawY + di * Y_SUB_OFF);
+		});
+		const centerZ = ((documents.length - 1) / 2) * Z_DOC_LANE;
 
-		// Z column positions (structural depth)
-		const Z_GAP = 220;
-		const Z_DOC   = 0;
-		const Z_SECS  = levelNums.map((_, i) => Z_DOC + (i + 1) * Z_GAP);
-		const Z_PARA  = Z_DOC + (levelNums.length + 1) * Z_GAP;
-		const Z_ENT   = Z_PARA + Z_GAP * 1.6;
-		const Z_TAG   = Z_ENT  + Z_GAP * 1.5;
+		// Per-doc rank counters for local Y within a lane
+		const secRankOf  = new Map(); // docKey → next section rank
+		const paraRankOf = new Map(); // docKey → next para rank
+		const tblRankOf  = new Map(); // docKey → next table rank
 
 		const nodePos = new Map();
-		const XS = 20, XSB = 28;
-
-		function placeFlat(nodes, colKey, z) {
-			nodes.forEach((node, i) => {
-				const key = node._key || node.id || (colKey + i);
-				const docKey = node.document_id;
-				const dY = docYMap.get(docKey) ?? 0;
-				const r = colKey === 'document' ? 10 : colKey.startsWith('section_L') ? 7 : 5;
-				nodePos.set(key, { x: i * XS, y: dY + i * 0.5, z, r, node, colKey,
-					decayClass: node.effective_decay_class || node.document_effective_decay_class || node.decay_class || null });
-			});
-		}
-		function placeWrapped(nodes, colKey, z0, cols) {
-			const rows = Math.ceil(nodes.length / cols) || 1;
-			nodes.forEach((node, i) => {
-				const key = node._key || node.id || (colKey + i);
-				const col = Math.floor(i / rows), row = i % rows;
-				const docKey = node.document_id;
-				const dY = docYMap.get(docKey) ?? 0;
-				nodePos.set(key, { x: col * XSB, y: dY + row * 3, z: z0, r: 5, node, colKey,
-					decayClass: node.effective_decay_class || node.document_effective_decay_class || node.decay_class || null });
-			});
+		function _dc(node) {
+			return node.effective_decay_class || node.document_effective_decay_class || node.decay_class || null;
 		}
 
-		placeFlat(documents, 'document', Z_DOC);
-		levelNums.forEach((lvl, i) => placeFlat(secByLvl.get(lvl), 'section_L' + lvl, Z_SECS[i]));
-		placeWrapped(paragraphs, 'paragraph', Z_PARA, PCOLS);
-		if (tables.length) placeFlat(tables, 'table', Z_PARA + 10);
-		placeWrapped(entities, 'entity', Z_ENT, ECOLS);
-		placeFlat(tagNodes, 'tag', Z_TAG);
+		// Documents
+		documents.forEach((d) => {
+			const dk = d._key || d.id;
+			nodePos.set(dk, { x: 0, y: docLaneY.get(dk), z: docLaneZ.get(dk), r: 10, node: d, colKey: 'document', decayClass: _dc(d) });
+		});
+
+		// Sections — place at X depth by level, Y by rank within doc lane
+		for (const s of sections) {
+			const key = s._key || s.id;
+			const dk  = s.document_id;
+			const laneZ = docLaneZ.get(dk) ?? 0;
+			const laneY = docLaneY.get(dk) ?? 0;
+			const rank  = secRankOf.get(dk) || 0; secRankOf.set(dk, rank + 1);
+			const lvl   = s.level || 1;
+			nodePos.set(key, {
+				x: X_SEC_BASE + (lvl - 1) * X_LEVEL_GAP,
+				y: laneY + rank * ROW_H_SEC,
+				z: laneZ, r: 7, node: s,
+				colKey: 'section_L' + lvl, decayClass: _dc(s),
+			});
+		}
+
+		// Paragraphs
+		for (const p of paragraphs) {
+			const key = p._key || p.id;
+			const dk  = p.document_id;
+			const laneZ = docLaneZ.get(dk) ?? 0;
+			const laneY = docLaneY.get(dk) ?? 0;
+			const rank  = paraRankOf.get(dk) || 0; paraRankOf.set(dk, rank + 1);
+			nodePos.set(key, {
+				x: X_PARA, y: laneY + rank * ROW_H_PARA, z: laneZ,
+				r: 5, node: p, colKey: 'paragraph', decayClass: _dc(p),
+			});
+		}
+
+		// Tables
+		for (const t of tables) {
+			const key = t._key || t.id;
+			const dk  = t.document_id;
+			const laneZ = docLaneZ.get(dk) ?? 0;
+			const laneY = docLaneY.get(dk) ?? 0;
+			const rank  = tblRankOf.get(dk) || 0; tblRankOf.set(dk, rank + 1);
+			nodePos.set(key, {
+				x: X_PARA + 40, y: laneY + rank * ROW_H_PARA, z: laneZ,
+				r: 5, node: t, colKey: 'table', decayClass: _dc(t),
+			});
+		}
+
+		// Entities — shared across docs, at centerZ, sorted by mention count
+		entities.forEach((e, ei) => {
+			const key = e._key || e.id;
+			nodePos.set(key, { x: X_ENT, y: ei * 18, z: centerZ, r: 5, node: e, colKey: 'entity', decayClass: _dc(e) });
+		});
+
+		// Tags — at centerZ, sorted by count
+		tagNodes.forEach((t, ti) => {
+			nodePos.set(t._key, { x: X_TAG, y: ti * 18, z: centerZ, r: 5, node: t, colKey: 'tag', decayClass: null });
+		});
 
 		// Related-node computation (same logic as SVG version)
 		const parentOf = new Map();
@@ -1441,51 +1479,60 @@
 			G3D.auraPoints[cls] = { points: ap, mat: amat, baseOp: cfg.op };
 		}
 
-		// ── Column guide rails (faint vertical lines at each Z plane) ─────────────
-		const gPos = [], gCol3 = [];
-		const colPlanes = [
-			[Z_DOC, '#38bdf8'],
-			...levelNums.map((lvl, i) => [Z_SECS[i], LEVEL_COLORS[(lvl-1) % LEVEL_COLORS.length]]),
-			[Z_PARA, '#fbbf24'], [Z_ENT, '#fb7185'], [Z_TAG, '#4ade80'],
-		];
-		const allX = entries.map(e => e.x);
-		const xMin = Math.min(0, ...allX), xMax = Math.max(100, ...allX);
-		for (const [z, hex] of colPlanes) {
-			const c = new THREE.Color(hex).multiplyScalar(0.45); // visible on smoke-gray
-			gPos.push(xMin, -300, z, xMax, -300, z, xMin, 800, z, xMax, 800, z, xMin, -300, z, xMin, 800, z, xMax, -300, z, xMax, 800, z);
-			for (let k = 0; k < 8; k++) gCol3.push(c.r, c.g, c.b);
+		// ── Per-lane guide rails (rectangle at each doc's Z, spanning actual Y range) ─
+		{
+			const gPos = [], gCols = [];
+			const allY = [...nodePos.values()].map(p => p.y).filter(Number.isFinite);
+			const yLo  = allY.length ? Math.min(...allY) - 20 : -100;
+			const yHi  = allY.length ? Math.max(...allY) + 20 :  100;
+			const laneColor = new THREE.Color('#38bdf8').multiplyScalar(0.3);
+			documents.forEach((d, di) => {
+				const lz = docLaneZ.get(d._key || d.id) ?? (di * Z_DOC_LANE);
+				// Horizontal line at yLo and yHi spanning X: 0 to X_TAG
+				gPos.push(0, yLo, lz, X_TAG + 60, yLo, lz);
+				gPos.push(0, yHi, lz, X_TAG + 60, yHi, lz);
+				// Vertical line at X=0 (doc column spine)
+				gPos.push(0, yLo, lz, 0, yHi, lz);
+				for (let k = 0; k < 6; k++) gCols.push(laneColor.r, laneColor.g, laneColor.b);
+			});
+			// X-depth lines (structural columns) at centerZ
+			const xDepths = [[0,'#38bdf8'],[X_SEC_BASE,'#818cf8'],[X_PARA,'#fbbf24'],[X_ENT,'#fb7185'],[X_TAG,'#4ade80']];
+			for (const [x, hex] of xDepths) {
+				const c = new THREE.Color(hex).multiplyScalar(0.25);
+				gPos.push(x, yLo, centerZ - 30, x, yHi, centerZ - 30);
+				gCols.push(c.r, c.g, c.b, c.r, c.g, c.b);
+			}
+			const ggeo = new THREE.BufferGeometry();
+			ggeo.setAttribute('position', new THREE.Float32BufferAttribute(gPos, 3));
+			ggeo.setAttribute('color', new THREE.Float32BufferAttribute(gCols, 3));
+			scene.add(new THREE.LineSegments(ggeo, new THREE.LineBasicMaterial({ vertexColors: true })));
 		}
-		const ggeo = new THREE.BufferGeometry();
-		ggeo.setAttribute('position', new THREE.Float32BufferAttribute(gPos, 3));
-		ggeo.setAttribute('color', new THREE.Float32BufferAttribute(gCol3, 3));
-		scene.add(new THREE.LineSegments(ggeo, new THREE.LineBasicMaterial({ vertexColors: true })));
 
 		// ── CSS label container (shared by time axis + node labels below) ────────
 		const labelContainer = document.getElementById('graph-labels');
 
-		// ── Time axis: horizontal tick lines + year labels ────────────────────────
-		const yVals = [...docYMap.values()].filter(v => v !== 0);
-		if (yVals.length) {
-			const yMin = Math.min(...yVals), yMax = Math.max(...yVals);
-			const yearMin = Math.floor((yMin / 60) + 2010 - 1);
-			const yearMax = Math.ceil((yMax  / 60) + 2010 + 1);
+		// ── Time axis: year tick labels on left edge of doc lanes ────────────────
+		{
+			const docYVals = [...docLaneY.values()];
+			const yLo = Math.min(...docYVals) - 60;
+			const yHi = Math.max(...docYVals) + 60;
+			const yearLo = Math.floor((yLo / 60) + 2010);
+			const yearHi = Math.ceil( (yHi / 60) + 2010);
 			const tickPts = [], tickCols = [];
-			const tickColor = new THREE.Color('#e2e8f0').multiplyScalar(0.5);
-			const tickX = xMin - 20;
-			for (let yr = yearMin; yr <= yearMax; yr += 5) {
+			const tickC = new THREE.Color('#e2e8f0').multiplyScalar(0.4);
+			const TICK_X = -60;
+			for (let yr = yearLo; yr <= yearHi; yr += (yearHi - yearLo > 20 ? 5 : 1)) {
 				const ty = (yr - 2010) * 60;
-				// Horizontal tick line across DOC column
-				tickPts.push(tickX - 15, ty, Z_DOC, xMax + 10, ty, Z_DOC);
-				for (let k = 0; k < 2; k++) tickCols.push(tickColor.r, tickColor.g, tickColor.b);
-				// CSS label div for year
+				if (ty < yLo - 60 || ty > yHi + 60) continue;
+				tickPts.push(TICK_X, ty, centerZ, TICK_X + 30, ty, centerZ);
+				tickCols.push(tickC.r, tickC.g, tickC.b, tickC.r, tickC.g, tickC.b);
 				const ydiv = document.createElement('div');
 				ydiv.dataset.lk = 'year:' + yr;
-				ydiv.style.cssText = 'position:absolute;font:9px ui-monospace,monospace;color:#e2e8f0;pointer-events:none;transform:translateY(-50%);opacity:0.7;font-weight:600;';
+				ydiv.style.cssText = 'position:absolute;font:9px ui-monospace,monospace;color:#cbd5e1;pointer-events:none;transform:translateY(-50%);opacity:0.85;font-weight:600;';
 				ydiv.textContent = yr;
 				if (labelContainer) labelContainer.appendChild(ydiv);
 				G3D.labelEls.push(ydiv);
-				// Store world pos for projection
-				nodePos.set('year:' + yr, { x: tickX - 22, y: ty, z: Z_DOC, r: 0, node: { title: String(yr) }, colKey: '_year' });
+				nodePos.set('year:' + yr, { x: TICK_X - 5, y: ty, z: centerZ, r: 0, node: { title: String(yr) }, colKey: '_year' });
 			}
 			if (tickPts.length) {
 				const tgeo = new THREE.BufferGeometry();
