@@ -1144,7 +1144,7 @@
 		const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
 		renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 		renderer.setSize(w, h);
-		renderer.setClearColor(0x4b5563, 1);
+		renderer.setClearColor(0x8b99a8, 1);
 
 		const scene = new THREE.Scene();
 		const camera = new THREE.PerspectiveCamera(55, w / h, 1, 20000);
@@ -1385,10 +1385,7 @@
 		const totalN = entries.length;
 		if (totalN === 0) return;
 
-		const geo = new THREE.SphereGeometry(1, 8, 6);
-		// vertexColors must be FALSE — instance colors use a separate shader path (USE_INSTANCING_COLOR)
-		// that is auto-enabled when instanceColor is set; vertexColors:true makes the shader read
-		// per-vertex geometry color instead, which SphereGeometry doesn't have → everything black.
+		const geo = new THREE.BoxGeometry(1.6, 1.6, 1.6);
 		const mat = new THREE.MeshBasicMaterial();
 		const instMesh = new THREE.InstancedMesh(geo, mat, totalN);
 		instMesh.frustumCulled = false;
@@ -1405,7 +1402,8 @@
 			dummy.updateMatrix();
 			instMesh.setMatrixAt(i, dummy.matrix);
 			col3.set(_nodeColorHex(node, colKey, colorMode));
-			if (isDim) col3.multiplyScalar(0.12);
+			// Lerp dimmed nodes toward bg color instead of near-black
+			if (isDim) col3.lerp(new THREE.Color(0x8b99a8), 0.72);
 			instMesh.setColorAt(i, col3);
 		}
 		instMesh.instanceMatrix.needsUpdate = true;
@@ -1511,28 +1509,29 @@
 		// ── CSS label container (shared by time axis + node labels below) ────────
 		const labelContainer = document.getElementById('graph-labels');
 
-		// ── Time axis: year tick labels on left edge of doc lanes ────────────────
+		// ── Time axis: year ticks + horizontal timeline planes per doc lane ──────
 		{
 			const docYVals = [...docLaneY.values()];
-			const yLo = Math.min(...docYVals) - 60;
-			const yHi = Math.max(...docYVals) + 60;
+			const yLo = Math.min(...docYVals) - 80;
+			const yHi = Math.max(...docYVals) + 80;
 			const yearLo = Math.floor((yLo / 60) + 2010);
 			const yearHi = Math.ceil( (yHi / 60) + 2010);
+			const span    = yearHi - yearLo;
+			const step    = span > 30 ? 10 : span > 10 ? 5 : span > 4 ? 2 : 1;
 			const tickPts = [], tickCols = [];
-			const tickC = new THREE.Color('#e2e8f0').multiplyScalar(0.4);
-			const TICK_X = -60;
-			for (let yr = yearLo; yr <= yearHi; yr += (yearHi - yearLo > 20 ? 5 : 1)) {
+			const tickC   = new THREE.Color('#1e293b').multiplyScalar(0.9);
+			const TICK_X  = -80;
+			for (let yr = Math.ceil(yearLo / step) * step; yr <= yearHi; yr += step) {
 				const ty = (yr - 2010) * 60;
-				if (ty < yLo - 60 || ty > yHi + 60) continue;
-				tickPts.push(TICK_X, ty, centerZ, TICK_X + 30, ty, centerZ);
+				tickPts.push(TICK_X, ty, centerZ, TICK_X + 40, ty, centerZ);
 				tickCols.push(tickC.r, tickC.g, tickC.b, tickC.r, tickC.g, tickC.b);
 				const ydiv = document.createElement('div');
 				ydiv.dataset.lk = 'year:' + yr;
-				ydiv.style.cssText = 'position:absolute;font:9px ui-monospace,monospace;color:#cbd5e1;pointer-events:none;transform:translateY(-50%);opacity:0.85;font-weight:600;';
+				ydiv.style.cssText = 'position:absolute;font:10px ui-monospace,monospace;color:#1e293b;pointer-events:none;transform:translateY(-50%);font-weight:700;letter-spacing:-0.5px;';
 				ydiv.textContent = yr;
 				if (labelContainer) labelContainer.appendChild(ydiv);
 				G3D.labelEls.push(ydiv);
-				nodePos.set('year:' + yr, { x: TICK_X - 5, y: ty, z: centerZ, r: 0, node: { title: String(yr) }, colKey: '_year' });
+				nodePos.set('year:' + yr, { x: TICK_X - 8, y: ty, z: centerZ, r: 0, node: { title: String(yr) }, colKey: '_year' });
 			}
 			if (tickPts.length) {
 				const tgeo = new THREE.BufferGeometry();
@@ -1540,6 +1539,22 @@
 				tgeo.setAttribute('color', new THREE.Float32BufferAttribute(tickCols, 3));
 				scene.add(new THREE.LineSegments(tgeo, new THREE.LineBasicMaterial({ vertexColors: true })));
 			}
+
+			// ── Horizontal timeline planes: semi-transparent slab at each doc's Y ──
+			documents.forEach((d, di) => {
+				const dk    = d._key || d.id;
+				const laneY = docLaneY.get(dk) ?? 0;
+				const laneZ = docLaneZ.get(dk) ?? 0;
+				const hex   = _nodeColorHex(d, 'document', colorMode);
+				const planeW = X_TAG + 180, planeD = Z_DOC_LANE * 0.7;
+				const planeMesh = new THREE.Mesh(
+					new THREE.PlaneGeometry(planeW, planeD),
+					new THREE.MeshBasicMaterial({ color: new THREE.Color(hex), transparent: true, opacity: 0.07, side: THREE.DoubleSide, depthWrite: false })
+				);
+				planeMesh.rotation.x = -Math.PI / 2;
+				planeMesh.position.set(planeW / 2 - 80, laneY, laneZ);
+				scene.add(planeMesh);
+			});
 		}
 
 		// ── CSS labels for docs and tags ──────────────────────────────────────────
