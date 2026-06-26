@@ -808,6 +808,14 @@
 				if (autoFit) requestAnimationFrame(() => requestAnimationFrame(_g3dFitScene));
 			},
 
+			_clearSelEdges() {
+				if (typeof G3D !== 'undefined' && G3D.selEdges && G3D.scene) {
+					G3D.scene.remove(G3D.selEdges);
+					if (G3D.selEdges.geometry) G3D.selEdges.geometry.dispose();
+					G3D.selEdges = null;
+				}
+			},
+
 			toggleDocSelection(doc) {
 				const key = doc._key || doc.id;
 				if (this.selectedDocKeys.has(key)) {
@@ -816,6 +824,7 @@
 					this.selectedDocKeys.add(key);
 				}
 				this.selectedDocKeys = new Set(this.selectedDocKeys); // trigger reactivity
+				this._clearSelEdges();
 				this.loadDocGraph();
 			},
 
@@ -825,6 +834,7 @@
 				} else {
 					this.selectedDocKeys = new Set();
 				}
+				this._clearSelEdges();
 				this.loadDocGraph();
 			},
 
@@ -1236,12 +1246,19 @@
 		let { documents, sections, paragraphs, tables, edges } = data;
 		let entities = data.entities || [];
 
-		if (selectedDocKeys && selectedDocKeys.size > 0)
+		if (selectedDocKeys && selectedDocKeys.size > 0) {
 			documents = documents.filter(d => selectedDocKeys.has(d._key || d.id));
+			// Filter entities/paragraphs to selected docs only
+			const selDocIds = new Set(documents.map(d => d._key || d.id));
+			entities  = entities.filter(e => selDocIds.has(e.document_id) || (e.document_ids||[]).some(id => selDocIds.has(id)));
+			paragraphs = paragraphs.filter(p => selDocIds.has(p.document_id));
+			sections   = sections.filter(s => selDocIds.has(s.document_id));
+			tables     = tables.filter(t => selDocIds.has(t.document_id));
+		}
 
 		entities = [...entities].sort((a, b) => (b.mention_count || 0) - (a.mention_count || 0));
 
-		// Virtual SUMO tag nodes
+		// Virtual SUMO tag nodes (from selected docs' paragraphs only)
 		const tagCounts = {};
 		for (const p of paragraphs) for (const t of (p.sumo_tags || [])) tagCounts[t] = (tagCounts[t] || 0) + 1;
 		const tagNodes = Object.entries(tagCounts).sort((a, b) => b[1] - a[1]).slice(0, 25)
@@ -1253,7 +1270,7 @@
 		// Within disc: doc center → section rings by level → paragraph outer ring.
 		// Entities/Tags float outside the tunnel in a cylindrical comet shell.
 
-		const Z_SPACING = 600;   // distance between doc discs along tunnel
+		const Z_SPACING = 220;   // distance between doc discs along tunnel
 		const R_DOC     = 12;    // doc node scale
 		const D_SEC     = 10;    // section node diameter for ring math
 		const D_PARA    = 7;     // paragraph node diameter
@@ -1289,7 +1306,7 @@
 		const minYear = validYears.length ? Math.min(...validYears) : 2020;
 		const maxYear = validYears.length ? Math.max(...validYears) : 2020;
 		const yearSpan = maxYear - minYear;
-		const Z_PER_YEAR = 480;
+		const Z_PER_YEAR = 220;
 
 		function _temporalZ(d, di) {
 			if (yearSpan < 2) return di * Z_SPACING;  // same-year fallback: index spacing
@@ -1501,44 +1518,45 @@
 		// Edges shown only on selection (built in onclick handler)
 		G3D.lineMesh = null;
 
-		// ── Decay aura Points (additive glow halos per node) ─────────────────────
-		const AURA = {
-			EVERGREEN: { hex: '#22d3ee', size: 55,  op: 0.42 },
-			SCHOLARLY: { hex: '#818cf8', size: 80,  op: 0.32 },
-			CURRENT:   { hex: '#fbbf24', size: 120, op: 0.24 },
-			EPHEMERAL: { hex: '#f87171', size: 170, op: 0.18 },
+		// ── Decay fins: semi-transparent planes perpendicular to disc, through each node ──
+		// Fin plane lies in XZ (tunnel axis direction), stands upright through the node.
+		// Width = node.r * 2.5 (spans tangentially), height = decay-class Z extent.
+		const DECAY_FIN = {
+			EVERGREEN: { hex: '#22d3ee', op: 0.14, zH: 90  },
+			SCHOLARLY: { hex: '#818cf8', op: 0.12, zH: 120 },
+			CURRENT:   { hex: '#fbbf24', op: 0.10, zH: 150 },
+			EPHEMERAL: { hex: '#f87171', op: 0.08, zH: 190 },
 		};
+		// Base fin geometry: 1×1 in XY, rotated to stand in XZ plane (normal faces Y)
+		const finBaseGeo = new THREE.PlaneGeometry(1, 1);
+		finBaseGeo.applyMatrix4(new THREE.Matrix4().makeRotationX(Math.PI / 2));
+		const finDummy = new THREE.Object3D();
 		G3D.auraPoints = {};
-		for (const [cls, cfg] of Object.entries(AURA)) {
-			const pts = entries.filter(e => e.decayClass === cls);
-			if (!pts.length) continue;
-			const pos = new Float32Array(pts.length * 3);
-			pts.forEach((e, i) => { pos[i*3]=e.x; pos[i*3+1]=e.y; pos[i*3+2]=e.z; });
-			const ageo = new THREE.BufferGeometry();
-			ageo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
-			const amat = new THREE.PointsMaterial({
-				color: new THREE.Color(cfg.hex), size: cfg.size, sizeAttenuation: true,
-				map: _glowTex(cfg.hex),
-				transparent: true, opacity: cfg.op,
-				blending: THREE.AdditiveBlending, depthWrite: false,
+		for (const [cls, cfg] of Object.entries(DECAY_FIN)) {
+			const clsEntries = entries.filter(e => e.decayClass === cls);
+			if (!clsEntries.length) continue;
+			const finMat = new THREE.MeshBasicMaterial({
+				color: new THREE.Color(cfg.hex), transparent: true, opacity: cfg.op,
+				side: THREE.DoubleSide, depthWrite: false,
 			});
-			const ap = new THREE.Points(ageo, amat);
-			scene.add(ap);
-			G3D.auraPoints[cls] = { points: ap, mat: amat, baseOp: cfg.op };
-		}
-		// Boosted halo for document nodes (r=12, much larger glow)
-		for (const [cls, cfg] of Object.entries(AURA)) {
-			const docPts = entries.filter(e => e.decayClass === cls && e.colKey === 'document');
-			if (!docPts.length) continue;
-			const pos = new Float32Array(docPts.length * 3);
-			docPts.forEach((e, i) => { pos[i*3]=e.x; pos[i*3+1]=e.y; pos[i*3+2]=e.z; });
-			const ageo = new THREE.BufferGeometry();
-			ageo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
-			scene.add(new THREE.Points(ageo, new THREE.PointsMaterial({
-				color: new THREE.Color(cfg.hex), size: cfg.size * 2.5, sizeAttenuation: true,
-				map: _glowTex(cfg.hex), transparent: true, opacity: cfg.op * 0.6,
-				blending: THREE.AdditiveBlending, depthWrite: false,
-			})));
+			const finMesh = new THREE.InstancedMesh(finBaseGeo, finMat, clsEntries.length);
+			finMesh.frustumCulled = false;
+			clsEntries.forEach((e, i) => {
+				// Radial angle from disc center to node (for fin orientation)
+				const dk = e.node.document_id || (e.colKey === 'document' ? (e.node._key || e.node.id) : null);
+				const dc = dk ? docCenter.get(dk) : null;
+				const cx = dc?.cx ?? 0, cy = dc?.cy ?? 0;
+				const angle = Math.atan2(e.y - cy, e.x - cx);
+				finDummy.position.set(e.x, e.y, e.z);
+				finDummy.rotation.set(0, 0, angle);
+				finDummy.scale.set(e.r * 2.5, cfg.zH, 1);
+				finDummy.updateMatrix();
+				finMesh.setMatrixAt(i, finDummy.matrix);
+			});
+			finMesh.instanceMatrix.needsUpdate = true;
+			scene.add(finMesh);
+			// Store EPHEMERAL for pulsing in animate()
+			G3D.auraPoints[cls] = { mat: finMat, baseOp: cfg.op };
 		}
 
 		// ── Tunnel visual elements ────────────────────────────────────────────────
