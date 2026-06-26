@@ -1524,11 +1524,12 @@
 		// ── Decay fins: semi-transparent planes perpendicular to disc, through each node ──
 		// Fin plane lies in XZ (tunnel axis direction), stands upright through the node.
 		// Width = node.r * 2.5 (spans tangentially), height = decay-class Z extent.
+		// zH = fin extent along tunnel (Z) axis; longer decay class = longer temporal reach
 		const DECAY_FIN = {
-			EVERGREEN: { hex: '#22d3ee', op: 0.14, zH: 90  },
-			SCHOLARLY: { hex: '#818cf8', op: 0.12, zH: 120 },
-			CURRENT:   { hex: '#fbbf24', op: 0.10, zH: 150 },
-			EPHEMERAL: { hex: '#f87171', op: 0.08, zH: 190 },
+			EVERGREEN: { hex: '#22d3ee', op: 0.16, zH: Z_SPACING * 5   },  // timeless — spans 5 discs
+			SCHOLARLY: { hex: '#818cf8', op: 0.14, zH: Z_SPACING * 2.5 },  // long-lived — 2.5 discs
+			CURRENT:   { hex: '#fbbf24', op: 0.12, zH: Z_SPACING * 1   },  // one disc span
+			EPHEMERAL: { hex: '#f87171', op: 0.10, zH: Z_SPACING * 0.4 },  // short reach
 		};
 		// Base fin geometry: 1×1 in XY plane (default). Instance matrix rotates to XZ.
 		// rotX(-90°) via instance: scale.y becomes Z extent, scale.x becomes X extent.
