@@ -1272,7 +1272,7 @@
 			return ya - yb;
 		});
 
-		const docDiscZ = new Map();   // docKey → Z position on tunnel axis
+		const docDiscZ = new Map();   // docKey → Z position (kept for tunnel visuals compat)
 		const docDiscR = new Map();   // docKey → max ring radius
 
 		const nodePos = new Map();
@@ -1280,12 +1280,55 @@
 			return node.effective_decay_class || node.document_effective_decay_class || node.decay_class || null;
 		}
 
+		// ── Temporal Z: real year-based positioning ───────────────────────────────
+		const docYears = sortedDocs.map(d => {
+			const raw = _dateToY(d.published_date || d.temporal_coverage_start);
+			return raw != null ? Math.round(raw / 60) + 2010 : null;
+		});
+		const validYears = docYears.filter(y => y != null);
+		const minYear = validYears.length ? Math.min(...validYears) : 2020;
+		const maxYear = validYears.length ? Math.max(...validYears) : 2020;
+		const yearSpan = maxYear - minYear;
+		const Z_PER_YEAR = 480;
+
+		function _temporalZ(d, di) {
+			if (yearSpan < 2) return di * Z_SPACING;  // same-year fallback: index spacing
+			const raw = _dateToY(d.published_date || d.temporal_coverage_start);
+			const yr = raw != null ? Math.round(raw / 60) + 2010 : minYear;
+			return (yr - minYear) * Z_PER_YEAR;
+		}
+
+		// Group docs sharing same computed Z → assign radial XY offsets
+		const zGroups = new Map();
+		sortedDocs.forEach((d, di) => {
+			const z = _temporalZ(d, di);
+			if (!zGroups.has(z)) zGroups.set(z, []);
+			zGroups.get(z).push(d._key || d.id);
+		});
+
+		const SAME_Z_RADIAL = 160;
+		const docCenter = new Map();  // docKey → {cx, cy, cz}
 		sortedDocs.forEach((d, di) => {
 			const dk    = d._key || d.id;
-			const discZ = di * Z_SPACING;
-			docDiscZ.set(dk, discZ);
+			const cz    = _temporalZ(d, di);
+			const group = zGroups.get(cz);
+			const idx   = group.indexOf(dk);
+			const total = group.length;
+			let cx = 0, cy = 0;
+			if (total > 1) {
+				const angle = (2 * Math.PI * idx) / total;
+				cx = SAME_Z_RADIAL * Math.cos(angle);
+				cy = SAME_Z_RADIAL * Math.sin(angle);
+			}
+			docCenter.set(dk, { cx, cy, cz });
+		});
 
-			nodePos.set(dk, { x:0, y:0, z:discZ, r:R_DOC, node:d, colKey:'document', decayClass:_dc(d) });
+		sortedDocs.forEach((d, di) => {
+			const dk = d._key || d.id;
+			const { cx, cy, cz } = docCenter.get(dk);
+			docDiscZ.set(dk, cz);
+
+			nodePos.set(dk, { x:cx, y:cy, z:cz, r:R_DOC, node:d, colKey:'document', decayClass:_dc(d) });
 
 			// Group this doc's sections by level
 			const docSecs = sections.filter(s => s.document_id === dk);
@@ -1302,7 +1345,7 @@
 				nodes.forEach((s, i) => {
 					const theta = (2 * Math.PI * i) / nodes.length;
 					nodePos.set(s._key || s.id, {
-						x: r * Math.cos(theta), y: r * Math.sin(theta), z: discZ,
+						x: cx + r * Math.cos(theta), y: cy + r * Math.sin(theta), z: cz,
 						r: 5, node: s, colKey: 'section_L' + lvl, decayClass: _dc(s),
 					});
 				});
@@ -1315,7 +1358,7 @@
 			docParas.forEach((p, i) => {
 				const theta = (2 * Math.PI * i) / Math.max(docParas.length, 1);
 				nodePos.set(p._key || p.id, {
-					x: paraR * Math.cos(theta), y: paraR * Math.sin(theta), z: discZ,
+					x: cx + paraR * Math.cos(theta), y: cy + paraR * Math.sin(theta), z: cz,
 					r: 4, node: p, colKey: 'paragraph', decayClass: _dc(p),
 				});
 			});
@@ -1326,7 +1369,7 @@
 			docTables.forEach((t, i) => {
 				const theta = (2 * Math.PI * i) / Math.max(docTables.length, 1);
 				nodePos.set(t._key || t.id, {
-					x: tableR * Math.cos(theta), y: tableR * Math.sin(theta), z: discZ,
+					x: cx + tableR * Math.cos(theta), y: cy + tableR * Math.sin(theta), z: cz,
 					r: 4, node: t, colKey: 'table', decayClass: _dc(t),
 				});
 			});
@@ -1335,7 +1378,8 @@
 		});
 
 		const maxDiscR = Math.max(...docDiscR.values(), 100);
-		const totalZ   = Math.max((sortedDocs.length - 1) * Z_SPACING, 1);
+		const allCZ    = sortedDocs.map((d, di) => _temporalZ(d, di));
+		const totalZ   = Math.max(...allCZ, Z_SPACING);
 
 		// Stable hash → deterministic comet placement
 		function _sh(str) {
@@ -1457,12 +1501,12 @@
 		// Edges shown only on selection (built in onclick handler)
 		G3D.lineMesh = null;
 
-		// ── Decay aura Points (additive glow per decay class) ─────────────────────
+		// ── Decay aura Points (additive glow halos per node) ─────────────────────
 		const AURA = {
-			EVERGREEN: { hex: '#22d3ee', size: 18, op: 0.38 },
-			SCHOLARLY: { hex: '#818cf8', size: 30, op: 0.30 },
-			CURRENT:   { hex: '#fbbf24', size: 48, op: 0.22 },
-			EPHEMERAL: { hex: '#f87171', size: 72, op: 0.16 },
+			EVERGREEN: { hex: '#22d3ee', size: 55,  op: 0.42 },
+			SCHOLARLY: { hex: '#818cf8', size: 80,  op: 0.32 },
+			CURRENT:   { hex: '#fbbf24', size: 120, op: 0.24 },
+			EPHEMERAL: { hex: '#f87171', size: 170, op: 0.18 },
 		};
 		G3D.auraPoints = {};
 		for (const [cls, cfg] of Object.entries(AURA)) {
@@ -1482,21 +1526,35 @@
 			scene.add(ap);
 			G3D.auraPoints[cls] = { points: ap, mat: amat, baseOp: cfg.op };
 		}
+		// Boosted halo for document nodes (r=12, much larger glow)
+		for (const [cls, cfg] of Object.entries(AURA)) {
+			const docPts = entries.filter(e => e.decayClass === cls && e.colKey === 'document');
+			if (!docPts.length) continue;
+			const pos = new Float32Array(docPts.length * 3);
+			docPts.forEach((e, i) => { pos[i*3]=e.x; pos[i*3+1]=e.y; pos[i*3+2]=e.z; });
+			const ageo = new THREE.BufferGeometry();
+			ageo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+			scene.add(new THREE.Points(ageo, new THREE.PointsMaterial({
+				color: new THREE.Color(cfg.hex), size: cfg.size * 2.5, sizeAttenuation: true,
+				map: _glowTex(cfg.hex), transparent: true, opacity: cfg.op * 0.6,
+				blending: THREE.AdditiveBlending, depthWrite: false,
+			})));
+		}
 
 		// ── Tunnel visual elements ────────────────────────────────────────────────
 		const labelContainer = document.getElementById('graph-labels');
 
-		// a) Disc ring outlines at each doc's Z
+		// a) Disc ring outlines at each doc's disc center
 		sortedDocs.forEach((d, di) => {
-			const dk  = d._key || d.id;
-			const dz  = docDiscZ.get(dk) ?? di * Z_SPACING;
+			const dk         = d._key || d.id;
+			const { cx, cy, cz } = docCenter.get(dk) ?? { cx:0, cy:0, cz:di*Z_SPACING };
 			const dr  = (docDiscR.get(dk) ?? maxDiscR) + 20;
 			const hex = _nodeColorHex(d, 'document', colorMode);
 			const c   = new THREE.Color(hex).multiplyScalar(0.32);
 			const N   = 64, pts = [], cols = [];
 			for (let i = 0; i < N; i++) {
 				const t1 = 2 * Math.PI * i / N, t2 = 2 * Math.PI * (i + 1) / N;
-				pts.push(dr * Math.cos(t1), dr * Math.sin(t1), dz,  dr * Math.cos(t2), dr * Math.sin(t2), dz);
+				pts.push(cx + dr*Math.cos(t1), cy + dr*Math.sin(t1), cz,  cx + dr*Math.cos(t2), cy + dr*Math.sin(t2), cz);
 				cols.push(c.r, c.g, c.b, c.r, c.g, c.b);
 			}
 			const rgeo = new THREE.BufferGeometry();
@@ -1505,18 +1563,18 @@
 			scene.add(new THREE.LineSegments(rgeo, new THREE.LineBasicMaterial({ vertexColors: true, transparent: true, opacity: 0.45 })));
 		});
 
-		// a2) Transparent disc planes (clickable — click shows all edges for that doc)
+		// a2) Transparent disc planes (clickable — shows all edges for that doc)
 		G3D.discPlanes = [];
 		sortedDocs.forEach((d, di) => {
-			const dk  = d._key || d.id;
-			const dz  = docDiscZ.get(dk) ?? di * Z_SPACING;
+			const dk         = d._key || d.id;
+			const { cx, cy, cz } = docCenter.get(dk) ?? { cx:0, cy:0, cz:di*Z_SPACING };
 			const dr  = (docDiscR.get(dk) ?? maxDiscR) + 18;
 			const hex = _nodeColorHex(d, 'document', colorMode);
 			const planeMesh = new THREE.Mesh(
 				new THREE.CircleGeometry(dr, 64),
 				new THREE.MeshBasicMaterial({ color: new THREE.Color(hex), transparent: true, opacity: 0.04, side: THREE.DoubleSide, depthWrite: false })
 			);
-			planeMesh.position.set(0, 0, dz);
+			planeMesh.position.set(cx, cy, cz);
 			planeMesh.userData.docKey = dk;
 			scene.add(planeMesh);
 			G3D.discPlanes.push(planeMesh);
@@ -1537,9 +1595,9 @@
 				const ep = nodePos.get(e._key || e.id);
 				const docKeys = (e.doc_keys || [e.doc_key || e.document_id]).filter(Boolean);
 				for (const dk of docKeys) {
-					const dz = docDiscZ.get(dk);
-					if (ep != null && dz != null) {
-						tetherPts.push(ep.x, ep.y, ep.z,  0, 0, dz);
+					const dc = docCenter.get(dk);
+					if (ep != null && dc != null) {
+						tetherPts.push(ep.x, ep.y, ep.z,  dc.cx, dc.cy, dc.cz);
 						tetherCols.push(tc.r, tc.g, tc.b,  tc.r, tc.g, tc.b);
 					}
 				}
@@ -1550,7 +1608,7 @@
 				for (const tname of (p.sumo_tags || []).slice(0, 3)) {
 					const tp = nodePos.get('tag:' + tname);
 					if (tp) {
-						tetherPts.push(tp.x, tp.y, tp.z,  0, 0, ep.z);
+						tetherPts.push(tp.x, tp.y, tp.z,  ep.x, ep.y, ep.z);
 						tetherCols.push(tc.r, tc.g, tc.b,  tc.r, tc.g, tc.b);
 					}
 				}
@@ -1565,8 +1623,8 @@
 
 		// d) Doc labels (name + year) beside each disc ring
 		sortedDocs.forEach((d, di) => {
-			const dk   = d._key || d.id;
-			const dz   = docDiscZ.get(dk) ?? di * Z_SPACING;
+			const dk         = d._key || d.id;
+			const { cx, cy, cz } = docCenter.get(dk) ?? { cx:0, cy:0, cz:di*Z_SPACING };
 			const dr   = (docDiscR.get(dk) ?? maxDiscR) + 35;
 			const hex  = _nodeColorHex(d, 'document', colorMode);
 			const yr   = d.published_date ? new Date(d.published_date).getFullYear()
@@ -1578,7 +1636,7 @@
 			el.textContent = (d.title || d.source_file || dk).slice(0, 30) + (yr ? `  [${yr}]` : '');
 			labelContainer.appendChild(el);
 			G3D.labelEls.push(el);
-			nodePos.set(lkey, { x: dr, y: 0, z: dz, r: 0, node: d, colKey: '_label' });
+			nodePos.set(lkey, { x: cx + dr, y: cy, z: cz, r: 0, node: d, colKey: '_label' });
 		});
 
 		// ── Raycaster + interaction ────────────────────────────────────────────────
