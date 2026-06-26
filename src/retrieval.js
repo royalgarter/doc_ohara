@@ -216,6 +216,10 @@ export class RetrievalEngine {
 		if (keywords.length === 0) return [];
 
 		const hasDateFilter = dateRange && (dateRange.from || dateRange.to);
+		// When strict=true (default), docs with no temporal info are excluded from date-range
+		// queries rather than auto-passing. Relax via OHARA_DATE_FILTER_STRICT=false.
+		const strictDateFilter = hasDateFilter &&
+			(process.env.OHARA_DATE_FILTER_STRICT !== 'false');
 
 		try {
 			const rows = await this.db.executeAQL(`
@@ -233,10 +237,15 @@ export class RetrievalEngine {
 					LET pubDate = parentDoc.published_date
 					LET covFrom = parentDoc.temporal_coverage_start
 					LET covTo   = parentDoc.temporal_coverage_end
-					FILTER @dateFrom == null OR pubDate == null OR pubDate >= @dateFrom
-						OR covTo   == null OR covTo   >= @dateFrom
-					FILTER @dateTo   == null OR pubDate == null OR pubDate <= @dateTo
-						OR covFrom == null OR covFrom <= @dateTo
+					LET hasTemporalInfo = pubDate != null OR covFrom != null OR covTo != null
+					FILTER @dateFrom == null
+						OR (!@strict AND !hasTemporalInfo)
+						OR (pubDate  != null AND pubDate >= @dateFrom)
+						OR (covTo    != null AND covTo   >= @dateFrom)
+					FILTER @dateTo == null
+						OR (!@strict AND !hasTemporalInfo)
+						OR (pubDate  != null AND pubDate <= @dateTo)
+						OR (covFrom  != null AND covFrom <= @dateTo)
 					RETURN {
 						node: MERGE(doc, {
 							document_published_date:        parentDoc.published_date,
@@ -252,6 +261,7 @@ export class RetrievalEngine {
 				limit:    limit * 2,
 				dateFrom: hasDateFilter ? (dateRange.from || null) : null,
 				dateTo:   hasDateFilter ? (dateRange.to   || null) : null,
+				strict:   strictDateFilter,
 			});
 			return rows.filter(r => r.score > 0);
 		} catch (err) {
