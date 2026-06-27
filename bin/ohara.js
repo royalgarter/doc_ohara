@@ -82,22 +82,27 @@ program
 		let localPath = filePath;
 		const isUrl = /^https?:\/\//i.test(filePath);
 		if (isUrl) {
-			if (!opts.json) console.log(chalk.dim(`Downloading ${filePath}...`));
 			const urlObj = new URL(filePath);
 			const rawName = path.basename(urlObj.pathname) || 'download';
 			const filename_dl = rawName.includes('.') ? rawName : `${rawName}.pdf`;
 			localPath = path.join(INPUT_DIR, filename_dl);
-			try {
-				const resp = await fetch(filePath, { redirect: 'follow' });
-				if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-				const buf = Buffer.from(await resp.arrayBuffer());
-				fs.writeFileSync(localPath, buf);
-				if (!opts.json) console.log(chalk.dim(`  Saved ${buf.length} bytes → ${localPath}`));
-			} catch (err) {
-				const msg = `Download failed: ${err.message}`;
-				emit(opts.json, { success: false, error: msg }, () => console.error(chalk.red(`✖ ${msg}`)));
-				process.exitCode = 1;
-				return;
+			const alreadyOnDisk = fs.existsSync(localPath);
+			if (alreadyOnDisk && !opts.force) {
+				if (!opts.json) console.log(chalk.dim(`Using cached file: ${localPath} (use --force to re-download)`));
+			} else {
+				if (!opts.json) console.log(chalk.dim(`Downloading ${filePath}...`));
+				try {
+					const resp = await fetch(filePath, { redirect: 'follow' });
+					if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+					const buf = Buffer.from(await resp.arrayBuffer());
+					fs.writeFileSync(localPath, buf);
+					if (!opts.json) console.log(chalk.dim(`  Saved ${buf.length} bytes → ${localPath}`));
+				} catch (err) {
+					const msg = `Download failed: ${err.message}`;
+					emit(opts.json, { success: false, error: msg }, () => console.error(chalk.red(`✖ ${msg}`)));
+					process.exitCode = 1;
+					return;
+				}
 			}
 		} else if (!fs.existsSync(localPath)) {
 			const msg = `File not found: ${localPath}`;
