@@ -224,10 +224,14 @@ flowchart TD
 
     FUSE["Phase 4 · Score Fusion\nmerge all phase results by node _id\nweighted sum:\nBM25×1.0 · SUMO×0.4 · entity×0.6\ncross-doc×0.4 · structural×0.3\nsort descending · top-K slice"]
 
-    FUSE --> OUT["📦 Results\n{ processedQuery, results[ {node, score, sources,\nedge_verb, edge_summary} ],\nshallowResults, entityPivotResults,\ncrossDocResults, deepResults }"]
+    FUSE --> CORR["Corrective RAG\ndrop Phase 3 structural nodes\nwith zero SUMO tag overlap\n(OHARA_CORRECTIVE_STRUCT=true)"]
+    CORR --> TIERS["Tier Classification\nPrincipal · Integrity · Explorer"]
+    TIERS --> SELF["Self-RAG (opt-in)\nGemini responsiveness check\non Principal tier nodes\n(OHARA_SELF_RAG_VERIFY)"]
+    SELF --> OUT["📦 Results\n{ processedQuery, results, tiers,\nshallowResults, entityPivotResults,\ncrossDocResults, deepResults }"]
 ```
 
-Four sequential phases via `RetrievalEngine.query(rawInput, options)`:
+`RetrievalEngine.query(rawInput, options)` — standard single-pass retrieval.
+`RetrievalEngine.queryCoR(rawInput, options)` — Chain-of-Retrieval iterative mode.
 
 ### Phase 0 — Input Parsing
 Tokenizes raw input: lowercase, `[a-z0-9]+` regex, strips stopwords, drops tokens ≤ 2 chars. Returns `{ keywords, raw }`.
@@ -247,6 +251,9 @@ From the top seed paragraphs' `entity_slugs`, finds other paragraphs across all 
 ### Phase 3 — Structural Traversal
 AQL graph traversal outbound from the top-scored node via `HAS_CHILD`, `NEXT_SIBLING`, `BELONGS_TO` edge types. Depth defaults to 2.
 
+### Corrective RAG — Structural Noise Filter
+After Phase 3, structural results are filtered by SUMO tag overlap against the query's `sumoHints` before fusion. Nodes with zero overlap are dropped — structurally-proximate ≠ semantically relevant. Controlled by `OHARA_CORRECTIVE_STRUCT` (default `true`); bypassed when query has no SUMO hints (keyword queries).
+
 ### Phase 4 — Score Fusion
 All phase results are merged by node `_id`. Scores are weighted and summed; results sorted descending. Cross-doc results propagate `edge_verb`/`edge_summary` to the fused entry. A temporal score is added per node when `temporal_intent ≠ 'none'`, using an exponential decay formula: `OHARA_TEMPORAL_WEIGHT × exp(−λ × Δt)`. λ is drawn from the document's `effective_decay_class` env var. The temporal contribution is skipped for `principal`-tier nodes and nodes whose BM25 score exceeds `OHARA_TEMPORAL_GATE_FLOOR` (protects high-relevance docs from recency bias).
 
@@ -258,9 +265,25 @@ Inspired by how people actually research: [Bates' Berrypicking model](https://en
 
 - **`tiers.principal`** — compact, corroborated-by-many-angles core answer. A node qualifies if it's hit by ≥2 phases (`contributions.length >= 2`) AND either spans ≥2 distinct documents or was reached via a cross-doc edge, AND its score clears a percentile floor (`OHARA_PRINCIPAL_SCORE_PCTL`, default top quartile). Capped at `OHARA_PRINCIPAL_LIMIT` (default 5).
 - **`tiers.integrity`** — Principal plus "verified" entries: structural-traversal neighbors of Principal nodes, and cross-doc edges with `weight >= OHARA_INTEGRITY_WEIGHT_MIN` (default 0.6). Each entry carries a `provenance` array (phase, document, edge verb/hops) showing what corroborated it. An optional one-shot Gemini cross-check (`OHARA_INTEGRITY_LLM_VERIFY`, off by default) can further validate multi-document candidates — always called with `temperature: 0` and a single-turn prompt (no chat history), matching the existing `prompts/enrich_cross_doc_edge.md` call pattern.
-- **`tiers.explorer`** — a `frontier` of further candidates one hop beyond Integrity (reuses `_phase1cCrossDocEdge` with `expandDepth + 1`), restricted to the band between `OHARA_EXPLORER_STOP_WEIGHT` (default 0.15) and `OHARA_INTEGRITY_WEIGHT_MIN` — the "weakening scent" zone. Returns metadata only (`document_id`, `edge_verb`, `edge_summary`, `score`), not full content — meant as candidate directions for a caller/UI to offer, not a final answer. No interactive multi-turn loop is wired up yet; `stopped_reason` explains why expansion stopped.
+- **`tiers.explorer`** — a `frontier` of further candidates one hop beyond Integrity (reuses `_phase1cCrossDocEdge` with `expandDepth + 1`), restricted to the band between `OHARA_EXPLORER_STOP_WEIGHT` (default 0.15) and `OHARA_INTEGRITY_WEIGHT_MIN` — the "weakening scent" zone. Returns metadata only (`document_id`, `edge_verb`, `edge_summary`, `score`), not full content — meant as candidate directions for a caller/UI to offer, not a final answer. `stopped_reason` explains why expansion stopped.
 
-CLI: `node bin/ohara.js query "<text>" --tiers [--verbose]`.
+### Self-RAG — Principal Tier Responsiveness Filter
+After tier classification, an optional Gemini one-shot pass (`prompts/self_rag_verify.md`, temperature 0, flex, cached) checks whether each `tiers.principal` node actually answers the query. Non-responsive nodes are removed. Controlled by `OHARA_SELF_RAG_VERIFY` (default off) or per-call `{ selfRagVerify: true }`.
+
+### Chain-of-Retrieval (CoR)
+`queryCoR(rawInput, options)` wraps `query()` in an iterative loop. Each iteration augments the query with top Explorer `edge_verb`/`edge_summary` signals and re-runs retrieval. Results are merged across iterations (dedup by `_id`, max score wins). Stops at `OHARA_COR_MAX_ITER` iterations (default 2) or when the top score improves by less than `OHARA_COR_SCORE_DELTA` (default 0.05). Use for deep multi-hop queries where influence chains span 3+ documents.
+
+CLI: `node bin/ohara.js query "<text>" --tiers [--verbose] [--cor]`.
+API: `POST /api/retrieval/query` with `{ cor: true }` routes to `queryCoR()`.
+
+### Conversational RAG
+`query()` accepts a `sessionHistory: [{role, content}]` option. The last N turns (`OHARA_SESSION_HISTORY_LIMIT`, default 3) are prepended to the query fingerprint prompt so Gemini resolves anaphora ("what about its governance?") before Phase 1 runs. The UI accumulates history automatically across queries and sends it with each request; a turn counter and clear button appear in the query panel when history is active.
+
+### Speculative RAG
+After each `query()` response, background async pre-warm calls fire on the top Explorer frontier nodes (using their `edge_verb`/`edge_summary` as query seeds). Results are cached under `SPECULATIVE:<query_hash>:<node_id>`. Reduces cold-start latency for predictable follow-up queries. Controlled by `OHARA_SPECULATIVE_RAG` (default off) and `OHARA_SPECULATIVE_LIMIT` (default 3 frontier nodes).
+
+### REFEED RAG — Feedback Loop
+User thumbs up/down on each result card in the UI posts `{ query_hash, node_id, result_rank, signal }` to `POST /api/retrieval/feedback`, stored in the `feedback` ArangoDB collection. Run `node scripts/tune_weights.js` to read accumulated feedback and get per-rank accuracy stats with suggested `OHARA_*_WEIGHT` adjustments.
 
 ---
 
@@ -373,6 +396,13 @@ All tunables are set via environment variables. Copy `.env.example` to `.env`:
 | `OHARA_DECAY_RATE_CURRENT` | `0.01` | λ decay rate for CURRENT documents (news, blogs — ~70 day half-life) |
 | `OHARA_DECAY_RATE_EPHEMERAL` | `0.1` | λ decay rate for EPHEMERAL documents (social posts, changelogs — ~7 day half-life) |
 | `OHARA_SIMILAR_TO_EVERGREEN_THRESHOLD` | `5` | Min incoming SIMILAR_TO edges to auto-promote a document to EVERGREEN decay class |
+| `OHARA_CORRECTIVE_STRUCT` | `true` | Corrective RAG: filter Phase 3 structural nodes with zero SUMO tag overlap before fusion |
+| `OHARA_SELF_RAG_VERIFY` | `false` | Self-RAG: Gemini responsiveness check on Principal tier after classification (opt-in) |
+| `OHARA_SESSION_HISTORY_LIMIT` | `3` | Conversational RAG: number of prior Q&A turns prepended to query fingerprint prompt |
+| `OHARA_COR_MAX_ITER` | `2` | Chain-of-Retrieval: max retrieval iterations chasing Explorer frontier |
+| `OHARA_COR_SCORE_DELTA` | `0.05` | Chain-of-Retrieval: min score improvement between iterations to continue |
+| `OHARA_SPECULATIVE_RAG` | `false` | Speculative RAG: pre-warm Explorer frontier in background after each query (opt-in) |
+| `OHARA_SPECULATIVE_LIMIT` | `3` | Speculative RAG: number of frontier nodes to pre-warm per query |
 
 ---
 
@@ -408,6 +438,8 @@ node bin/ohara.js ingest path/to/file.pdf --force  # re-ingest even if already p
 ```bash
 npm run ohara:query                                         # sample query
 node bin/ohara.js query "proof of work consensus"          # custom query
+node bin/ohara.js query "topic" --tiers --verbose          # show Principal/Integrity/Explorer tiers
+node bin/ohara.js query "topic" --cor                      # Chain-of-Retrieval iterative mode
 ```
 
 ### 6. Export to wiki
@@ -450,6 +482,8 @@ node src/ingest/entity_dedup.js
 │   ├── ingest_document.md            # Main LLM prompt (DoCO structuring + entities + SUMO + temporal metadata)
 │   ├── enrich_cross_doc_edge.md      # LLM prompt for SIMILAR_TO edge verb/tags/summary
 │   ├── extract_query_fingerprint.md  # Lightweight prompt for short queries: sumo_tags + entities + temporal_intent
+│   ├── self_rag_verify.md            # Self-RAG: responsiveness check prompt → {responsive, reason}
+│   ├── verify_integrity_claim.md     # Integrity tier cross-check prompt
 │   ├── extract_toc.md
 │   ├── extract_tags.md
 │   ├── extract_entities.md
@@ -463,6 +497,7 @@ node src/ingest/entity_dedup.js
 │   ├── db-init.js            # ArangoDB collection/index setup
 │   ├── admin-queries.js      # Diagnostic AQL queries
 │   ├── sync-cache.js         # LLM cache sync utility
+│   ├── tune_weights.js       # REFEED RAG: reads feedback collection, suggests OHARA_*_WEIGHT adjustments
 │   └── clean_noise_entities.js  # Removes opaque-identifier noise entities from existing data
 ├── tests/
 │   └── ingest.test.js        # Node.js built-in test runner
@@ -483,7 +518,8 @@ All endpoints are served by `server.js`.
 |---|---|---|
 | `GET` | `/api/graph` | Full graph state (documents, sections, paragraphs, tables, edges) |
 | `GET` | `/api/graph/node/:collection/:key/neighbors` | Lazy-load a node's neighbors |
-| `POST` | `/api/retrieval/query` | Run the retrieval engine |
+| `POST` | `/api/retrieval/query` | Run the retrieval engine; `cor:true` routes to `queryCoR()`; accepts `sessionHistory`, `selfRagVerify` |
+| `POST` | `/api/retrieval/feedback` | Store REFEED RAG feedback signal (`query_hash`, `node_id`, `result_rank`, `signal`) |
 | `GET` | `/api/retrieval/context/:nodeId` | Get context for a specific node |
 | `POST` | `/api/pipeline/upload` | Upload a file for ingestion |
 | `POST` | `/api/pipeline/run` | Trigger pipeline on uploaded files |
