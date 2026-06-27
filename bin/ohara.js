@@ -73,21 +73,42 @@ program
 
 		// --- file mode ---
 		if (!filePath) {
-			console.error(chalk.red('✖ Provide a file path or use --crawl'));
+			console.error(chalk.red('✖ Provide a file path or URL, or use --crawl'));
 			process.exitCode = 1;
 			return;
 		}
 		fs.mkdirSync(INPUT_DIR, { recursive: true });
-		if (!fs.existsSync(filePath)) {
-			const msg = `File not found: ${filePath}`;
+
+		let localPath = filePath;
+		const isUrl = /^https?:\/\//i.test(filePath);
+		if (isUrl) {
+			if (!opts.json) console.log(chalk.dim(`Downloading ${filePath}...`));
+			const urlObj = new URL(filePath);
+			const rawName = path.basename(urlObj.pathname) || 'download';
+			const filename_dl = rawName.includes('.') ? rawName : `${rawName}.pdf`;
+			localPath = path.join(INPUT_DIR, filename_dl);
+			try {
+				const resp = await fetch(filePath, { redirect: 'follow' });
+				if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+				const buf = Buffer.from(await resp.arrayBuffer());
+				fs.writeFileSync(localPath, buf);
+				if (!opts.json) console.log(chalk.dim(`  Saved ${buf.length} bytes → ${localPath}`));
+			} catch (err) {
+				const msg = `Download failed: ${err.message}`;
+				emit(opts.json, { success: false, error: msg }, () => console.error(chalk.red(`✖ ${msg}`)));
+				process.exitCode = 1;
+				return;
+			}
+		} else if (!fs.existsSync(localPath)) {
+			const msg = `File not found: ${localPath}`;
 			emit(opts.json, { success: false, error: msg }, () => console.error(chalk.red(`✖ ${msg}`)));
 			process.exitCode = 1;
 			return;
 		}
 
-		const filename = path.basename(filePath);
+		const filename = path.basename(localPath);
 		const destPath = path.join(INPUT_DIR, filename);
-		fs.copyFileSync(filePath, destPath);
+		if (localPath !== destPath) fs.copyFileSync(localPath, destPath);
 
 		const queue = getIngestionQueue();
 		const job = queue.add('ingestion', { filename, force: !!opts.force });
