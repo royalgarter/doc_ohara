@@ -35,11 +35,48 @@ program
 	.version('2.0.0');
 
 program
-	.command('ingest <path>')
-	.description('Queue a document for processing')
+	.command('ingest [path]')
+	.description('Ingest a document file, or use --crawl to ingest from the crawl DB collection')
 	.option('--json', 'machine-readable output')
-	.option('--force', 're-ingest even if the file hash already exists in the database')
+	.option('--force', 're-ingest even if already exists in the database')
+	.option('--crawl [domain]', 'ingest HTML pages from the crawl collection (optionally filter by domain)')
 	.action(async (filePath, opts) => {
+		const aiKey = process.env.GEMINI_API_KEY;
+
+		// --- crawl-DB mode ---
+		if (opts.crawl !== undefined) {
+			const domain = typeof opts.crawl === 'string' ? opts.crawl : null;
+			if (!aiKey) {
+				console.error(chalk.red('✖ GEMINI_API_KEY not set'));
+				process.exitCode = 1;
+				return;
+			}
+			if (!opts.json) console.log(chalk.cyan(domain ? `Ingesting crawled pages for: ${domain}` : 'Ingesting all crawled pages'));
+			try {
+				const result = await ingestCrawledDomain(domain, aiKey, (pct, msg) => {
+					if (!opts.json) process.stderr.write(`\r[${String(pct).padStart(3)}%] ${msg}`);
+				}, { force: !!opts.force });
+				if (!opts.json) process.stderr.write('\n');
+				emit(opts.json, result, ({ ingested, skipped, failed, total }) => {
+					console.log(chalk.green(`✔ ${ingested}/${total} ingested`) +
+						(skipped ? chalk.yellow(`, ${skipped} skipped`) : '') +
+						(failed ? chalk.red(`, ${failed} failed`) : ''));
+				});
+			} catch (err) {
+				emit(opts.json, { success: false, error: err.message }, () =>
+					console.error(chalk.red(`✖ ${err.message}`))
+				);
+				process.exitCode = 1;
+			}
+			return;
+		}
+
+		// --- file mode ---
+		if (!filePath) {
+			console.error(chalk.red('✖ Provide a file path or use --crawl'));
+			process.exitCode = 1;
+			return;
+		}
 		fs.mkdirSync(INPUT_DIR, { recursive: true });
 		if (!fs.existsSync(filePath)) {
 			const msg = `File not found: ${filePath}`;
@@ -60,7 +97,6 @@ program
 			if (opts.force) console.log(chalk.dim('  --force: skipping duplicate-hash check'));
 		}
 
-		const aiKey = process.env.GEMINI_API_KEY;
 		const processed = await runWorkerOnce(aiKey);
 		const outcome = processed.find(p => p.jobId === job.id);
 
@@ -88,37 +124,6 @@ program
 				process.exitCode = 1;
 			}
 		});
-	});
-
-program
-	.command('ingest-crawl [domain]')
-	.description('Ingest HTML pages already stored in the crawl collection (does not crawl). Optionally filter by domain.')
-	.option('--json', 'machine-readable output')
-	.option('--force', 're-ingest even if already ingested')
-	.action(async (domain, opts) => {
-		const aiKey = process.env.GEMINI_API_KEY;
-		if (!aiKey) {
-			console.error(chalk.red('✖ GEMINI_API_KEY not set'));
-			process.exitCode = 1;
-			return;
-		}
-		if (!opts.json) console.log(chalk.cyan(domain ? `Ingesting crawled pages for: ${domain}` : 'Ingesting all crawled pages'));
-		try {
-			const result = await ingestCrawledDomain(domain || null, aiKey, (pct, msg) => {
-				if (!opts.json) process.stderr.write(`\r[${String(pct).padStart(3)}%] ${msg}`);
-			}, { force: !!opts.force });
-			if (!opts.json) process.stderr.write('\n');
-			emit(opts.json, result, ({ ingested, skipped, failed, total }) => {
-				console.log(chalk.green(`✔ ${ingested}/${total} ingested`) +
-					(skipped ? chalk.yellow(`, ${skipped} skipped`) : '') +
-					(failed ? chalk.red(`, ${failed} failed`) : ''));
-			});
-		} catch (err) {
-			emit(opts.json, { success: false, error: err.message }, () =>
-				console.error(chalk.red(`✖ ${err.message}`))
-			);
-			process.exitCode = 1;
-		}
 	});
 
 program
