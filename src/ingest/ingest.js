@@ -300,7 +300,7 @@ Document text content:
 ${content}
 `;
 
-	const parsedText = (await callLLM(prompt, { model: GEMINI_MODEL, cache: false })) || '{}';
+	const parsedText = (await callLLM(prompt, { model: GEMINI_MODEL, cache: false, serviceTier: 'flex' })) || '{}';
 	const cleanJson = parsedText.replace(/^```json/gi, '').replace(/^```/gi, '').replace(/```$/gi, '').trim();
 	return JSON.parse(cleanJson);
 }
@@ -365,7 +365,7 @@ async function generateFromMarkdown(ai, mdContent, filename) {
 	try {
 		const promptTemplate = fs.readFileSync(path.join('prompts', 'ingest_document.md'), 'utf-8');
 		const prompt = `${promptTemplate}\n\nDOCUMENT_MARKDOWN:\n\n${mdContent}`;
-		const parsedText = (await callLLM(prompt, { model: GEMINI_MODEL, cache: false })) || '{}';
+		const parsedText = (await callLLM(prompt, { model: GEMINI_MODEL, cache: false, serviceTier: 'flex' })) || '{}';
 		const cleanJson = parsedText.replace(/^```json/gi, '').replace(/^```/gi, '').replace(/```$/gi, '').trim();
 		return safeParseJsonFromText(cleanJson);
 	} catch (err) {
@@ -584,7 +584,7 @@ async function detectTocWithLLM(ai, firstChunks) {
 
 		let parsed = readCacheSync(key);
 		if (!parsed) {
-			const raw = ((await callLLM(prompt, { model: GEMINI_MODEL, cache: false })) ?? '').trim().replace(/^```json/i, '').replace(/^```/, '').replace(/```$/, '').trim();
+			const raw = ((await callLLM(prompt, { model: GEMINI_MODEL, cache: false, serviceTier: 'flex' })) ?? '').trim().replace(/^```json/i, '').replace(/^```/, '').replace(/```$/, '').trim();
 			try { parsed = JSON.parse(raw); } catch { return null; }
 			writeCache(key, parsed);
 		}
@@ -619,7 +619,7 @@ async function enrichCrossDocEdge(ai, docA, docB, snippetsA, snippetsB, sharedEn
 
 		if (!parsed) {
 			const prompt = `${enrichPrompt}\n\nINPUT:\n${inputPayload}`;
-			const raw = ((await callLLM(prompt, { model: GEMINI_MODEL, cache: false })) ?? '').trim().replace(/^```json\s*/i, '').replace(/^```/, '').replace(/```$/, '').trim();
+			const raw = ((await callLLM(prompt, { model: GEMINI_MODEL, cache: false, serviceTier: 'flex' })) ?? '').trim().replace(/^```json\s*/i, '').replace(/^```/, '').replace(/```$/, '').trim();
 			try { parsed = JSON.parse(raw); } catch { return null; }
 			writeCache(key, parsed);
 		}
@@ -646,7 +646,7 @@ async function generateDocContext(ai, firstChunkText) {
 	const cached = readCacheSync(key);
 	if (cached && typeof cached.summary === 'string') return cached.summary;
 	try {
-		const summary = ((await callLLM(prompt, { model: GEMINI_MODEL, cache: false })) || '').trim();
+		const summary = ((await callLLM(prompt, { model: GEMINI_MODEL, cache: false, serviceTier: 'flex' })) || '').trim();
 		if (summary) writeCache(key, { summary });
 		return summary || null;
 	} catch (err) {
@@ -776,7 +776,7 @@ async function structureMarkdownWithRetries(ai, filename, mdContent) {
 				const pageHint  = chunk.startPage != null ? `\nPAGE_RANGE:${chunk.startPage}-${chunk.endPage}` : '';
 				const docCtxSection = docContextSummary ? `\nDOCUMENT_CONTEXT (applies to entire document, not just this excerpt):\n${docContextSummary}` : '';
 				const prompt = `${promptNorm}${levelHint}${pageHint}${docCtxSection}\n\nDOCUMENT_CHUNK_HEADING:${chunk.heading || ''}\n\n${chunk.text}`;
-				const parsedText = (await callLLM(prompt, { model: modelId, cache: false })) || '{}';
+				const parsedText = (await callLLM(prompt, { model: modelId, cache: false, serviceTier: 'flex' })) || '{}';
 				diag.raw_llm_output = parsedText;
 				const cleanJson = parsedText.replace(/^```json/gi, '').replace(/^```/gi, '').replace(/```$/gi, '').trim();
 				let parsed;
@@ -792,7 +792,7 @@ async function structureMarkdownWithRetries(ai, filename, mdContent) {
 					try {
 						addPipelineLog('info', `Attempting automated repair for chunk ${chunk.id}`);
 						const repairPrompt = `The text below may contain a JSON object mixed with commentary or markdown fences. Extract and return ONLY the JSON object (no explanation, no markdown fences). If multiple objects exist, return the single top-level object.\n\nNOISY_OUTPUT:\n${parsedText}`;
-						const repairText = (await callLLM(repairPrompt, { model: modelId, cache: false })) || '';
+						const repairText = (await callLLM(repairPrompt, { model: modelId, cache: false, serviceTier: 'flex' })) || '';
 						diag.repair_raw_output = repairText;
 						try {
 							const repaired = safeParseJsonFromText(repairText);
