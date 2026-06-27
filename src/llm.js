@@ -4,6 +4,15 @@ import { cacheKeyFor, readCacheAsync, writeCacheAsync, credFingerprint } from '.
 const PROVIDER = process.env.LLM_PROVIDER || 'gemini';
 const DEFAULT_MODEL = process.env.LLM_MODEL || 'gemini-2.5-flash-lite-preview-06-17';
 const DEFAULT_EMBEDDING_MODEL = process.env.LLM_EMBEDDING_MODEL || 'gemini-embedding-exp-03-07';
+const CF_WORKERS_FALLBACK_MODEL = process.env.CF_WORKERS_MODEL || '@cf/zai-org/glm-4.7-flash';
+
+// Errors from Gemini that warrant a fallback attempt
+const GEMINI_FALLBACK_CODES = new Set([503, 429, 500]);
+function _isGeminiFallbackError(err) {
+	const msg = err?.message || '';
+	return GEMINI_FALLBACK_CODES.has(err?.status) ||
+		/503|429|unavailable|resource.?exhausted|rate.?limit|overloaded/i.test(msg);
+}
 
 let _geminiAI = null;
 function _getGeminiAI() {
@@ -63,31 +72,72 @@ async function _callCloudflare(prompt, { model, systemPrompt, json } = {}) {
 	return text;
 }
 
+// Cloudflare Workers AI — direct API (CF_ACCOUNT_ID + CF_API_TOKEN required)
+// Used as Gemini fallback; model default: @cf/zai-org/glm-4.7-flash
+async function _callCFWorkersAI(prompt, { model, systemPrompt, json } = {}) {
+	const accountId = process.env.CF_ACCOUNT_ID;
+	const token = process.env.CF_API_TOKEN;
+	if (!accountId || !token) throw new Error('CF_ACCOUNT_ID and CF_API_TOKEN must be set for Workers AI fallback');
+
+	const resolvedModel = model || CF_WORKERS_FALLBACK_MODEL;
+	const messages = [];
+	if (systemPrompt) messages.push({ role: 'system', content: systemPrompt });
+	messages.push({ role: 'user', content: typeof prompt === 'string' ? prompt : JSON.stringify(prompt) });
+
+	const url = `https://api.cloudflare.com/client/v4/accounts/${accountId}/ai/run/${resolvedModel}`;
+	const resp = await fetch(url, {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+		body: JSON.stringify({ messages }),
+	});
+	if (!resp.ok) {
+		const errText = await resp.text();
+		throw new Error(`CF Workers AI error ${resp.status}: ${errText}`);
+	}
+	const data = await resp.json();
+	if (!data.success) throw new Error(`CF Workers AI failed: ${JSON.stringify(data.errors)}`);
+	const text = (data.result?.response ?? '').trim();
+	if (json) return JSON.parse(text);
+	return text;
+}
+
 /**
  * Generate text from a prompt, with automatic disk+DB caching.
  * Pass cache: false to skip cache lookup/write.
  * Extra keys (e.g. temperature, maxOutputTokens, serviceTier) forwarded to Gemini config.
  */
+async function _callPrimary(prompt, { model, systemPrompt, json, ...extraConfig } = {}) {
+	if (PROVIDER === 'cloudflare') return _callCloudflare(prompt, { model, systemPrompt, json });
+	if (PROVIDER === 'cf-workers') return _callCFWorkersAI(prompt, { model, systemPrompt, json });
+	return _callGemini(prompt, { model, systemPrompt, json, ...extraConfig });
+}
+
 export async function callLLM(prompt, { model, systemPrompt, json, cache = true, ...extraConfig } = {}) {
 	const resolvedModel = model || DEFAULT_MODEL;
+
+	const invoke = async () => {
+		try {
+			return await _callPrimary(prompt, { model: resolvedModel, systemPrompt, json, ...extraConfig });
+		} catch (err) {
+			// Fallback to CF Workers AI when Gemini is overloaded/rate-limited
+			if (PROVIDER === 'gemini' && _isGeminiFallbackError(err) && process.env.CF_API_TOKEN) {
+				console.error(`[llm] Gemini error (${err.message}) — falling back to CF Workers AI`);
+				return _callCFWorkersAI(prompt, { systemPrompt, json });
+			}
+			throw err;
+		}
+	};
 
 	if (cache) {
 		const key = cacheKeyFor([PROVIDER, resolvedModel, credFingerprint(), systemPrompt || '', prompt, json ? 'json' : '']);
 		const cached = await readCacheAsync(key);
 		if (cached?.result !== undefined) return cached.result;
-
-		const result = PROVIDER === 'cloudflare'
-			? await _callCloudflare(prompt, { model: resolvedModel, systemPrompt, json })
-			: await _callGemini(prompt, { model: resolvedModel, systemPrompt, json, ...extraConfig });
-
+		const result = await invoke();
 		await writeCacheAsync(key, { result });
 		return result;
 	}
 
-	if (PROVIDER === 'cloudflare') {
-		return _callCloudflare(prompt, { model: resolvedModel, systemPrompt, json });
-	}
-	return _callGemini(prompt, { model: resolvedModel, systemPrompt, json, ...extraConfig });
+	return invoke();
 }
 
 /**
