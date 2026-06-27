@@ -2128,36 +2128,50 @@ export async function ingestCrawledDomain(domain, aiKey, onProgress = () => {}, 
 	const inputDir = 'doc_pipeline/input';
 	fs.mkdirSync(inputDir, { recursive: true });
 
+	// Group pages by root domain so each domain becomes ONE document with pages as sections.
+	const byDomain = new Map();
+	for (const page of pages) {
+		let hostname;
+		try { hostname = new URL(page.url).hostname; } catch { hostname = 'unknown'; }
+		if (!byDomain.has(hostname)) byDomain.set(hostname, []);
+		byDomain.get(hostname).push(page);
+	}
+
 	let ingested = 0, failed = 0, skipped = 0;
+	const domainList = [...byDomain.entries()];
 
-	for (let i = 0; i < pages.length; i++) {
-		const page = pages[i];
-		onProgress(Math.round((i / pages.length) * 100), `Ingesting ${page.url}`);
+	for (let di = 0; di < domainList.length; di++) {
+		const [hostname, domainPages] = domainList[di];
+		onProgress(Math.round((di / domainList.length) * 100), `Bundling ${domainPages.length} page(s) for ${hostname}`);
 
-		const titleInfo = extractHtmlTitle(page.html) || { text: new URL(page.url).pathname || page.url, level: 1 };
-		const md = htmlToMarkdown(page.html);
-		const fullMd = `${'#'.repeat(titleInfo.level)} ${titleInfo.text}\n\n${md}`;
+		// Build one combined markdown: H1 = domain, H2 = each page
+		const sections = domainPages.map(page => {
+			const titleInfo = extractHtmlTitle(page.html) || { text: new URL(page.url).pathname || page.url };
+			const md = htmlToMarkdown(page.html);
+			return `## ${titleInfo.text}\n\n<!-- url: ${page.url} -->\n\n${md}`;
+		});
+		const combinedMd = `# ${hostname}\n\n${sections.join('\n\n---\n\n')}`;
 
-		// Sanitized filename derived from URL
-		const slug = page.url.replace(/^https?:\/\//, '').replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 180);
+		const slug = hostname.replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 120);
 		const filename = `${slug}.md`;
-		fs.writeFileSync(path.join(inputDir, filename), fullMd, 'utf-8');
+		fs.writeFileSync(path.join(inputDir, filename), combinedMd, 'utf-8');
+		addPipelineLog('info', `Bundled ${domainPages.length} pages → ${filename}`);
 
 		try {
 			await ingestSingleFile(filename, aiKey, () => {}, opts);
 			ingested++;
-			addPipelineLog('info', `[${i + 1}/${pages.length}] Ingested: ${page.url}`);
+			addPipelineLog('info', `[${di + 1}/${domainList.length}] Ingested domain bundle: ${hostname}`);
 		} catch (err) {
 			if (err.code === 'ALREADY_INGESTED') {
 				skipped++;
-				addPipelineLog('info', `[${i + 1}/${pages.length}] Skipped (already ingested): ${page.url}`);
+				addPipelineLog('info', `[${di + 1}/${domainList.length}] Skipped (already ingested): ${hostname}`);
 			} else {
 				failed++;
-				addPipelineLog('error', `[${i + 1}/${pages.length}] Failed ${page.url}: ${err.message}`);
+				addPipelineLog('error', `[${di + 1}/${domainList.length}] Failed ${hostname}: ${err.message}`);
 			}
 		}
 	}
 
 	onProgress(100, `Done. ${ingested} ingested, ${skipped} skipped, ${failed} failed.`);
-	return { ingested, failed, skipped, total: pages.length };
+	return { ingested, failed, skipped, total: domainList.length };
 }

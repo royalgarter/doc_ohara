@@ -8,8 +8,6 @@
  *   node scripts/backfill-temporal.js          # dry-run (show what would change)
  *   node scripts/backfill-temporal.js --write  # apply updates to ArangoDB
  */
-import dotenv from 'dotenv';
-dotenv.config();
 import { loadEnvFromDB } from '../src/db/env.js';
 import { initArangoClient } from '../src/db/client.js';
 import { GoogleGenAI } from '@google/genai';

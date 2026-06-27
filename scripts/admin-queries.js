@@ -2,8 +2,6 @@
 // Admin query scripts for the Doc Ohara Space-Time Graph.
 // Usage: node scripts/admin-queries.js [query-name]
 // Available queries: docs, sections, tags, tag-coverage, missing-tags, repair-stats, missing-temporal, decay-distribution, all
-import dotenv from 'dotenv';
-dotenv.config();
 import { loadEnvFromDB } from '../src/db/env.js';
 import { initArangoClient } from '../src/db/client.js';
 import { getArangoDBSimulator } from '../src/db/simulator.js';

@@ -1,4 +1,3 @@
-import 'dotenv/config';
 import { loadEnvFromDB } from './src/db/env.js';
 import express from 'express';
 import path from 'node:path';

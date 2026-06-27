@@ -8,8 +8,6 @@
  *   node scripts/backfill-embeddings.js          # dry-run (count only)
  *   node scripts/backfill-embeddings.js --write  # embed and store
  */
-import dotenv from 'dotenv';
-dotenv.config();
 import { loadEnvFromDB } from '../src/db/env.js';
 import { initArangoClient } from '../src/db/client.js';
 import { GoogleGenAI } from '@google/genai';

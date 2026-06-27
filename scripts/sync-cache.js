@@ -1,8 +1,5 @@
-import dotenv from 'dotenv';
 import fs from 'fs';
 import * as ac from '../src/db/client.js';
-
-dotenv.config();
 (async ()=>{
 	try{
 		await ac.initArangoClient();

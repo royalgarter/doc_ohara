@@ -18,8 +18,6 @@
  *   node scripts/build-precedes-edges.js          # dry-run
  *   node scripts/build-precedes-edges.js --write  # apply
  */
-import dotenv from 'dotenv';
-dotenv.config();
 import { loadEnvFromDB } from '../src/db/env.js';
 import { initArangoClient } from '../src/db/client.js';
 

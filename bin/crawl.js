@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-import 'dotenv/config';
 import { loadEnvFromDB } from '../src/db/env.js';
 import { connectBrowser, fetchHtml } from '../src/browser/index.js';
 import { initArangoClient } from '../src/db/client.js';

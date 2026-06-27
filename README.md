@@ -172,6 +172,18 @@ temporal_confidence   # 0.0–1.0
 decay_class           # 'EVERGREEN'|'SCHOLARLY'|'CURRENT'|'EPHEMERAL'
 ```
 
+### Web Crawl Ingest (`ingestCrawledDomain`)
+
+When ingesting HTML pages from the `crawl` ArangoDB collection, **all pages from the same hostname are bundled into a single document**. Each page becomes an `## H2` section under a root `# hostname` heading. This keeps one `documents` node per domain rather than one per URL.
+
+Bundle logic (`src/ingest/ingest.js` → `ingestCrawledDomain`):
+1. Group `crawl` records by `new URL(page.url).hostname`.
+2. For each hostname, build `<hostname>.md`: H1 = hostname, H2 per page (with `<!-- url: ... -->` comment), body = page markdown.
+3. Write combined file to `doc_pipeline/input/` and call `ingestSingleFile` once.
+4. Returns `{ ingested, failed, skipped, total }` counted per domain, not per page.
+
+To re-ingest rwatimes.io after this fix: delete old per-page documents from ArangoDB, then run `ingestCrawledDomain('rwatimes.io', ...)` with `force: true`.
+
 ---
 
 ## Retrieval Engine (`src/retrieval.js`)

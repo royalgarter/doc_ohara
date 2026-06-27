@@ -1,7 +1,4 @@
-import dotenv from 'dotenv';
 import * as client from '../src/db/client.js';
-
-dotenv.config();
 (async ()=>{
 	try{
 		const db = await client.initArangoClient();
