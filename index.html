@@ -10,100 +10,164 @@
 	<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 	<style>
-		/* Utilities litewind (a fixed-class subset of Tailwind) doesn't ship —
-			 kept to the smallest possible set instead of pulling in the full build. */
+		/* ── Base utilities ────────────────────────────────────────────────────── */
 		[x-cloak] { display: none !important; }
 		body { font-family: 'SF Mono', ui-monospace, 'Cascadia Code', monospace; }
 		.scrollbar-thin::-webkit-scrollbar { width: 3px; height: 3px; }
-		.scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
-		.scrollbar-thin::-webkit-scrollbar-thumb { background: #334155; border-radius: 2px; }
+		.scrollbar-thin::-webkit-scrollbar-track { background: #1a1108; }
+		.scrollbar-thin::-webkit-scrollbar-thumb { background: #8B5B29; border-radius: 2px; }
 		.log-line { font-size: 10.5px; line-height: 1.5; }
 		.line-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 		.ml-auto { margin-left: auto; }
 		.mt-auto { margin-top: auto; }
 		.inset-0 { top: 0; right: 0; bottom: 0; left: 0; }
-		.dot-glow { box-shadow: 0 0 6px #38bdf8; }
-		.group:hover .group-hover-sky { color: #7dd3fc; }
-		/* litewind has no alpha-channel background/border utilities — define the
-			 handful this UI actually uses as plain rgba rules under the same class names */
-		.bg-gray-800\/50 { background-color: rgba(30,41,59,.5); }
-		.bg-gray-800\/60 { background-color: rgba(30,41,59,.6); }
-		.bg-gray-800\/80 { background-color: rgba(30,41,59,.8); }
-		.bg-gray-800\/90 { background-color: rgba(30,41,59,.9); }
-		.bg-gray-900\/40 { background-color: rgba(15,23,42,.4); }
-		.bg-gray-900\/90 { background-color: rgba(15,23,42,.9); }
-		.bg-yellow-700\/60 { background-color: rgba(161,98,7,.6); }
-		.bg-yellow-800\/50 { background-color: rgba(133,77,14,.5); }
-		.bg-yellow-950\/20 { background-color: rgba(66,32,6,.2); }
-		.bg-red-800\/50 { background-color: rgba(153,27,27,.5); }
-		.bg-red-950\/30 { background-color: rgba(69,10,10,.3); }
-		.bg-green-900\/40 { background-color: rgba(20,83,45,.4); }
-		.bg-green-950\/30 { background-color: rgba(5,46,22,.3); }
-		.bg-green-950\/20 { background-color: rgba(5,46,22,.2); }
-		.bg-sky-700\/70 { background-color: rgba(3,105,161,.7); }
-		.bg-sky-950\/20 { background-color: rgba(8,47,73,.2); }
-		.bg-sky-950\/30 { background-color: rgba(8,47,73,.3); }
-		.border-gray-700\/40 { border-color: rgba(51,65,85,.4); }
-		.border-gray-700\/50 { border-color: rgba(51,65,85,.5); }
-		.border-gray-700\/60 { border-color: rgba(51,65,85,.6); }
-		.border-gray-800\/60 { border-color: rgba(30,41,59,.6); }
-		.border-green-800\/50 { border-color: rgba(22,101,52,.5); }
-		.border-yellow-700\/40 { border-color: rgba(161,98,7,.4); }
-		.border-red-800\/60 { border-color: rgba(153,27,27,.6); }
-		.hover\:bg-yellow-600\/70:hover { background-color: rgba(202,138,4,.7); }
-		.hover\:bg-yellow-700\/60:hover { background-color: rgba(161,98,7,.6); }
-		.hover\:bg-red-700\/60:hover { background-color: rgba(185,28,28,.6); }
-		.hover\:bg-red-900\/50:hover { background-color: rgba(127,29,29,.5); }
-		.text-yellow-400\/70 { color: rgba(250,204,21,.7); }
-		.text-red-400\/80 { color: rgba(248,113,113,.8); }
-		/* litewind ships bg-sky-* but no text-sky-*/border-gray-*/gray-950/hover:text-* — fill the exact shades used */
-		.bg-gray-950 { background-color: #030712; }
-		.text-sky-200 { color: #bae6fd; } .text-sky-300 { color: #7dd3fc; }
-		.text-sky-400 { color: #38bdf8; } .text-sky-500 { color: #0ea5e9; }
-		.border-gray-400 { border-color: #38bdf8; } .border-gray-500 { border-color: #0ea5e9; }
-		.border-gray-600 { border-color: #0284c7; } .border-gray-700 { border-color: #0369a1; }
-		.hover\:text-gray-300:hover { color: #d1d5db; }
-		.hover\:text-gray-400:hover { color: #9ca3af; }
-		.hover\:text-red-400:hover { color: #f87171; }
 		#graph-svg .node-g { cursor: pointer; }
 		#graph-svg .node-g circle { transition: r 0.1s; }
+
+		/* ── Classic Literature Palette ────────────────────────────────────────
+		   #4B3D2D  dark brown    #8B5B29  medium brown
+		   #C2B280  tan/sand      #D9CBA0  warm beige    #E3D4B9  parchment
+		   Derived: #1a1108 (darkest bg)  #2d2014 (dark bg)  #3d2e1c (panel)
+		            #6b5235 (muted accent)  #5a4530 (border mid)
+		   ─────────────────────────────────────────────────────────────────── */
+
+		/* Background */
+		.cl-bg-0   { background-color: #1a1108; }  /* body / canvas */
+		.cl-bg-1   { background-color: #2d2014; }  /* header / nav / dark panel */
+		.cl-bg-2   { background-color: #3d2e1c; }  /* cards / inputs / inactive btns */
+		.cl-bg-3   { background-color: #4B3D2D; }  /* active / hover states */
+		.cl-bg-acc { background-color: #8B5B29; }  /* primary action */
+		.cl-bg-acc:hover { background-color: #6b5235; }
+
+		/* Text */
+		.cl-t0 { color: #E3D4B9; }  /* brightest — titles, selected */
+		.cl-t1 { color: #D9CBA0; }  /* primary text */
+		.cl-t2 { color: #C2B280; }  /* accent / secondary highlight */
+		.cl-t3 { color: #8B5B29; }  /* section headers, labels */
+		.cl-t4 { color: #6b5235; }  /* muted */
+		.cl-t5 { color: #5a4530; }  /* dim / disabled */
+		.cl-t0:hover { color: #E3D4B9; }
+		.cl-t1:hover { color: #E3D4B9; }
+		.cl-t2:hover { color: #E3D4B9; }
+		.cl-t3:hover { color: #D9CBA0; }
+		.cl-t4:hover { color: #D9CBA0; }
+
+		/* Border */
+		.cl-b0 { border-color: #3d2e1c; }  /* subtle */
+		.cl-b1 { border-color: #5a4530; }  /* normal */
+		.cl-b2 { border-color: #8B5B29; }  /* accent / selected */
+
+		/* Dot glow */
+		.dot-glow { box-shadow: 0 0 6px #C2B280; }
+		.group:hover .group-hover-cl { color: #D9CBA0; }
+
+		/* Tab */
+		.cl-tab-on  { background-color: #4B3D2D; color: #C2B280; }
+		.cl-tab-off { color: #6b5235; }
+		.cl-tab-off:hover { color: #D9CBA0; }
+
+		/* Button primary */
+		.cl-btn { background-color: #8B5B29; color: #E3D4B9; }
+		.cl-btn:hover { background-color: #6b5235; }
+		.cl-btn:disabled { background-color: #3d2e1c; color: #5a4530; cursor: not-allowed; }
+
+		/* Button ghost */
+		.cl-btn-gh { background-color: #3d2e1c; color: #C2B280; border-color: #5a4530; }
+		.cl-btn-gh:hover { background-color: #4B3D2D; color: #E3D4B9; border-color: #8B5B29; }
+
+		/* Button danger hover */
+		.cl-btn-del { background-color: #3d2e1c; color: #6b5235; }
+		.cl-btn-del:hover { background-color: #3d1a1a; color: #f87171; }
+
+		/* Card */
+		.cl-card     { background-color: #3d2e1c; border-color: #5a4530; }
+		.cl-card:hover { border-color: #8B5B29; background-color: #4B3D2D; }
+		.cl-card-on  { background-color: #4B3D2D; border-color: #8B5B29; }
+
+		/* Input */
+		.cl-input { background-color: #3d2e1c; border-color: #5a4530; color: #D9CBA0; }
+		.cl-input:focus { outline: none; border-color: #8B5B29; }
+
+		/* Job status card backgrounds — solid, no opacity */
+		.cl-job-failed    { background-color: #2d1010; border-color: #7a2222; }
+		.cl-job-waiting   { background-color: #2d2810; border-color: #7a6322; }
+		.cl-job-active    { background-color: #3d2e1c; border-color: #8B5B29; }
+		.cl-job-completed { background-color: #3d2e1c; border-color: #5a4530; }
+
+		/* Status indicator colors used inline */
+		.cl-status-fail    { color: #f87171; }
+		.cl-status-warn    { color: #fbbf24; }
+		.cl-status-ok      { color: #4ade80; }
+		.cl-status-act     { color: #C2B280; }
+
+		/* SUMO tag chip */
+		.cl-tag { background-color: #253320; border-color: #3a5330; color: #4ade80; }
+
+		/* litewind overrides — remap gray/sky classes to Classic Literature */
+		.bg-gray-950 { background-color: #1a1108; }
+		.bg-sky-700  { background-color: #8B5B29; }
+		.bg-sky-900  { background-color: #3d2e1c; }
+		.text-sky-400, .text-sky-300, .text-sky-200 { color: #C2B280; }
+		.text-sky-500 { color: #8B5B29; }
+		.border-gray-700 { border-color: #5a4530; }
+		.border-gray-800 { border-color: #3d2e1c; }
+		.hover\:bg-sky-600:hover  { background-color: #6b5235; }
+		.hover\:bg-sky-800:hover  { background-color: #4B3D2D; }
+		.hover\:text-gray-300:hover { color: #D9CBA0; }
+		.hover\:text-red-400:hover  { color: #f87171; }
+
+		/* Functional status (keep red/yellow/green for semantic meaning) */
+		.bg-yellow-700\/60 { background-color: #7a5010; }
+		.bg-yellow-800\/50 { background-color: #5e3e0e; }
+		.bg-yellow-950\/20 { background-color: #2d2310; }
+		.bg-red-800\/50    { background-color: #3d1a1a; }
+		.bg-red-950\/30    { background-color: #2d1010; }
+		.bg-green-900\/40  { background-color: #1a2d1a; }
+		.border-yellow-700\/40 { border-color: #7a5010; }
+		.border-red-800\/60    { border-color: #7a2222; }
+		.border-green-800\/50  { border-color: #3a5330; }
+		.hover\:bg-yellow-600\/70:hover { background-color: #8a6018; }
+		.hover\:bg-yellow-700\/60:hover { background-color: #7a5010; }
+		.hover\:bg-red-700\/60:hover    { background-color: #6b1e1e; }
+		.hover\:bg-red-900\/50:hover    { background-color: #3d1a1a; }
+		.text-yellow-400\/70 { color: #fbbf24; }
+		.text-red-400\/80    { color: #f87171; }
 	</style>
 </head>
 <body x-data="app()" x-init="init()" x-cloak
-	class="bg-gray-950 text-gray-100 h-screen flex flex-col overflow-hidden">
+	class="cl-bg-0 cl-t1 h-screen flex flex-col overflow-hidden">
 
 	<!-- ── Header ─────────────────────────────────────────────────────────────── -->
-	<header class="flex items-center gap-5 px-4 h-10 bg-gray-900 border-b border-gray-800 flex-shrink-0 select-none">
+	<header class="flex items-center gap-5 px-4 h-10 cl-bg-1 border-b cl-b0 flex-shrink-0 select-none">
 		<div class="flex items-center gap-2">
-			<div class="w-2 h-2 rounded-full bg-sky-400 dot-glow"></div>
-			<span class="text-xs font-bold text-sky-400 tracking-widest">DOC OHARA</span>
+			<div class="w-2 h-2 rounded-full cl-bg-acc dot-glow" style="background:#C2B280"></div>
+			<span class="text-xs font-bold cl-t2 tracking-widest">DOC OHARA</span>
 		</div>
-		<div class="flex gap-4 text-xs text-gray-500">
-			<span><span class="text-gray-300" x-text="graphData.documents.length"></span> docs</span>
-			<span><span class="text-gray-300" x-text="graphData.sections.length"></span> sections</span>
-			<span><span class="text-gray-300" x-text="graphData.paragraphs.length"></span> nodes</span>
-			<span><span class="text-gray-300" x-text="graphData.entities.length"></span> entities</span>
-			<span><span class="text-gray-300" x-text="graphData.edges.length"></span> edges</span>
-			<span class="text-gray-700" x-text="graphSource ? '[' + graphSource + ']' : ''"></span>
+		<div class="flex gap-4 text-xs cl-t3">
+			<span><span class="cl-t1" x-text="graphData.documents.length"></span> docs</span>
+			<span><span class="cl-t1" x-text="graphData.sections.length"></span> sections</span>
+			<span><span class="cl-t1" x-text="graphData.paragraphs.length"></span> nodes</span>
+			<span><span class="cl-t1" x-text="graphData.entities.length"></span> entities</span>
+			<span><span class="cl-t1" x-text="graphData.edges.length"></span> edges</span>
+			<span class="cl-t5" x-text="graphSource ? '[' + graphSource + ']' : ''"></span>
 		</div>
 		<div class="ml-auto flex items-center gap-2">
 			<button @click="colorMode='doc'; renderCurrentGraph()"
-				:class="colorMode==='doc' ? 'bg-violet-700/70 text-violet-200' : 'bg-gray-800 text-gray-500 hover:text-gray-300'"
+				:class="colorMode==='doc' ? 'cl-tab-on' : 'cl-tab-off'"
 				class="text-sm px-2 py-0.5 rounded transition">by doc</button>
 			<button @click="colorMode='type'; renderCurrentGraph()"
-				:class="colorMode==='type' ? 'bg-sky-700/70 text-sky-200' : 'bg-gray-800 text-gray-500 hover:text-gray-300'"
+				:class="colorMode==='type' ? 'cl-tab-on' : 'cl-tab-off'"
 				class="text-sm px-2 py-0.5 rounded transition">by type</button>
 			<button @click="colorMode='sumo'; renderCurrentGraph()"
-				:class="colorMode==='sumo' ? 'bg-green-800/70 text-green-200' : 'bg-gray-800 text-gray-500 hover:text-gray-300'"
+				:class="colorMode==='sumo' ? 'cl-tab-on' : 'cl-tab-off'"
 				class="text-sm px-2 py-0.5 rounded transition">by SUMO</button>
 			<select @change="timelineResolution = $event.target.value; renderCurrentGraph()"
-				class="text-xs bg-gray-800 text-gray-400 border border-gray-700 rounded px-1 py-0.5 transition hover:text-gray-200">
+				class="cl-input text-xs rounded px-1 py-0.5 border transition">
 				<template x-for="r in ['day','week','month','year','decade','century']" :key="r">
 					<option :value="r" :selected="timelineResolution === r" x-text="r"></option>
 				</template>
 			</select>
-			<button @click="loadGraph()"
-				class="text-sm px-2 py-0.5 rounded bg-gray-800 text-gray-500 hover:text-gray-300 transition">↺</button>
+			<button @click="loadGraph()" class="cl-btn-gh text-sm px-2 py-0.5 rounded border transition">↺</button>
 		</div>
 	</header>
 
@@ -111,10 +175,10 @@
 	<div class="flex flex-1 min-h-0">
 
 		<!-- Vertical tab bar -->
-		<nav class="flex flex-col items-center gap-1 py-2 w-9 bg-gray-900 border-r border-gray-800 flex-shrink-0">
+		<nav class="flex flex-col items-center gap-1 py-2 w-9 cl-bg-1 border-r cl-b0 flex-shrink-0">
 			<template x-for="t in tabs" :key="t.id">
 				<button @click="tab = t.id; if(t.id==='jobs') loadJobs()" :title="t.label"
-					:class="tab === t.id ? 'bg-gray-700 text-sky-400' : 'text-gray-600 hover:text-gray-300'"
+					:class="tab === t.id ? 'cl-tab-on' : 'cl-tab-off'"
 					class="relative w-7 h-7 flex items-center justify-center rounded text-sm transition">
 					<span x-text="t.icon"></span>
 					<span x-show="t.id === 'jobs' && jobStats.failed > 0"
@@ -124,57 +188,49 @@
 		</nav>
 
 		<!-- Left panel -->
-		<div class="flex flex-col border-r border-gray-800 flex-shrink-0 overflow-hidden bg-gray-400" 
+		<div class="flex flex-col border-r cl-b0 flex-shrink-0 overflow-hidden cl-bg-1"
 				:class="docsOpen ? 'w-64' : 'w-32'">
 
 			<!-- GRAPH tab -->
 			<div x-show="tab === 'graph'" class="flex flex-col h-full overflow-hidden p-3 gap-3">
-				<!-- Documents header with fold toggle -->
 				<button @click="docsOpen = !docsOpen"
-					class="flex items-center justify-between text-sm font-bold text-gray-500 uppercase tracking-widest hover:text-gray-300 transition select-none">
+					class="flex items-center justify-between text-sm font-bold cl-t3 uppercase tracking-widest transition select-none">
 					<span>Documents</span>
-					<span x-text="docsOpen ? '◄' : '►'" class="text-gray-600"></span>
+					<span x-text="docsOpen ? '◄' : '►'" class="cl-t4"></span>
 				</button>
-				<!-- Select-all toggle -->
 				<div x-show="docsOpen && graphData.documents.length > 0" class="flex items-center gap-2 -mt-1 mb-0.5">
 					<button @click="toggleAllDocs()"
-						class="text-xs text-gray-600 hover:text-gray-300 transition select-none"
+						class="text-xs cl-t4 transition select-none"
 						x-text="selectedDocKeys.size === 0 ? 'select all' : 'clear all'"></button>
-					<span class="text-xs text-gray-700" x-show="selectedDocKeys.size > 0"
+					<span class="text-xs cl-t5" x-show="selectedDocKeys.size > 0"
 						x-text="selectedDocKeys.size + '/' + graphData.documents.length + ' selected'"></span>
 				</div>
 				<div class="flex flex-col gap-1.5 overflow-y-auto scrollbar-thin" style="max-height:40vh">
 					<template x-for="doc in graphData.documents" :key="doc._key || doc.id">
 						<div @click="toggleDocSelection(doc)"
-							:class="selectedDocKeys.has(doc._key || doc.id)
-								? 'border-gray-500 bg-sky-950/30'
-								: 'border-gray-700 bg-gray-700 hover:border-gray-600 hover:bg-gray-500'"
+							:class="selectedDocKeys.has(doc._key || doc.id) ? 'cl-card-on' : 'cl-card'"
 							class="group p-2 rounded border cursor-pointer transition text-xs flex-shrink-0 relative">
-							<!-- Selection indicator -->
 							<div class="absolute top-2 right-2 w-3 h-3 rounded-sm border flex items-center justify-center flex-shrink-0"
-								:class="selectedDocKeys.has(doc._key || doc.id)
-									? 'border-gray-400 bg-sky-500/30'
-									: 'border-gray-600'">
+								:class="selectedDocKeys.has(doc._key || doc.id) ? 'cl-b2' : 'cl-b1'">
 								<span x-show="selectedDocKeys.has(doc._key || doc.id)"
-									class="text-sky-300 leading-none" style="font-size:9px">✓</span>
+									class="cl-t1 leading-none" style="font-size:9px">✓</span>
 							</div>
-							<div class="text-gray-200 truncate pr-5"
-								:class="selectedDocKeys.has(doc._key || doc.id) ? 'text-sky-200' : 'group-hover-sky'"
+							<div class="cl-t1 truncate pr-5"
+								:class="selectedDocKeys.has(doc._key || doc.id) ? 'cl-t0' : 'group-hover-cl'"
 								x-text="doc.title || doc.source_file"></div>
 							<div class="flex justify-between mt-0.5">
-								<span class="text-gray-600" x-text="doc.parser_engine || 'LiteParse'"></span>
-								<span class="text-gray-600 text-sm"
+								<span class="cl-t4" x-text="doc.parser_engine || 'LiteParse'"></span>
+								<span class="cl-t4 text-sm"
 									x-text="doc.upload_time ? new Date(doc.upload_time).toLocaleDateString() : ''"></span>
 							</div>
 						</div>
 					</template>
 					<div x-show="graphData.documents.length === 0"
-						class="text-xs text-gray-700 text-center py-6">No documents yet</div>
+						class="text-xs cl-t5 text-center py-6">No documents yet</div>
 				</div>
-				<!-- Legend -->
-				<div class="border-t border-gray-800 pt-2.5 grid grid-cols-2 gap-x-3 gap-y-1.5 mt-auto">
+				<div class="border-t cl-b0 pt-2.5 grid grid-cols-2 gap-x-3 gap-y-1.5 mt-auto">
 					<template x-for="item in legend" :key="item[1]">
-						<div class="flex items-center gap-1.5 text-xs text-gray-500">
+						<div class="flex items-center gap-1.5 text-xs cl-t3">
 							<div class="w-2.5 h-2.5 rounded-full flex-shrink-0" :style="'background:' + item[0]"></div>
 							<span x-text="item[1]"></span>
 						</div>
@@ -184,415 +240,355 @@
 
 			<!-- INGEST tab -->
 			<div x-show="tab === 'ingest'" class="flex flex-col h-full overflow-hidden p-3 gap-3">
-				<div class="text-sm font-bold text-gray-500 uppercase tracking-widest">Pipeline Control</div>
-
+				<div class="text-sm font-bold cl-t3 uppercase tracking-widest">Pipeline Control</div>
 				<div class="flex flex-col gap-1">
-					<div class="text-sm text-gray-600 mb-0.5">Staged input files</div>
+					<div class="text-sm cl-t4 mb-0.5">Staged input files</div>
 					<div class="flex flex-col gap-1 max-h-36 overflow-y-auto scrollbar-thin">
 						<template x-for="f in inputFiles" :key="f.name">
-							<div class="flex items-center gap-2 text-xs px-2 py-1 rounded bg-gray-800 border border-gray-700">
-								<span class="flex-1 truncate text-gray-300" x-text="f.name"></span>
-								<span class="text-gray-600 text-sm flex-shrink-0" x-text="f.size"></span>
+							<div class="flex items-center gap-2 text-xs px-2 py-1 rounded cl-card border">
+								<span class="flex-1 truncate cl-t1" x-text="f.name"></span>
+								<span class="cl-t4 text-sm flex-shrink-0" x-text="f.size"></span>
 								<button @click="deleteInputFile(f.name)"
-									class="text-gray-700 hover:text-red-400 transition flex-shrink-0 leading-none">✕</button>
+									class="cl-btn-del flex-shrink-0 leading-none">✕</button>
 							</div>
 						</template>
-						<div x-show="inputFiles.length === 0"
-							class="text-sm text-gray-700 text-center py-2">No files staged</div>
+						<div x-show="inputFiles.length === 0" class="text-sm cl-t5 text-center py-2">No files staged</div>
 					</div>
 				</div>
-
 				<button @click="runPipeline()" :disabled="pipelineActive"
-					:class="pipelineActive ? 'bg-gray-800 text-gray-600 cursor-not-allowed' : 'bg-sky-700 hover:bg-sky-600 text-white'"
-					class="text-xs font-semibold py-1.5 rounded transition flex items-center justify-center gap-2">
+					class="cl-btn text-xs font-semibold py-1.5 rounded transition flex items-center justify-center gap-2">
 					<span x-show="pipelineActive" class="animate-spin inline-block">⟳</span>
 					<span x-text="pipelineActive ? 'Running…' : '▶ Run Pipeline'"></span>
 				</button>
-
-				<div class="flex-1 min-h-0 flex flex-col overflow-hidden rounded border border-gray-800 bg-gray-950">
-					<div class="text-sm text-gray-700 px-2 py-1 border-b border-gray-800 flex-shrink-0">log</div>
+				<div class="flex-1 min-h-0 flex flex-col overflow-hidden rounded border cl-b0 cl-bg-0">
+					<div class="text-sm cl-t5 px-2 py-1 border-b cl-b0 flex-shrink-0">log</div>
 					<div class="flex-1 overflow-y-auto scrollbar-thin p-2 flex flex-col gap-0.5" id="log-console">
 						<template x-for="(log, i) in pipelineLogs" :key="i">
 							<div class="log-line"
 								:class="{
 									'text-green-400': log.level === 'success',
-									'text-red-400':     log.level === 'error',
-									'text-yellow-400':   log.level === 'warn',
-									'text-gray-500':   log.level === 'info'
+									'text-red-400':   log.level === 'error',
+									'text-yellow-400': log.level === 'warn',
+									'cl-t3':          log.level === 'info'
 								}"
 								x-text="'[' + log.level + '] ' + log.message"></div>
 						</template>
-						<div x-show="pipelineLogs.length === 0" class="text-sm text-gray-800 py-1">idle</div>
+						<div x-show="pipelineLogs.length === 0" class="text-sm cl-t5 py-1">idle</div>
 					</div>
 				</div>
 			</div>
 
 			<!-- QUERY tab -->
 			<div x-show="tab === 'query'" class="flex flex-col h-full overflow-hidden p-3 gap-3">
-				<div class="text-sm font-bold text-gray-500 uppercase tracking-widest">Hybrid Retrieval</div>
-
+				<div class="text-sm font-bold cl-t3 uppercase tracking-widest">Hybrid Retrieval</div>
 				<div class="flex gap-1.5">
 					<input x-model="queryInput" @keydown.enter="runQuery()"
 						placeholder="Search the graph…"
-						class="flex-1 text-xs bg-gray-800 border border-gray-700 rounded px-2.5 py-1.5
-									 text-gray-200 placeholder-gray-700 focus:outline-none focus:border-gray-500 transition" />
+						class="cl-input flex-1 text-xs rounded px-2.5 py-1.5 border" />
 					<button @click="runQuery()" :disabled="queryLoading"
-						class="text-xs px-2.5 py-1.5 bg-sky-700 hover:bg-sky-600 text-white rounded transition flex-shrink-0">→</button>
+						class="cl-btn text-xs px-2.5 py-1.5 rounded transition flex-shrink-0">→</button>
 				</div>
-
 				<div x-show="queryResults && queryResults.processedQuery && queryResults.processedQuery.keywords && queryResults.processedQuery.keywords.length"
 					class="flex flex-wrap gap-1">
 					<template x-for="kw in (queryResults && queryResults.processedQuery && queryResults.processedQuery.keywords || [])" :key="kw">
-						<span class="text-sm px-1.5 py-0.5 bg-gray-800 border border-gray-700 text-gray-400 rounded"
-							x-text="kw"></span>
+						<span class="cl-card text-sm px-1.5 py-0.5 border cl-t2 rounded" x-text="kw"></span>
 					</template>
 				</div>
-
 				<div class="flex-1 min-h-0 overflow-y-auto scrollbar-thin flex flex-col gap-2">
 					<template x-for="(r, i) in (queryResults && queryResults.shallowResults || [])" :key="i">
 						<div @click="highlightResultNode(r.node)"
-							class="text-xs p-2 rounded bg-gray-800 border border-gray-700 cursor-pointer
-										 hover:border-gray-600 transition">
+							class="cl-card text-xs p-2 rounded border cursor-pointer transition">
 							<div class="flex justify-between items-center mb-1">
-								<span class="text-sky-500 text-sm font-bold" x-text="'#' + (i + 1)"></span>
-								<span class="text-green-400 text-sm"
-									x-text="Math.round(r.score * 100) + '%'"></span>
+								<span class="cl-t3 text-sm font-bold" x-text="'#' + (i + 1)"></span>
+								<span class="text-green-400 text-sm" x-text="Math.round(r.score * 100) + '%'"></span>
 							</div>
-							<div class="text-gray-300 text-base leading-relaxed line-clamp-3"
+							<div class="cl-t1 text-base leading-relaxed line-clamp-3"
 								x-text="r.node.content || r.node.title || '—'"></div>
 							<div class="flex flex-wrap gap-1 mt-1.5">
 								<template x-for="tag in (r.node.sumo_tags || []).slice(0, 4)" :key="tag">
-									<span class="text-sm px-1 py-0.5 bg-green-900/40 text-green-400 rounded"
-										x-text="tag"></span>
+									<span class="cl-tag text-sm px-1 py-0.5 rounded border" x-text="tag"></span>
 								</template>
 							</div>
 						</div>
 					</template>
 					<div x-show="queryResults && !(queryResults.shallowResults && queryResults.shallowResults.length)"
-						class="text-xs text-gray-700 text-center py-6">No results</div>
+						class="text-xs cl-t5 text-center py-6">No results</div>
 					<div x-show="!queryResults && !queryLoading"
-						class="text-base text-gray-700 text-center py-6 leading-relaxed">
+						class="text-base cl-t5 text-center py-6 leading-relaxed">
 						Enter a keyword or phrase<br>to search the knowledge graph
 					</div>
-					<div x-show="queryLoading"
-						class="text-xs text-gray-600 text-center py-6 animate-pulse">Searching…</div>
+					<div x-show="queryLoading" class="text-xs cl-t4 text-center py-6 animate-pulse">Searching…</div>
 				</div>
 			</div>
 
 			<!-- JOBS tab -->
 			<div x-show="tab === 'jobs'" x-init="if(tab==='jobs') loadJobs()" class="flex flex-col h-full overflow-hidden p-3 gap-2">
-				<div class="text-sm font-bold text-gray-500 uppercase tracking-widest">Job Queue</div>
-
+				<div class="text-sm font-bold cl-t3 uppercase tracking-widest">Job Queue</div>
 				<div class="grid grid-cols-4 gap-1 flex-shrink-0">
-					<template x-for="[key, color] in [['failed','text-red-400'],['waiting','text-yellow-400'],['active','text-sky-400'],['completed','text-green-400']]" :key="key">
-						<div class="flex flex-col items-center py-1 rounded bg-gray-800 border border-gray-700">
+					<template x-for="[key, color] in [['failed','text-red-400'],['waiting','text-yellow-400'],['active','cl-t2'],['completed','text-green-400']]" :key="key">
+						<div class="flex flex-col items-center py-1 rounded cl-card border">
 							<span class="text-xs font-bold" :class="color" x-text="jobStats[key] || 0"></span>
-							<span class="text-sm text-gray-600" x-text="key"></span>
+							<span class="text-sm cl-t4" x-text="key"></span>
 						</div>
 					</template>
 				</div>
-
 				<div x-show="jobStats.failed > 0" class="flex gap-1.5 flex-shrink-0">
 					<button @click="retryAllFailed(false)"
-						class="flex-1 text-sm py-1 rounded bg-yellow-700/60 hover:bg-yellow-600/70 text-yellow-200 transition">
+						class="flex-1 text-sm py-1 rounded bg-yellow-700\/60 hover:bg-yellow-600\/70 text-yellow-200 transition">
 						↺ Retry all failed
 					</button>
 					<button @click="retryAllFailed(true)"
-						class="flex-1 text-sm py-1 rounded bg-red-800/50 hover:bg-red-700/60 text-red-300 transition">
+						class="flex-1 text-sm py-1 rounded bg-red-800\/50 hover:bg-red-700\/60 text-red-300 transition">
 						↺ Force retry all
 					</button>
 				</div>
-
 				<div class="flex-1 min-h-0 overflow-y-auto scrollbar-thin flex flex-col gap-1.5">
 					<template x-for="job in jobs" :key="job.id">
 						<div class="rounded border p-2 text-xs"
 							:class="{
-								'border-red-800/60 bg-red-950/30':   job.status === 'failed',
-								'border-yellow-700/40 bg-yellow-950/20': job.status === 'waiting',
-								'border-gray-700 bg-sky-950/20':   job.status === 'active',
-								'border-gray-700 bg-gray-800': job.status === 'completed',
+								'cl-job-failed':    job.status === 'failed',
+								'cl-job-waiting':   job.status === 'waiting',
+								'cl-job-active':    job.status === 'active',
+								'cl-job-completed': job.status === 'completed',
 							}">
 							<div class="flex items-center gap-2 mb-1">
 								<div class="w-1.5 h-1.5 rounded-full flex-shrink-0"
 									:style="'background:' + jobStatusColor(job.status)"></div>
-								<span class="font-semibold text-gray-200 truncate flex-1"
+								<span class="font-semibold cl-t1 truncate flex-1"
 									x-text="job.data && job.data.filename || job.id"></span>
 								<span class="text-sm uppercase font-bold flex-shrink-0"
 									:class="{
 										'text-red-400':   job.status==='failed',
 										'text-yellow-400': job.status==='waiting',
-										'text-sky-400':   job.status==='active',
+										'cl-t2':          job.status==='active',
 										'text-green-400': job.status==='completed',
 									}"
 									x-text="job.status"></span>
 							</div>
 							<div x-show="job.status === 'active'" class="mb-1">
-								<div class="h-1 bg-gray-800 rounded overflow-hidden">
-									<div class="h-full bg-sky-500 transition-all" :style="'width:' + (job.progress||0) + '%'"></div>
+								<div class="h-1 cl-bg-2 rounded overflow-hidden">
+									<div class="h-full cl-bg-acc transition-all" :style="'width:' + (job.progress||0) + '%'"></div>
 								</div>
-								<div class="text-sm text-gray-500 mt-0.5" x-text="job.progressMessage || ''"></div>
+								<div class="text-sm cl-t3 mt-0.5" x-text="job.progressMessage || ''"></div>
 							</div>
 							<div x-show="job.status === 'failed' && job.error"
-								class="text-sm text-red-400/80 mb-1.5 leading-relaxed break-words"
+								class="text-sm text-red-400 mb-1.5 leading-relaxed break-words"
 								x-text="job.error"></div>
 							<div x-show="job.status === 'completed' && job.result && job.result.skipped"
-								class="text-sm text-yellow-400/70 mb-1.5"
+								class="text-sm text-yellow-400 mb-1.5"
 								x-text="job.result && job.result.reason"></div>
-
-							<!-- LLM usage summary -->
 							<template x-if="job.status === 'completed' && job.result && job.result.llm_usage && job.result.llm_usage.total_tokens > 0">
-								<div class="mt-1 mb-1.5 rounded border border-gray-800 px-2 py-1.5 bg-gray-900">
-									<div class="text-sm font-bold text-gray-600 uppercase tracking-wider mb-1"
+								<div class="mt-1 mb-1.5 rounded border cl-b0 px-2 py-1.5 cl-bg-1">
+									<div class="text-sm font-bold cl-t4 uppercase tracking-wider mb-1"
 										x-text="(job.result.llm_usage.model || 'Gemini') + ' · usage'"></div>
-									<div class="grid grid-cols-2 gap-x-4 gap-y-0.5 text-sm text-gray-500">
-										<div>Prompt <span class="text-gray-300 float-right" x-text="job.result.llm_usage.prompt_tokens.toLocaleString()"></span></div>
+									<div class="grid grid-cols-2 gap-x-4 gap-y-0.5 text-sm cl-t3">
+										<div>Prompt <span class="cl-t1 float-right" x-text="job.result.llm_usage.prompt_tokens.toLocaleString()"></span></div>
 										<div>Generated <span class="text-green-400 float-right" x-text="job.result.llm_usage.candidates_tokens.toLocaleString()"></span></div>
-										<div>Total tokens <span class="text-sky-400 float-right" x-text="job.result.llm_usage.total_tokens.toLocaleString()"></span></div>
-										<div>Chunks <span class="text-gray-300 float-right" x-text="job.result.llm_usage.chunks + (job.result.llm_usage.cache_hits ? ' (' + job.result.llm_usage.cache_hits + ' cached)' : '')"></span></div>
+										<div>Total tokens <span class="cl-t2 float-right" x-text="job.result.llm_usage.total_tokens.toLocaleString()"></span></div>
+										<div>Chunks <span class="cl-t1 float-right" x-text="job.result.llm_usage.chunks + (job.result.llm_usage.cache_hits ? ' (' + job.result.llm_usage.cache_hits + ' cached)' : '')"></span></div>
 										<template x-if="job.result.llm_usage.repair_prompt_tokens > 0">
 											<div class="col-span-2 text-yellow-600">Repair tokens <span class="float-right" x-text="(job.result.llm_usage.repair_prompt_tokens + job.result.llm_usage.repair_candidates_tokens).toLocaleString()"></span></div>
 										</template>
 									</div>
 								</div>
 							</template>
-
-							<div class="flex items-center gap-2 text-sm text-gray-600">
+							<div class="flex items-center gap-2 text-sm cl-t4">
 								<span x-text="'attempt ' + (job.attempts||0) + '/' + (job.maxAttempts||3)"></span>
 								<span x-text="job.updatedAt ? new Date(job.updatedAt).toLocaleTimeString() : ''"></span>
 								<span x-show="job.data && job.data.force" class="text-yellow-600">--force</span>
 							</div>
 							<div x-show="job.status === 'failed' || job.status === 'completed'" class="flex gap-1 mt-1.5">
 								<button @click="retryJob(job.id, false)"
-									class="text-sm px-2 py-0.5 rounded bg-gray-700 hover:bg-gray-600 text-gray-300 transition">
-									↺ Retry
-								</button>
+									class="cl-btn-gh text-sm px-2 py-0.5 rounded border transition">↺ Retry</button>
 								<button @click="retryJob(job.id, true)"
-									class="text-sm px-2 py-0.5 rounded bg-yellow-800/50 hover:bg-yellow-700/60 text-yellow-300 transition">
-									↺ Force
-								</button>
+									class="text-sm px-2 py-0.5 rounded bg-yellow-800\/50 hover:bg-yellow-700\/60 text-yellow-300 transition">↺ Force</button>
 								<button @click="deleteJob(job.id)"
-									class="text-sm px-2 py-0.5 rounded bg-gray-800 hover:bg-red-900/50 text-gray-600 hover:text-red-400 transition ml-auto">
-									✕
-								</button>
+									class="cl-btn-del text-sm px-2 py-0.5 rounded transition ml-auto">✕</button>
 							</div>
 						</div>
 					</template>
-					<div x-show="!jobsLoading && jobs.length === 0"
-						class="text-base text-gray-700 text-center py-8">No jobs yet</div>
-					<div x-show="jobsLoading && jobs.length === 0"
-						class="text-base text-gray-600 text-center py-8 animate-pulse">Loading…</div>
+					<div x-show="!jobsLoading && jobs.length === 0" class="text-base cl-t5 text-center py-8">No jobs yet</div>
+					<div x-show="jobsLoading && jobs.length === 0" class="text-base cl-t4 text-center py-8 animate-pulse">Loading…</div>
 				</div>
-
-				<button @click="loadJobs()" class="flex-shrink-0 text-sm py-1 rounded bg-gray-800 text-gray-600 hover:text-gray-400 transition">
-					↺ Refresh
-				</button>
+				<button @click="loadJobs()" class="cl-btn-gh flex-shrink-0 text-sm py-1 rounded border transition">↺ Refresh</button>
 			</div>
 
 			<!-- WIKI tab -->
 			<div x-show="tab === 'wiki'" class="flex flex-col h-full overflow-hidden p-3 gap-3">
-				<div class="text-sm font-bold text-gray-500 uppercase tracking-widest">Wiki Export</div>
-				<p class="text-base text-gray-600 leading-relaxed">
+				<div class="text-sm font-bold cl-t3 uppercase tracking-widest">Wiki Export</div>
+				<p class="text-base cl-t4 leading-relaxed">
 					Compile graph nodes into Quartz-compatible markdown files for publishing.
 				</p>
 				<button @click="exportWiki()" :disabled="wikiExporting"
-					class="text-xs py-1.5 px-3 rounded border border-gray-700 hover:border-gray-500
-								 text-gray-300 hover:text-white transition flex items-center justify-center gap-2">
+					class="cl-btn-gh text-xs py-1.5 px-3 rounded border transition flex items-center justify-center gap-2">
 					<span x-show="wikiExporting" class="animate-spin inline-block">⟳</span>
 					<span x-text="wikiExporting ? 'Exporting…' : '⬇ Export to wiki/'"></span>
 				</button>
 				<div x-show="wikiMessage" class="text-base text-green-400" x-text="wikiMessage"></div>
 				<div class="flex-1"></div>
-				<div class="text-sm text-gray-700 border-t border-gray-800 pt-2">
-					Output: <code class="text-gray-600">wiki/*.md</code>
-				</div>
+				<div class="text-sm cl-t5 border-t cl-b0 pt-2">Output: <code class="cl-t4">wiki/*.md</code></div>
 			</div>
 
-			<!-- DOCS tab — temporal metadata + decay class override -->
+			<!-- DOCS tab -->
 			<div x-show="tab === 'docs'" x-init="if(tab==='docs') loadDocs()" class="flex flex-col h-full overflow-hidden p-3 gap-3">
-				<div class="text-sm font-bold text-gray-500 uppercase tracking-widest">Documents — Temporal Metadata</div>
+				<div class="text-sm font-bold cl-t3 uppercase tracking-widest">Documents — Temporal Metadata</div>
 				<div class="flex gap-2">
-					<button @click="loadDocs()" class="text-xs py-1 px-2 rounded bg-gray-800 text-gray-400 hover:text-white transition">↺ Refresh</button>
+					<button @click="loadDocs()" class="cl-btn-gh text-xs py-1 px-2 rounded border transition">↺ Refresh</button>
 				</div>
 				<div class="flex-1 overflow-y-auto space-y-2" x-show="docsAdminList.length > 0">
 					<template x-for="d in docsAdminList" :key="d._key">
-						<div class="rounded border border-gray-800 p-2 space-y-1 bg-gray-900 text-xs">
-							<div class="text-gray-300 font-medium truncate" x-text="d.title || d._key"></div>
-							<div class="text-gray-600 flex gap-4">
-								<span>published: <span class="text-gray-400" x-text="d.published_date || '—'"></span></span>
-								<span>decay: <span class="text-gray-400" x-text="d.decay_class || '—'"></span></span>
-								<span>confidence: <span class="text-gray-400" x-text="d.temporal_confidence != null ? d.temporal_confidence.toFixed(2) : '—'"></span></span>
+						<div class="rounded border cl-b0 p-2 space-y-1 cl-bg-1 text-xs">
+							<div class="cl-t1 font-medium truncate" x-text="d.title || d._key"></div>
+							<div class="cl-t4 flex gap-4">
+								<span>published: <span class="cl-t2" x-text="d.published_date || '—'"></span></span>
+								<span>decay: <span class="cl-t2" x-text="d.decay_class || '—'"></span></span>
+								<span>confidence: <span class="cl-t2" x-text="d.temporal_confidence != null ? d.temporal_confidence.toFixed(2) : '—'"></span></span>
 							</div>
 							<div class="flex items-center gap-2 mt-1">
-								<span class="text-gray-600">effective_decay_class:</span>
+								<span class="cl-t4">effective_decay_class:</span>
 								<select :id="'decay-'+d._key"
-									class="bg-gray-800 border border-gray-700 text-gray-300 rounded px-1 py-0.5 text-xs"
+									class="cl-input rounded px-1 py-0.5 text-xs border"
 									:value="d.effective_decay_class || d.decay_class || 'SCHOLARLY'">
-									<option>EVERGREEN</option>
-									<option>SCHOLARLY</option>
-									<option>CURRENT</option>
-									<option>EPHEMERAL</option>
+									<option>EVERGREEN</option><option>SCHOLARLY</option>
+									<option>CURRENT</option><option>EPHEMERAL</option>
 								</select>
 								<button @click="patchDecayClass(d._key)"
-									class="text-xs px-2 py-0.5 rounded bg-sky-900 text-sky-300 hover:bg-sky-800 transition">
-									Save
-								</button>
+									class="cl-btn-gh text-xs px-2 py-0.5 rounded border transition">Save</button>
 								<span :id="'decay-status-'+d._key" class="text-green-400 text-xs hidden">✓</span>
 							</div>
 						</div>
 					</template>
 				</div>
-				<div x-show="docsAdminList.length === 0" class="text-gray-700 text-sm">No documents ingested yet.</div>
+				<div x-show="docsAdminList.length === 0" class="cl-t5 text-sm">No documents ingested yet.</div>
 			</div>
 
 		</div>
 
 		<!-- ── Right: graph canvas + inspector ────────────────────────────────── -->
-		<div class="flex flex-col flex-1 min-w-0 overflow-hidden bg-gray-200">
+		<div class="flex flex-col flex-1 min-w-0 overflow-hidden cl-bg-0">
 
 			<!-- 3D Space-Time Graph canvas -->
-			<div class="flex-1 overflow-hidden relative bg-gray-950" id="graph-container" style="min-height:300px;">
+			<div class="flex-1 overflow-hidden relative cl-bg-0" id="graph-container" style="min-height:300px;">
 				<canvas id="graph-canvas" style="display:block;width:100%;height:100%;"></canvas>
 				<div id="graph-labels" style="position:absolute;inset:0;pointer-events:none;overflow:hidden;"></div>
 
 				<!-- Clear selection button overlay -->
 				<div x-show="selectedNode" class="absolute top-2 left-2 z-10 select-none">
 					<button @click="selectedNode = null; renderCurrentGraph()"
-						class="text-xs px-2 py-1 rounded bg-gray-800 border border-gray-700
-									 text-gray-400 hover:text-white hover:bg-gray-700 hover:border-gray-500 transition">
-						✕ clear selection
-					</button>
+						class="cl-btn-gh text-xs px-2 py-1 rounded border transition">✕ clear selection</button>
 				</div>
 
 				<!-- Zoom controls overlay -->
 				<div class="absolute top-2 right-2 flex items-center gap-1 z-10 select-none">
 					<button @click="zoomOut()" title="Zoom out (-)"
-						class="w-6 h-6 flex items-center justify-center rounded bg-gray-800 border border-gray-700
-									 text-gray-400 hover:text-white hover:bg-gray-700 transition text-sm leading-none">−</button>
-					<span class="text-sm text-gray-600 w-10 text-center"
-						x-text="Math.round(graphZoom * 100) + '%'"></span>
+						class="cl-btn-gh w-6 h-6 flex items-center justify-center rounded border transition text-sm leading-none">−</button>
+					<span class="text-sm cl-t4 w-10 text-center" x-text="Math.round(graphZoom * 100) + '%'"></span>
 					<button @click="zoomIn()" title="Zoom in (+)"
-						class="w-6 h-6 flex items-center justify-center rounded bg-gray-800 border border-gray-700
-									 text-gray-400 hover:text-white hover:bg-gray-700 transition text-sm leading-none">+</button>
+						class="cl-btn-gh w-6 h-6 flex items-center justify-center rounded border transition text-sm leading-none">+</button>
 				</div>
 
-				<div x-show="graphLoading"
-					class="absolute inset-0 flex items-center justify-center pointer-events-none">
-					<span class="text-xs text-gray-600 animate-pulse">Loading graph…</span>
+				<div x-show="graphLoading" class="absolute inset-0 flex items-center justify-center pointer-events-none">
+					<span class="text-xs cl-t4 animate-pulse">Loading graph…</span>
 				</div>
 				<div x-show="!graphLoading && graphData.documents.length === 0"
 					class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none gap-2">
-					<span class="text-gray-700 text-sm">No data</span>
-					<span class="text-gray-800 text-xs">Run the pipeline from the Ingest tab</span>
+					<span class="cl-t5 text-sm">No data</span>
+					<span class="cl-t5 text-xs">Run the pipeline from the Ingest tab</span>
 				</div>
 				<div x-show="!graphLoading && graphData.documents.length > 0 && selectedDocKeys.size === 0"
 					class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none gap-2">
-					<span class="text-gray-700 text-sm">No document selected</span>
-					<span class="text-gray-800 text-xs">Select a document from the left panel to view its graph</span>
+					<span class="cl-t5 text-sm">No document selected</span>
+					<span class="cl-t5 text-xs">Select a document from the left panel to view its graph</span>
 				</div>
 			</div>
 
 			<!-- Node inspector strip -->
 			<div x-show="selectedNode"
-				class="flex-shrink-0 border-t border-gray-800 bg-gray-900 p-3 flex gap-4 items-start"
+				class="flex-shrink-0 border-t cl-b0 cl-bg-1 p-3 flex gap-4 items-start"
 				style="max-height: 600px;">
-
 				<div class="flex-1 min-w-0 flex flex-col gap-1.5 overflow-hidden">
-					<!-- Type + key row -->
 					<div class="flex items-center gap-2">
 						<div class="w-2.5 h-2.5 rounded-full flex-shrink-0"
 							:style="'background:' + nodeColor(selectedNode)"></div>
 						<span class="text-sm font-bold px-1.5 py-0.5 rounded uppercase tracking-wider"
-							:style="'background:' + nodeColor(selectedNode) + '22; color:' + nodeColor(selectedNode)"
+							:style="'background:' + nodeColor(selectedNode) + '33; color:' + nodeColor(selectedNode)"
 							x-text="selectedNode && (selectedNode.node_type || selectedNode.type || (selectedNode._id && selectedNode._id.split('/')[0]))"></span>
-						<span class="text-sm text-gray-600"
+						<span class="text-sm cl-t4"
 							x-text="selectedNode && (selectedNode._key || selectedNode.id)"></span>
-						<!-- Loading indicator: only for real DB nodes that haven't been expanded yet -->
 						<span x-show="selectedNode && selectedNode._id && !selectedNode._id.startsWith('tags/') && !expandedNodes.has(selectedNode._id)"
-							class="text-sm text-gray-500 ml-auto animate-pulse">loading…</span>
+							class="text-sm cl-t3 ml-auto animate-pulse">loading…</span>
 						<span x-show="selectedNode && selectedNode._id && !selectedNode._id.startsWith('tags/') && expandedNodes.has(selectedNode._id)"
 							class="text-sm text-green-400 ml-auto">expanded</span>
 					</div>
-					<!-- SUMO tag inspector: tag name + paragraph count -->
 					<div x-show="selectedNode && selectedNode._id && selectedNode._id.startsWith('tags/')"
 						class="flex flex-col gap-1">
-						<div class="text-xs text-green-300 font-semibold"
+						<div class="text-xs text-green-400 font-semibold"
 							x-text="selectedNode && ('#' + selectedNode.title)"></div>
-						<div class="text-base text-gray-500"
+						<div class="text-base cl-t3"
 							x-text="selectedNode && selectedNode._tagCount + ' paragraph(s) tagged — full path highlighted in graph'"></div>
 					</div>
-					<!-- Entity inspector: name, type, mention count -->
 					<div x-show="selectedNode && selectedNode._id && selectedNode._id.startsWith('entities/')"
 						class="flex flex-col gap-1">
-						<div class="text-xs text-pink-300 font-semibold" x-text="selectedNode && selectedNode.name"></div>
-						<div class="text-base text-gray-500"
+						<div class="text-xs cl-t2 font-semibold" x-text="selectedNode && selectedNode.name"></div>
+						<div class="text-base cl-t3"
 							x-text="selectedNode && (selectedNode.type + ' · mentioned ' + (selectedNode.mention_count || 0) + ' time(s)')"></div>
 					</div>
-					<!-- Title (sections / documents) -->
-					<div class="text-xs text-gray-200 font-semibold truncate"
+					<div class="text-xs cl-t0 font-semibold truncate"
 						x-show="selectedNode && !selectedNode._id?.startsWith('tags/') && (selectedNode.title || selectedNode.source_file)"
 						x-text="selectedNode && (selectedNode.title || selectedNode.source_file || '')"></div>
-					<!-- Section children: show all child paragraph/table content with node ID annotations -->
 					<div x-show="selectedNode && selectedNode._id && selectedNode._id.startsWith('sections/')"
 						class="overflow-y-auto scrollbar-thin flex-1 flex flex-col gap-3"
 						style="max-height: 300px;">
 						<template x-if="sectionChildren(selectedNode).length === 0">
-							<div class="text-base text-gray-700 italic">
+							<div class="text-base cl-t5 italic">
 								<span x-show="!expandedNodes.has(selectedNode && selectedNode._id)" class="animate-pulse">loading children…</span>
 								<span x-show="expandedNodes.has(selectedNode && selectedNode._id)">no content nodes found</span>
 							</div>
 						</template>
 						<template x-for="child in sectionChildren(selectedNode)" :key="child.node._id">
 							<div class="flex flex-col gap-0.5">
-								<!-- Child node ID annotation -->
 								<div class="flex items-center gap-1.5">
-									<span class="text-xs font-mono text-gray-700" x-text="child.node._id"></span>
-									<span class="text-xs px-1 rounded"
-										:style="'background:' + (child.kind === 'table' ? '#f472b622' : '#fbbf2422') + '; color:' + (child.kind === 'table' ? '#f472b6' : '#fbbf24')"
+									<span class="text-xs font-mono cl-t5" x-text="child.node._id"></span>
+									<span class="text-xs px-1 rounded cl-bg-2 cl-t2 border cl-b1"
 										x-text="child.node.node_type || child.kind"></span>
 								</div>
-								<!-- Paragraph content -->
 								<div x-show="child.kind === 'paragraph'"
-									class="text-sm text-gray-400 leading-relaxed"
+									class="text-sm cl-t1 leading-relaxed"
 									style="white-space: pre-wrap; word-break: break-word;"
 									x-text="child.node.content || (expandedNodes.has(child.node._id) ? '[empty]' : '…')"></div>
-								<!-- Table: render as simple grid summary -->
-								<div x-show="child.kind === 'table'" class="text-sm text-gray-500 font-mono">
+								<div x-show="child.kind === 'table'" class="text-sm cl-t3 font-mono">
 									<span x-text="child.node.markdown_representation || ('[table ' + ((child.node.matrix_data || []).length) + ' rows]')"></span>
 								</div>
 							</div>
 						</template>
 					</div>
-					<!-- Content (paragraph / figure text — non-section nodes) -->
-					<div class="text-base text-gray-400 overflow-y-auto scrollbar-thin leading-relaxed flex-1"
+					<div class="text-base cl-t1 overflow-y-auto scrollbar-thin leading-relaxed flex-1"
 						style="max-height: 500px; white-space: pre-wrap; word-break: break-word;"
 						x-show="selectedNode && !selectedNode._id?.startsWith('tags/') && !selectedNode._id?.startsWith('sections/') && selectedNode.content"
 						x-text="selectedNode && (selectedNode.content || '')"></div>
-					<!-- Empty content notification for paragraphs that loaded but have no text -->
 					<div class="text-base text-yellow-600 italic"
 						x-show="selectedNode && selectedNode._id && selectedNode._id.startsWith('paragraphs/') && expandedNodes.has(selectedNode._id) && selectedNode.content === ''">[EMPTY CONTENT]</div>
-					<!-- Empty state for structural nodes (not tags, not paragraphs-with-content, not sections) -->
-					<div class="text-base text-gray-700 italic"
+					<div class="text-base cl-t5 italic"
 						x-show="selectedNode && !selectedNode._id?.startsWith('tags/') && !selectedNode._id?.startsWith('sections/') && !selectedNode._id?.startsWith('entities/') && !selectedNode.content && !selectedNode.title && !(selectedNode._id?.startsWith('paragraphs/') && expandedNodes.has(selectedNode._id))">—</div>
 				</div>
 
-				<!-- SUMO tags (shown for paragraphs/sections that HAVE tags, not for tag nodes themselves) -->
+				<!-- SUMO tags -->
 				<div x-show="selectedNode && !selectedNode._id?.startsWith('tags/') && selectedNode.sumo_tags && selectedNode.sumo_tags.length > 0"
 					class="flex-shrink-0 w-44 flex flex-col gap-1.5">
-					<div class="text-sm font-bold text-gray-600 uppercase tracking-wider">SUMO Tags</div>
+					<div class="text-sm font-bold cl-t4 uppercase tracking-wider">SUMO Tags</div>
 					<div class="flex flex-wrap gap-1 overflow-y-auto scrollbar-thin" style="max-height: 140px;">
 						<template x-for="tag in (selectedNode && selectedNode.sumo_tags || []).slice(0, 20)" :key="tag">
-							<span class="text-sm px-1.5 py-0.5 bg-green-900/40 border border-green-800/50
-													 text-green-300 rounded" x-text="tag"></span>
+							<span class="cl-tag text-sm px-1.5 py-0.5 border rounded" x-text="tag"></span>
 						</template>
 					</div>
 					<div x-show="selectedNode && (selectedNode.sumo_candidate_tags_raw || []).length > (selectedNode.sumo_tags || []).length"
-						class="text-sm text-gray-700"
+						class="text-sm cl-t5"
 						x-text="selectedNode ? '+' + ((selectedNode.sumo_candidate_tags_raw || []).length - (selectedNode.sumo_tags || []).length) + ' dropped' : ''">
 					</div>
 				</div>
 
 				<button @click="selectedNode = null; renderCurrentGraph()"
-					class="flex-shrink-0 text-gray-700 hover:text-gray-400 transition text-xs mt-0.5">✕</button>
+					class="flex-shrink-0 cl-t5 cl-t4 transition text-xs mt-0.5">✕</button>
 			</div>
 
 		</div>
@@ -612,17 +608,17 @@
 				{ id: 'docs',   icon: '✦', label: 'Docs'   },
 			],
 			legend: [
-				['#38bdf8', 'Document'],
-				['#818cf8', 'Section L1'],
-				['#2dd4bf', 'Section L2'],
-				['#67e8f9', 'Section L3'],
-				['#a78bfa', 'Section L4'],
-				['#f0abfc', 'Section L5'],
-				['#fbbf24', 'Paragraph'],
-				['#c084fc', 'Figure'],
-				['#f472b6', 'Table'],
-				['#fb7185', 'Entity'],
-				['#4ade80', 'Tag'],
+				['#C2B280', 'Document'],
+				['#C2B280', 'Section L1'],
+				['#D9CBA0', 'Section L2'],
+				['#E3D4B9', 'Section L3'],
+				['#b8975a', 'Section L4'],
+				['#a07840', 'Section L5'],
+				['#D9CBA0', 'Paragraph'],
+				['#E3D4B9', 'Figure'],
+				['#8B5B29', 'Table'],
+				['#c9a96e', 'Entity'],
+				['#b8975a', 'Tag'],
 			],
 
 			graphData: { documents: [], sections: [], paragraphs: [], tables: [], entities: [], edges: [] },
@@ -1004,7 +1000,7 @@
 			},
 
 			jobStatusColor(status) {
-				return { failed: '#f87171', waiting: '#fbbf24', active: '#38bdf8', completed: '#4ade80' }[status] || '#94a3b8';
+				return { failed: '#f87171', waiting: '#fbbf24', active: '#C2B280', completed: '#4ade80' }[status] || '#8B5B29';
 			},
 
 			nodeColor(node) { return getNodeColor(node, this.colorMode); },
@@ -1014,20 +1010,20 @@
 	// ── SVG Graph Renderer ────────────────────────────────────────────────────
 
 	// One color per section level (index 0 = level 1, etc.)
-	const LEVEL_COLORS = ['#818cf8','#2dd4bf','#67e8f9','#a78bfa','#f0abfc','#fb923c','#34d399'];
+	const LEVEL_COLORS = ['#C2B280','#D9CBA0','#E3D4B9','#b8975a','#a07840','#8B5B29','#c9a96e'];
 
 	const FIXED_COLORS = {
-		document:  '#38bdf8',
-		paragraph: '#fbbf24',
-		figure:    '#c084fc',
-		table:     '#f472b6',
-		entity:    '#fb7185',
-		tag:       '#4ade80',
+		document:  '#C2B280',
+		paragraph: '#D9CBA0',
+		figure:    '#E3D4B9',
+		table:     '#8B5B29',
+		entity:    '#c9a96e',
+		tag:       '#b8975a',
 	};
 
 	const CLUSTER_PALETTE = [
-		'#38bdf8','#2dd4bf','#a78bfa','#f472b6',
-		'#fb923c','#4ade80','#facc15','#e879f9',
+		'#C2B280','#D9CBA0','#E3D4B9','#b8975a',
+		'#a07840','#8B5B29','#c9a96e','#6b5235',
 	];
 
 	// Returns a stable colKey string for a node.
@@ -1060,7 +1056,7 @@
 	}
 
 	function getNodeColor(node, colorMode) {
-		if (!node) return '#475569';
+		if (!node) return '#8B5B29';
 		if (colorMode === 'sumo') {
 			const tags = node.sumo_tags || [];
 			if (tags.length > 0) {
@@ -1074,7 +1070,7 @@
 			const lvl = parseInt(ck.replace('section_L', ''), 10);
 			return LEVEL_COLORS[(lvl - 1) % LEVEL_COLORS.length];
 		}
-		return FIXED_COLORS[ck] || '#475569';
+		return FIXED_COLORS[ck] || '#8B5B29';
 	}
 
 	// ── Three.js 3D Space-Time Graph Renderer ────────────────────────────────────
@@ -1121,16 +1117,16 @@
 	function _titleColor(title) {
 		let h = 0;
 		for (const c of (title || '')) h = (h * 31 + c.charCodeAt(0)) & 0x7fffffff;
-		return `hsl(${h % 360},70%,58%)`;
+		return `hsl(${h % 360},35%,65%)`;
 	}
 
 	function _nodeColorHex(node, colKey, colorMode, docColorMap) {
 		if (colorMode === 'doc' && docColorMap) {
-			if (colKey === 'tag') return '#4ade80';
-			if (colKey === 'entity') return '#fb7185';
+			if (colKey === 'tag') return '#b8975a';
+			if (colKey === 'entity') return '#c9a96e';
 			if (colKey === '_label' || colKey === '_tick') return null;
 			const dk = node && (node.document_id || node._key);
-			return (dk && docColorMap.get(dk)) || '#94a3b8';
+			return (dk && docColorMap.get(dk)) || '#C2B280';
 		}
 		if (colorMode === 'sumo') {
 			const tags = node.sumo_tags || [];
@@ -1139,14 +1135,14 @@
 				return CLUSTER_PALETTE[h % CLUSTER_PALETTE.length];
 			}
 		}
-		if (colKey === 'tag') return '#4ade80';
-		if (colKey === 'entity') return '#fb7185';
-		if (colKey === 'document') return '#38bdf8';
+		if (colKey === 'tag') return '#b8975a';
+		if (colKey === 'entity') return '#c9a96e';
+		if (colKey === 'document') return '#C2B280';
 		if (colKey.startsWith('section_L')) {
 			const lvl = parseInt(colKey.replace('section_L',''), 10);
 			return LEVEL_COLORS[(lvl - 1) % LEVEL_COLORS.length];
 		}
-		return FIXED_COLORS[colKey] || '#fbbf24';
+		return FIXED_COLORS[colKey] || '#D9CBA0';
 	}
 
 	function _disposeG3D() {
@@ -1177,7 +1173,7 @@
 		const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
 		renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 		renderer.setSize(w, h);
-		renderer.setClearColor(0x8b99a8, 1);
+		renderer.setClearColor(0x1a1108, 1);
 
 		const scene = new THREE.Scene();
 		const camera = new THREE.PerspectiveCamera(55, w / h, 1, 20000);
@@ -1214,7 +1210,7 @@
 		// Tooltip
 		const tip = document.createElement('div');
 		tip.id = 'g3d-tooltip';
-		tip.style.cssText = 'position:absolute;background:rgba(30,41,59,0.95);color:#e2e8f0;font:10px ui-monospace,monospace;padding:3px 8px;border-radius:4px;pointer-events:none;white-space:nowrap;display:none;z-index:20;border:1px solid #64748b;max-width:300px;overflow:hidden;text-overflow:ellipsis;box-shadow:0 2px 8px rgba(0,0,0,0.4);';
+		tip.style.cssText = 'position:absolute;background:#3d2e1c;color:#E3D4B9;font:10px ui-monospace,monospace;padding:3px 8px;border-radius:4px;pointer-events:none;white-space:nowrap;display:none;z-index:20;border:1px solid #8B5B29;max-width:300px;overflow:hidden;text-overflow:ellipsis;box-shadow:0 2px 8px #0006;';
 		container.appendChild(tip);
 
 		Object.assign(G3D, { renderer, scene, camera, controls, tooltipEl: tip, initialized: true });
@@ -1527,10 +1523,10 @@
 
 		// ── InstancedMesh per shape bucket ───────────────────────────────────────
 		const SHAPE_GEO = {
-			document:  () => new THREE.SphereGeometry(1, 8, 6),
+			document:  () => new THREE.SphereGeometry(1, 32, 24),
 			section:   () => new THREE.TetrahedronGeometry(1),
 			paragraph: () => new THREE.BoxGeometry(1, 1, 1),
-			figure:    () => new THREE.SphereGeometry(1, 6, 4),
+			figure:    () => new THREE.SphereGeometry(1, 16, 12),
 			table:     () => new THREE.OctahedronGeometry(1),
 			other:     () => new THREE.BoxGeometry(1, 1, 1),
 		};
@@ -1577,8 +1573,8 @@
 				dummy.updateMatrix();
 				mesh.setMatrixAt(idx, dummy.matrix);
 				const hex = _nodeColorHex(node, colKey, colorMode, docColorMap);
-				col3.set(hex || '#94a3b8');
-				if (isDim) col3.lerp(new THREE.Color(0x8b99a8), 0.72);
+				col3.set(hex || '#C2B280');
+				if (isDim) col3.lerp(new THREE.Color(0x4B3D2D), 0.72);
 				mesh.setColorAt(idx, col3);
 				G3D.keyToMeshIdx.set(key, { mesh, idx });
 				mesh._nodeKeys[idx] = key;
@@ -1596,7 +1592,7 @@
 			const se = nodePos.get(selectedKey);
 			if (se) {
 				const ringGeo = new THREE.RingGeometry(se.r * 1.9, se.r * 2.4, 32);
-				const hex = _nodeColorHex(se.node, se.colKey, colorMode, docColorMap) || '#94a3b8';
+				const hex = _nodeColorHex(se.node, se.colKey, colorMode, docColorMap) || '#C2B280';
 				const ringMat = new THREE.MeshBasicMaterial({ color: hex, transparent: true, opacity: 0.75, side: THREE.DoubleSide });
 				const ring = new THREE.Mesh(ringGeo, ringMat);
 				ring.position.set(se.x, se.y, se.z);
@@ -1614,10 +1610,10 @@
 		// Width = node.r * 2.5 (spans tangentially), height = decay-class Z extent.
 		// zH = fin extent along tunnel (Z) axis; longer decay class = longer temporal reach
 		const DECAY_FIN = {
-			EVERGREEN: { hex: '#22d3ee', op: 0.16, zH: Z_SPACING * 5   },  // timeless — spans 5 discs
-			SCHOLARLY: { hex: '#818cf8', op: 0.14, zH: Z_SPACING * 2.5 },  // long-lived — 2.5 discs
-			CURRENT:   { hex: '#fbbf24', op: 0.12, zH: Z_SPACING * 1   },  // one disc span
-			EPHEMERAL: { hex: '#f87171', op: 0.10, zH: Z_SPACING * 0.4 },  // short reach
+			EVERGREEN: { hex: '#C2B280', op: 0.16, zH: Z_SPACING * 5   },  // timeless — spans 5 discs
+			SCHOLARLY: { hex: '#D9CBA0', op: 0.14, zH: Z_SPACING * 2.5 },  // long-lived — 2.5 discs
+			CURRENT:   { hex: '#8B5B29', op: 0.12, zH: Z_SPACING * 1   },  // one disc span
+			EPHEMERAL: { hex: '#6b5235', op: 0.10, zH: Z_SPACING * 0.4 },  // short reach
 		};
 		// Base fin geometry: 1×1 in XY plane (default). Instance matrix rotates to XZ.
 		// rotX(-90°) via instance: scale.y becomes Z extent, scale.x becomes X extent.
@@ -1666,7 +1662,7 @@
 			const dk         = d._key || d.id;
 			const { cx, cy, cz } = docCenter.get(dk) ?? { cx:0, cy:0, cz:di*Z_SPACING };
 			const dr  = (docDiscR.get(dk) ?? maxDiscR) + 20;
-			const hex = _nodeColorHex(d, 'document', colorMode, docColorMap) || '#38bdf8';
+			const hex = _nodeColorHex(d, 'document', colorMode, docColorMap) || '#C2B280';
 			const c   = new THREE.Color(hex).multiplyScalar(0.32);
 			const N   = 64, pts = [], cols = [];
 			for (let i = 0; i < N; i++) {
@@ -1686,7 +1682,7 @@
 			const dk         = d._key || d.id;
 			const { cx, cy, cz } = docCenter.get(dk) ?? { cx:0, cy:0, cz:di*Z_SPACING };
 			const dr  = (docDiscR.get(dk) ?? maxDiscR) + 18;
-			const hex = _nodeColorHex(d, 'document', colorMode, docColorMap) || '#38bdf8';
+			const hex = _nodeColorHex(d, 'document', colorMode, docColorMap) || '#C2B280';
 			const planeMesh = new THREE.Mesh(
 				new THREE.CircleGeometry(dr, 64),
 				new THREE.MeshBasicMaterial({ color: new THREE.Color(hex), transparent: true, opacity: 0.04, side: THREE.DoubleSide, depthWrite: false })
@@ -1701,7 +1697,7 @@
 		{
 			const spGeo = new THREE.BufferGeometry();
 			spGeo.setAttribute('position', new THREE.Float32BufferAttribute([0, 0, -80,  0, 0, totalZ + 80], 3));
-			scene.add(new THREE.LineSegments(spGeo, new THREE.LineBasicMaterial({ color: 0x475569, transparent: true, opacity: 0.35 })));
+			scene.add(new THREE.LineSegments(spGeo, new THREE.LineBasicMaterial({ color: 0x5a4530 })));
 		}
 
 		// b2) Timeline axis ticks + labels
@@ -1749,7 +1745,7 @@
 				const el = document.createElement('div');
 				const lkey = '__tick__' + cur;
 				el.dataset.lk = lkey;
-				el.style.cssText = 'position:absolute;font:8px ui-monospace,monospace;color:#475569;pointer-events:none;white-space:nowrap;';
+				el.style.cssText = 'position:absolute;font:8px ui-monospace,monospace;color:#8B5B29;pointer-events:none;white-space:nowrap;';
 				el.textContent = _fmtBucket(cur);
 				labelContainer.appendChild(el);
 				G3D.labelEls.push(el);
@@ -1759,14 +1755,14 @@
 			if (tickPts.length) {
 				const tgeo = new THREE.BufferGeometry();
 				tgeo.setAttribute('position', new THREE.Float32BufferAttribute(tickPts, 3));
-				scene.add(new THREE.LineSegments(tgeo, new THREE.LineBasicMaterial({ color: 0x374151, transparent: true, opacity: 0.6 })));
+				scene.add(new THREE.LineSegments(tgeo, new THREE.LineBasicMaterial({ color: 0x4B3D2D })));
 			}
 		}
 
 		// c) Entity/Tag tether lines to disc centers
 		{
 			const tetherPts = [], tetherCols = [];
-			const tc = new THREE.Color('#94a3b8').multiplyScalar(0.22);
+			const tc = new THREE.Color('#8B5B29').multiplyScalar(0.5);
 			for (const e of entities) {
 				const ep = nodePos.get(e._key || e.id);
 				const docKeys = (e.doc_keys || [e.doc_key || e.document_id]).filter(Boolean);
