@@ -379,12 +379,31 @@ async function startServer() {
 	// API: Multi-phase Hybrid Retrieval (BM25 + SUMO + Entity + Structural)
 	app.post('/api/retrieval/query', async (req, res) => {
 		try {
-			const { query, depth, limit, expandDepth, crossDocLimit, crossDocWeight } = req.body;
+			const { query, depth, limit, expandDepth, crossDocLimit, crossDocWeight, selfRagVerify, sessionHistory, cor } = req.body;
 			if (!query) {
 				return res.status(400).json({ success: false, error: 'Query is required.' });
 			}
-			const result = await retrievalEngine.query(query, { depth, limit, expandDepth, crossDocLimit, crossDocWeight });
+			const queryFn = cor ? retrievalEngine.queryCoR.bind(retrievalEngine) : retrievalEngine.query.bind(retrievalEngine);
+			const result = await queryFn(query, { depth, limit, expandDepth, crossDocLimit, crossDocWeight, selfRagVerify, sessionHistory });
 			res.json({ success: true, ...result });
+		} catch (err) {
+			res.status(500).json({ success: false, error: err.message });
+		}
+	});
+
+	// REFEED RAG: store per-result user feedback for weight tuning
+	app.post('/api/retrieval/feedback', async (req, res) => {
+		try {
+			const { query_hash, node_id, result_rank, signal } = req.body;
+			if (!query_hash || !node_id || !signal) {
+				return res.status(400).json({ success: false, error: 'query_hash, node_id, signal required.' });
+			}
+			if (!['positive', 'negative'].includes(signal)) {
+				return res.status(400).json({ success: false, error: 'signal must be positive or negative.' });
+			}
+			const db = await arangoClient.initArangoClient();
+			await db.collection('feedback').save({ query_hash, node_id, result_rank: result_rank || 0, signal, ts: new Date().toISOString() });
+			res.json({ success: true });
 		} catch (err) {
 			res.status(500).json({ success: false, error: err.message });
 		}

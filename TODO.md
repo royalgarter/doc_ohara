@@ -155,3 +155,55 @@ a temporal component with five-layer protection against burying "gold" timeless 
 
 Out of scope: UI for manual decay_class override, PRECEDES edges (use AQL sort instead),
 dense embedding similarity for temporal coverage matching.
+
+---
+
+TODO — 2026-06-27: RAG Pattern Improvements
+
+Analysis of 25 RAG archetypes vs Ohara revealed 6 actionable gaps.
+Reference: `refs/ohara_vs_25_rag.md`
+
+### #1 — Corrective RAG · High priority · ~15 lines
+> Filter Phase 3 structural noise before fusion
+
+- [x] `src/retrieval.js` — after `_phase4Structural()`, filter `structResults` by SUMO tag overlap when `queryHints.sumo_tags` is non-empty; drop nodes with zero overlap
+- [x] `.env.example` — add `OHARA_CORRECTIVE_STRUCT=true`
+
+### #2 — Self-RAG · Medium priority · ~40 lines
+> Post-fusion Gemini responsiveness check on Principal tier
+
+- [x] `prompts/self_rag_verify.md` — one-shot prompt: does passage answer query? → `{responsive, reason}`
+- [x] `src/retrieval.js` — add `_selfRagFilter()`; call after `_classifyTiers()`; filter `tiers.principal`; reuses `_verifyIntegrityClaim()` call pattern (temperature 0, flex, cached)
+- [x] `server.js` — pass `selfRagVerify` from request body to `query()` options
+- [x] `.env.example` — add `OHARA_SELF_RAG_VERIFY=false`
+
+### #3 — Conversational RAG · Medium priority · ~25 lines
+> Session history prepended to query fingerprint prompt
+
+- [x] `src/retrieval.js` — accept `sessionHistory[]` in `query()` options; prepend last N turns in `_extractHintsWithGemini()` prompt before query text
+- [x] `server.js` — accept `sessionHistory` array in POST `/api/retrieval/query`
+- [ ] `index.html` — accumulate last N Q&A pairs in Alpine state; send with each query call
+- [x] `.env.example` — add `OHARA_SESSION_HISTORY_LIMIT=3`
+
+### #4 — Chain-of-Retrieval (CoR) · High priority · ~80 lines
+> Iterative retrieval loop chasing Explorer frontier
+
+- [x] `src/retrieval.js` — add `queryCoR(rawInput, options)`; iterates `query()` using top Explorer `edge_verb`/`edge_summary` as augmented seeds; merges + dedups across iterations; stops at `OHARA_COR_MAX_ITER` or score plateau
+- [x] `server.js` — accept `cor: true` in request body; route to `queryCoR()`
+- [x] `bin/ohara.js` — add `--cor` flag to `query` command
+- [x] `.env.example` — add `OHARA_COR_MAX_ITER=2`, `OHARA_COR_SCORE_DELTA=0.05`
+
+### #5 — Speculative RAG · Low-Medium priority · ~30 lines
+> Background pre-warm of Explorer frontier after each query
+
+- [x] `src/retrieval.js` — fire background async `query()` on top Explorer frontier nodes post-response; cache under `SPECULATIVE:<query_hash>:<node_id>` key
+- [x] `.env.example` — add `OHARA_SPECULATIVE_RAG=false`, `OHARA_SPECULATIVE_LIMIT=3`
+
+### #6 — REFEED RAG · Low priority · ~120 lines + UI
+> User feedback loop to tune phase weights
+
+- [x] `src/db/client.js` — add `feedback` to document collections list
+- [x] `server.js` — add `POST /api/retrieval/feedback` endpoint
+- [x] `scripts/tune_weights.js` — read feedback collection; compute per-phase accuracy; output suggested `OHARA_*_WEIGHT` env var values
+- [ ] `index.html` — thumbs up/down buttons per result card (UI work pending)
+- [x] `.env.example` — document feedback-adjacent env vars

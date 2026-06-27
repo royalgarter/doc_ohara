@@ -174,6 +174,7 @@ program
 	.option('--verbose', 'show per-result source phases and scores')
 	.option('--raw', 'show flat scored list instead of reconstructed Markdown')
 	.option('--tiers', 'show Principal / Integrity / Explorer tier breakdown instead of flat results')
+	.option('--cor', 'Chain-of-Retrieval: iterative retrieval chasing Explorer frontier')
 	.action(async (text, opts) => {
 		if (!opts.json) logOharaEnv();
 		let retrievalDB;
@@ -198,13 +199,16 @@ program
 			console.log(chalk.dim(`Input type: ${inputType}${inputType === 'paragraph' ? ' (Gemini extraction)' : ''}`));
 		}
 
-		const result = await engine.query(text, {
+		const queryOpts = {
 			depth: parseInt(opts.depth, 10),
 			limit: parseInt(opts.limit, 10),
 			expandDepth: parseInt(opts.expandDepth, 10),
 			crossDocLimit: opts.crossDocLimit ? parseInt(opts.crossDocLimit, 10) : undefined,
 			crossDocWeight: opts.crossDocWeight ? parseFloat(opts.crossDocWeight) : undefined,
-		});
+		};
+		const result = opts.cor
+			? await engine.queryCoR(text, queryOpts)
+			: await engine.query(text, queryOpts);
 
 		const markdown = opts.json || opts.raw || opts.tiers ? null : await engine.formatAsMarkdown(result.results || []);
 		const principalMarkdown = opts.tiers && !opts.json

@@ -20,6 +20,9 @@ const FINGERPRINT_PROMPT = fs.readFileSync(
 const INTEGRITY_VERIFY_PROMPT = fs.readFileSync(
 	path.resolve(__dirname, '../prompts/verify_integrity_claim.md'), 'utf8'
 );
+const SELF_RAG_VERIFY_PROMPT = fs.readFileSync(
+	path.resolve(__dirname, '../prompts/self_rag_verify.md'), 'utf8'
+);
 
 const STOPWORDS = new Set([
 	'a', 'an', 'the', 'and', 'or', 'of', 'in', 'on', 'to', 'is', 'are', 'how',
@@ -94,11 +97,17 @@ export class RetrievalEngine {
 		return 'paragraph';
 	}
 
-	async _extractHintsWithGemini(rawInput) {
+	async _extractHintsWithGemini(rawInput, sessionHistory = []) {
 		const ai = this._getAI();
 		if (!ai) return { entityHints: [], sumoHints: [], temporalIntent: 'none' };
 
-		const prompt = FINGERPRINT_PROMPT + rawInput.slice(0, 2000);
+		const historyLimit = parseInt(process.env.OHARA_SESSION_HISTORY_LIMIT || '3', 10);
+		const recentHistory = sessionHistory.slice(-historyLimit);
+		const historyBlock = recentHistory.length
+			? recentHistory.map(t => `${t.role === 'assistant' ? 'Assistant' : 'User'}: ${String(t.content).slice(0, 500)}`).join('\n') + '\n\n'
+			: '';
+
+		const prompt = FINGERPRINT_PROMPT + historyBlock + rawInput.slice(0, 2000);
 
 		try {
 			const result = await ai.models.generateContent({
@@ -166,7 +175,38 @@ export class RetrievalEngine {
 		}
 	}
 
-	async preprocessInput(rawInput) {
+	async _selfRagFilter(rawQuery, nodes) {
+		const ai = this._getAI();
+		if (!ai || !nodes.length) return nodes;
+
+		const results = await Promise.all(nodes.map(async entry => {
+			const content = (entry.node?.content || entry.node?.title || '').slice(0, 1200);
+			if (!content) return { entry, responsive: true };
+			const inputPayload = JSON.stringify({ query: rawQuery.slice(0, 400), passage: content });
+			const prompt = `${SELF_RAG_VERIFY_PROMPT}\n\nINPUT:\n${inputPayload}`;
+			const key = cacheKeyFor([SELF_RAG_VERIFY_PROMPT, inputPayload, GEMINI_MODEL]);
+			const cached = readCacheSync(key);
+			if (cached) return { entry, ...cached };
+			try {
+				const resp = await ai.models.generateContent({
+					model: GEMINI_MODEL,
+					contents: prompt,
+					config: { serviceTier: 'flex', temperature: 0 },
+				});
+				const raw = (resp.text || '').replace(/^```json\s*/i, '').replace(/```\s*$/, '').trim();
+				const parsed = JSON.parse(raw);
+				const result = { responsive: parsed.responsive !== false, reason: String(parsed.reason || '').slice(0, 200) };
+				writeCache(key, result);
+				return { entry, ...result };
+			} catch (_) {
+				return { entry, responsive: true };
+			}
+		}));
+
+		return results.filter(r => r.responsive).map(r => r.entry);
+	}
+
+	async preprocessInput(rawInput, sessionHistory = []) {
 		const keywords = this._tokenize(rawInput);
 		const inputType = this._classifyInput(keywords);
 
@@ -178,7 +218,7 @@ export class RetrievalEngine {
 		// Extract fingerprint for phrase and paragraph queries (not bare keywords)
 		if (inputType === 'phrase' || inputType === 'paragraph') {
 			({ entityHints, sumoHints, temporalIntent, dateRange = { from: null, to: null } } =
-				await this._extractHintsWithGemini(rawInput));
+				await this._extractHintsWithGemini(rawInput, sessionHistory));
 		}
 
 		// Heuristic temporal intent + date range for keyword queries (no Gemini call)
@@ -875,7 +915,8 @@ export class RetrievalEngine {
 			...(options.crossDocWeight != null ? { crossDoc: options.crossDocWeight } : {}),
 		};
 
-		const processedQuery = await this.preprocessInput(rawInput);
+		const sessionHistory = Array.isArray(options.sessionHistory) ? options.sessionHistory : [];
+		const processedQuery = await this.preprocessInput(rawInput, sessionHistory);
 
 		const bm25Results   = await this._phase1BM25(processedQuery, limit);
 		const sumoResults   = await this._phase2SUMO(processedQuery, bm25Results, limit);
@@ -901,7 +942,17 @@ export class RetrievalEngine {
 			...crossDocResults.map(r => r.node._id),
 			...vectorResults.map(r => r.node._id),
 		]);
-		const structResults = await this._phase4Structural(topNodeId, depth, seenAfterPhase3);
+		let structResults = await this._phase4Structural(topNodeId, depth, seenAfterPhase3);
+
+		// Corrective RAG: drop structural nodes with zero SUMO overlap when query has hints
+		const correctiveEnabled = process.env.OHARA_CORRECTIVE_STRUCT !== 'false';
+		const queryHints = processedQuery.sumoHints;
+		if (correctiveEnabled && Array.isArray(queryHints) && queryHints.length > 0) {
+			const sumoSet = new Set(queryHints);
+			structResults = structResults.filter(r =>
+				(r.node?.sumo_tags || []).some(t => sumoSet.has(t))
+			);
+		}
 
 		const fused = this._fuseResults(bm25Results, sumoResults, entityResults, crossDocResults, structResults, weights, vectorResults);
 
@@ -921,7 +972,13 @@ export class RetrievalEngine {
 
 		const tiers = await this._classifyTiers(fused, processedQuery, crossDocResults, depth, seenAfterPhase3, options);
 
-		return {
+		// Self-RAG: optional Gemini responsiveness filter on Principal tier
+		const selfRagEnabled = options.selfRagVerify ?? (process.env.OHARA_SELF_RAG_VERIFY === 'true');
+		if (selfRagEnabled && tiers.principal?.length) {
+			tiers.principal = await this._selfRagFilter(rawInput, tiers.principal);
+		}
+
+		const response = {
 			processedQuery,
 			results: topK,
 			tiers,
@@ -931,10 +988,77 @@ export class RetrievalEngine {
 			crossDocResults,
 			deepResults: structResults.map(r => r.node),
 		};
+
+		// Speculative RAG: background pre-warm of Explorer frontier for likely follow-up queries
+		if (process.env.OHARA_SPECULATIVE_RAG === 'true' && !options._speculative) {
+			const specLimit = parseInt(process.env.OHARA_SPECULATIVE_LIMIT || '3', 10);
+			const frontier = tiers.explorer?.frontier?.slice(0, specLimit) || [];
+			if (frontier.length) {
+				const queryHash = cacheKeyFor([rawInput]);
+				for (const f of frontier) {
+					const specKey = `SPECULATIVE:${queryHash}:${f.document_id || f.node_id || ''}`;
+					if (!readCacheSync(specKey)) {
+						const speculativeQuery = [f.edge_verb, f.edge_summary].filter(Boolean).join(': ') || rawInput;
+						this.query(speculativeQuery, { ...options, _speculative: true }).then(r => {
+							writeCache(specKey, r);
+						}).catch(() => {});
+					}
+				}
+			}
+		}
+
+		return response;
 	}
 
 	async getDeepContext(targetNodeId, _edgeTypes, options = {}) {
 		const depth = options.depth || 2;
 		return this._phase4Structural(targetNodeId, depth, new Set());
+	}
+
+	// Chain-of-Retrieval: iteratively chase Explorer frontier to surface deep multi-hop knowledge
+	async queryCoR(rawInput, options = {}) {
+		const maxIter = parseInt(process.env.OHARA_COR_MAX_ITER || '2', 10);
+		const scoreDelta = parseFloat(process.env.OHARA_COR_SCORE_DELTA || '0.05');
+
+		const merged = new Map(); // _id → fused entry (keep max score)
+		let currentQuery = rawInput;
+		let prevTopScore = 0;
+
+		for (let iter = 0; iter < maxIter; iter++) {
+			const result = await this.query(currentQuery, options);
+
+			// Merge results (dedup by _id, keep max score)
+			for (const entry of result.results || []) {
+				const id = entry.node?._id;
+				if (!id) continue;
+				if (!merged.has(id) || merged.get(id).score < entry.score) {
+					merged.set(id, { ...entry, cor_iter: iter });
+				}
+			}
+
+			// Stop if Explorer has no frontier to chase
+			const frontier = result.tiers?.explorer?.frontier || [];
+			if (!frontier.length) break;
+
+			// Build augmented query from top frontier signals
+			const seeds = frontier.slice(0, 3)
+				.map(f => [f.edge_verb, f.edge_summary].filter(Boolean).join(': '))
+				.filter(Boolean);
+			if (!seeds.length) break;
+
+			// Stop if top score hasn't improved meaningfully
+			const topScore = [...merged.values()].reduce((m, e) => Math.max(m, e.score), 0);
+			if (iter > 0 && topScore - prevTopScore < scoreDelta) break;
+			prevTopScore = topScore;
+
+			currentQuery = `${rawInput} [context: ${seeds.join('; ')}]`;
+		}
+
+		const allResults = [...merged.values()].sort((a, b) => b.score - a.score);
+		return {
+			processedQuery: { raw: rawInput, cor: true, iterations: maxIter },
+			results: allResults,
+			cor_iter_count: maxIter,
+		};
 	}
 }
