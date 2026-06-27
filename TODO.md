@@ -205,5 +205,5 @@ Reference: `refs/ohara_vs_25_rag.md`
 - [x] `src/db/client.js` — add `feedback` to document collections list
 - [x] `server.js` — add `POST /api/retrieval/feedback` endpoint
 - [x] `scripts/tune_weights.js` — read feedback collection; compute per-phase accuracy; output suggested `OHARA_*_WEIGHT` env var values
-- [ ] `index.html` — thumbs up/down buttons per result card (UI work pending)
+- [x] `index.html` — thumbs up/down buttons per result card; `sendFeedback()` posts to `/api/retrieval/feedback`; `feedbackSent` state highlights sent signal
 - [x] `.env.example` — document feedback-adjacent env vars

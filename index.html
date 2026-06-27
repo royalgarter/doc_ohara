@@ -300,7 +300,21 @@
 							class="cl-card text-xs p-2 rounded border cursor-pointer transition">
 							<div class="flex justify-between items-center mb-1">
 								<span class="cl-t3 text-sm font-bold" x-text="'#' + (i + 1)"></span>
-								<span class="text-green-400 text-sm" x-text="Math.round(r.score * 100) + '%'"></span>
+								<div class="flex items-center gap-2">
+									<span class="text-green-400 text-sm" x-text="Math.round(r.score * 100) + '%'"></span>
+									<div class="flex gap-1" @click.stop>
+										<button
+											@click="sendFeedback(r.node._id, i, 'positive')"
+											:class="feedbackSent[r.node._id + 'positive'] ? 'text-green-400' : 'cl-t5 hover:text-green-400'"
+											class="transition text-base leading-none"
+											title="Helpful">👍</button>
+										<button
+											@click="sendFeedback(r.node._id, i, 'negative')"
+											:class="feedbackSent[r.node._id + 'negative'] ? 'text-red-400' : 'cl-t5 hover:text-red-400'"
+											class="transition text-base leading-none"
+											title="Not helpful">👎</button>
+									</div>
+								</div>
 							</div>
 							<div class="cl-t1 text-base leading-relaxed line-clamp-3"
 								x-text="r.node.content || r.node.title || '—'"></div>
@@ -639,6 +653,8 @@
 			queryInput: '',
 			queryResults: null,
 			queryLoading: false,
+			queryHash: null,
+			feedbackSent: {},
 
 			jobs: [],
 			jobStats: { waiting: 0, active: 0, completed: 0, failed: 0, total: 0 },
@@ -910,6 +926,8 @@
 				if (!q) return;
 				this.queryLoading = true;
 				this.queryResults = null;
+				this.feedbackSent = {};
+				this.queryHash = btoa(q).replace(/[^a-z0-9]/gi, '').slice(0, 32);
 				try {
 					const r = await fetch('/api/retrieval/query', {
 						method: 'POST',
@@ -920,6 +938,19 @@
 					if (d.success) this.queryResults = d;
 				} catch(e) {}
 				this.queryLoading = false;
+			},
+
+			async sendFeedback(nodeId, rank, signal) {
+				const key = nodeId + signal;
+				if (this.feedbackSent[key]) return;
+				this.feedbackSent[key] = signal;
+				try {
+					await fetch('/api/retrieval/feedback', {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({ query_hash: this.queryHash, node_id: nodeId, result_rank: rank, signal }),
+					});
+				} catch(e) { delete this.feedbackSent[key]; }
 			},
 
 			async loadDocs() {
