@@ -12,6 +12,7 @@ import { validateTags } from '../sumo.js';
 import { processNodeEntities, normalizeEntity } from '../entities.js';
 import { PseudoTOCGenerator, GeminiTocLLMClient, GeminiEmbeddingClient } from '../toc.js';
 import { extractHtmlTitle, htmlToMarkdown } from '../helper.js';
+import { callLLM } from '../llm.js';
 
 const GEMINI_MODEL = 'gemini-2.5-flash-lite';
 
@@ -299,15 +300,8 @@ Document text content:
 ${content}
 `;
 
-	const result = await ai.models.generateContent({
-		model: GEMINI_MODEL,
-		contents: prompt,
-		config: { serviceTier: 'flex' },
-	});
-
-	const parsedText = result.text?.trim() || '{}';
+	const parsedText = (await callLLM(prompt, { model: GEMINI_MODEL, cache: false })) || '{}';
 	const cleanJson = parsedText.replace(/^```json/gi, '').replace(/^```/gi, '').replace(/```$/gi, '').trim();
-	
 	return JSON.parse(cleanJson);
 }
 
@@ -371,8 +365,7 @@ async function generateFromMarkdown(ai, mdContent, filename) {
 	try {
 		const promptTemplate = fs.readFileSync(path.join('prompts', 'ingest_document.md'), 'utf-8');
 		const prompt = `${promptTemplate}\n\nDOCUMENT_MARKDOWN:\n\n${mdContent}`;
-		const result = await ai.models.generateContent({ model: GEMINI_MODEL, contents: prompt, config: { serviceTier: 'flex' } });
-		const parsedText = result.text?.trim() || '{}';
+		const parsedText = (await callLLM(prompt, { model: GEMINI_MODEL, cache: false })) || '{}';
 		const cleanJson = parsedText.replace(/^```json/gi, '').replace(/^```/gi, '').replace(/```$/gi, '').trim();
 		return safeParseJsonFromText(cleanJson);
 	} catch (err) {
@@ -591,8 +584,7 @@ async function detectTocWithLLM(ai, firstChunks) {
 
 		let parsed = readCacheSync(key);
 		if (!parsed) {
-			const resp = await ai.models.generateContent({ model: GEMINI_MODEL, contents: prompt, config: { serviceTier: 'flex' } });
-			const raw = (resp.text ?? '').trim().replace(/^```json/i, '').replace(/^```/, '').replace(/```$/, '').trim();
+			const raw = ((await callLLM(prompt, { model: GEMINI_MODEL, cache: false })) ?? '').trim().replace(/^```json/i, '').replace(/^```/, '').replace(/```$/, '').trim();
 			try { parsed = JSON.parse(raw); } catch { return null; }
 			writeCache(key, parsed);
 		}
@@ -627,8 +619,7 @@ async function enrichCrossDocEdge(ai, docA, docB, snippetsA, snippetsB, sharedEn
 
 		if (!parsed) {
 			const prompt = `${enrichPrompt}\n\nINPUT:\n${inputPayload}`;
-			const resp = await ai.models.generateContent({ model: GEMINI_MODEL, contents: prompt, config: { serviceTier: 'flex' } });
-			const raw = (resp.text ?? '').trim().replace(/^```json\s*/i, '').replace(/^```/, '').replace(/```$/, '').trim();
+			const raw = ((await callLLM(prompt, { model: GEMINI_MODEL, cache: false })) ?? '').trim().replace(/^```json\s*/i, '').replace(/^```/, '').replace(/```$/, '').trim();
 			try { parsed = JSON.parse(raw); } catch { return null; }
 			writeCache(key, parsed);
 		}
@@ -655,8 +646,7 @@ async function generateDocContext(ai, firstChunkText) {
 	const cached = readCacheSync(key);
 	if (cached && typeof cached.summary === 'string') return cached.summary;
 	try {
-		const resp = await ai.models.generateContent({ model: GEMINI_MODEL, contents: prompt, config: { serviceTier: 'flex' } });
-		const summary = (resp.text || '').trim();
+		const summary = ((await callLLM(prompt, { model: GEMINI_MODEL, cache: false })) || '').trim();
 		if (summary) writeCache(key, { summary });
 		return summary || null;
 	} catch (err) {
@@ -786,12 +776,7 @@ async function structureMarkdownWithRetries(ai, filename, mdContent) {
 				const pageHint  = chunk.startPage != null ? `\nPAGE_RANGE:${chunk.startPage}-${chunk.endPage}` : '';
 				const docCtxSection = docContextSummary ? `\nDOCUMENT_CONTEXT (applies to entire document, not just this excerpt):\n${docContextSummary}` : '';
 				const prompt = `${promptNorm}${levelHint}${pageHint}${docCtxSection}\n\nDOCUMENT_CHUNK_HEADING:${chunk.heading || ''}\n\n${chunk.text}`;
-				const resp = await ai.models.generateContent({ model: modelId, contents: prompt, config: { serviceTier: 'flex' } });
-				const um = resp.usageMetadata || {};
-				diag.usage.prompt_tokens     += um.promptTokenCount     || 0;
-				diag.usage.candidates_tokens += um.candidatesTokenCount || 0;
-				diag.usage.total_tokens      += um.totalTokenCount      || 0;
-				const parsedText = resp.text?.trim() || '{}';
+				const parsedText = (await callLLM(prompt, { model: modelId, cache: false })) || '{}';
 				diag.raw_llm_output = parsedText;
 				const cleanJson = parsedText.replace(/^```json/gi, '').replace(/^```/gi, '').replace(/```$/gi, '').trim();
 				let parsed;
@@ -807,12 +792,7 @@ async function structureMarkdownWithRetries(ai, filename, mdContent) {
 					try {
 						addPipelineLog('info', `Attempting automated repair for chunk ${chunk.id}`);
 						const repairPrompt = `The text below may contain a JSON object mixed with commentary or markdown fences. Extract and return ONLY the JSON object (no explanation, no markdown fences). If multiple objects exist, return the single top-level object.\n\nNOISY_OUTPUT:\n${parsedText}`;
-						const repairResp = await ai.models.generateContent({ model: modelId, contents: repairPrompt, config: { serviceTier: 'flex' } });
-						const rum = repairResp.usageMetadata || {};
-						diag.usage.repair_prompt_tokens     += rum.promptTokenCount     || 0;
-						diag.usage.repair_candidates_tokens += rum.candidatesTokenCount || 0;
-						diag.usage.total_tokens             += rum.totalTokenCount      || 0;
-						const repairText = repairResp.text?.trim() || '';
+						const repairText = (await callLLM(repairPrompt, { model: modelId, cache: false })) || '';
 						diag.repair_raw_output = repairText;
 						try {
 							const repaired = safeParseJsonFromText(repairText);
