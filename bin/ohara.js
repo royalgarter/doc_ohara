@@ -771,7 +771,35 @@ program
 	});
 
 // ── env command ──────────────────────────────────────────────────────────────
-const envCmd = program.command('env').description('Manage environment variables stored in ArangoDB');
+const envCmd = program
+	.command('env [assignment]')
+	.description('Set an env var (KEY=value), or manage env vars with subcommands')
+	.action(async (assignment) => {
+		if (!assignment) {
+			envCmd.help();
+			return;
+		}
+		const eqIdx = assignment.indexOf('=');
+		if (eqIdx === -1) {
+			console.error(chalk.red('✖ Expected format: KEY=value'));
+			process.exitCode = 1;
+			return;
+		}
+		const key = assignment.slice(0, eqIdx).trim();
+		const value = assignment.slice(eqIdx + 1); // preserve empty string as-is
+		if (!key) {
+			console.error(chalk.red('✖ Key cannot be empty'));
+			process.exitCode = 1;
+			return;
+		}
+		try {
+			await setEnv(key, value);
+			console.log(chalk.green(`✔ Set ${key}=${value === '' ? '(empty)' : value}`));
+		} catch (err) {
+			console.error(chalk.red(`✖ ${err.message}`));
+			process.exitCode = 1;
+		}
+	});
 
 envCmd
 	.command('list')
