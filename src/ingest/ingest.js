@@ -12,7 +12,7 @@ import { validateTags } from '../sumo.js';
 import { processNodeEntities, normalizeEntity } from '../entities.js';
 import { PseudoTOCGenerator, GeminiTocLLMClient, GeminiEmbeddingClient } from '../toc.js';
 import { extractHtmlTitle, htmlToMarkdown } from '../helper.js';
-import { callLLM } from '../llm.js';
+import { callLLM, createGeminiCache, callLLMWithCache } from '../llm.js';
 
 const GEMINI_MODEL = 'gemini-2.5-flash-lite';
 
@@ -729,6 +729,17 @@ async function structureMarkdownWithRetries(ai, filename, mdContent) {
 	// parallel pool
 	const concurrency = parseInt(process.env.OHARA_INGEST_CONCURRENCY || '4', 10) || 4;
 
+	// Try to create a Gemini server-side cache for the system prompt (needs ~32K tokens minimum).
+	// Falls back gracefully — chunks just send the full prompt if cache creation fails.
+	const systemPromptContent = fs.readFileSync(path.join('prompts', 'ingest_document.md'), 'utf-8').trim();
+	let geminiCacheName = null;
+	try {
+		geminiCacheName = await createGeminiCache(systemPromptContent, { model: GEMINI_MODEL, ttlSeconds: 300 });
+		addPipelineLog('info', `Gemini CachedContent created: ${geminiCacheName}`);
+	} catch (cacheErr) {
+		addPipelineLog('info', `Gemini CachedContent skipped (${cacheErr.message}) — sending full prompt per chunk`);
+	}
+
 	// per-run diagnostics: one entry per chunk, written to doc_pipeline/diagnostics/
 	const chunkDiagnostics = [];
 
@@ -750,8 +761,7 @@ async function structureMarkdownWithRetries(ai, filename, mdContent) {
 		};
 		chunkDiagnostics.push(diag);
 
-		const systemPrompt = fs.readFileSync(path.join('prompts', 'ingest_document.md'), 'utf-8');
-		const promptNorm = systemPrompt.trim();
+		const promptNorm = systemPromptContent;
 		const modelId = GEMINI_MODEL;
 		const credFp = credFingerprint();
 		const key = cacheKeyFor([promptNorm, chunk.text, modelId, credFp, docContextSummary || '']);
@@ -775,8 +785,10 @@ async function structureMarkdownWithRetries(ai, filename, mdContent) {
 				const levelHint = chunk.headingLevel ? `\nHEADING_LEVEL:${chunk.headingLevel}` : '';
 				const pageHint  = chunk.startPage != null ? `\nPAGE_RANGE:${chunk.startPage}-${chunk.endPage}` : '';
 				const docCtxSection = docContextSummary ? `\nDOCUMENT_CONTEXT (applies to entire document, not just this excerpt):\n${docContextSummary}` : '';
-				const prompt = `${promptNorm}${levelHint}${pageHint}${docCtxSection}\n\nDOCUMENT_CHUNK_HEADING:${chunk.heading || ''}\n\n${chunk.text}`;
-				const parsedText = (await callLLM(prompt, { model: modelId, cache: false, serviceTier: 'flex' })) || '{}';
+				const chunkBody = `${levelHint}${pageHint}${docCtxSection}\n\nDOCUMENT_CHUNK_HEADING:${chunk.heading || ''}\n\n${chunk.text}`;
+				const parsedText = geminiCacheName
+					? (await callLLMWithCache(geminiCacheName, chunkBody, { model: modelId, cache: false, serviceTier: 'flex' })) || '{}'
+					: (await callLLM(`${promptNorm}${chunkBody}`, { model: modelId, cache: false, serviceTier: 'flex' })) || '{}';
 				diag.raw_llm_output = parsedText;
 				const cleanJson = parsedText.replace(/^```json/gi, '').replace(/^```/gi, '').replace(/```$/gi, '').trim();
 				let parsed;
