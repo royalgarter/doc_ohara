@@ -15,7 +15,7 @@ import {
 	runPipelineExecution,
 	clearPipelineLogs,
 	addPipelineLog
-} from './src/ingest/pipeline.js';
+} from './src/ingest/ingest.js';
 
 // Tool catalog shared between /tools discovery and the MCP server (bin/ohara-mcp.js)
 const AGENT_TOOLS = [

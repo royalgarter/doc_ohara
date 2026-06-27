@@ -2,7 +2,7 @@
 // Pulls 'ingestion' jobs and runs them through pipeline_runner.ingestSingleFile,
 // reporting progress and retrying transient OOM / Gemini rate-limit failures.
 import { getIngestionQueue } from './queue.js';
-import { ingestSingleFile } from './pipeline.js';
+import { ingestSingleFile } from './ingest.js';
 
 const RETRYABLE_CODES = new Set(['OOM', 'RATE_LIMIT']);
 const NON_ERROR_CODES = new Set(['ALREADY_INGESTED']);
