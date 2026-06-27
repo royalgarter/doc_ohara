@@ -392,8 +392,14 @@ async function performParsing(ai, filename, fileContentPath, isPdf, targetSubDir
 	const isMarkdown = ext === '.md' || ext === '.markdown' || fileContentPath.endsWith('.md');
 
 	if (isMarkdown) {
-		// read and chunk
 		const mdContent = fs.readFileSync(fileContentPath, 'utf-8');
+		return await structureMarkdownWithRetries(ai, filename, mdContent);
+	}
+
+	// Reuse existing LiteParse output (.md) if the input file was deleted or parsing already done
+	if (fs.existsSync(mdOutPath)) {
+		addPipelineLog('info', `Reusing cached LiteParse output: ${mdOutPath}`);
+		const mdContent = fs.readFileSync(mdOutPath, 'utf-8');
 		return await structureMarkdownWithRetries(ai, filename, mdContent);
 	}
 
@@ -1598,8 +1604,19 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
 
 	// Hash the input file and skip if already ingested (unless --force)
 	const fileContentPath = path.join(inputDir, filename);
+	const mdCachePath = path.join(rawOutputDir, filename, `${path.basename(filename, path.extname(filename))}.md`);
+	const fileExists = fs.existsSync(fileContentPath);
+	const mdCacheExists = fs.existsSync(mdCachePath);
+
+	if (!fileExists && !mdCacheExists) {
+		throw new Error(`Input file not found and no cached LiteParse output available: ${fileContentPath}`);
+	}
+	if (!fileExists) {
+		addPipelineLog('warn', `Input file missing (${filename}) — will use cached LiteParse output at ${mdCachePath}`);
+	}
+
 	let fileHash = null;
-	if (fs.existsSync(fileContentPath)) {
+	if (fileExists) {
 		const buf = fs.readFileSync(fileContentPath);
 		fileHash = crypto.createHash('sha256').update(buf).digest('hex');
 		if (process.env.ARANGO_URL) {
