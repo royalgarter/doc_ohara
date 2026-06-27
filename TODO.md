@@ -207,3 +207,73 @@ Reference: `refs/ohara_vs_25_rag.md`
 - [x] `scripts/tune_weights.js` — read feedback collection; compute per-phase accuracy; output suggested `OHARA_*_WEIGHT` env var values
 - [x] `index.html` — thumbs up/down buttons per result card; `sendFeedback()` posts to `/api/retrieval/feedback`; `feedbackSent` state highlights sent signal
 - [x] `.env.example` — document feedback-adjacent env vars
+
+---
+
+TODO — 2026-06-27: Next Improvements
+
+### #1 — Tiers UI · High priority · ~50 lines · `index.html`
+> Surface Principal / Integrity / Explorer tiers in query panel
+
+Currently query panel shows `shallowResults` only. Tiers computed server-side but never displayed.
+
+- [ ] `index.html` — add tabbed or sectioned view below results: Principal (corroborated core), Integrity (verified), Explorer frontier (candidate directions)
+- [ ] `index.html` — Principal nodes show `provenance[]` badge count; Explorer nodes show `edge_verb` + `edge_summary` as expandable hint
+- [ ] `index.html` — thumbs up/down already on `shallowResults`; mirror to Principal tier cards too
+
+### #2 — CoR Toggle in UI · High priority · ~15 lines · `index.html`
+> Expose Chain-of-Retrieval mode in query panel
+
+`queryCoR()` wired server-side (`cor: true`) but no UI control.
+
+- [ ] `index.html` — add toggle checkbox "Deep search (CoR)" near query input; set `cor` flag in `runQuery()` body when checked
+- [ ] `index.html` — show `cor_iter_count` in result header when CoR was used
+
+### #3 — Vector Embeddings (Phase 1d) · High priority · ~0 code · config only
+> Enable true dense semantic search alongside BM25
+
+All infrastructure exists: `OHARA_EMBED_PARAGRAPHS`, Phase 1d ANN search in `retrieval.js`, vector index in `db-init.js`. Just needs enabling + re-ingest.
+
+- [ ] `.env` — set `OHARA_EMBED_PARAGRAPHS=true`, tune `OHARA_VECTOR_WEIGHT` (default 0.5)
+- [ ] Re-ingest corpus to generate embeddings (or run backfill script if one exists)
+- [ ] `scripts/db-init.js` — verify vector index creation succeeds (requires ArangoDB 3.12 Enterprise)
+- [ ] Test: `node bin/ohara.js query "topic" --verbose` → results should include `vector` in sources
+
+### #4 — Reasoning RAG · Medium priority · ~60 lines · `src/retrieval.js`
+> Chain-of-thought sub-query generation between retrieval phases
+
+After Phase 1 BM25, Gemini reasons about what's missing → generates 1-2 targeted sub-queries → feeds Phase 2/3.
+
+- [ ] `prompts/reasoning_subquery.md` — prompt: given query + top BM25 snippets, what specific sub-questions remain unanswered? → `{subqueries: [...]}`
+- [ ] `src/retrieval.js` — add `_generateSubqueries(rawInput, bm25Results)` after Phase 1; run sub-queries through `_phase1BM25()` and merge into `bm25Results` before Phase 1b
+- [ ] `.env.example` — add `OHARA_REASONING_RAG=false` (opt-in), `OHARA_REASONING_SUBQUERY_LIMIT=2`
+
+### #5 — REFEED Weight Auto-Apply · Medium priority · ~30 lines
+> Write suggested weights back instead of just printing them
+
+`tune_weights.js` prints suggestions but user must manually edit `.env`.
+
+- [ ] `scripts/tune_weights.js` — add `--apply` flag; when set, write suggested `OHARA_*_WEIGHT` values to `.env` file in-place
+- [ ] `server.js` — optional: add `POST /api/config/weights` endpoint that runs tune_weights logic and applies to running process env (no restart needed for weights)
+
+### #6 — Temporal Metadata Review UI · Medium priority · ~40 lines · `index.html`
+> Let admins inspect and correct auto-extracted temporal metadata
+
+Schema has `temporal_needs_review: true` on every LLM-extracted doc. No UI to correct.
+
+- [ ] `index.html` — in Docs admin tab, show `published_date`, `decay_class`, `temporal_confidence` per doc with inline edit fields
+- [ ] `server.js` — add `PATCH /api/documents/:key` endpoint to update `published_date`, `decay_class`, `temporal_needs_review`
+
+### #7 — Entity Dedup Automation · Low priority · ~20 lines
+> Auto-trigger dedup after batch ingest instead of manual script
+
+- [ ] `src/ingest/ingest.js` — after `ingestCrawledDomain()` or `ingestSingleFile()` completes, optionally call entity dedup (gated by `OHARA_AUTO_ENTITY_DEDUP=false`)
+- [ ] `.env.example` — add `OHARA_AUTO_ENTITY_DEDUP=false`
+
+### #8 — Agentic RAG (full) · Low priority · ~100 lines
+> Dynamic tool dispatch per iteration instead of fixed CoR augmentation pattern
+
+- [ ] `src/retrieval.js` — add `queryAgent(rawInput, options)`; each iteration Gemini picks strategy: `bm25_only` | `entity_pivot` | `cross_doc_expand` | `structural_deep`; execute chosen phase; merge; repeat until stopping condition
+- [ ] `prompts/agent_strategy.md` — prompt: given query + found nodes so far, which retrieval tool to call next?
+- [ ] `bin/ohara.js` — `--agent` flag
+- [ ] `server.js` — `agent: true` param routes to `queryAgent()`
