@@ -182,7 +182,7 @@ Reference: `refs/ohara_vs_25_rag.md`
 
 - [x] `src/retrieval.js` — accept `sessionHistory[]` in `query()` options; prepend last N turns in `_extractHintsWithGemini()` prompt before query text
 - [x] `server.js` — accept `sessionHistory` array in POST `/api/retrieval/query`
-- [ ] `index.html` — accumulate last N Q&A pairs in Alpine state; send with each query call
+- [x] `index.html` — accumulate last N Q&A pairs in Alpine state (`sessionHistory`); send with each query; turn counter + clear button shown when history active; input border highlights amber when history non-empty
 - [x] `.env.example` — add `OHARA_SESSION_HISTORY_LIMIT=3`
 
 ### #4 — Chain-of-Retrieval (CoR) · High priority · ~80 lines

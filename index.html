@@ -280,10 +280,17 @@
 
 			<!-- QUERY tab -->
 			<div x-show="tab === 'query'" class="flex flex-col h-full overflow-hidden p-3 gap-3">
-				<div class="text-sm font-bold cl-t3 uppercase tracking-widest">Hybrid Retrieval</div>
+				<div class="flex items-center justify-between">
+					<div class="text-sm font-bold cl-t3 uppercase tracking-widest">Hybrid Retrieval</div>
+					<div x-show="sessionHistory.length > 0" class="flex items-center gap-1.5">
+						<span class="text-xs cl-t5" x-text="(sessionHistory.length / 2 | 0) + ' turn' + (sessionHistory.length > 2 ? 's' : '')"></span>
+						<button @click="sessionHistory = []" class="text-xs cl-t5 hover:cl-t2 transition" title="Clear conversation history">✕ clear</button>
+					</div>
+				</div>
 				<div class="flex gap-1.5">
 					<input x-model="queryInput" @keydown.enter="runQuery()"
 						placeholder="Search the graph…"
+						:class="sessionHistory.length ? 'border-amber-700' : ''"
 						class="cl-input flex-1 text-xs rounded px-2.5 py-1.5 border" />
 					<button @click="runQuery()" :disabled="queryLoading"
 						class="cl-btn text-xs px-2.5 py-1.5 rounded transition flex-shrink-0">→</button>
@@ -655,6 +662,7 @@
 			queryLoading: false,
 			queryHash: null,
 			feedbackSent: {},
+			sessionHistory: [],
 
 			jobs: [],
 			jobStats: { waiting: 0, active: 0, completed: 0, failed: 0, total: 0 },
@@ -932,10 +940,18 @@
 					const r = await fetch('/api/retrieval/query', {
 						method: 'POST',
 						headers: { 'Content-Type': 'application/json' },
-						body: JSON.stringify({ query: q }),
+						body: JSON.stringify({ query: q, sessionHistory: this.sessionHistory }),
 					});
 					const d = await r.json();
-					if (d.success) this.queryResults = d;
+					if (d.success) {
+						this.queryResults = d;
+						// Accumulate conversation history for Conversational RAG
+						const topContent = (d.shallowResults || [])[0]?.node?.content || '';
+						this.sessionHistory.push({ role: 'user', content: q });
+						if (topContent) this.sessionHistory.push({ role: 'assistant', content: topContent.slice(0, 500) });
+						// Keep last 6 turns (3 Q&A pairs = OHARA_SESSION_HISTORY_LIMIT=3)
+						if (this.sessionHistory.length > 6) this.sessionHistory = this.sessionHistory.slice(-6);
+					}
 				} catch(e) {}
 				this.queryLoading = false;
 			},
