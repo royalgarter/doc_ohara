@@ -2,8 +2,8 @@ import { GoogleGenAI } from '@google/genai';
 import { cacheKeyFor, readCacheAsync, writeCacheAsync, credFingerprint } from './cache.js';
 
 const PROVIDER = process.env.LLM_PROVIDER || 'gemini';
-const DEFAULT_MODEL = process.env.LLM_MODEL || 'gemini-2.5-flash-lite-preview-06-17';
-const DEFAULT_EMBEDDING_MODEL = process.env.LLM_EMBEDDING_MODEL || 'gemini-embedding-exp-03-07';
+const DEFAULT_MODEL = process.env.LLM_MODEL || 'gemini-2.5-flash-lite';
+const DEFAULT_EMBEDDING_MODEL = process.env.LLM_EMBEDDING_MODEL || 'gemini-embedding-2';
 const CF_WORKERS_FALLBACK_MODEL = process.env.CF_WORKERS_MODEL || '@cf/zai-org/glm-4.7-flash';
 
 // Errors from Gemini that warrant a fallback attempt
@@ -148,7 +148,7 @@ export async function callLLM(prompt, { model, systemPrompt, json, cache = true,
  * @param {string} systemPrompt - Large system prompt to cache server-side
  * @param {object} opts
  * @param {string} [opts.model] - Gemini model ID
- * @param {number} [opts.ttlSeconds=3600] - Cache TTL in seconds (default 1h)
+ * @param {number} [opts.ttlSeconds=300] - Cache TTL in seconds
  */
 export async function createGeminiCache(systemPrompt, { model, ttlSeconds = 300 } = {}) {
 	if (PROVIDER !== 'gemini') throw new Error('createGeminiCache requires LLM_PROVIDER=gemini');
