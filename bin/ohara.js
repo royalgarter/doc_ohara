@@ -12,6 +12,7 @@ import * as arangoClient from '../src/db/client.js';
 import { RetrievalEngine } from '../src/retrieval.js';
 import { getIngestionQueue } from '../src/ingest/queue.js';
 import { runWorkerOnce } from '../src/ingest/worker.js';
+import { ingestCrawledDomain } from '../src/ingest/ingest.js';
 import { QuartzExporter } from '../src/exporter.js';
 
 const INPUT_DIR = 'doc_pipeline/input';
@@ -87,6 +88,37 @@ program
 				process.exitCode = 1;
 			}
 		});
+	});
+
+program
+	.command('ingest-crawl <domain>')
+	.description('Ingest all crawled HTML pages from ArangoDB for a domain (run crawl first)')
+	.option('--json', 'machine-readable output')
+	.option('--force', 're-ingest even if already ingested')
+	.action(async (domain, opts) => {
+		const aiKey = process.env.GEMINI_API_KEY;
+		if (!aiKey) {
+			console.error(chalk.red('✖ GEMINI_API_KEY not set'));
+			process.exitCode = 1;
+			return;
+		}
+		if (!opts.json) console.log(chalk.cyan(`Ingesting crawled pages for: ${domain}`));
+		try {
+			const result = await ingestCrawledDomain(domain, aiKey, (pct, msg) => {
+				if (!opts.json) process.stderr.write(`\r[${String(pct).padStart(3)}%] ${msg}`);
+			}, { force: !!opts.force });
+			if (!opts.json) process.stderr.write('\n');
+			emit(opts.json, result, ({ ingested, skipped, failed, total }) => {
+				console.log(chalk.green(`✔ ${ingested}/${total} ingested`) +
+					(skipped ? chalk.yellow(`, ${skipped} skipped`) : '') +
+					(failed ? chalk.red(`, ${failed} failed`) : ''));
+			});
+		} catch (err) {
+			emit(opts.json, { success: false, error: err.message }, () =>
+				console.error(chalk.red(`✖ ${err.message}`))
+			);
+			process.exitCode = 1;
+		}
 	});
 
 program

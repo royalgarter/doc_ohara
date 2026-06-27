@@ -11,6 +11,7 @@ import { updateEdge as updateArangoEdge } from '../db/client.js';
 import { validateTags } from '../sumo.js';
 import { processNodeEntities, normalizeEntity } from '../entities.js';
 import { PseudoTOCGenerator, GeminiTocLLMClient, GeminiEmbeddingClient } from '../toc.js';
+import { extractHtmlTitle, htmlToMarkdown } from '../helper.js';
 
 const GEMINI_MODEL = 'gemini-2.5-flash-lite';
 
@@ -2077,4 +2078,70 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
 		total_chunks: totalChunks || null,
 		completed_chunks: completedChunks || null,
 	};
+}
+
+/**
+ * Ingest all crawled HTML pages from the `crawl` ArangoDB collection for a given domain.
+ * Each page is converted to Markdown with a title derived from its first <h> tag.
+ *
+ * @param {string} domain - Hostname or URL to match (e.g. "rwatimes.io" or "https://rwatimes.io")
+ * @param {string} aiKey - Gemini API key
+ * @param {Function} onProgress - (pct, msg) progress callback
+ * @param {object} opts - { force }
+ */
+export async function ingestCrawledDomain(domain, aiKey, onProgress = () => {}, opts = {}) {
+	const hostname = domain.replace(/^https?:\/\//, '').replace(/\/.*$/, '');
+
+	const db = await arangoClient.initArangoClient();
+	const crawlColl = db.collection('crawl');
+	if (!(await crawlColl.exists())) throw new Error(`Collection 'crawl' not found. Run 'ohara crawl' first.`);
+
+	const cursor = await db.query(
+		'FOR doc IN crawl FILTER CONTAINS(doc.url, @hostname) RETURN doc',
+		{ hostname }
+	);
+	const pages = await cursor.all();
+
+	if (pages.length === 0) {
+		addPipelineLog('warn', `No crawled pages for domain: ${hostname}`);
+		return { ingested: 0, failed: 0, skipped: 0, total: 0 };
+	}
+
+	addPipelineLog('info', `Found ${pages.length} crawled page(s) for ${hostname}`);
+
+	const inputDir = 'doc_pipeline/input';
+	fs.mkdirSync(inputDir, { recursive: true });
+
+	let ingested = 0, failed = 0, skipped = 0;
+
+	for (let i = 0; i < pages.length; i++) {
+		const page = pages[i];
+		onProgress(Math.round((i / pages.length) * 100), `Ingesting ${page.url}`);
+
+		const titleInfo = extractHtmlTitle(page.html) || { text: new URL(page.url).pathname || page.url, level: 1 };
+		const md = htmlToMarkdown(page.html);
+		const fullMd = `${'#'.repeat(titleInfo.level)} ${titleInfo.text}\n\n${md}`;
+
+		// Sanitized filename derived from URL
+		const slug = page.url.replace(/^https?:\/\//, '').replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 180);
+		const filename = `${slug}.md`;
+		fs.writeFileSync(path.join(inputDir, filename), fullMd, 'utf-8');
+
+		try {
+			await ingestSingleFile(filename, aiKey, () => {}, opts);
+			ingested++;
+			addPipelineLog('info', `[${i + 1}/${pages.length}] Ingested: ${page.url}`);
+		} catch (err) {
+			if (err.code === 'ALREADY_INGESTED') {
+				skipped++;
+				addPipelineLog('info', `[${i + 1}/${pages.length}] Skipped (already ingested): ${page.url}`);
+			} else {
+				failed++;
+				addPipelineLog('error', `[${i + 1}/${pages.length}] Failed ${page.url}: ${err.message}`);
+			}
+		}
+	}
+
+	onProgress(100, `Done. ${ingested} ingested, ${skipped} skipped, ${failed} failed.`);
+	return { ingested, failed, skipped, total: pages.length };
 }
