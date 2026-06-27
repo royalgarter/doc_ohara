@@ -148,7 +148,7 @@ Elliptic curve cryptography underpins the key generation algorithm used in Bitco
 		delete process.env.GEMINI_API_KEY;
 		delete process.env.ARANGO_URL;
 
-		const { ingestSingleFile } = await import('../src/ingest/pipeline.js');
+		const { ingestSingleFile } = await import('../src/ingest/ingest.js');
 
 		await assert.rejects(
 			() => ingestSingleFile(fixtureFilename, null),
