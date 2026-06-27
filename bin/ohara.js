@@ -91,8 +91,8 @@ program
 	});
 
 program
-	.command('ingest-crawl <domain>')
-	.description('Ingest all crawled HTML pages from ArangoDB for a domain (run crawl first)')
+	.command('ingest-crawl [domain]')
+	.description('Ingest HTML pages already stored in the crawl collection (does not crawl). Optionally filter by domain.')
 	.option('--json', 'machine-readable output')
 	.option('--force', 're-ingest even if already ingested')
 	.action(async (domain, opts) => {
@@ -102,9 +102,9 @@ program
 			process.exitCode = 1;
 			return;
 		}
-		if (!opts.json) console.log(chalk.cyan(`Ingesting crawled pages for: ${domain}`));
+		if (!opts.json) console.log(chalk.cyan(domain ? `Ingesting crawled pages for: ${domain}` : 'Ingesting all crawled pages'));
 		try {
-			const result = await ingestCrawledDomain(domain, aiKey, (pct, msg) => {
+			const result = await ingestCrawledDomain(domain || null, aiKey, (pct, msg) => {
 				if (!opts.json) process.stderr.write(`\r[${String(pct).padStart(3)}%] ${msg}`);
 			}, { force: !!opts.force });
 			if (!opts.json) process.stderr.write('\n');

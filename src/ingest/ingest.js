@@ -2081,33 +2081,40 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
 }
 
 /**
- * Ingest all crawled HTML pages from the `crawl` ArangoDB collection for a given domain.
- * Each page is converted to Markdown with a title derived from its first <h> tag.
+ * Ingest HTML pages already stored in the `crawl` ArangoDB collection.
+ * Does NOT crawl — reads only from the database.
  *
- * @param {string} domain - Hostname or URL to match (e.g. "rwatimes.io" or "https://rwatimes.io")
+ * @param {string|null} domain - Filter by hostname (e.g. "rwatimes.io"). Null/omit = all records.
  * @param {string} aiKey - Gemini API key
  * @param {Function} onProgress - (pct, msg) progress callback
  * @param {object} opts - { force }
  */
 export async function ingestCrawledDomain(domain, aiKey, onProgress = () => {}, opts = {}) {
-	const hostname = domain.replace(/^https?:\/\//, '').replace(/\/.*$/, '');
-
 	const db = await arangoClient.initArangoClient();
 	const crawlColl = db.collection('crawl');
-	if (!(await crawlColl.exists())) throw new Error(`Collection 'crawl' not found. Run 'ohara crawl' first.`);
+	if (!(await crawlColl.exists())) throw new Error(`Collection 'crawl' not found. Run the crawl command first.`);
 
-	const cursor = await db.query(
-		'FOR doc IN crawl FILTER CONTAINS(doc.url, @hostname) RETURN doc',
-		{ hostname }
-	);
+	let cursor;
+	if (domain) {
+		const hostname = domain.replace(/^https?:\/\//, '').replace(/\/.*$/, '');
+		cursor = await db.query(
+			'FOR doc IN crawl FILTER CONTAINS(doc.url, @hostname) RETURN doc',
+			{ hostname }
+		);
+		addPipelineLog('info', `Querying crawl records for hostname: ${hostname}`);
+	} else {
+		cursor = await db.query('FOR doc IN crawl RETURN doc');
+		addPipelineLog('info', 'Querying all crawl records');
+	}
+
 	const pages = await cursor.all();
 
 	if (pages.length === 0) {
-		addPipelineLog('warn', `No crawled pages for domain: ${hostname}`);
+		addPipelineLog('warn', `No crawled pages found${domain ? ` for domain: ${domain}` : ''}`);
 		return { ingested: 0, failed: 0, skipped: 0, total: 0 };
 	}
 
-	addPipelineLog('info', `Found ${pages.length} crawled page(s) for ${hostname}`);
+	addPipelineLog('info', `Found ${pages.length} crawled page(s) to ingest`);
 
 	const inputDir = 'doc_pipeline/input';
 	fs.mkdirSync(inputDir, { recursive: true });
