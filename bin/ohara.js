@@ -20,6 +20,17 @@ if (process.env.ARANGO_URL) await loadEnvFromDB();
 
 const useRealDB = !!process.env.ARANGO_URL;
 
+function logOharaEnv() {
+	const vars = Object.entries(process.env)
+		.filter(([k]) => k.startsWith('OHARA_'))
+		.sort(([a], [b]) => a.localeCompare(b));
+	if (vars.length === 0) return;
+	console.log(chalk.dim('  OHARA config:'));
+	for (const [k, v] of vars) {
+		console.log(chalk.dim(`    ${k}=${v}`));
+	}
+}
+
 function emit(json, data, humanFn) {
 	if (json) {
 		console.log(JSON.stringify(data, null, 2));
@@ -41,6 +52,7 @@ program
 	.option('--force', 're-ingest even if already exists in the database')
 	.option('--crawl [domain]', 'ingest HTML pages from the crawl collection (optionally filter by domain)')
 	.action(async (filePath, opts) => {
+		if (!opts.json) logOharaEnv();
 		const aiKey = process.env.GEMINI_API_KEY;
 
 		// --- crawl-DB mode ---
@@ -165,6 +177,7 @@ program
 	.option('--raw', 'show flat scored list instead of reconstructed Markdown')
 	.option('--tiers', 'show Principal / Integrity / Explorer tier breakdown instead of flat results')
 	.action(async (text, opts) => {
+		if (!opts.json) logOharaEnv();
 		let retrievalDB;
 		if (useRealDB) {
 			await arangoClient.initArangoClient();
