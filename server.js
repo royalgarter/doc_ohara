@@ -59,6 +59,7 @@ async function startServer() {
 		await arangoClient.createSearchViewIfNotExists().catch(err =>
 			console.warn('[server] Could not create ArangoSearch view:', err.message)
 		);
+		arangoClient.startPeriodicCleanup();
 		retrievalDB = { executeAQL: (q, b) => arangoClient.executeAQL(q, b) };
 	} else {
 		// Simulator shim: executeAQL delegates to dbSim
@@ -395,13 +396,13 @@ async function startServer() {
 	});
 
 	// API: Queue a single document for background ingestion (used by CLI `ohara ingest` and agents)
-	app.post('/api/queue/ingest', (req, res) => {
+	app.post('/api/queue/ingest', async (req, res) => {
 		try {
 			const { filename } = req.body;
 			if (!filename || !fs.existsSync(path.join(INPUT_DIR, filename))) {
 				return res.status(400).json({ success: false, error: `File not staged in input dir: ${filename}` });
 			}
-			const job = ingestionQueue.add('ingestion', { filename });
+			const job = await ingestionQueue.add('ingestion', { filename });
 			res.json({ success: true, job });
 		} catch (err) {
 			res.status(500).json({ success: false, error: err.message });
@@ -409,19 +410,26 @@ async function startServer() {
 	});
 
 	// API: Queue / worker status — optionally filtered by ?status=failed|completed|waiting
-	app.get('/api/queue/jobs', (req, res) => {
-		const { status } = req.query;
-		const jobs = status ? ingestionQueue.list({ status }) : ingestionQueue.list();
-		res.json({ success: true, jobs, stats: ingestionQueue.stats() });
+	app.get('/api/queue/jobs', async (req, res) => {
+		try {
+			const { status } = req.query;
+			const [jobs, stats] = await Promise.all([
+				ingestionQueue.list({ status }),
+				ingestionQueue.stats(),
+			]);
+			res.json({ success: true, jobs, stats });
+		} catch (err) {
+			res.status(500).json({ success: false, error: err.message });
+		}
 	});
 
 	// API: Requeue a failed/completed job (sets status back to waiting, resets attempts, optionally with --force)
-	app.post('/api/queue/jobs/:id/retry', (req, res) => {
+	app.post('/api/queue/jobs/:id/retry', async (req, res) => {
 		try {
-			const job = ingestionQueue.getJob(req.params.id);
+			const job = await ingestionQueue.getJob(req.params.id);
 			if (!job) return res.status(404).json({ success: false, error: 'Job not found' });
 			const force = req.body?.force ?? false;
-			ingestionQueue.update(job.id, {
+			await ingestionQueue.update(job.id, {
 				status: 'waiting',
 				attempts: 0,
 				error: null,
@@ -430,16 +438,16 @@ async function startServer() {
 				progressMessage: '',
 				data: { ...job.data, force },
 			});
-			res.json({ success: true, job: ingestionQueue.getJob(job.id) });
+			res.json({ success: true, job: await ingestionQueue.getJob(job.id) });
 		} catch (err) {
 			res.status(500).json({ success: false, error: err.message });
 		}
 	});
 
 	// API: Delete a job record from the queue
-	app.delete('/api/queue/jobs/:id', (req, res) => {
+	app.delete('/api/queue/jobs/:id', async (req, res) => {
 		try {
-			const removed = ingestionQueue.remove(req.params.id);
+			const removed = await ingestionQueue.remove(req.params.id);
 			if (!removed) return res.status(404).json({ success: false, error: 'Job not found' });
 			res.json({ success: true });
 		} catch (err) {
@@ -461,7 +469,7 @@ async function startServer() {
 
 	// API: Generates a system-prompt snippet summarizing current graph state for Claude
 	app.get('/api/agent/system-prompt', async (req, res) => {
-		const stats = ingestionQueue.stats();
+		const stats = await ingestionQueue.stats();
 		let counts;
 		if (process.env.ARANGO_URL) {
 			counts = await arangoClient.getStats().catch(() => null);

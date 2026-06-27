@@ -30,7 +30,7 @@ export async function initArangoClient() {
 	if (username) db.useBasicAuth(username, password);
 
 	// ensure collections exist
-	const docCollections = ['documents', 'sections', 'paragraphs', 'tables', 'llm_cache', 'entities'];
+	const docCollections = ['documents', 'sections', 'paragraphs', 'tables', 'llm_cache', 'entities', 'jobs'];
 	for (const name of docCollections) {
 		const coll = db.collection(name);
 		const exists = await coll.exists().catch(() => false);
@@ -81,6 +81,8 @@ export async function initArangoClient() {
 		db.collection('entities').ensureIndex({ type: 'persistent', fields: ['norm_key'], name: 'idx_entities_norm_key' }).catch(() => {}),
 		// array index on document_ids — backs the /api/graph entity-scoping filter
 		db.collection('entities').ensureIndex({ type: 'persistent', fields: ['document_ids[*]'], name: 'idx_entities_document_ids' }).catch(() => {}),
+		// jobs: queue + status + createdAt for claimNext and list queries
+		db.collection('jobs').ensureIndex({ type: 'persistent', fields: ['queue', 'status', 'createdAt'], name: 'idx_jobs_queue_status_created' }).catch(() => {}),
 	]).then().catch(() => {});
 
 	initialized = true;
@@ -295,4 +297,87 @@ export async function createSearchViewIfNotExists() {
 export async function close() {
 	db = null;
 	initialized = false;
+}
+
+// Remove orphaned child nodes (no parent document) and dangling edges (missing _from/_to node).
+// Returns counts of removed records.
+export async function cleanOrphans() {
+	if (!initialized) await initArangoClient();
+
+	const [sections, paragraphs, tables] = await Promise.all([
+		db.query(`
+			LET docIds = (FOR d IN documents RETURN d._id)
+			FOR s IN sections
+				FILTER s.document_id NOT IN (FOR d IN documents RETURN d._key)
+				REMOVE s IN sections
+				RETURN 1
+		`).then(c => c.all()),
+		db.query(`
+			FOR p IN paragraphs
+				FILTER p.document_id NOT IN (FOR d IN documents RETURN d._key)
+				REMOVE p IN paragraphs
+				RETURN 1
+		`).then(c => c.all()),
+		db.query(`
+			FOR t IN tables
+				FILTER t.document_id NOT IN (FOR d IN documents RETURN d._key)
+				REMOVE t IN tables
+				RETURN 1
+		`).then(c => c.all()),
+	]);
+
+	// Purge completed/failed jobs older than 7 days
+	const jobs = await db.query(`
+		LET cutoff = DATE_ISO8601(DATE_NOW() - 7 * 24 * 60 * 60 * 1000)
+		FOR j IN jobs
+			FILTER j.status IN ['completed', 'failed'] AND j.updatedAt < cutoff
+			REMOVE j IN jobs
+			RETURN 1
+	`).then(c => c.all());
+
+	// Collect all valid node _ids
+	const edges = await db.query(`
+		LET validIds = UNION(
+			(FOR d IN documents RETURN d._id),
+			(FOR s IN sections  RETURN s._id),
+			(FOR p IN paragraphs RETURN p._id),
+			(FOR t IN tables     RETURN t._id)
+		)
+		FOR e IN edges
+			FILTER e._from NOT IN validIds OR e._to NOT IN validIds
+			REMOVE e IN edges
+			RETURN 1
+	`).then(c => c.all());
+
+	return {
+		sections: sections.length,
+		paragraphs: paragraphs.length,
+		tables: tables.length,
+		edges: edges.length,
+		jobs: jobs.length,
+	};
+}
+
+let _cleanupTimer = null;
+
+// Start periodic orphan cleanup. intervalMs default 1 hour.
+export function startPeriodicCleanup(intervalMs = 60 * 60 * 1000) {
+	if (_cleanupTimer) return;
+	_cleanupTimer = setInterval(async () => {
+		try {
+			const removed = await cleanOrphans();
+			const total = Object.values(removed).reduce((a, b) => a + b, 0);
+			if (total > 0) console.log(`[db:cleanup] Removed orphans:`, removed);
+		} catch (err) {
+			console.error('[db:cleanup] Error during cleanup:', err.message);
+		}
+	}, intervalMs);
+	_cleanupTimer.unref?.(); // don't block process exit
+}
+
+export function stopPeriodicCleanup() {
+	if (_cleanupTimer) {
+		clearInterval(_cleanupTimer);
+		_cleanupTimer = null;
+	}
 }

@@ -31,9 +31,9 @@ server.registerTool(
 		fs.copyFileSync(filePath, path.join(INPUT_DIR, filename));
 
 		const queue = getIngestionQueue();
-		const job = queue.add('ingestion', { filename });
+		const job = await queue.add('ingestion', { filename });
 		await runWorkerOnce(process.env.GEMINI_API_KEY);
-		const finished = queue.getJob(job.id);
+		const finished = await queue.getJob(job.id);
 
 		return { content: [{ type: 'text', text: JSON.stringify(finished, null, 2) }] };
 	}

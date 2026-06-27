@@ -126,7 +126,7 @@ program
 		if (localPath !== destPath) fs.copyFileSync(localPath, destPath);
 
 		const queue = getIngestionQueue();
-		const job = queue.add('ingestion', { filename, force: !!opts.force });
+		const job = await queue.add('ingestion', { filename, force: !!opts.force });
 
 		if (!opts.json) {
 			console.log(chalk.cyan(`Queued "${filename}" as job ${job.id}`));
@@ -136,7 +136,7 @@ program
 		const processed = await runWorkerOnce(aiKey);
 		const outcome = processed.find(p => p.jobId === job.id);
 
-		emit(opts.json, { success: !!outcome?.success, job: queue.getJob(job.id) }, () => {
+		emit(opts.json, { success: !!outcome?.success, job: await queue.getJob(job.id) }, () => {
 			if (outcome?.success) {
 				const status = outcome.result?.ingestion_status;
 				const u = outcome.result.llm_usage;
@@ -756,7 +756,7 @@ program
 				edges: state.edges.length,
 			};
 		}
-		const queueStats = getIngestionQueue().stats();
+		const queueStats = await getIngestionQueue().stats();
 		emit(opts.json, { success: true, database: dbStats, queue: queueStats }, () => {
 			console.log(chalk.bold('Database:'), chalk.green('OK'),
 				chalk.dim(`[${dbStats.source}]`),

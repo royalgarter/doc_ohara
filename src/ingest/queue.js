@@ -1,27 +1,10 @@
-// Doc_Ohara: Lightweight disk-persisted job queue (BullMQ-shaped API, no Redis dependency).
-// Per project decision: no external broker; jobs persist to doc_pipeline/collections/job_queue.json
-// so `ohara status` and the Agent Dashboard can inspect queue/worker state across processes.
-import fs from 'node:fs';
-import path from 'node:path';
+// Doc_Ohara: ArangoDB-backed job queue (BullMQ-shaped API).
+// Migrated from file-based (job_queue.json) to ArangoDB 'jobs' collection.
 import { EventEmitter } from 'node:events';
+import { initArangoClient } from '../db/client.js';
 
-const QUEUE_FILE = 'doc_pipeline/collections/job_queue.json';
-
-function loadJobs() {
-	try {
-		if (fs.existsSync(QUEUE_FILE)) {
-			return JSON.parse(fs.readFileSync(QUEUE_FILE, 'utf-8'));
-		}
-	} catch (e) {
-		console.error('[Queue] Failed to read job_queue.json, resetting.', e);
-	}
-	return [];
-}
-
-function saveJobs(jobs) {
-	const dir = path.dirname(QUEUE_FILE);
-	fs.mkdirSync(dir, { recursive: true });
-	fs.writeFileSync(QUEUE_FILE, JSON.stringify(jobs, null, 2), 'utf-8');
+async function getDB() {
+	return initArangoClient();
 }
 
 export class JobQueue extends EventEmitter {
@@ -30,10 +13,10 @@ export class JobQueue extends EventEmitter {
 		this.name = name;
 	}
 
-	add(type, data, options = {}) {
-		const jobs = loadJobs();
+	async add(type, data, options = {}) {
+		const db = await getDB();
 		const job = {
-			id: `job_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+			_key: `job_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
 			queue: this.name,
 			type,
 			data,
@@ -45,62 +28,92 @@ export class JobQueue extends EventEmitter {
 			createdAt: new Date().toISOString(),
 			updatedAt: new Date().toISOString(),
 			result: null,
-			error: null
+			error: null,
 		};
-		jobs.push(job);
-		saveJobs(jobs);
+		const res = await db.collection('jobs').save(job);
+		job.id = res._key;
 		this.emit('added', job);
 		return job;
 	}
 
-	getJob(id) {
-		return loadJobs().find(j => j.id === id) || null;
+	async getJob(id) {
+		const db = await getDB();
+		try {
+			const doc = await db.collection('jobs').document(id);
+			return { ...doc, id: doc._key };
+		} catch {
+			return null;
+		}
 	}
 
-	list({ status } = {}) {
-		const jobs = loadJobs();
-		return status ? jobs.filter(j => j.status === status) : jobs;
+	async list({ status } = {}) {
+		const db = await getDB();
+		const cursor = status
+			? await db.query(
+				`FOR j IN jobs FILTER j.queue == @q AND j.status == @s SORT j.createdAt ASC RETURN j`,
+				{ q: this.name, s: status }
+			)
+			: await db.query(
+				`FOR j IN jobs FILTER j.queue == @q SORT j.createdAt ASC RETURN j`,
+				{ q: this.name }
+			);
+		const docs = await cursor.all();
+		return docs.map(d => ({ ...d, id: d._key }));
 	}
 
-	update(id, patch) {
-		const jobs = loadJobs();
-		const idx = jobs.findIndex(j => j.id === id);
-		if (idx === -1) return null;
-		jobs[idx] = { ...jobs[idx], ...patch, updatedAt: new Date().toISOString() };
-		saveJobs(jobs);
-		this.emit('updated', jobs[idx]);
-		return jobs[idx];
+	async update(id, patch) {
+		const db = await getDB();
+		patch.updatedAt = new Date().toISOString();
+		try {
+			await db.collection('jobs').update(id, patch);
+			const doc = await db.collection('jobs').document(id);
+			const job = { ...doc, id: doc._key };
+			this.emit('updated', job);
+			return job;
+		} catch {
+			return null;
+		}
 	}
 
-	// Atomically claim the next waiting job
-	claimNext() {
-		const jobs = loadJobs();
-		const idx = jobs.findIndex(j => j.status === 'waiting');
-		if (idx === -1) return null;
-		jobs[idx].status = 'active';
-		jobs[idx].updatedAt = new Date().toISOString();
-		saveJobs(jobs);
-		return jobs[idx];
+	// Atomically claim next waiting job via AQL to avoid race conditions.
+	async claimNext() {
+		const db = await getDB();
+		const cursor = await db.query(`
+			FOR j IN jobs
+				FILTER j.queue == @q AND j.status == 'waiting'
+				SORT j.createdAt ASC
+				LIMIT 1
+				UPDATE j WITH { status: 'active', updatedAt: DATE_ISO8601(DATE_NOW()) } IN jobs
+				RETURN NEW
+		`, { q: this.name });
+		const doc = await cursor.next();
+		return doc ? { ...doc, id: doc._key } : null;
 	}
 
-	remove(id) {
-		const jobs = loadJobs();
-		const idx = jobs.findIndex(j => j.id === id);
-		if (idx === -1) return false;
-		jobs.splice(idx, 1);
-		saveJobs(jobs);
-		return true;
+	async remove(id) {
+		const db = await getDB();
+		try {
+			await db.collection('jobs').remove(id);
+			return true;
+		} catch {
+			return false;
+		}
 	}
 
-	stats() {
-		const jobs = loadJobs();
-		return {
-			waiting: jobs.filter(j => j.status === 'waiting').length,
-			active: jobs.filter(j => j.status === 'active').length,
-			completed: jobs.filter(j => j.status === 'completed').length,
-			failed: jobs.filter(j => j.status === 'failed').length,
-			total: jobs.length
-		};
+	async stats() {
+		const db = await getDB();
+		const cursor = await db.query(`
+			FOR j IN jobs FILTER j.queue == @q
+			COLLECT s = j.status WITH COUNT INTO c
+			RETURN { status: s, count: c }
+		`, { q: this.name });
+		const rows = await cursor.all();
+		const out = { waiting: 0, active: 0, completed: 0, failed: 0, total: 0 };
+		for (const { status, count } of rows) {
+			if (status in out) out[status] = count;
+			out.total += count;
+		}
+		return out;
 	}
 }
 
