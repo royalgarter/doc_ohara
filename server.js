@@ -2,6 +2,7 @@ import { loadEnvFromDB } from './src/db/env.js';
 import express from 'express';
 import path from 'node:path';
 import fs from 'node:fs';
+import { GoogleGenAI } from '@google/genai';
 import * as arangoClient from './src/db/client.js';
 import { getArangoDBSimulator } from './src/db/simulator.js';
 import { QuartzExporter } from './src/exporter.js';
@@ -93,14 +94,30 @@ async function startServer() {
 		try {
 			if (process.env.ARANGO_URL) {
 				const db = await arangoClient.initArangoClient();
-				const docs = await db.query(`
-					FOR d IN documents
-					SORT d._key DESC
-					RETURN d
-				`).then(c => c.all());
-				return res.json({ success: true, source: 'arangodb', documents: docs });
+				const limit = Math.min(parseInt(req.query.limit || '50', 10), 200);
+				const offset = parseInt(req.query.offset || '0', 10);
+				const [docs, totalArr, healthArr] = await Promise.all([
+					db.query({
+						query: `FOR d IN documents SORT d._key DESC LIMIT @offset, @limit RETURN d`,
+						bindVars: { offset, limit },
+					}).then(c => c.all()),
+					db.query(`RETURN LENGTH(documents)`).then(c => c.all()),
+					db.query(`
+						RETURN {
+							total: LENGTH(documents),
+							partial: LENGTH(FOR d IN documents FILTER d.ingestion_status == 'partial' RETURN 1),
+							needs_review: LENGTH(FOR d IN documents FILTER d.temporal_needs_review == true RETURN 1),
+							total_entities: LENGTH(entities),
+							total_paragraphs: LENGTH(paragraphs)
+						}
+					`).then(c => c.all()),
+				]);
+				const total = totalArr[0] || 0;
+				const health = healthArr[0] || {};
+				return res.json({ success: true, source: 'arangodb', documents: docs, total, offset, limit, health });
 			}
-			res.json({ success: true, source: 'simulator', documents: dbSim.getState().documents || [] });
+			const all = dbSim.getState().documents || [];
+			res.json({ success: true, source: 'simulator', documents: all, total: all.length, offset: 0, limit: all.length });
 		} catch (err) {
 			res.status(500).json({ success: false, error: err.message });
 		}
@@ -473,6 +490,54 @@ async function startServer() {
 			const removed = await ingestionQueue.remove(req.params.id);
 			if (!removed) return res.status(404).json({ success: false, error: 'Job not found' });
 			res.json({ success: true });
+		} catch (err) {
+			res.status(500).json({ success: false, error: err.message });
+		}
+	});
+
+	// API: Answer synthesis — run retrieval then Gemini-generate a grounded answer with citations
+	app.post('/api/retrieval/answer', async (req, res) => {
+		try {
+			const { query, sessionHistory, cor, agent, reasoningRag, selfRagVerify } = req.body;
+			if (!query) return res.status(400).json({ success: false, error: 'query is required' });
+			const apiKey = process.env.GEMINI_API_KEY;
+			if (!apiKey) return res.status(500).json({ success: false, error: 'GEMINI_API_KEY not set' });
+
+			const queryFn = agent
+				? retrievalEngine.queryAgent.bind(retrievalEngine)
+				: cor
+					? retrievalEngine.queryCoR.bind(retrievalEngine)
+					: retrievalEngine.query.bind(retrievalEngine);
+			const result = await queryFn(query, { sessionHistory, reasoningRag, selfRagVerify });
+
+			const principalNodes = (result.tiers?.principal?.length ? result.tiers.principal : result.results || []).slice(0, 6);
+			if (!principalNodes.length) {
+				return res.json({ success: true, answer: 'No relevant documents found.', citations: [], retrieval: result });
+			}
+
+			const context = principalNodes.map((r, i) => {
+				const n = r.node || r;
+				const src = n.document_id || n._id || '';
+				const content = (n.content || n.markdown_representation || '').slice(0, 600);
+				return `[${i + 1}] (${src})\n${content}`;
+			}).join('\n\n');
+
+			const prompt = `You are an expert assistant answering questions from a document knowledge base.\n\nQuestion: ${query}\n\nRelevant passages:\n${context}\n\nAnswer the question using only the passages above. Cite sources with [n] inline. Be concise. If passages don't answer the question, say so.`;
+
+			const ai = new GoogleGenAI({ apiKey });
+			const geminiRes = await ai.models.generateContent({
+				model: 'gemini-2.5-flash-lite',
+				contents: [{ role: 'user', parts: [{ text: prompt }] }],
+				config: { temperature: 0.2 },
+			});
+			const answer = geminiRes.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '';
+
+			const citations = principalNodes.map((r, i) => {
+				const n = r.node || r;
+				return { ref: i + 1, document_id: n.document_id || '', node_id: n._id || '', title: n.title || '', score: r.score };
+			});
+
+			res.json({ success: true, answer, citations, retrieval: result });
 		} catch (err) {
 			res.status(500).json({ success: false, error: err.message });
 		}

@@ -312,6 +312,20 @@
 						<input type="checkbox" x-model="agentMode" :disabled="corMode" class="accent-purple-500 w-3 h-3" />
 						<span class="text-xs cl-t4">agent</span>
 					</label>
+					<label class="flex items-center gap-1 cursor-pointer flex-shrink-0" title="Answer mode: synthesize a grounded answer from retrieved passages">
+						<input type="checkbox" x-model="answerMode" class="accent-green-600 w-3 h-3" />
+						<span class="text-xs cl-t4">answer</span>
+					</label>
+				</div>
+				<!-- Answer synthesis result -->
+				<div x-show="answerResult" class="rounded border border-green-800 bg-green-950 p-2 text-xs space-y-1 flex-shrink-0">
+					<div class="text-green-400 font-medium text-xs uppercase tracking-wide">Answer</div>
+					<div class="cl-t1 leading-relaxed whitespace-pre-wrap" x-text="answerResult && answerResult.answer"></div>
+					<div x-show="answerResult && answerResult.citations && answerResult.citations.length" class="cl-t5 pt-1 space-y-0.5">
+						<template x-for="c in (answerResult && answerResult.citations || [])" :key="c.ref">
+							<div>[<span x-text="c.ref"></span>] <span class="cl-t4" x-text="c.document_id || c.node_id"></span> <span class="text-green-600" x-text="c.score ? ('(' + c.score.toFixed(3) + ')') : ''"></span></div>
+						</template>
+					</div>
 				</div>
 				<!-- Results tier tabs -->
 				<div x-show="queryResults" class="flex gap-1 flex-shrink-0">
@@ -566,9 +580,20 @@
 
 			<!-- DOCS tab -->
 			<div x-show="tab === 'docs'" x-init="if(tab==='docs') loadDocs()" class="flex flex-col h-full overflow-hidden p-3 gap-3">
-				<div class="text-sm font-bold cl-t3 uppercase tracking-widest">Documents — Temporal Metadata</div>
-				<div class="flex gap-2">
+				<div class="text-sm font-bold cl-t3 uppercase tracking-widest">Documents — Ingest Health</div>
+				<!-- Health summary banner -->
+				<div x-show="docsHealth" class="rounded border cl-b0 cl-bg-1 px-2 py-1.5 text-xs flex gap-3 flex-wrap cl-t4">
+					<span>docs: <span class="cl-t1 font-medium" x-text="docsHealth && docsHealth.total || 0"></span></span>
+					<span>paragraphs: <span class="cl-t1 font-medium" x-text="docsHealth && docsHealth.total_paragraphs || 0"></span></span>
+					<span>entities: <span class="cl-t1 font-medium" x-text="docsHealth && docsHealth.total_entities || 0"></span></span>
+					<span x-show="docsHealth && docsHealth.partial > 0" class="text-amber-500">⚠ partial: <span x-text="docsHealth && docsHealth.partial"></span></span>
+					<span x-show="docsHealth && docsHealth.needs_review > 0" class="text-amber-400">⚑ review: <span x-text="docsHealth && docsHealth.needs_review"></span></span>
+				</div>
+				<div class="flex gap-2 items-center">
 					<button @click="loadDocs()" class="cl-btn-gh text-xs py-1 px-2 rounded border transition">↺ Refresh</button>
+					<span class="cl-t5 text-xs" x-show="docsTotal > docsAdminList.length" x-text="'Showing ' + docsAdminList.length + ' / ' + docsTotal"></span>
+					<button x-show="docsTotal > docsAdminList.length" @click="loadMoreDocs()"
+						class="cl-btn-gh text-xs py-1 px-2 rounded border transition">Load more</button>
 				</div>
 				<div class="flex-1 overflow-y-auto space-y-2" x-show="docsAdminList.length > 0">
 					<template x-for="d in docsAdminList" :key="d._key">
@@ -581,6 +606,10 @@
 									title="Temporal metadata auto-extracted — review recommended">⚑ review</span>
 							</div>
 							<div class="cl-t4 flex gap-4 flex-wrap">
+								<span x-show="d.ingestion_status && d.ingestion_status !== 'complete'"
+									class="text-amber-500" x-text="d.ingestion_status"></span>
+								<span x-show="d.entity_count != null">entities: <span class="cl-t2" x-text="d.entity_count"></span></span>
+								<span x-show="d.total_chunks != null">chunks: <span class="cl-t2" x-text="(d.completed_chunks || 0) + '/' + d.total_chunks"></span></span>
 								<span>decay: <span class="cl-t2" x-text="d.decay_class || '—'"></span></span>
 								<span>confidence: <span class="cl-t2" x-text="d.temporal_confidence != null ? d.temporal_confidence.toFixed(2) : '—'"></span></span>
 							</div>
@@ -795,6 +824,8 @@
 			resultTab: 'all',
 			corMode: false,
 			agentMode: false,
+			answerMode: false,
+			answerResult: null,
 
 			jobs: [],
 			jobStats: { waiting: 0, active: 0, completed: 0, failed: 0, total: 0 },
@@ -804,6 +835,8 @@
 			wikiMessage: '',
 
 			docsAdminList: [],
+			docsTotal: 0,
+			docsHealth: null,
 
 			async init() {
 				await Promise.all([this.loadDocuments(), this.loadInputFiles(), this.loadJobs()]);
@@ -1066,24 +1099,33 @@
 				if (!q) return;
 				this.queryLoading = true;
 				this.queryResults = null;
+				this.answerResult = null;
 				this.feedbackSent = {};
 				this.resultTab = 'all';
 				this.queryHash = btoa(q).replace(/[^a-z0-9]/gi, '').slice(0, 32);
+				const endpoint = this.answerMode ? '/api/retrieval/answer' : '/api/retrieval/query';
 				try {
-					const r = await fetch('/api/retrieval/query', {
+					const r = await fetch(endpoint, {
 						method: 'POST',
 						headers: { 'Content-Type': 'application/json' },
 						body: JSON.stringify({ query: q, sessionHistory: this.sessionHistory, cor: this.corMode, agent: this.agentMode }),
 					});
 					const d = await r.json();
 					if (d.success) {
-						this.queryResults = d;
+						if (this.answerMode) {
+							this.answerResult = d;
+							// also populate retrieval results from answer response
+							if (d.retrieval) this.queryResults = d.retrieval;
+						} else {
+							this.queryResults = d;
+						}
 						// Auto-switch to principal tab if tiers returned results
-						if (d.tiers && d.tiers.principal && d.tiers.principal.length) {
+						const ret = this.answerMode ? (d.retrieval || d) : d;
+						if (ret.tiers && ret.tiers.principal && ret.tiers.principal.length) {
 							this.resultTab = 'principal';
 						}
 						// Accumulate conversation history for Conversational RAG
-						const topContent = (d.shallowResults || [])[0]?.node?.content || '';
+						const topContent = (ret.shallowResults || [])[0]?.node?.content || d.answer || '';
 						this.sessionHistory.push({ role: 'user', content: q });
 						if (topContent) this.sessionHistory.push({ role: 'assistant', content: topContent.slice(0, 500) });
 						// Keep last 6 turns (3 Q&A pairs = OHARA_SESSION_HISTORY_LIMIT=3)
@@ -1106,10 +1148,8 @@
 				} catch(e) { delete this.feedbackSent[key]; }
 			},
 
-			async loadDocs() {
-			try {
-				const d = await fetch('/api/documents').then(r => r.json());
-				this.docsAdminList = (d.documents || []).map(doc => ({
+			_mapDoc(doc) {
+				return {
 					_key: doc._key,
 					title: doc.title,
 					published_date: doc.published_date,
@@ -1117,9 +1157,28 @@
 					effective_decay_class: doc.effective_decay_class,
 					temporal_confidence: doc.temporal_confidence,
 					temporal_needs_review: doc.temporal_needs_review,
-				}));
-			} catch(e) { console.error('loadDocs failed', e); }
-		},
+					ingestion_status: doc.ingestion_status,
+					entity_count: doc.entity_count,
+					total_chunks: doc.total_chunks,
+					completed_chunks: doc.completed_chunks,
+				};
+			},
+
+			async loadDocs() {
+				try {
+					const d = await fetch('/api/documents?limit=50&offset=0').then(r => r.json());
+					this.docsAdminList = (d.documents || []).map(doc => this._mapDoc(doc));
+					this.docsTotal = d.total || 0;
+					this.docsHealth = d.health || null;
+				} catch(e) { console.error('loadDocs failed', e); }
+			},
+
+			async loadMoreDocs() {
+				try {
+					const d = await fetch(`/api/documents?limit=50&offset=${this.docsAdminList.length}`).then(r => r.json());
+					this.docsAdminList.push(...(d.documents || []).map(doc => this._mapDoc(doc)));
+				} catch(e) { console.error('loadMoreDocs failed', e); }
+			},
 
 		async patchDoc(key, patch) {
 			try {
