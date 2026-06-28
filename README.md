@@ -300,6 +300,9 @@ Results carry `agent_tool` tag showing which iteration surfaced each node. The U
 CLI: `node bin/ohara.js query "<text>" --agent`.
 API: `POST /api/retrieval/query` with `{ agent: true }` (takes precedence over `cor`).
 
+### Answer Synthesis
+`POST /api/retrieval/answer` runs retrieval (supporting `cor`, `agent`, `sessionHistory`, `selfRagVerify`, `reasoningRag` params) then passes the top 6 Principal-tier nodes as context to Gemini (`gemini-2.5-flash-lite`, temperature 0.2) with an instruction to cite sources with `[n]` inline. Returns `{ answer, citations: [{ref, document_id, node_id, title, score}], retrieval }`. The `retrieval` field contains the full retrieval response for inspection. UI: "answer" checkbox routes the query to this endpoint and shows a green answer panel with citation list above the result tabs.
+
 ---
 
 ## Entity System (`src/entities.js`)
@@ -538,9 +541,12 @@ All endpoints are served by `server.js`.
 
 | Method | Path | Purpose |
 |---|---|---|
-| `GET` | `/api/graph` | Full graph state (documents, sections, paragraphs, tables, edges) |
+| `GET` | `/api/graph` | Structural graph for selected docs (filtered by `?docKeys=k1,k2`) |
 | `GET` | `/api/graph/node/:collection/:key/neighbors` | Lazy-load a node's neighbors |
+| `GET` | `/api/documents` | Paginated document list (`?limit=50&offset=0`, max 200/page); returns `{documents, total, offset, limit, health}` where `health` aggregates total paragraphs, entities, partial-ingest count, needs-review count |
+| `PATCH` | `/api/documents/:key` | Update temporal metadata (`decay_class`, `effective_decay_class`, `published_date`, `temporal_needs_review`) |
 | `POST` | `/api/retrieval/query` | Run retrieval; `agent:true` → `queryAgent()`, `cor:true` → `queryCoR()`, else `query()`; accepts `sessionHistory`, `selfRagVerify`, `reasoningRag` |
+| `POST` | `/api/retrieval/answer` | Retrieval + Gemini answer synthesis; returns `{answer, citations[], retrieval}`; supports same params as `/query` |
 | `POST` | `/api/retrieval/feedback` | Store REFEED RAG feedback signal (`query_hash`, `node_id`, `result_rank`, `signal`) |
 | `GET` | `/api/retrieval/context/:nodeId` | Get context for a specific node |
 | `POST` | `/api/pipeline/upload` | Upload a file for ingestion |
