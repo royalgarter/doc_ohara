@@ -12,7 +12,7 @@ Doc Ohara is a document transformation and retrieval engine that converts unstru
 flowchart TD
     SRC["📄 PDF / EPUB / DOCX / MD"]
 
-    subgraph INGEST["① Ingest Pipeline  —  src/ingest/pipeline.js"]
+    subgraph INGEST["① Ingest Pipeline  —  src/ingest/ingest.js"]
         direction TB
         I1["Preflight\nvalidate API keys + lit CLI"]
         I2["Dedup\nSHA-256 hash → skip if seen"]
@@ -138,7 +138,7 @@ flowchart TD
     ENRICH --> DONE["✅ Document ingested\nready for retrieval"]
 ```
 
-### Stages (`src/ingest/pipeline.js`)
+### Stages (`src/ingest/ingest.js`)
 
 1. **Preflight** — validates `GEMINI_API_KEY`, `ARANGO_URL`, and the `lit` CLI (LiteParse).
 2. **Dedup** — SHA-256 hashes the file; skips if already ingested (override with `--force`).
@@ -462,6 +462,7 @@ npm run ohara:query                                         # sample query
 node bin/ohara.js query "proof of work consensus"          # custom query
 node bin/ohara.js query "topic" --tiers --verbose          # show Principal/Integrity/Explorer tiers
 node bin/ohara.js query "topic" --cor                      # Chain-of-Retrieval iterative mode
+node bin/ohara.js query "topic" --agent                    # Agentic RAG (Gemini-driven tool dispatch)
 ```
 
 ### 6. Export to wiki
@@ -474,6 +475,199 @@ npm run ohara:export:json   # Raw JSON dump
 ```bash
 node src/ingest/entity_dedup.js
 ```
+
+---
+
+## How To Use
+
+This section walks through the main workflows end-to-end.
+
+### First-Time Setup
+
+```bash
+# 1. Copy config
+cp .env.example .env
+
+# 2. Required: add Gemini API key and ArangoDB connection
+#    GEMINI_API_KEY=your_key
+#    ARANGO_URL=http://root:password@localhost:8529/ohara
+#    LITEPARSE_CLI_PATH=/path/to/lit     # for PDF/EPUB/DOCX parsing
+#
+#    Leave ARANGO_URL blank to run with the in-memory simulator (no ArangoDB needed).
+
+# 3. Initialise ArangoDB collections and ArangoSearch view
+node scripts/db-init.js
+
+# 4. Start the server
+npm run dev
+# → Dashboard at http://localhost:3000
+```
+
+---
+
+### Ingesting Documents
+
+**Dashboard (recommended for one-off files)**
+
+1. Open the **Ingest** tab.
+2. Upload a file (PDF, EPUB, DOCX, or plain `.md`).
+3. Click **Run Pipeline**. Progress logs stream in real time.
+4. Once complete, the document appears in the **Documents** tab.
+
+**CLI (batch / scripted)**
+
+```bash
+# Single file
+node bin/ohara.js ingest path/to/document.pdf
+
+# Force re-ingest (skips SHA-256 dedup check)
+node bin/ohara.js ingest path/to/document.pdf --force
+
+# Background queue (BullMQ worker must be running)
+node src/ingest/worker.js &           # start background worker
+node bin/ohara.js ingest file.pdf     # enqueues the job
+```
+
+**Post-ingest maintenance (run once after a batch)**
+
+```bash
+# Merge duplicate entity nodes across documents
+node src/ingest/entity_dedup.js
+
+# Remove opaque-identifier noise entities (dry-run first)
+node scripts/clean_noise_entities.js --dry-run
+node scripts/clean_noise_entities.js
+```
+
+**Auto-dedup on every ingest** — set `OHARA_AUTO_ENTITY_DEDUP=true` in `.env`.
+
+---
+
+### Querying Documents
+
+#### Dashboard
+
+1. Open the **Query** tab and type your question.
+2. Press Enter or click **Search**.
+3. Results appear in three tabs:
+   - **All** — full ranked list, each card shows score, SUMO tags, entity slugs, and phase badges.
+   - **★ Principal** — compact core-answer set: nodes corroborated by ≥2 retrieval phases.
+   - **✓ Integrity** — Principal plus structurally/cross-doc verified neighbours with provenance trail.
+   - **◎ Explorer** — frontier candidates one hop beyond Integrity; use these as jumping-off points, not final answers.
+4. Thumbs up/down on any card posts feedback (used by REFEED RAG weight tuning).
+
+**Query mode toggles (checkboxes below the search bar)**
+
+| Toggle | Effect |
+|---|---|
+| `cor` | Chain-of-Retrieval: runs retrieval iteratively, chasing Explorer frontier signals. Good for deep multi-hop questions spanning 3+ documents. |
+| `agent` | Agentic RAG: Gemini picks which retrieval tool to use each iteration (`bm25 → entity_pivot → cross_doc → structural`). Shown as a purple trace badge: `bm25 +8 → entity_pivot +3`. Takes precedence over `cor`. |
+| `answer` | Answer Synthesis: routes to `/api/retrieval/answer`, which retrieves then generates a Gemini-grounded answer with inline `[n]` citations. Green answer panel appears above results. |
+
+**Conversational context** — after each query, the turn is accumulated automatically. A turn counter + clear button appear when history is active. The last 3 Q&A pairs are sent with every subsequent query so Gemini resolves anaphora ("what about its governance?") correctly. Clear history to start fresh.
+
+#### CLI
+
+```bash
+# Basic query
+node bin/ohara.js query "proof of work consensus"
+
+# Show tier breakdown (Principal / Integrity / Explorer)
+node bin/ohara.js query "topic" --tiers
+
+# Verbose: include entity hints, SUMO tags, phase scores
+node bin/ohara.js query "topic" --tiers --verbose
+
+# Chain-of-Retrieval (multi-hop)
+node bin/ohara.js query "influence of Keynes on post-war policy" --cor
+
+# Agentic RAG (Gemini-guided tool dispatch)
+node bin/ohara.js query "cross-document comparison of monetary theory" --agent
+```
+
+---
+
+### Advanced RAG Features
+
+All features below are off by default (opt-in via `.env` or per-request).
+
+**Self-RAG** — Gemini checks each Principal node for actual query responsiveness after tier classification. Non-responsive nodes are removed.
+```
+OHARA_SELF_RAG_VERIFY=true
+```
+
+**Reasoning RAG** — After BM25, Gemini generates 1–2 sub-queries targeting gaps in the initial results. Each sub-query runs BM25 independently; new nodes are merged before SUMO expansion.
+```
+OHARA_REASONING_RAG=true
+OHARA_REASONING_SUBQUERY_LIMIT=2
+```
+
+**Speculative RAG** — After each query, background pre-warm calls fire on the top Explorer frontier nodes so likely follow-up queries hit cache instead of running the full pipeline.
+```
+OHARA_SPECULATIVE_RAG=true
+OHARA_SPECULATIVE_LIMIT=3
+```
+
+**Corrective RAG** — On by default. Structural traversal nodes with zero SUMO tag overlap are dropped before fusion (structural proximity ≠ semantic relevance). Disable with `OHARA_CORRECTIVE_STRUCT=false`.
+
+**Temporal scoring** — Adds an exponential decay contribution to each fused node based on `published_date` and `decay_class`. Protected by four guards: no temporal intent in query → skipped; Principal tier → immune; high BM25 score → immune; EVERGREEN class → near-zero decay.
+```
+OHARA_TEMPORAL_WEIGHT=0.2    # 0 = disabled
+```
+
+---
+
+### Tuning Retrieval Weights (REFEED RAG)
+
+After accumulating thumbs-up/down feedback from the dashboard:
+
+```bash
+# Preview suggested weight adjustments
+node scripts/tune_weights.js
+
+# Apply suggestions to .env in-place
+node scripts/tune_weights.js --apply
+```
+
+The script reads the `feedback` ArangoDB collection, computes per-rank accuracy (positive / total), and suggests `OHARA_*_WEIGHT` values. Restart the server after applying.
+
+---
+
+### Analytics Dashboard
+
+Click the **◎ Analytics** tab to see:
+- **Corpus summary** — total documents, paragraphs, entities, and feedback signals.
+- **Accuracy by rank** — green bar chart showing positive-feedback rate at each result rank (rank 1 = top result). High accuracy at rank 1 means retrieval is well-calibrated.
+- **Top-rated nodes** — the 10 nodes most frequently thumbed-up across all queries; useful for identifying canonical reference passages.
+
+Refresh the tab at any time with the **Refresh** button.
+
+---
+
+### Exporting to a Wiki
+
+```bash
+npm run ohara:export        # Quartz-compatible Markdown → wiki/
+npm run ohara:export:json   # Raw JSON dump → doc_pipeline/collections/export.json
+```
+
+The `wiki/` directory is ready to drop into a [Quartz](https://quartz.jzhao.xyz/) or Obsidian vault. Each entity gets its own page with backlinks to every paragraph that mentions it; each document gets a landing page with a TOC.
+
+---
+
+### Backfilling Vector Embeddings
+
+If you enable `OHARA_EMBED_PARAGRAPHS=true` for future ingests but have existing paragraphs without vectors:
+
+```bash
+# Preview what would be backfilled
+node scripts/backfill_embeddings.js --dry-run
+
+# Run backfill (requires GEMINI_API_KEY + ArangoDB connection)
+node scripts/backfill_embeddings.js
+```
+
+Then create the ArangoDB vector index (ArangoDB 3.12 Enterprise required) and restart the server. Results from Phase 1d (vector ANN) will appear in retrieval.
 
 ---
 
@@ -495,7 +689,7 @@ node src/ingest/entity_dedup.js
 │   │   ├── simulator.js      # In-memory ArangoDB simulator with AQL support
 │   │   └── seed.js           # Sample graph seed data
 │   └── ingest/
-│       ├── pipeline.js       # Core ingestion pipeline
+│       ├── ingest.js         # Core ingestion pipeline
 │       ├── worker.js         # BullMQ worker
 │       ├── queue.js          # Job queue management
 │       ├── chunker.js        # Markdown chunker

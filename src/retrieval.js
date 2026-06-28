@@ -1102,7 +1102,7 @@ export class RetrievalEngine {
 			let strategyRaw = readCacheSync(strategyKey);
 			if (!strategyRaw) {
 				try {
-					const ai = new GoogleGenAI({ apiKey: options.geminiApiKey || process.env.GEMINI_API_KEY });
+					const ai = this._getAI();
 					const prompt = [
 						AGENT_STRATEGY_PROMPT,
 						`\nQuery: ${rawInput}`,
@@ -1149,13 +1149,16 @@ export class RetrievalEngine {
 			}
 		}
 
-		const weights = { ...w(), ...(options.crossDocWeight != null ? { crossDoc: options.crossDocWeight } : {}) };
 		const allResults = [...merged.values()].sort((a, b) => b.score - a.score).slice(0, limit);
+		const crossDocFromMerged = allResults.filter(r => r.agent_tool === 'cross_doc' || r.sources?.includes('cross_doc_edge'));
+		const seenAgentIds = new Set(allResults.map(r => r.node?._id).filter(Boolean));
+		const tiers = await this._classifyTiers(allResults, processedQuery, crossDocFromMerged, 2, seenAgentIds, options);
 
 		return {
 			processedQuery,
 			results: allResults,
 			shallowResults: allResults,
+			tiers,
 			agent_tool_history: toolHistory,
 			agent_trace: agentTrace,
 		};
@@ -1169,9 +1172,13 @@ export class RetrievalEngine {
 		const merged = new Map(); // _id → fused entry (keep max score)
 		let currentQuery = rawInput;
 		let prevTopScore = 0;
+		let firstProcessedQuery = null;
+		let lastTiers = null;
 
 		for (let iter = 0; iter < maxIter; iter++) {
 			const result = await this.query(currentQuery, options);
+			if (iter === 0) firstProcessedQuery = result.processedQuery;
+			lastTiers = result.tiers;
 
 			// Merge results (dedup by _id, keep max score)
 			for (const entry of result.results || []) {
@@ -1202,9 +1209,10 @@ export class RetrievalEngine {
 
 		const allResults = [...merged.values()].sort((a, b) => b.score - a.score);
 		return {
-			processedQuery: { raw: rawInput, cor: true, iterations: maxIter },
+			processedQuery: { ...(firstProcessedQuery || { raw: rawInput }), cor: true, iterations: maxIter },
 			results: allResults,
 			shallowResults: allResults,
+			tiers: lastTiers || { principal: [], integrity: [], explorer: { frontier: [], stopped_reason: 'no_data' } },
 			cor_iter_count: maxIter,
 		};
 	}
