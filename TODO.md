@@ -270,3 +270,56 @@ TODO — 2026-06-27: Next Improvements
 - [x] `server.js` — `agent: true` body param routes to `queryAgent()` (takes precedence over `cor`)
 - [x] `index.html` — "agent" checkbox (mutually exclusive with "deep"); purple badge shows tool dispatch chain (e.g. `bm25 → entity_pivot → cross_doc`)
 - [x] `.env.example` — `OHARA_AGENT_MAX_ITER=4`
+
+---
+
+TODO — 2026-06-28: Next Improvements
+
+### #1 — Re-ranker / Cross-Encoder Pass · Medium priority · ~40 lines
+> Improve Principal-tier precision beyond additive weighted sum
+
+Current scoring is weighted sum; final Principal ordering is noisy. Add optional Gemini batch re-rank call on top-N nodes.
+
+- [ ] `src/retrieval.js` — add `_rerankWithGemini(rawQuery, nodes)`: single Gemini call, pass top 5 Principal nodes + query → returns ranked order; temperature 0, cached; called after `_selfRagFilter()` when enabled
+- [ ] `prompts/rerank.md` — prompt: given query + N passages (numbered), output `{ranked: [1,3,2,...]}` order by relevance; no explanation
+- [ ] `server.js` — accept `rerank: true` in POST `/api/retrieval/query`; pass to `query()` options
+- [ ] `.env.example` — `OHARA_RERANK=false`, `OHARA_RERANK_TOP_N=5`
+
+### #2 — Vector Index Activation · High priority (infra dep) · config only
+> Enable `_phase1dVector()` — currently returns empty without ArangoDB Enterprise
+
+- [ ] Requires ArangoDB 3.12 Enterprise for `arangosearch` vector index
+- [ ] `.env` — set `OHARA_EMBED_PARAGRAPHS=true`, tune `OHARA_VECTOR_WEIGHT=0.5`
+- [ ] Run `node scripts/backfill_embeddings.js` to populate `embedding` field on existing paragraphs
+- [ ] `scripts/db-init.js` — add vector index creation step (Enterprise AQL: `CREATE ARANGOSEARCH VIEW`)
+- [ ] Test: `node bin/ohara.js query "topic" --verbose` → results should show `vector` in sources
+
+### #3 — Streaming SSE for Long Queries · Medium priority · ~60 lines
+> CoR and Agentic RAG block 3–8s; stream each iteration result as it arrives
+
+- [ ] `server.js` — add `GET /api/retrieval/stream?query=...` SSE endpoint; for CoR/agent, push each iteration's merged results as `data: {...}\n\n` event; final event carries `done: true`
+- [ ] `index.html` — use `EventSource` when `streamMode` checkbox active; append results incrementally to `queryResults.results` as SSE events arrive; show iteration counter live
+- [ ] `.env.example` — `OHARA_STREAM_CHUNK_DELAY=0` (ms between SSE flushes, 0 = immediate)
+
+### #4 — Agent Iteration Trace UI · Low priority · ~20 lines
+> Surface per-tool result counts in the purple badge tooltip
+
+Currently `agent_tool_history` shows `bm25 → entity_pivot → cross_doc` but no per-tool node counts.
+
+- [ ] `src/retrieval.js` — `queryAgent()`: accumulate `{tool, added}` per iteration into `agent_trace`; return alongside `agent_tool_history`
+- [ ] `index.html` — render `agent_trace` as tooltip or expanded row under purple badge: e.g. `bm25 +8 → entity_pivot +3 → cross_doc +1`
+
+### #5 — Query Analytics Tab · Low priority · ~50 lines
+> Visualise feedback signals, tier distribution, top entities in admin panel
+
+- [ ] `server.js` — add `GET /api/analytics` returning: feedback positive/negative ratio by rank, top 10 queried entities (from feedback `node_id` prefixes), tier hit counts if stored
+- [ ] `index.html` — new sidebar tab "analytics"; bar charts via inline SVG; feedback accuracy by rank, total queries (from sessionHistory length), entity frequency
+- [ ] `src/db/client.js` — optionally add `query_log` collection to record `{query_hash, ts, tier_counts}` per request (opt-in, `OHARA_QUERY_LOG=false`)
+
+### #6 — MCP Server Adapter · Low priority · ~80 lines
+> Expose RetrievalEngine as MCP tool server for Claude Desktop / Cursor
+
+- [ ] `bin/ohara-mcp.js` already exists — check if it wraps retrieval or just stubs
+- [ ] Wire `query`, `answer`, `get_graph_context` tools to real `RetrievalEngine` methods
+- [ ] Test with `claude mcp add ohara node bin/ohara-mcp.js`
+- [ ] `.env.example` — `OHARA_MCP_PORT=3001`
