@@ -612,7 +612,7 @@ export class RetrievalEngine {
 		if (!queryVec) {
 			try {
 				const resp = await ai.models.embedContent({
-					model: 'gemini-embedding-001',
+					model: 'gemini-embedding-2',
 					contents: processedQuery.raw.slice(0, 2000),
 					config: { taskType: 'RETRIEVAL_QUERY', outputDimensionality: 768 },
 				});
