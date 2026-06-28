@@ -612,9 +612,9 @@ export class RetrievalEngine {
 		if (!queryVec) {
 			try {
 				const resp = await ai.models.embedContent({
-					model: 'text-embedding-004',
+					model: 'gemini-embedding-001',
 					contents: processedQuery.raw.slice(0, 2000),
-					config: { taskType: 'RETRIEVAL_QUERY' },
+					config: { taskType: 'RETRIEVAL_QUERY', outputDimensionality: 768 },
 				});
 				queryVec = resp.embeddings?.[0]?.values;
 				if (queryVec) await writeCache(cacheKey, queryVec);
@@ -625,14 +625,13 @@ export class RetrievalEngine {
 		if (!queryVec) return [];
 
 		try {
-			// ArangoDB 3.12 Enterprise: OPTIONS indexHint required for ANN vector search.
-			// APPROX_NEAR_COSINE(doc_field, query_vec) — document field must be first arg.
+			// ArangoDB 3.12 Enterprise: COSINE_SIMILARITY(doc_field, query_vec) DESC via vector index.
 			const rows = await this.db.executeAQL(`
 				FOR p IN paragraphs
-					OPTIONS { indexHint: "idx_para_embedding", forceIndexHint: true }
-					SORT APPROX_NEAR_COSINE(p.embedding, @vec) ASC
+					OPTIONS { indexHint: "idx_para_embedding" }
+					SORT COSINE_SIMILARITY(p.embedding, @vec) DESC
 					LIMIT @limit
-					RETURN { node: p, score: 1 - APPROX_NEAR_COSINE(p.embedding, @vec), source: "vector" }
+					RETURN { node: p, score: COSINE_SIMILARITY(p.embedding, @vec), source: "vector" }
 			`, { vec: queryVec, limit });
 			return rows.filter(r => r.score > 0);
 		} catch (_) {
