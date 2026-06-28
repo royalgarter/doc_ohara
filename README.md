@@ -295,7 +295,7 @@ After Phase 1 BM25, Gemini inspects the top results and generates 1–2 targeted
 2. The chosen retrieval tool runs; new nodes merge into the accumulator (dedup by `_id`, max score wins).
 3. Loop continues until Gemini returns `done`, a tool would repeat, or `OHARA_AGENT_MAX_ITER` (default 4) iterations are reached.
 
-Results carry `agent_tool` tag showing which iteration surfaced each node. The UI shows the dispatch chain as a purple badge (e.g. `bm25 → entity_pivot → cross_doc`).
+Each result carries `agent_tool` tag showing which tool surfaced it. The response includes `agent_trace: [{tool, added}]` (nodes added per iteration) and `agent_tool_history: [...]` (ordered tool list). The UI purple badge shows the full trace inline: `bm25 +8 → entity_pivot +3 → cross_doc +1`; hovering shows the same as a tooltip.
 
 CLI: `node bin/ohara.js query "<text>" --agent`.
 API: `POST /api/retrieval/query` with `{ agent: true }` (takes precedence over `cor`).
@@ -548,6 +548,7 @@ All endpoints are served by `server.js`.
 | `POST` | `/api/retrieval/query` | Run retrieval; `agent:true` → `queryAgent()`, `cor:true` → `queryCoR()`, else `query()`; accepts `sessionHistory`, `selfRagVerify`, `reasoningRag` |
 | `POST` | `/api/retrieval/answer` | Retrieval + Gemini answer synthesis; returns `{answer, citations[], retrieval}`; supports same params as `/query` |
 | `POST` | `/api/retrieval/feedback` | Store REFEED RAG feedback signal (`query_hash`, `node_id`, `result_rank`, `signal`) |
+| `GET` | `/api/analytics` | Feedback accuracy by rank, top 10 positively-rated nodes, corpus totals (docs/paragraphs/entities/feedback); powers the Analytics sidebar tab |
 | `GET` | `/api/retrieval/context/:nodeId` | Get context for a specific node |
 | `POST` | `/api/pipeline/upload` | Upload a file for ingestion |
 | `POST` | `/api/pipeline/run` | Trigger pipeline on uploaded files |
