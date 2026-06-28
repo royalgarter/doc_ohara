@@ -396,7 +396,7 @@ async function startServer() {
 	// API: Multi-phase Hybrid Retrieval (BM25 + SUMO + Entity + Structural)
 	app.post('/api/retrieval/query', async (req, res) => {
 		try {
-			const { query, depth, limit, expandDepth, crossDocLimit, crossDocWeight, selfRagVerify, sessionHistory, cor, agent, reasoningRag } = req.body;
+			const { query, depth, limit, expandDepth, crossDocLimit, crossDocWeight, selfRagVerify, sessionHistory, cor, agent, reasoningRag, rerank } = req.body;
 			if (!query) {
 				return res.status(400).json({ success: false, error: 'Query is required.' });
 			}
@@ -405,7 +405,7 @@ async function startServer() {
 				: cor
 					? retrievalEngine.queryCoR.bind(retrievalEngine)
 					: retrievalEngine.query.bind(retrievalEngine);
-			const result = await queryFn(query, { depth, limit, expandDepth, crossDocLimit, crossDocWeight, selfRagVerify, sessionHistory, reasoningRag });
+			const result = await queryFn(query, { depth, limit, expandDepth, crossDocLimit, crossDocWeight, selfRagVerify, sessionHistory, reasoningRag, rerank });
 			res.json({ success: true, ...result });
 		} catch (err) {
 			res.status(500).json({ success: false, error: err.message });

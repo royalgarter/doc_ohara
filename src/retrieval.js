@@ -29,6 +29,9 @@ const REASONING_SUBQUERY_PROMPT = fs.readFileSync(
 const AGENT_STRATEGY_PROMPT = fs.readFileSync(
 	path.resolve(__dirname, '../prompts/agent_strategy.md'), 'utf8'
 );
+const RERANK_PROMPT = fs.readFileSync(
+	path.resolve(__dirname, '../prompts/rerank.md'), 'utf8'
+);
 
 const STOPWORDS = new Set([
 	'a', 'an', 'the', 'and', 'or', 'of', 'in', 'on', 'to', 'is', 'are', 'how',
@@ -210,6 +213,52 @@ export class RetrievalEngine {
 		}));
 
 		return results.filter(r => r.responsive).map(r => r.entry);
+	}
+
+	// Single Gemini call: reorder nodes by relevance to rawQuery.
+	// Returns nodes in new order; falls back to original order on parse failure.
+	async _rerankWithGemini(rawQuery, nodes) {
+		const ai = this._getAI();
+		if (!ai || nodes.length <= 1) return nodes;
+
+		const topN = parseInt(process.env.OHARA_RERANK_TOP_N || '5', 10);
+		const candidates = nodes.slice(0, topN);
+
+		const passages = candidates.map((r, i) => {
+			const n = r.node || r;
+			const text = (n.content || n.title || '').slice(0, 500);
+			return `[${i + 1}] ${text}`;
+		}).join('\n\n');
+
+		const inputPayload = JSON.stringify({ query: rawQuery.slice(0, 400), passages_count: candidates.length });
+		const key = cacheKeyFor([RERANK_PROMPT, rawQuery.slice(0, 400), passages.slice(0, 1000), GEMINI_MODEL]);
+		const cached = readCacheSync(key);
+
+		let ranked;
+		if (cached) {
+			ranked = cached;
+		} else {
+			try {
+				const prompt = `${RERANK_PROMPT}\n\nQuery: ${rawQuery.slice(0, 400)}\n\nPassages:\n${passages}`;
+				const resp = await ai.models.generateContent({
+					model: GEMINI_MODEL,
+					contents: prompt,
+					config: { serviceTier: 'flex', temperature: 0 },
+				});
+				const raw = (resp.text || '').replace(/^```json\s*/i, '').replace(/```\s*$/, '').trim();
+				const parsed = JSON.parse(raw);
+				ranked = (parsed.ranked || []).filter(n => Number.isInteger(n) && n >= 1 && n <= candidates.length);
+				if (ranked.length === candidates.length) writeCache(key, ranked);
+			} catch (_) {
+				return nodes; // fallback: original order
+			}
+		}
+
+		if (!ranked || ranked.length !== candidates.length) return nodes;
+
+		// Reorder candidates per Gemini ranking; append remaining nodes unchanged
+		const reordered = ranked.map(n => candidates[n - 1]);
+		return [...reordered, ...nodes.slice(topN)];
 	}
 
 	async _generateSubqueries(rawQuery, bm25Results) {
@@ -576,13 +625,14 @@ export class RetrievalEngine {
 		if (!queryVec) return [];
 
 		try {
+			// ArangoDB 3.12 Enterprise: OPTIONS indexHint required for ANN vector search.
+			// APPROX_NEAR_COSINE(doc_field, query_vec) — document field must be first arg.
 			const rows = await this.db.executeAQL(`
 				FOR p IN paragraphs
-					LET dist = APPROX_NEAR_COSINE(@vec, p.embedding)
-					FILTER dist != null
-					SORT dist ASC
+					OPTIONS { indexHint: "idx_para_embedding", forceIndexHint: true }
+					SORT APPROX_NEAR_COSINE(p.embedding, @vec) ASC
 					LIMIT @limit
-					RETURN { node: p, score: 1 - dist, source: "vector" }
+					RETURN { node: p, score: 1 - APPROX_NEAR_COSINE(p.embedding, @vec), source: "vector" }
 			`, { vec: queryVec, limit });
 			return rows.filter(r => r.score > 0);
 		} catch (_) {
@@ -1026,6 +1076,12 @@ export class RetrievalEngine {
 		const selfRagEnabled = options.selfRagVerify ?? (process.env.OHARA_SELF_RAG_VERIFY === 'true');
 		if (selfRagEnabled && tiers.principal?.length) {
 			tiers.principal = await this._selfRagFilter(rawInput, tiers.principal);
+		}
+
+		// Re-ranker: Gemini cross-encoder pass on Principal tier (opt-in)
+		const rerankEnabled = options.rerank ?? (process.env.OHARA_RERANK === 'true');
+		if (rerankEnabled && tiers.principal?.length > 1) {
+			tiers.principal = await this._rerankWithGemini(rawInput, tiers.principal);
 		}
 
 		const response = {
