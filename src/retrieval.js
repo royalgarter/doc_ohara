@@ -1105,6 +1105,7 @@ export class RetrievalEngine {
 		return {
 			processedQuery: { raw: rawInput, cor: true, iterations: maxIter },
 			results: allResults,
+			shallowResults: allResults,
 			cor_iter_count: maxIter,
 		};
 	}
