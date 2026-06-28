@@ -175,6 +175,7 @@ program
 	.option('--raw', 'show flat scored list instead of reconstructed Markdown')
 	.option('--tiers', 'show Principal / Integrity / Explorer tier breakdown instead of flat results')
 	.option('--cor', 'Chain-of-Retrieval: iterative retrieval chasing Explorer frontier')
+	.option('--agent', 'Agentic RAG: Gemini picks retrieval tool each iteration')
 	.action(async (text, opts) => {
 		if (!opts.json) logOharaEnv();
 		let retrievalDB;
@@ -206,9 +207,11 @@ program
 			crossDocLimit: opts.crossDocLimit ? parseInt(opts.crossDocLimit, 10) : undefined,
 			crossDocWeight: opts.crossDocWeight ? parseFloat(opts.crossDocWeight) : undefined,
 		};
-		const result = opts.cor
-			? await engine.queryCoR(text, queryOpts)
-			: await engine.query(text, queryOpts);
+		const result = opts.agent
+			? await engine.queryAgent(text, queryOpts)
+			: opts.cor
+				? await engine.queryCoR(text, queryOpts)
+				: await engine.query(text, queryOpts);
 
 		const markdown = opts.json || opts.raw || opts.tiers ? null : await engine.formatAsMarkdown(result.results || []);
 		const principalMarkdown = opts.tiers && !opts.json

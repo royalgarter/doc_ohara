@@ -26,6 +26,9 @@ const SELF_RAG_VERIFY_PROMPT = fs.readFileSync(
 const REASONING_SUBQUERY_PROMPT = fs.readFileSync(
 	path.resolve(__dirname, '../prompts/reasoning_subquery.md'), 'utf8'
 );
+const AGENT_STRATEGY_PROMPT = fs.readFileSync(
+	path.resolve(__dirname, '../prompts/agent_strategy.md'), 'utf8'
+);
 
 const STOPWORDS = new Set([
 	'a', 'an', 'the', 'and', 'or', 'of', 'in', 'on', 'to', 'is', 'are', 'how',
@@ -1060,6 +1063,97 @@ export class RetrievalEngine {
 	async getDeepContext(targetNodeId, _edgeTypes, options = {}) {
 		const depth = options.depth || 2;
 		return this._phase4Structural(targetNodeId, depth, new Set());
+	}
+
+	// Agentic RAG: Gemini picks retrieval tool each iteration based on what's been found so far
+	async queryAgent(rawInput, options = {}) {
+		const limit = options.limit || parseInt(process.env.OHARA_RESULT_LIMIT || '20', 10);
+		const maxIter = parseInt(process.env.OHARA_AGENT_MAX_ITER || '4', 10);
+		const sessionHistory = Array.isArray(options.sessionHistory) ? options.sessionHistory : [];
+
+		const processedQuery = await this.preprocessInput(rawInput, sessionHistory);
+		const merged = new Map(); // _id → entry
+		const toolHistory = [];
+
+		const _mergeIn = (entries, tag) => {
+			for (const e of entries) {
+				const id = e.node?._id;
+				if (!id) continue;
+				if (!merged.has(id) || merged.get(id).score < e.score) {
+					merged.set(id, { ...e, agent_tool: tag });
+				}
+			}
+		};
+
+		for (let iter = 0; iter < maxIter; iter++) {
+			const foundCount = merged.size;
+			const topSnippets = [...merged.values()]
+				.sort((a, b) => b.score - a.score)
+				.slice(0, 5)
+				.map(e => e.node?.content?.slice(0, 120) || '')
+				.filter(Boolean);
+
+			// Ask Gemini which tool to use next
+			const strategyKey = cacheKeyFor(['agent_strategy', rawInput, toolHistory.join(','), foundCount]);
+			let strategyRaw = readCacheSync(strategyKey);
+			if (!strategyRaw) {
+				try {
+					const ai = new GoogleGenAI({ apiKey: options.geminiApiKey || process.env.GEMINI_API_KEY });
+					const prompt = [
+						AGENT_STRATEGY_PROMPT,
+						`\nQuery: ${rawInput}`,
+						`Found so far (${foundCount} nodes): ${topSnippets.join(' | ') || 'none'}`,
+						`Tools used: ${toolHistory.join(', ') || 'none'}`,
+					].join('\n');
+					const res = await ai.models.generateContent({
+						model: GEMINI_MODEL,
+						contents: [{ role: 'user', parts: [{ text: prompt }] }],
+						config: { temperature: 0, thinkingConfig: { thinkingBudget: 0 } },
+					});
+					strategyRaw = res.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '{"tool":"done","reason":"no response"}';
+					writeCache(strategyKey, strategyRaw);
+				} catch {
+					break;
+				}
+			}
+
+			let strategy;
+			try {
+				const m = strategyRaw.match(/\{[\s\S]*\}/);
+				strategy = JSON.parse(m ? m[0] : strategyRaw);
+			} catch { break; }
+
+			const tool = strategy.tool;
+			if (!tool || tool === 'done' || toolHistory.includes(tool)) break;
+			toolHistory.push(tool);
+
+			const seenIds = new Set(merged.keys());
+
+			if (tool === 'bm25') {
+				const hint = strategy.hint || rawInput;
+				const pq = hint !== rawInput ? { ...processedQuery, keywords: this._tokenize(hint), raw: hint } : processedQuery;
+				_mergeIn(await this._phase1BM25(pq, limit), 'bm25');
+			} else if (tool === 'entity_pivot') {
+				const bm25Base = [...merged.values()].filter(e => e.agent_tool === 'bm25' || e.sources?.includes('bm25'));
+				_mergeIn(await this._phase3EntityPivot(processedQuery, bm25Base.length ? bm25Base : [...merged.values()], seenIds, limit), 'entity_pivot');
+			} else if (tool === 'cross_doc') {
+				const base = [...merged.values()];
+				_mergeIn(await this._phase1cCrossDocEdge(processedQuery, base, seenIds, limit, 1), 'cross_doc');
+			} else if (tool === 'structural') {
+				const topId = [...merged.values()].sort((a, b) => b.score - a.score)[0]?.node?._id;
+				if (topId) _mergeIn(await this._phase4Structural(topId, 2, seenIds), 'structural');
+			}
+		}
+
+		const weights = { ...w(), ...(options.crossDocWeight != null ? { crossDoc: options.crossDocWeight } : {}) };
+		const allResults = [...merged.values()].sort((a, b) => b.score - a.score).slice(0, limit);
+
+		return {
+			processedQuery,
+			results: allResults,
+			shallowResults: allResults,
+			agent_tool_history: toolHistory,
+		};
 	}
 
 	// Chain-of-Retrieval: iteratively chase Explorer frontier to surface deep multi-hop knowledge

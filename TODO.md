@@ -264,7 +264,9 @@ TODO — 2026-06-27: Next Improvements
 ### #8 — Agentic RAG (full) · Low priority · ~100 lines
 > Dynamic tool dispatch per iteration instead of fixed CoR augmentation pattern
 
-- [ ] `src/retrieval.js` — add `queryAgent(rawInput, options)`; each iteration Gemini picks strategy: `bm25_only` | `entity_pivot` | `cross_doc_expand` | `structural_deep`; execute chosen phase; merge; repeat until stopping condition
-- [ ] `prompts/agent_strategy.md` — prompt: given query + found nodes so far, which retrieval tool to call next?
-- [ ] `bin/ohara.js` — `--agent` flag
-- [ ] `server.js` — `agent: true` param routes to `queryAgent()`
+- [x] `src/retrieval.js` — `queryAgent()`: Gemini picks from bm25/entity_pivot/cross_doc/structural/done each iter; merges deduped results; cached strategy calls (temperature 0)
+- [x] `prompts/agent_strategy.md` — given query + found snippets + tool_history → `{tool, reason, hint}`
+- [x] `bin/ohara.js` — `--agent` flag routes to `queryAgent()`
+- [x] `server.js` — `agent: true` body param routes to `queryAgent()` (takes precedence over `cor`)
+- [x] `index.html` — "agent" checkbox (mutually exclusive with "deep"); purple badge shows tool dispatch chain (e.g. `bm25 → entity_pivot → cross_doc`)
+- [x] `.env.example` — `OHARA_AGENT_MAX_ITER=4`

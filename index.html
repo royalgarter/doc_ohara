@@ -302,10 +302,15 @@
 							<span class="cl-card text-sm px-1.5 py-0.5 border cl-t2 rounded" x-text="kw"></span>
 						</template>
 						<span x-show="queryResults && queryResults.processedQuery && queryResults.processedQuery.cor" class="text-xs px-1.5 py-0.5 rounded border border-amber-700 text-amber-500">CoR ×<span x-text="queryResults && queryResults.cor_iter_count"></span></span>
+						<span x-show="queryResults && queryResults.agent_tool_history && queryResults.agent_tool_history.length" class="text-xs px-1.5 py-0.5 rounded border border-purple-700 text-purple-400" x-text="'Agent: ' + (queryResults && queryResults.agent_tool_history || []).join(' → ')"></span>
 					</div>
 					<label class="flex items-center gap-1 cursor-pointer flex-shrink-0" title="Chain-of-Retrieval: iterative deep search">
-						<input type="checkbox" x-model="corMode" class="accent-amber-700 w-3 h-3" />
+						<input type="checkbox" x-model="corMode" :disabled="agentMode" class="accent-amber-700 w-3 h-3" />
 						<span class="text-xs cl-t4">deep</span>
+					</label>
+					<label class="flex items-center gap-1 cursor-pointer flex-shrink-0" title="Agentic RAG: Gemini picks retrieval tool each iteration">
+						<input type="checkbox" x-model="agentMode" :disabled="corMode" class="accent-purple-500 w-3 h-3" />
+						<span class="text-xs cl-t4">agent</span>
 					</label>
 				</div>
 				<!-- Results tier tabs -->
@@ -789,6 +794,7 @@
 			sessionHistory: [],
 			resultTab: 'all',
 			corMode: false,
+			agentMode: false,
 
 			jobs: [],
 			jobStats: { waiting: 0, active: 0, completed: 0, failed: 0, total: 0 },
@@ -1067,7 +1073,7 @@
 					const r = await fetch('/api/retrieval/query', {
 						method: 'POST',
 						headers: { 'Content-Type': 'application/json' },
-						body: JSON.stringify({ query: q, sessionHistory: this.sessionHistory, cor: this.corMode }),
+						body: JSON.stringify({ query: q, sessionHistory: this.sessionHistory, cor: this.corMode, agent: this.agentMode }),
 					});
 					const d = await r.json();
 					if (d.success) {
