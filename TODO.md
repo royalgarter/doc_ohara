@@ -215,19 +215,17 @@ TODO — 2026-06-27: Next Improvements
 ### #1 — Tiers UI · High priority · ~50 lines · `index.html`
 > Surface Principal / Integrity / Explorer tiers in query panel
 
-Currently query panel shows `shallowResults` only. Tiers computed server-side but never displayed.
-
-- [ ] `index.html` — add tabbed or sectioned view below results: Principal (corroborated core), Integrity (verified), Explorer frontier (candidate directions)
-- [ ] `index.html` — Principal nodes show `provenance[]` badge count; Explorer nodes show `edge_verb` + `edge_summary` as expandable hint
-- [ ] `index.html` — thumbs up/down already on `shallowResults`; mirror to Principal tier cards too
+- [x] `index.html` — tabbed view: All / ★ Principal / ✓ Integrity / ◎ Explorer; tab counts from live results
+- [x] `index.html` — Principal cards: amber border, phase count badge, `provenance[]` phase tags, thumbs up/down
+- [x] `index.html` — Integrity cards: green border, `edge_verb` + `edge_summary` inline
+- [x] `index.html` — Explorer cards: purple border, frontier `edge_verb`/`edge_summary`, `stopped_reason` footer
+- [x] `index.html` — auto-switch to Principal tab when tiers.principal has results
 
 ### #2 — CoR Toggle in UI · High priority · ~15 lines · `index.html`
 > Expose Chain-of-Retrieval mode in query panel
 
-`queryCoR()` wired server-side (`cor: true`) but no UI control.
-
-- [ ] `index.html` — add toggle checkbox "Deep search (CoR)" near query input; set `cor` flag in `runQuery()` body when checked
-- [ ] `index.html` — show `cor_iter_count` in result header when CoR was used
+- [x] `index.html` — "deep" checkbox (`corMode`) near query input; sends `cor: true` in request body
+- [x] `index.html` — CoR badge shows iteration count in keyword chips row when active
 
 ### #3 — Vector Embeddings (Phase 1d) · High priority · ~0 code · config only
 > Enable true dense semantic search alongside BM25

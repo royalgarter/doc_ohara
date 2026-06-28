@@ -295,45 +295,154 @@
 					<button @click="runQuery()" :disabled="queryLoading"
 						class="cl-btn text-xs px-2.5 py-1.5 rounded transition flex-shrink-0">→</button>
 				</div>
-				<div x-show="queryResults && queryResults.processedQuery && queryResults.processedQuery.keywords && queryResults.processedQuery.keywords.length"
-					class="flex flex-wrap gap-1">
-					<template x-for="kw in (queryResults && queryResults.processedQuery && queryResults.processedQuery.keywords || [])" :key="kw">
-						<span class="cl-card text-sm px-1.5 py-0.5 border cl-t2 rounded" x-text="kw"></span>
+				<!-- CoR toggle + keyword chips -->
+				<div class="flex items-center justify-between gap-2">
+					<div class="flex flex-wrap gap-1 flex-1">
+						<template x-for="kw in (queryResults && queryResults.processedQuery && queryResults.processedQuery.keywords || [])" :key="kw">
+							<span class="cl-card text-sm px-1.5 py-0.5 border cl-t2 rounded" x-text="kw"></span>
+						</template>
+						<span x-show="queryResults && queryResults.processedQuery && queryResults.processedQuery.cor" class="text-xs px-1.5 py-0.5 rounded border border-amber-700 text-amber-500">CoR ×<span x-text="queryResults && queryResults.cor_iter_count"></span></span>
+					</div>
+					<label class="flex items-center gap-1 cursor-pointer flex-shrink-0" title="Chain-of-Retrieval: iterative deep search">
+						<input type="checkbox" x-model="corMode" class="accent-amber-700 w-3 h-3" />
+						<span class="text-xs cl-t4">deep</span>
+					</label>
+				</div>
+				<!-- Results tier tabs -->
+				<div x-show="queryResults" class="flex gap-1 flex-shrink-0">
+					<template x-for="t in ['all','principal','integrity','explorer']" :key="t">
+						<button @click="resultTab = t"
+							:class="resultTab === t ? 'cl-tab-on' : 'cl-tab-off'"
+							class="text-xs px-2 py-0.5 rounded transition capitalize"
+							x-text="t === 'all' ? 'All (' + (queryResults && queryResults.shallowResults && queryResults.shallowResults.length || 0) + ')' :
+								t === 'principal' ? '★ ' + (queryResults && queryResults.tiers && queryResults.tiers.principal && queryResults.tiers.principal.length || 0) :
+								t === 'integrity' ? '✓ ' + (queryResults && queryResults.tiers && queryResults.tiers.integrity && queryResults.tiers.integrity.length || 0) :
+								'◎ ' + (queryResults && queryResults.tiers && queryResults.tiers.explorer && queryResults.tiers.explorer.frontier && queryResults.tiers.explorer.frontier.length || 0)">
+						</button>
 					</template>
 				</div>
 				<div class="flex-1 min-h-0 overflow-y-auto scrollbar-thin flex flex-col gap-2">
-					<template x-for="(r, i) in (queryResults && queryResults.shallowResults || [])" :key="i">
-						<div @click="highlightResultNode(r.node)"
-							class="cl-card text-xs p-2 rounded border cursor-pointer transition">
-							<div class="flex justify-between items-center mb-1">
-								<span class="cl-t3 text-sm font-bold" x-text="'#' + (i + 1)"></span>
-								<div class="flex items-center gap-2">
-									<span class="text-green-400 text-sm" x-text="Math.round(r.score * 100) + '%'"></span>
-									<div class="flex gap-1" @click.stop>
-										<button
-											@click="sendFeedback(r.node._id, i, 'positive')"
-											:class="feedbackSent[r.node._id + 'positive'] ? 'text-green-400' : 'cl-t5 hover:text-green-400'"
-											class="transition text-base leading-none"
-											title="Helpful">👍</button>
-										<button
-											@click="sendFeedback(r.node._id, i, 'negative')"
-											:class="feedbackSent[r.node._id + 'negative'] ? 'text-red-400' : 'cl-t5 hover:text-red-400'"
-											class="transition text-base leading-none"
-											title="Not helpful">👎</button>
+					<!-- ALL tab -->
+					<template x-if="!queryResults || resultTab === 'all'">
+						<div class="flex flex-col gap-2">
+							<template x-for="(r, i) in (queryResults && queryResults.shallowResults || [])" :key="i">
+								<div @click="highlightResultNode(r.node)"
+									class="cl-card text-xs p-2 rounded border cursor-pointer transition">
+									<div class="flex justify-between items-center mb-1">
+										<span class="cl-t3 text-sm font-bold" x-text="'#' + (i + 1)"></span>
+										<div class="flex items-center gap-2">
+											<span class="text-green-400 text-sm" x-text="Math.round(r.score * 100) + '%'"></span>
+											<div class="flex gap-1" @click.stop>
+												<button @click="sendFeedback(r.node._id, i, 'positive')"
+													:class="feedbackSent[r.node._id + 'positive'] ? 'text-green-400' : 'cl-t5 hover:text-green-400'"
+													class="transition text-base leading-none" title="Helpful">👍</button>
+												<button @click="sendFeedback(r.node._id, i, 'negative')"
+													:class="feedbackSent[r.node._id + 'negative'] ? 'text-red-400' : 'cl-t5 hover:text-red-400'"
+													class="transition text-base leading-none" title="Not helpful">👎</button>
+											</div>
+										</div>
+									</div>
+									<div class="cl-t1 text-base leading-relaxed line-clamp-3"
+										x-text="r.node.content || r.node.title || '—'"></div>
+									<div class="flex flex-wrap gap-1 mt-1.5">
+										<template x-for="tag in (r.node.sumo_tags || []).slice(0, 4)" :key="tag">
+											<span class="cl-tag text-sm px-1 py-0.5 rounded border" x-text="tag"></span>
+										</template>
 									</div>
 								</div>
-							</div>
-							<div class="cl-t1 text-base leading-relaxed line-clamp-3"
-								x-text="r.node.content || r.node.title || '—'"></div>
-							<div class="flex flex-wrap gap-1 mt-1.5">
-								<template x-for="tag in (r.node.sumo_tags || []).slice(0, 4)" :key="tag">
-									<span class="cl-tag text-sm px-1 py-0.5 rounded border" x-text="tag"></span>
-								</template>
-							</div>
+							</template>
+							<div x-show="queryResults && !(queryResults.shallowResults && queryResults.shallowResults.length)"
+								class="text-xs cl-t5 text-center py-6">No results</div>
 						</div>
 					</template>
-					<div x-show="queryResults && !(queryResults.shallowResults && queryResults.shallowResults.length)"
-						class="text-xs cl-t5 text-center py-6">No results</div>
+					<!-- PRINCIPAL tab -->
+					<template x-if="queryResults && resultTab === 'principal'">
+						<div class="flex flex-col gap-2">
+							<template x-for="(r, i) in (queryResults.tiers && queryResults.tiers.principal || [])" :key="i">
+								<div @click="highlightResultNode(r.node)"
+									class="text-xs p-2 rounded border cursor-pointer transition"
+									style="background-color:#2a1f0e; border-color:#8B5B29;">
+									<div class="flex justify-between items-center mb-1">
+										<span class="text-amber-500 text-sm font-bold">★ Core</span>
+										<div class="flex items-center gap-2">
+											<span class="text-green-400 text-sm" x-text="Math.round(r.score * 100) + '%'"></span>
+											<span class="text-xs cl-t4" x-text="(r.contributions || []).length + ' phases'" title="Number of retrieval phases that found this node"></span>
+											<div class="flex gap-1" @click.stop>
+												<button @click="sendFeedback(r.node._id, i, 'positive')"
+													:class="feedbackSent[r.node._id + 'positive'] ? 'text-green-400' : 'cl-t5 hover:text-green-400'"
+													class="transition text-base leading-none" title="Helpful">👍</button>
+												<button @click="sendFeedback(r.node._id, i, 'negative')"
+													:class="feedbackSent[r.node._id + 'negative'] ? 'text-red-400' : 'cl-t5 hover:text-red-400'"
+													class="transition text-base leading-none" title="Not helpful">👎</button>
+											</div>
+										</div>
+									</div>
+									<div class="cl-t1 text-base leading-relaxed line-clamp-3"
+										x-text="r.node.content || r.node.title || '—'"></div>
+									<div class="flex flex-wrap gap-1 mt-1.5">
+										<template x-for="p in (r.provenance || []).slice(0, 3)" :key="p.phase">
+											<span class="text-xs px-1 py-0.5 rounded border border-amber-900 text-amber-600" x-text="p.phase"></span>
+										</template>
+										<template x-for="tag in (r.node.sumo_tags || []).slice(0, 3)" :key="tag">
+											<span class="cl-tag text-sm px-1 py-0.5 rounded border" x-text="tag"></span>
+										</template>
+									</div>
+								</div>
+							</template>
+							<div x-show="!(queryResults.tiers && queryResults.tiers.principal && queryResults.tiers.principal.length)"
+								class="text-xs cl-t5 text-center py-6">No principal results — query may be too broad or corpus too small</div>
+						</div>
+					</template>
+					<!-- INTEGRITY tab -->
+					<template x-if="queryResults && resultTab === 'integrity'">
+						<div class="flex flex-col gap-2">
+							<template x-for="(r, i) in (queryResults.tiers && queryResults.tiers.integrity || [])" :key="i">
+								<div @click="highlightResultNode(r.node)"
+									class="text-xs p-2 rounded border cursor-pointer transition"
+									style="background-color:#0e1f14; border-color:#2d6a4a;">
+									<div class="flex justify-between items-center mb-1">
+										<span class="text-emerald-500 text-sm font-bold">✓ Verified</span>
+										<div class="flex items-center gap-2">
+											<span class="text-green-400 text-sm" x-text="Math.round(r.score * 100) + '%'"></span>
+											<span x-show="r.edge_verb" class="text-xs cl-t4 italic" x-text="r.edge_verb"></span>
+										</div>
+									</div>
+									<div class="cl-t1 text-base leading-relaxed line-clamp-3"
+										x-text="r.node.content || r.node.title || '—'"></div>
+									<div x-show="r.edge_summary" class="text-xs cl-t4 mt-1 italic line-clamp-2" x-text="r.edge_summary"></div>
+									<div class="flex flex-wrap gap-1 mt-1.5">
+										<template x-for="tag in (r.node.sumo_tags || []).slice(0, 3)" :key="tag">
+											<span class="cl-tag text-sm px-1 py-0.5 rounded border" x-text="tag"></span>
+										</template>
+									</div>
+								</div>
+							</template>
+							<div x-show="!(queryResults.tiers && queryResults.tiers.integrity && queryResults.tiers.integrity.length)"
+								class="text-xs cl-t5 text-center py-6">No integrity results</div>
+						</div>
+					</template>
+					<!-- EXPLORER tab -->
+					<template x-if="queryResults && resultTab === 'explorer'">
+						<div class="flex flex-col gap-2">
+							<div class="text-xs cl-t4 px-1">Frontier candidates — follow-up directions, not final answers</div>
+							<template x-for="(f, i) in (queryResults.tiers && queryResults.tiers.explorer && queryResults.tiers.explorer.frontier || [])" :key="i">
+								<div class="text-xs p-2 rounded border transition"
+									style="background-color:#0e0e1f; border-color:#3a3a6a;">
+									<div class="flex justify-between items-center mb-1">
+										<span class="text-purple-400 text-sm font-bold">◎ Frontier</span>
+										<span class="text-xs cl-t4" x-text="Math.round((f.score || 0) * 100) + '%'"></span>
+									</div>
+									<div x-show="f.edge_verb" class="text-purple-300 text-sm font-medium" x-text="f.edge_verb"></div>
+									<div x-show="f.edge_summary" class="cl-t2 text-base leading-relaxed mt-0.5 line-clamp-3" x-text="f.edge_summary"></div>
+									<div class="text-xs cl-t5 mt-1" x-text="f.document_id || ''"></div>
+								</div>
+							</template>
+							<div x-show="!(queryResults.tiers && queryResults.tiers.explorer && queryResults.tiers.explorer.frontier && queryResults.tiers.explorer.frontier.length)"
+								class="text-xs cl-t5 text-center py-6">No frontier candidates</div>
+							<div x-show="queryResults.tiers && queryResults.tiers.explorer && queryResults.tiers.explorer.stopped_reason"
+								class="text-xs cl-t5 text-center" x-text="'Stopped: ' + (queryResults.tiers.explorer.stopped_reason || '')"></div>
+						</div>
+					</template>
 					<div x-show="!queryResults && !queryLoading"
 						class="text-base cl-t5 text-center py-6 leading-relaxed">
 						Enter a keyword or phrase<br>to search the knowledge graph
@@ -663,6 +772,8 @@
 			queryHash: null,
 			feedbackSent: {},
 			sessionHistory: [],
+			resultTab: 'all',
+			corMode: false,
 
 			jobs: [],
 			jobStats: { waiting: 0, active: 0, completed: 0, failed: 0, total: 0 },
@@ -935,16 +1046,21 @@
 				this.queryLoading = true;
 				this.queryResults = null;
 				this.feedbackSent = {};
+				this.resultTab = 'all';
 				this.queryHash = btoa(q).replace(/[^a-z0-9]/gi, '').slice(0, 32);
 				try {
 					const r = await fetch('/api/retrieval/query', {
 						method: 'POST',
 						headers: { 'Content-Type': 'application/json' },
-						body: JSON.stringify({ query: q, sessionHistory: this.sessionHistory }),
+						body: JSON.stringify({ query: q, sessionHistory: this.sessionHistory, cor: this.corMode }),
 					});
 					const d = await r.json();
 					if (d.success) {
 						this.queryResults = d;
+						// Auto-switch to principal tab if tiers returned results
+						if (d.tiers && d.tiers.principal && d.tiers.principal.length) {
+							this.resultTab = 'principal';
+						}
 						// Accumulate conversation history for Conversational RAG
 						const topContent = (d.shallowResults || [])[0]?.node?.content || '';
 						this.sessionHistory.push({ role: 'user', content: q });
