@@ -1,6 +1,12 @@
 // REFEED RAG: read feedback collection, compute per-phase accuracy, suggest OHARA_*_WEIGHT values.
-// Usage: node scripts/tune_weights.js
+// Usage: node scripts/tune_weights.js [--apply]
+//   --apply  Write suggested weights to .env file in-place
 import * as client from '../src/db/client.js';
+import fs from 'node:fs';
+import path from 'node:path';
+
+const APPLY = process.argv.includes('--apply');
+const ENV_PATH = path.resolve(process.cwd(), '.env');
 
 const PHASE_WEIGHTS = {
 	fulltext: 'OHARA_BM25_WEIGHT (fusion weight for BM25 results, default 1.0 — not an env var yet)',
@@ -65,6 +71,36 @@ const PHASE_WEIGHTS = {
 		console.log('\nPhase weight env vars:');
 		for (const [phase, envVar] of Object.entries(PHASE_WEIGHTS)) {
 			console.log(`  ${phase}: ${envVar}`);
+		}
+
+		// --apply: write suggested weights to .env
+		if (APPLY && fs.existsSync(ENV_PATH)) {
+			const suggestions = [];
+			if (overallAcc < 50) {
+				suggestions.push(['OHARA_ENTITY_PIVOT_WEIGHT', '0.4']);
+				suggestions.push(['OHARA_PRINCIPAL_SCORE_PCTL', '0.85']);
+			} else if (overallAcc > 80) {
+				suggestions.push(['OHARA_CROSS_DOC_WEIGHT', '0.6']);
+				suggestions.push(['OHARA_CROSS_DOC_EXPAND_DEPTH', '2']);
+			}
+			if (suggestions.length) {
+				let env = fs.readFileSync(ENV_PATH, 'utf8');
+				for (const [key, val] of suggestions) {
+					const re = new RegExp(`^${key}=.*$`, 'm');
+					if (re.test(env)) {
+						env = env.replace(re, `${key}=${val}`);
+					} else {
+						env += `\n${key}=${val}`;
+					}
+				}
+				fs.writeFileSync(ENV_PATH, env, 'utf8');
+				console.log('\nApplied to .env:');
+				for (const [k, v] of suggestions) console.log(`  ${k}=${v}`);
+			} else {
+				console.log('\n--apply: no changes needed.');
+			}
+		} else if (APPLY) {
+			console.warn('\n--apply: .env not found, skipping write.');
 		}
 	} catch (e) {
 		console.error('Error:', e.message);

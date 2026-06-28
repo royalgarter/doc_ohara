@@ -10,6 +10,7 @@ import * as arangoClient from '../db/client.js';
 import { updateEdge as updateArangoEdge } from '../db/client.js';
 import { validateTags } from '../sumo.js';
 import { processNodeEntities, normalizeEntity } from '../entities.js';
+import { runEntityDedup } from './entity_dedup.js';
 import { PseudoTOCGenerator, GeminiTocLLMClient, GeminiEmbeddingClient } from '../toc.js';
 import { extractHtmlTitle, htmlToMarkdown } from '../helper.js';
 import { callLLM, createGeminiCache, callLLMWithCache } from '../llm.js';
@@ -2076,6 +2077,11 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
 	}
 
 	onProgress(100, `Completed ingestion of ${filename} (${nodeCount} nodes).`);
+
+	// Auto entity dedup after ingest
+	if (process.env.OHARA_AUTO_ENTITY_DEDUP === 'true') {
+		try { await runEntityDedup(); } catch (e) { addPipelineLog('warn', `Auto entity dedup failed: ${e.message}`); }
+	}
 
 	return {
 		filename,

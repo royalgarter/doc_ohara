@@ -97,4 +97,9 @@ async function run() {
 	console.log('Deduplication complete.');
 }
 
-run().catch(err => { console.error(err.message); process.exit(1); });
+export { run as runEntityDedup };
+
+// Run directly when invoked as CLI
+if (process.argv[1] && process.argv[1].endsWith('entity_dedup.js')) {
+	run().catch(err => { console.error(err.message); process.exit(1); });
+}

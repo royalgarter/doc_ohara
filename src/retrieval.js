@@ -23,6 +23,9 @@ const INTEGRITY_VERIFY_PROMPT = fs.readFileSync(
 const SELF_RAG_VERIFY_PROMPT = fs.readFileSync(
 	path.resolve(__dirname, '../prompts/self_rag_verify.md'), 'utf8'
 );
+const REASONING_SUBQUERY_PROMPT = fs.readFileSync(
+	path.resolve(__dirname, '../prompts/reasoning_subquery.md'), 'utf8'
+);
 
 const STOPWORDS = new Set([
 	'a', 'an', 'the', 'and', 'or', 'of', 'in', 'on', 'to', 'is', 'are', 'how',
@@ -204,6 +207,34 @@ export class RetrievalEngine {
 		}));
 
 		return results.filter(r => r.responsive).map(r => r.entry);
+	}
+
+	async _generateSubqueries(rawQuery, bm25Results) {
+		const ai = this._getAI();
+		if (!ai) return [];
+		const snippets = bm25Results.slice(0, 3).map(r =>
+			(r.node?.content || r.node?.title || '').slice(0, 400)
+		).filter(Boolean);
+		if (!snippets.length) return [];
+		const inputPayload = JSON.stringify({ query: rawQuery.slice(0, 400), passages: snippets });
+		const prompt = `${REASONING_SUBQUERY_PROMPT}\n\nINPUT:\n${inputPayload}`;
+		const key = cacheKeyFor([REASONING_SUBQUERY_PROMPT, inputPayload, GEMINI_MODEL]);
+		const cached = readCacheSync(key);
+		if (cached) return cached.subqueries || [];
+		try {
+			const resp = await ai.models.generateContent({
+				model: GEMINI_MODEL,
+				contents: prompt,
+				config: { serviceTier: 'flex', temperature: 0 },
+			});
+			const raw = (resp.text || '').replace(/^```json\s*/i, '').replace(/```\s*$/, '').trim();
+			const parsed = JSON.parse(raw);
+			const subqueries = (parsed.subqueries || []).slice(0, parseInt(process.env.OHARA_REASONING_SUBQUERY_LIMIT || '2', 10));
+			writeCache(key, { subqueries });
+			return subqueries;
+		} catch (_) {
+			return [];
+		}
 	}
 
 	async preprocessInput(rawInput, sessionHistory = []) {
@@ -918,7 +949,23 @@ export class RetrievalEngine {
 		const sessionHistory = Array.isArray(options.sessionHistory) ? options.sessionHistory : [];
 		const processedQuery = await this.preprocessInput(rawInput, sessionHistory);
 
-		const bm25Results   = await this._phase1BM25(processedQuery, limit);
+		let bm25Results = await this._phase1BM25(processedQuery, limit);
+
+		// Reasoning RAG: generate sub-queries from BM25 gaps, merge results before Phase 1b
+		const reasoningEnabled = options.reasoningRag ?? (process.env.OHARA_REASONING_RAG === 'true');
+		if (reasoningEnabled && !options._speculative && bm25Results.length > 0) {
+			const subqueries = await this._generateSubqueries(rawInput, bm25Results);
+			if (subqueries.length) {
+				const subResults = await Promise.all(
+					subqueries.map(sq => this._phase1BM25({ ...processedQuery, keywords: this._tokenize(sq), raw: sq }, Math.ceil(limit / 2)))
+				);
+				const seenIds = new Set(bm25Results.map(r => r.node._id));
+				for (const sub of subResults.flat()) {
+					if (!seenIds.has(sub.node._id)) { bm25Results.push(sub); seenIds.add(sub.node._id); }
+				}
+			}
+		}
+
 		const sumoResults   = await this._phase2SUMO(processedQuery, bm25Results, limit);
 
 		const seenAfterPhase2 = new Set([

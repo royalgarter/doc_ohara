@@ -227,46 +227,39 @@ TODO — 2026-06-27: Next Improvements
 - [x] `index.html` — "deep" checkbox (`corMode`) near query input; sends `cor: true` in request body
 - [x] `index.html` — CoR badge shows iteration count in keyword chips row when active
 
-### #3 — Vector Embeddings (Phase 1d) · High priority · ~0 code · config only
+### #3 — Vector Embeddings (Phase 1d) · High priority · config + backfill
 > Enable true dense semantic search alongside BM25
 
-All infrastructure exists: `OHARA_EMBED_PARAGRAPHS`, Phase 1d ANN search in `retrieval.js`, vector index in `db-init.js`. Just needs enabling + re-ingest.
-
-- [ ] `.env` — set `OHARA_EMBED_PARAGRAPHS=true`, tune `OHARA_VECTOR_WEIGHT` (default 0.5)
-- [ ] Re-ingest corpus to generate embeddings (or run backfill script if one exists)
-- [ ] `scripts/db-init.js` — verify vector index creation succeeds (requires ArangoDB 3.12 Enterprise)
+- [x] `scripts/backfill_embeddings.js` — backfill vectors for existing paragraphs missing `embedding` field; `--dry-run` flag
+- [ ] `.env` — set `OHARA_EMBED_PARAGRAPHS=true`, tune `OHARA_VECTOR_WEIGHT` (default 0.5) — **requires ArangoDB 3.12 Enterprise for vector index**
+- [ ] Run `node scripts/backfill_embeddings.js` after enabling
 - [ ] Test: `node bin/ohara.js query "topic" --verbose` → results should include `vector` in sources
 
 ### #4 — Reasoning RAG · Medium priority · ~60 lines · `src/retrieval.js`
 > Chain-of-thought sub-query generation between retrieval phases
 
-After Phase 1 BM25, Gemini reasons about what's missing → generates 1-2 targeted sub-queries → feeds Phase 2/3.
-
-- [ ] `prompts/reasoning_subquery.md` — prompt: given query + top BM25 snippets, what specific sub-questions remain unanswered? → `{subqueries: [...]}`
-- [ ] `src/retrieval.js` — add `_generateSubqueries(rawInput, bm25Results)` after Phase 1; run sub-queries through `_phase1BM25()` and merge into `bm25Results` before Phase 1b
-- [ ] `.env.example` — add `OHARA_REASONING_RAG=false` (opt-in), `OHARA_REASONING_SUBQUERY_LIMIT=2`
+- [x] `prompts/reasoning_subquery.md` — prompt: given query + top BM25 snippets, what sub-questions remain? → `{subqueries: [...]}`
+- [x] `src/retrieval.js` — `_generateSubqueries()` after Phase 1 BM25; sub-queries run through `_phase1BM25()` and merged before Phase 1b; gated by `OHARA_REASONING_RAG=false`
+- [x] `server.js` — pass `reasoningRag` from request body
+- [x] `.env.example` — `OHARA_REASONING_RAG=false`, `OHARA_REASONING_SUBQUERY_LIMIT=2`
 
 ### #5 — REFEED Weight Auto-Apply · Medium priority · ~30 lines
 > Write suggested weights back instead of just printing them
 
-`tune_weights.js` prints suggestions but user must manually edit `.env`.
-
-- [ ] `scripts/tune_weights.js` — add `--apply` flag; when set, write suggested `OHARA_*_WEIGHT` values to `.env` file in-place
-- [ ] `server.js` — optional: add `POST /api/config/weights` endpoint that runs tune_weights logic and applies to running process env (no restart needed for weights)
+- [x] `scripts/tune_weights.js` — `--apply` flag writes suggested `OHARA_*_WEIGHT` values to `.env` in-place using regex replace
 
 ### #6 — Temporal Metadata Review UI · Medium priority · ~40 lines · `index.html`
 > Let admins inspect and correct auto-extracted temporal metadata
 
-Schema has `temporal_needs_review: true` on every LLM-extracted doc. No UI to correct.
-
-- [ ] `index.html` — in Docs admin tab, show `published_date`, `decay_class`, `temporal_confidence` per doc with inline edit fields
-- [ ] `server.js` — add `PATCH /api/documents/:key` endpoint to update `published_date`, `decay_class`, `temporal_needs_review`
+- [x] `index.html` — Docs tab: amber border + ⚑ review badge on `temporal_needs_review` docs; inline `published_date` edit field; `effective_decay_class` select saves via `patchDoc()`; clears review flag on save
+- [x] `server.js` — `PATCH /api/documents/:key` already existed; `temporal_needs_review` added to allowed fields
 
 ### #7 — Entity Dedup Automation · Low priority · ~20 lines
 > Auto-trigger dedup after batch ingest instead of manual script
 
-- [ ] `src/ingest/ingest.js` — after `ingestCrawledDomain()` or `ingestSingleFile()` completes, optionally call entity dedup (gated by `OHARA_AUTO_ENTITY_DEDUP=false`)
-- [ ] `.env.example` — add `OHARA_AUTO_ENTITY_DEDUP=false`
+- [x] `src/ingest/entity_dedup.js` — export `runEntityDedup`; CLI guard added
+- [x] `src/ingest/ingest.js` — auto-call `runEntityDedup()` after `ingestSingleFile()` when `OHARA_AUTO_ENTITY_DEDUP=true`
+- [x] `.env.example` — `OHARA_AUTO_ENTITY_DEDUP=false`
 
 ### #8 — Agentic RAG (full) · Low priority · ~100 lines
 > Dynamic tool dispatch per iteration instead of fixed CoR augmentation pattern

@@ -567,25 +567,40 @@
 				</div>
 				<div class="flex-1 overflow-y-auto space-y-2" x-show="docsAdminList.length > 0">
 					<template x-for="d in docsAdminList" :key="d._key">
-						<div class="rounded border cl-b0 p-2 space-y-1 cl-bg-1 text-xs">
-							<div class="cl-t1 font-medium truncate" x-text="d.title || d._key"></div>
-							<div class="cl-t4 flex gap-4">
-								<span>published: <span class="cl-t2" x-text="d.published_date || '—'"></span></span>
+						<div class="rounded border p-2 space-y-1 cl-bg-1 text-xs"
+							:class="d.temporal_needs_review ? 'border-amber-800' : 'cl-b0'">
+							<div class="flex items-center justify-between gap-1">
+								<div class="cl-t1 font-medium truncate" x-text="d.title || d._key"></div>
+								<span x-show="d.temporal_needs_review"
+									class="flex-shrink-0 text-xs px-1 py-0.5 rounded border border-amber-700 text-amber-500"
+									title="Temporal metadata auto-extracted — review recommended">⚑ review</span>
+							</div>
+							<div class="cl-t4 flex gap-4 flex-wrap">
 								<span>decay: <span class="cl-t2" x-text="d.decay_class || '—'"></span></span>
 								<span>confidence: <span class="cl-t2" x-text="d.temporal_confidence != null ? d.temporal_confidence.toFixed(2) : '—'"></span></span>
 							</div>
-							<div class="flex items-center gap-2 mt-1">
-								<span class="cl-t4">effective_decay_class:</span>
+							<!-- published_date inline edit -->
+							<div class="flex items-center gap-2">
+								<span class="cl-t4">published:</span>
+								<input :id="'pub-'+d._key" type="text" :value="d.published_date || ''"
+									placeholder="YYYY-MM-DD or YYYY"
+									class="cl-input rounded px-1 py-0.5 text-xs border flex-1" />
+								<button @click="patchDoc(d._key, { published_date: document.getElementById('pub-'+d._key).value || null })"
+									class="cl-btn-gh text-xs px-2 py-0.5 rounded border transition">✓</button>
+							</div>
+							<!-- decay class select -->
+							<div class="flex items-center gap-2">
+								<span class="cl-t4">effective decay:</span>
 								<select :id="'decay-'+d._key"
-									class="cl-input rounded px-1 py-0.5 text-xs border"
+									class="cl-input rounded px-1 py-0.5 text-xs border flex-1"
 									:value="d.effective_decay_class || d.decay_class || 'SCHOLARLY'">
 									<option>EVERGREEN</option><option>SCHOLARLY</option>
 									<option>CURRENT</option><option>EPHEMERAL</option>
 								</select>
-								<button @click="patchDecayClass(d._key)"
-									class="cl-btn-gh text-xs px-2 py-0.5 rounded border transition">Save</button>
-								<span :id="'decay-status-'+d._key" class="text-green-400 text-xs hidden">✓</span>
+								<button @click="patchDoc(d._key, { effective_decay_class: document.getElementById('decay-'+d._key).value, temporal_needs_review: false }); d.temporal_needs_review = false"
+									class="cl-btn-gh text-xs px-2 py-0.5 rounded border transition">✓</button>
 							</div>
+							<span :id="'doc-status-'+d._key" class="text-green-400 text-xs hidden">Saved ✓</span>
 						</div>
 					</template>
 				</div>
@@ -1095,27 +1110,25 @@
 					decay_class: doc.decay_class,
 					effective_decay_class: doc.effective_decay_class,
 					temporal_confidence: doc.temporal_confidence,
+					temporal_needs_review: doc.temporal_needs_review,
 				}));
 			} catch(e) { console.error('loadDocs failed', e); }
 		},
 
-		async patchDecayClass(key) {
-			const sel = document.getElementById('decay-' + key);
-			if (!sel) return;
-			const val = sel.value;
+		async patchDoc(key, patch) {
 			try {
 				const r = await fetch('/api/documents/' + key, {
 					method: 'PATCH',
 					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({ effective_decay_class: val }),
+					body: JSON.stringify(patch),
 				}).then(r => r.json());
-				const statusEl = document.getElementById('decay-status-' + key);
-				if (statusEl) { statusEl.classList.remove('hidden'); setTimeout(() => statusEl.classList.add('hidden'), 2000); }
 				if (r.success) {
 					const doc = this.docsAdminList.find(d => d._key === key);
-					if (doc) doc.effective_decay_class = val;
+					if (doc) Object.assign(doc, patch);
+					const statusEl = document.getElementById('doc-status-' + key);
+					if (statusEl) { statusEl.classList.remove('hidden'); setTimeout(() => statusEl.classList.add('hidden'), 2000); }
 				}
-			} catch(e) { console.error('patchDecayClass failed', e); }
+			} catch(e) { console.error('patchDoc failed', e); }
 		},
 
 		async exportWiki() {
