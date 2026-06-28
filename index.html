@@ -597,7 +597,7 @@
 									<option>EVERGREEN</option><option>SCHOLARLY</option>
 									<option>CURRENT</option><option>EPHEMERAL</option>
 								</select>
-								<button @click="patchDoc(d._key, { effective_decay_class: document.getElementById('decay-'+d._key).value, temporal_needs_review: false }); d.temporal_needs_review = false"
+								<button @click="patchDoc(d._key, { effective_decay_class: document.getElementById('decay-'+d._key).value, temporal_needs_review: false })"
 									class="cl-btn-gh text-xs px-2 py-0.5 rounded border transition">✓</button>
 							</div>
 							<span :id="'doc-status-'+d._key" class="text-green-400 text-xs hidden">Saved ✓</span>
