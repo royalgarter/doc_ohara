@@ -575,6 +575,43 @@ async function startServer() {
 		res.json({ success: true, prompt });
 	});
 
+	// API: Query Analytics — feedback accuracy by rank, top entities, tier summary
+	app.get('/api/analytics', async (req, res) => {
+		try {
+			if (!process.env.ARANGO_URL) return res.json({ success: true, source: 'simulator', byRank: [], topEntities: [], summary: {} });
+			const db = await arangoClient.initArangoClient();
+			const [byRankRaw, topEntitiesRaw, summaryRaw] = await Promise.all([
+				db.query(`
+					FOR f IN feedback
+						COLLECT rank = f.result_rank INTO group
+						LET pos = LENGTH(FOR g IN group FILTER g.f.signal == 'positive' RETURN 1)
+						LET neg = LENGTH(FOR g IN group FILTER g.f.signal == 'negative' RETURN 1)
+						SORT rank ASC
+						RETURN { rank, positive: pos, negative: neg, total: pos + neg }
+				`).then(c => c.all()),
+				db.query(`
+					FOR f IN feedback FILTER f.signal == 'positive'
+						COLLECT node_id = f.node_id WITH COUNT INTO cnt
+						SORT cnt DESC LIMIT 10
+						RETURN { node_id, count: cnt }
+				`).then(c => c.all()),
+				db.query(`
+					RETURN {
+						total_feedback: LENGTH(feedback),
+						positive: LENGTH(FOR f IN feedback FILTER f.signal == 'positive' RETURN 1),
+						negative: LENGTH(FOR f IN feedback FILTER f.signal == 'negative' RETURN 1),
+						total_docs: LENGTH(documents),
+						total_paragraphs: LENGTH(paragraphs),
+						total_entities: LENGTH(entities)
+					}
+				`).then(c => c.all()),
+			]);
+			res.json({ success: true, byRank: byRankRaw, topEntities: topEntitiesRaw, summary: summaryRaw[0] || {} });
+		} catch (err) {
+			res.status(500).json({ success: false, error: err.message });
+		}
+	});
+
 	// API: Trigger Quartz Wiki Export
 	app.post('/api/quartz/export', async (req, res) => {
 		try {

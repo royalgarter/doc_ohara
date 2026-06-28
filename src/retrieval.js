@@ -1074,15 +1074,19 @@ export class RetrievalEngine {
 		const processedQuery = await this.preprocessInput(rawInput, sessionHistory);
 		const merged = new Map(); // _id → entry
 		const toolHistory = [];
+		const agentTrace = []; // [{tool, added}] per iteration
 
 		const _mergeIn = (entries, tag) => {
+			let added = 0;
 			for (const e of entries) {
 				const id = e.node?._id;
 				if (!id) continue;
+				if (!merged.has(id)) { added++; }
 				if (!merged.has(id) || merged.get(id).score < e.score) {
 					merged.set(id, { ...e, agent_tool: tag });
 				}
 			}
+			agentTrace.push({ tool: tag, added });
 		};
 
 		for (let iter = 0; iter < maxIter; iter++) {
@@ -1153,6 +1157,7 @@ export class RetrievalEngine {
 			results: allResults,
 			shallowResults: allResults,
 			agent_tool_history: toolHistory,
+			agent_trace: agentTrace,
 		};
 	}
 

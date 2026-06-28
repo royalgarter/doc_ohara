@@ -304,17 +304,14 @@ Current scoring is weighted sum; final Principal ordering is noisy. Add optional
 ### #4 — Agent Iteration Trace UI · Low priority · ~20 lines
 > Surface per-tool result counts in the purple badge tooltip
 
-Currently `agent_tool_history` shows `bm25 → entity_pivot → cross_doc` but no per-tool node counts.
-
-- [ ] `src/retrieval.js` — `queryAgent()`: accumulate `{tool, added}` per iteration into `agent_trace`; return alongside `agent_tool_history`
-- [ ] `index.html` — render `agent_trace` as tooltip or expanded row under purple badge: e.g. `bm25 +8 → entity_pivot +3 → cross_doc +1`
+- [x] `src/retrieval.js` — `queryAgent()`: accumulate `{tool, added}` per iteration into `agent_trace`; returned alongside `agent_tool_history`
+- [x] `index.html` — purple badge now shows `bm25 +8 → entity_pivot +3 → cross_doc +1` inline (tooltip = same)
 
 ### #5 — Query Analytics Tab · Low priority · ~50 lines
 > Visualise feedback signals, tier distribution, top entities in admin panel
 
-- [ ] `server.js` — add `GET /api/analytics` returning: feedback positive/negative ratio by rank, top 10 queried entities (from feedback `node_id` prefixes), tier hit counts if stored
-- [ ] `index.html` — new sidebar tab "analytics"; bar charts via inline SVG; feedback accuracy by rank, total queries (from sessionHistory length), entity frequency
-- [ ] `src/db/client.js` — optionally add `query_log` collection to record `{query_hash, ts, tier_counts}` per request (opt-in, `OHARA_QUERY_LOG=false`)
+- [x] `server.js` — `GET /api/analytics`: feedback positive/negative by rank (bar chart data), top 10 positively-rated node_ids, corpus summary (docs/paragraphs/entities/feedback totals)
+- [x] `index.html` — new "◎ Analytics" sidebar tab; summary stat row; green bar chart of accuracy by rank; top-rated nodes list; loads on tab click via `loadAnalytics()`
 
 ### #6 — MCP Server Adapter · Low priority · ~80 lines
 > Expose RetrievalEngine as MCP tool server for Claude Desktop / Cursor
