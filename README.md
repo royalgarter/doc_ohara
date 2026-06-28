@@ -232,6 +232,7 @@ flowchart TD
 
 `RetrievalEngine.query(rawInput, options)` — standard single-pass retrieval.
 `RetrievalEngine.queryCoR(rawInput, options)` — Chain-of-Retrieval iterative mode.
+`RetrievalEngine.queryAgent(rawInput, options)` — Agentic RAG: Gemini-driven dynamic tool dispatch.
 
 ### Phase 0 — Input Parsing
 Tokenizes raw input: lowercase, `[a-z0-9]+` regex, strips stopwords, drops tokens ≤ 2 chars. Returns `{ keywords, raw }`.
@@ -283,7 +284,21 @@ API: `POST /api/retrieval/query` with `{ cor: true }` routes to `queryCoR()`.
 After each `query()` response, background async pre-warm calls fire on the top Explorer frontier nodes (using their `edge_verb`/`edge_summary` as query seeds). Results are cached under `SPECULATIVE:<query_hash>:<node_id>`. Reduces cold-start latency for predictable follow-up queries. Controlled by `OHARA_SPECULATIVE_RAG` (default off) and `OHARA_SPECULATIVE_LIMIT` (default 3 frontier nodes).
 
 ### REFEED RAG — Feedback Loop
-User thumbs up/down on each result card in the UI posts `{ query_hash, node_id, result_rank, signal }` to `POST /api/retrieval/feedback`, stored in the `feedback` ArangoDB collection. Run `node scripts/tune_weights.js` to read accumulated feedback and get per-rank accuracy stats with suggested `OHARA_*_WEIGHT` adjustments.
+User thumbs up/down on each result card in the UI posts `{ query_hash, node_id, result_rank, signal }` to `POST /api/retrieval/feedback`, stored in the `feedback` ArangoDB collection. Run `node scripts/tune_weights.js` to read accumulated feedback and get per-rank accuracy stats with suggested `OHARA_*_WEIGHT` adjustments. Pass `--apply` to write suggestions to `.env` in-place.
+
+### Reasoning RAG — Sub-Query Gap Fill
+After Phase 1 BM25, Gemini inspects the top results and generates 1–2 targeted sub-queries for gaps the initial results don't cover (`prompts/reasoning_subquery.md` → `{subqueries: [...]}`). Each sub-query runs through `_phase1BM25()` independently; new results are merged (dedup by `_id`) before Phase 1b. Controlled by `OHARA_REASONING_RAG` (default off) and `OHARA_REASONING_SUBQUERY_LIMIT` (default 2).
+
+### Agentic RAG — Dynamic Tool Dispatch
+`queryAgent(rawInput, options)` replaces the fixed pipeline with a Gemini-guided loop. Each iteration:
+1. Gemini reads the query, found-so-far snippets, and tool history → picks one of `bm25 | entity_pivot | cross_doc | structural | done` (`prompts/agent_strategy.md`, temperature 0, cached).
+2. The chosen retrieval tool runs; new nodes merge into the accumulator (dedup by `_id`, max score wins).
+3. Loop continues until Gemini returns `done`, a tool would repeat, or `OHARA_AGENT_MAX_ITER` (default 4) iterations are reached.
+
+Results carry `agent_tool` tag showing which iteration surfaced each node. The UI shows the dispatch chain as a purple badge (e.g. `bm25 → entity_pivot → cross_doc`).
+
+CLI: `node bin/ohara.js query "<text>" --agent`.
+API: `POST /api/retrieval/query` with `{ agent: true }` (takes precedence over `cor`).
 
 ---
 
@@ -403,6 +418,10 @@ All tunables are set via environment variables. Copy `.env.example` to `.env`:
 | `OHARA_COR_SCORE_DELTA` | `0.05` | Chain-of-Retrieval: min score improvement between iterations to continue |
 | `OHARA_SPECULATIVE_RAG` | `false` | Speculative RAG: pre-warm Explorer frontier in background after each query (opt-in) |
 | `OHARA_SPECULATIVE_LIMIT` | `3` | Speculative RAG: number of frontier nodes to pre-warm per query |
+| `OHARA_REASONING_RAG` | `false` | Reasoning RAG: generate sub-queries from BM25 gaps before Phase 1b (opt-in) |
+| `OHARA_REASONING_SUBQUERY_LIMIT` | `2` | Reasoning RAG: max sub-queries generated per request |
+| `OHARA_AUTO_ENTITY_DEDUP` | `false` | Auto-run cross-doc entity dedup after each ingest (opt-in) |
+| `OHARA_AGENT_MAX_ITER` | `4` | Agentic RAG: max Gemini tool-dispatch iterations per query |
 
 ---
 
@@ -483,6 +502,8 @@ node src/ingest/entity_dedup.js
 │   ├── enrich_cross_doc_edge.md      # LLM prompt for SIMILAR_TO edge verb/tags/summary
 │   ├── extract_query_fingerprint.md  # Lightweight prompt for short queries: sumo_tags + entities + temporal_intent
 │   ├── self_rag_verify.md            # Self-RAG: responsiveness check prompt → {responsive, reason}
+│   ├── reasoning_subquery.md         # Reasoning RAG: gap sub-query generation → {subqueries: [...]}
+│   ├── agent_strategy.md             # Agentic RAG: tool picker prompt → {tool, reason, hint}
 │   ├── verify_integrity_claim.md     # Integrity tier cross-check prompt
 │   ├── extract_toc.md
 │   ├── extract_tags.md
@@ -497,7 +518,8 @@ node src/ingest/entity_dedup.js
 │   ├── db-init.js            # ArangoDB collection/index setup
 │   ├── admin-queries.js      # Diagnostic AQL queries
 │   ├── sync-cache.js         # LLM cache sync utility
-│   ├── tune_weights.js       # REFEED RAG: reads feedback collection, suggests OHARA_*_WEIGHT adjustments
+│   ├── tune_weights.js       # REFEED RAG: reads feedback collection, suggests OHARA_*_WEIGHT adjustments (--apply writes to .env)
+│   ├── backfill_embeddings.js  # Backfill text-embedding-004 vectors for paragraphs missing embedding field (--dry-run)
 │   └── clean_noise_entities.js  # Removes opaque-identifier noise entities from existing data
 ├── tests/
 │   └── ingest.test.js        # Node.js built-in test runner
@@ -518,7 +540,7 @@ All endpoints are served by `server.js`.
 |---|---|---|
 | `GET` | `/api/graph` | Full graph state (documents, sections, paragraphs, tables, edges) |
 | `GET` | `/api/graph/node/:collection/:key/neighbors` | Lazy-load a node's neighbors |
-| `POST` | `/api/retrieval/query` | Run the retrieval engine; `cor:true` routes to `queryCoR()`; accepts `sessionHistory`, `selfRagVerify` |
+| `POST` | `/api/retrieval/query` | Run retrieval; `agent:true` → `queryAgent()`, `cor:true` → `queryCoR()`, else `query()`; accepts `sessionHistory`, `selfRagVerify`, `reasoningRag` |
 | `POST` | `/api/retrieval/feedback` | Store REFEED RAG feedback signal (`query_hash`, `node_id`, `result_rank`, `signal`) |
 | `GET` | `/api/retrieval/context/:nodeId` | Get context for a specific node |
 | `POST` | `/api/pipeline/upload` | Upload a file for ingestion |
