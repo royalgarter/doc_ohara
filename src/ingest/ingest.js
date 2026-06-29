@@ -1823,8 +1823,39 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
 
 				// Insert paragraphs in parallel batches — section IDs are all resolved by now
 				const docsParagraphs = transformedDocs.paragraphs.filter(p => p.document_id === doc.id);
-				await runBatched(docsParagraphs, async (p) => {
+
+				// Pre-compute embeddings for all paragraphs before inserting so the vector index is satisfied at insert time.
+				const embeddingMap = new Map(); // index → float[]
+				if (process.env.OHARA_EMBED_PARAGRAPHS === 'true' && ai) {
+					const embedBatch = parseInt(process.env.OHARA_EMBED_BATCH_SIZE || '20', 10);
+					const embeddable = docsParagraphs
+						.map((p, idx) => ({ idx, text: typeof p.content === 'string' && p.content.length >= 20 ? p.content.slice(0, 8192) : null }))
+						.filter(e => e.text !== null);
+					for (let i = 0; i < embeddable.length; i += embedBatch) {
+						const batch = embeddable.slice(i, i + embedBatch);
+						try {
+							const resp = await ai.models.embedContent({
+								model: 'gemini-embedding-2',
+								contents: batch.map(b => b.text),
+								config: { taskType: 'RETRIEVAL_DOCUMENT', outputDimensionality: 768 },
+							});
+							const embeddings = resp.embeddings || [];
+							for (let j = 0; j < batch.length; j++) {
+								const vec = embeddings[j]?.values;
+								if (vec) embeddingMap.set(batch[j].idx, vec);
+							}
+						} catch (embErr) {
+							addPipelineLog('warn', `Embedding batch ${i}–${i + embedBatch} failed: ${embErr.message}`);
+						}
+					}
+					addPipelineLog('info', `Embeddings generated for ${embeddingMap.size} paragraph(s) in ${doc.id}`);
+				}
+
+				for (let piBatch = 0; piBatch < docsParagraphs.length; piBatch += BATCH_SIZE) {
+					await Promise.all(docsParagraphs.slice(piBatch, piBatch + BATCH_SIZE).map(async (p, batchLocal) => {
+						const pIdx = piBatch + batchLocal;
 					const secHandle = p.section_id ? sectionIdMap.get(p.section_id) : null;
+					const embedding = embeddingMap.get(pIdx) ?? new Array(768).fill(0);
 					const paraRes = await arangoClient.insertParagraph({
 						document_id: inserted._key,
 						section_id: secHandle || null,
@@ -1838,6 +1869,7 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
 						sumo_resolved_map: p.sumo_resolved_map || {},
 						entity_slugs: (p.entities || []).map(e => e.slug),
 						entity_types: (p.entities || []).map(e => e.type),
+						embedding,
 					});
 					nodeCount += 1;
 					const paraHandle = paraRes._id || `paragraphs/${paraRes._key}`;
@@ -1880,36 +1912,7 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
 					}
 
 					await Promise.all(edgePromises);
-				});
-
-				// Optional: embed paragraph content with Gemini text-embedding-004 for vector search.
-				// Enabled when OHARA_EMBED_PARAGRAPHS=true. Runs after insertion so it never blocks persist.
-				if (process.env.OHARA_EMBED_PARAGRAPHS === 'true' && ai) {
-					const embedBatch = parseInt(process.env.OHARA_EMBED_BATCH_SIZE || '20', 10);
-					const embeddable = docsParagraphs
-						.filter(p => typeof p.content === 'string' && p.content.length >= 20)
-						.map(p => ({ key: p._key || p.id, text: p.content.slice(0, 8192) }));
-					for (let i = 0; i < embeddable.length; i += embedBatch) {
-						const batch = embeddable.slice(i, i + embedBatch);
-						try {
-							const resp = await ai.models.embedContent({
-								model: 'text-embedding-004',
-								contents: batch.map(b => b.text),
-								config: { taskType: 'RETRIEVAL_DOCUMENT' },
-							});
-							const embeddings = resp.embeddings || [];
-							for (let j = 0; j < batch.length; j++) {
-								const vec = embeddings[j]?.values;
-								if (vec && batch[j].key) {
-									await arangoClient.updateDocument(batch[j].key, { embedding: vec }).catch(() => {});
-								}
-							}
-						} catch (embErr) {
-							addPipelineLog('warn', `Embedding batch ${i}–${i + embedBatch} failed: ${embErr.message}`);
-						}
-					}
-					addPipelineLog('info', `Embeddings generated for ${embeddable.length} paragraph(s) in ${doc.id}`);
-				}
+				})); }
 
 				// Roll up entity_slugs and sumo_tags onto the document record for O(docs) pre-filtering
 				{

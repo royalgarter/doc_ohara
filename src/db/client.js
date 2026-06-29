@@ -128,6 +128,12 @@ export async function updateDocument(key, patch) {
 	await coll.update(key, patch);
 }
 
+export async function updateParagraph(key, patch) {
+	if (!initialized) await initArangoClient();
+	const coll = db.collection('paragraphs');
+	await coll.update(key, patch);
+}
+
 export async function upsertEntity(entity) {
 	if (!initialized) await initArangoClient();
 	const coll = db.collection('entities');
