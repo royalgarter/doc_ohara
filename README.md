@@ -1,8 +1,8 @@
-# Doc Ohara: Space-Time Graph for Advanced Context Retrieval
+# OHARA: [O]ntology [H]istorical [A]tlas [R]etrieval [A]rchitecture
 
-Doc Ohara is a document transformation and retrieval engine that converts unstructured documents into a multi-dimensional **Space-Time Graph** stored in ArangoDB. It solves the "lost in the middle" problem of traditional flat-chunk RAG by navigating a structured graph instead of scanning a flat list.
+OHARA (Ontology Historical Atlas Retrieval Architecture) is a document transformation and retrieval engine that converts unstructured documents into a multi-dimensional **Space-Time Graph** stored in ArangoDB. It solves the "lost in the middle" problem of traditional flat-chunk RAG by navigating a structured graph instead of scanning a flat list.
 
-> **TL;DR**: Doc Ohara parses documents into a hierarchy of sections and paragraphs, enriches each node with SUMO ontology tags and named entities, links shared concepts across documents, and retrieves context through a three-phase hybrid engine.
+> **TL;DR**: Acting as a multi-dimensional atlas for your data, OHARA parses documents into precise structural hierarchies and enriches them with SUMO ontology tags and named entities[cite: 1]. By mapping semantic connections across *space* (cross-document entity pivots) and *time* (temporal intent and exponential decay), OHARA retrieves deep, corroborated context through a multi-phase hybrid architecture.
 
 ---
 
