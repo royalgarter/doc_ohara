@@ -14,8 +14,8 @@
 		[x-cloak] { display: none !important; }
 		body { font-family: 'SF Mono', ui-monospace, 'Cascadia Code', monospace; }
 		.scrollbar-thin::-webkit-scrollbar { width: 3px; height: 3px; }
-		.scrollbar-thin::-webkit-scrollbar-track { background: #1a1108; }
-		.scrollbar-thin::-webkit-scrollbar-thumb { background: #8B5B29; border-radius: 2px; }
+		.scrollbar-thin::-webkit-scrollbar-track { background: #eee8d5; }
+		.scrollbar-thin::-webkit-scrollbar-thumb { background: #93a1a1; border-radius: 2px; }
 		.log-line { font-size: 10.5px; line-height: 1.5; }
 		.line-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 		.ml-auto { margin-left: auto; }
@@ -24,114 +24,115 @@
 		#graph-svg .node-g { cursor: pointer; }
 		#graph-svg .node-g circle { transition: r 0.1s; }
 
-		/* ── Classic Literature Palette ────────────────────────────────────────
-		   #4B3D2D  dark brown    #8B5B29  medium brown
-		   #C2B280  tan/sand      #D9CBA0  warm beige    #E3D4B9  parchment
-		   Derived: #1a1108 (darkest bg)  #2d2014 (dark bg)  #3d2e1c (panel)
-		            #6b5235 (muted accent)  #5a4530 (border mid)
+		/* ── Solarized Light Theme ──────────────────────────────────────────
+		   #fdf6e3  base3 (light bg)  #eee8d5  base2 (panel bg)
+		   #657b83  base00 (text)      #586e75  base01 (emph)
+		   #93a1a1  base1 (muted)      #839496  base0 (secondary)
+		   #268bd2  blue (accent)      #dc322f  red     #b58900  yellow
+		   #859900  green              #cb4b16  orange
 		   ─────────────────────────────────────────────────────────────────── */
 
 		/* Background */
-		.cl-bg-0   { background-color: #1a1108; }  /* body / canvas */
-		.cl-bg-1   { background-color: #2d2014; }  /* header / nav / dark panel */
-		.cl-bg-2   { background-color: #3d2e1c; }  /* cards / inputs / inactive btns */
-		.cl-bg-3   { background-color: #4B3D2D; }  /* active / hover states */
-		.cl-bg-acc { background-color: #8B5B29; }  /* primary action */
-		.cl-bg-acc:hover { background-color: #6b5235; }
+		.cl-bg-0   { background-color: #fdf6e3; }  /* body / canvas */
+		.cl-bg-1   { background-color: #eee8d5; }  /* header / nav / panel */
+		.cl-bg-2   { background-color: #fdf6e3; }  /* cards / inputs / inactive btns */
+		.cl-bg-3   { background-color: #e5dfcd; }  /* active / hover states */
+		.cl-bg-acc { background-color: #268bd2; }  /* primary action */
+		.cl-bg-acc:hover { background-color: #1a6ea0; }
 
 		/* Text */
-		.cl-t0 { color: #E3D4B9; }  /* brightest — titles, selected */
-		.cl-t1 { color: #D9CBA0; }  /* primary text */
-		.cl-t2 { color: #C2B280; }  /* accent / secondary highlight */
-		.cl-t3 { color: #8B5B29; }  /* section headers, labels */
-		.cl-t4 { color: #6b5235; }  /* muted */
-		.cl-t5 { color: #5a4530; }  /* dim / disabled */
-		.cl-t0:hover { color: #E3D4B9; }
-		.cl-t1:hover { color: #E3D4B9; }
-		.cl-t2:hover { color: #E3D4B9; }
-		.cl-t3:hover { color: #D9CBA0; }
-		.cl-t4:hover { color: #D9CBA0; }
+		.cl-t0 { color: #002b36; }  /* brightest — titles, selected */
+		.cl-t1 { color: #657b83; }  /* primary text */
+		.cl-t2 { color: #268bd2; }  /* accent / secondary highlight */
+		.cl-t3 { color: #586e75; }  /* section headers, labels */
+		.cl-t4 { color: #839496; }  /* muted */
+		.cl-t5 { color: #93a1a1; }  /* dim / disabled */
+		.cl-t0:hover { color: #002b36; }
+		.cl-t1:hover { color: #002b36; }
+		.cl-t2:hover { color: #1a6ea0; }
+		.cl-t3:hover { color: #657b83; }
+		.cl-t4:hover { color: #657b83; }
 
 		/* Border */
-		.cl-b0 { border-color: #3d2e1c; }  /* subtle */
-		.cl-b1 { border-color: #5a4530; }  /* normal */
-		.cl-b2 { border-color: #8B5B29; }  /* accent / selected */
+		.cl-b0 { border-color: #eee8d5; }  /* subtle */
+		.cl-b1 { border-color: #93a1a1; }  /* normal */
+		.cl-b2 { border-color: #268bd2; }  /* accent / selected */
 
 		/* Dot glow */
-		.dot-glow { box-shadow: 0 0 6px #C2B280; }
-		.group:hover .group-hover-cl { color: #D9CBA0; }
+		.dot-glow { box-shadow: 0 0 6px #268bd2; }
+		.group:hover .group-hover-cl { color: #586e75; }
 
 		/* Tab */
-		.cl-tab-on  { background-color: #4B3D2D; color: #C2B280; }
-		.cl-tab-off { color: #6b5235; }
-		.cl-tab-off:hover { color: #D9CBA0; }
+		.cl-tab-on  { background-color: #268bd2; color: #fdf6e3; }
+		.cl-tab-off { color: #839496; }
+		.cl-tab-off:hover { color: #586e75; }
 
 		/* Button primary */
-		.cl-btn { background-color: #8B5B29; color: #E3D4B9; }
-		.cl-btn:hover { background-color: #6b5235; }
-		.cl-btn:disabled { background-color: #3d2e1c; color: #5a4530; cursor: not-allowed; }
+		.cl-btn { background-color: #268bd2; color: #fdf6e3; }
+		.cl-btn:hover { background-color: #1a6ea0; }
+		.cl-btn:disabled { background-color: #eee8d5; color: #93a1a1; cursor: not-allowed; }
 
 		/* Button ghost */
-		.cl-btn-gh { background-color: #3d2e1c; color: #C2B280; border-color: #5a4530; }
-		.cl-btn-gh:hover { background-color: #4B3D2D; color: #E3D4B9; border-color: #8B5B29; }
+		.cl-btn-gh { background-color: #eee8d5; color: #586e75; border-color: #93a1a1; }
+		.cl-btn-gh:hover { background-color: #e5dfcd; color: #002b36; border-color: #268bd2; }
 
 		/* Button danger hover */
-		.cl-btn-del { background-color: #3d2e1c; color: #6b5235; }
-		.cl-btn-del:hover { background-color: #3d1a1a; color: #f87171; }
+		.cl-btn-del { background-color: #eee8d5; color: #93a1a1; }
+		.cl-btn-del:hover { background-color: #fce8e8; color: #dc322f; }
 
 		/* Card */
-		.cl-card     { background-color: #3d2e1c; border-color: #5a4530; }
-		.cl-card:hover { border-color: #8B5B29; background-color: #4B3D2D; }
-		.cl-card-on  { background-color: #4B3D2D; border-color: #8B5B29; }
+		.cl-card     { background-color: #eee8d5; border-color: #93a1a1; }
+		.cl-card:hover { border-color: #268bd2; background-color: #e5dfcd; }
+		.cl-card-on  { background-color: #e5dfcd; border-color: #268bd2; }
 
 		/* Input */
-		.cl-input { background-color: #3d2e1c; border-color: #5a4530; color: #D9CBA0; }
-		.cl-input:focus { outline: none; border-color: #8B5B29; }
+		.cl-input { background-color: #fdf6e3; border-color: #93a1a1; color: #657b83; }
+		.cl-input:focus { outline: none; border-color: #268bd2; }
 
 		/* Job status card backgrounds — solid, no opacity */
-		.cl-job-failed    { background-color: #2d1010; border-color: #7a2222; }
-		.cl-job-waiting   { background-color: #2d2810; border-color: #7a6322; }
-		.cl-job-active    { background-color: #3d2e1c; border-color: #8B5B29; }
-		.cl-job-completed { background-color: #3d2e1c; border-color: #5a4530; }
+		.cl-job-failed    { background-color: #fce8e8; border-color: #dc322f; }
+		.cl-job-waiting   { background-color: #fcf4e0; border-color: #b58900; }
+		.cl-job-active    { background-color: #e8f0fc; border-color: #268bd2; }
+		.cl-job-completed { background-color: #eef5e8; border-color: #859900; }
 
 		/* Status indicator colors used inline */
-		.cl-status-fail    { color: #f87171; }
-		.cl-status-warn    { color: #fbbf24; }
-		.cl-status-ok      { color: #4ade80; }
-		.cl-status-act     { color: #C2B280; }
+		.cl-status-fail    { color: #dc322f; }
+		.cl-status-warn    { color: #b58900; }
+		.cl-status-ok      { color: #859900; }
+		.cl-status-act     { color: #268bd2; }
 
 		/* SUMO tag chip */
-		.cl-tag { background-color: #253320; border-color: #3a5330; color: #4ade80; }
+		.cl-tag { background-color: #eef5e8; border-color: #859900; color: #586e75; }
 
-		/* litewind overrides — remap gray/sky classes to Classic Literature */
-		.bg-gray-950 { background-color: #1a1108; }
-		.bg-sky-700  { background-color: #8B5B29; }
-		.bg-sky-900  { background-color: #3d2e1c; }
-		.text-sky-400, .text-sky-300, .text-sky-200 { color: #C2B280; }
-		.text-sky-500 { color: #8B5B29; }
-		.border-gray-700 { border-color: #5a4530; }
-		.border-gray-800 { border-color: #3d2e1c; }
-		.hover\:bg-sky-600:hover  { background-color: #6b5235; }
-		.hover\:bg-sky-800:hover  { background-color: #4B3D2D; }
-		.hover\:text-gray-300:hover { color: #D9CBA0; }
-		.hover\:text-red-400:hover  { color: #f87171; }
+		/* litewind overrides — remap gray/sky classes to Solarized Light */
+		.bg-gray-950 { background-color: #fdf6e3; }
+		.bg-sky-700  { background-color: #268bd2; }
+		.bg-sky-900  { background-color: #eee8d5; }
+		.text-sky-400, .text-sky-300, .text-sky-200 { color: #268bd2; }
+		.text-sky-500 { color: #1a6ea0; }
+		.border-gray-700 { border-color: #93a1a1; }
+		.border-gray-800 { border-color: #eee8d5; }
+		.hover\:bg-sky-600:hover  { background-color: #1a6ea0; }
+		.hover\:bg-sky-800:hover  { background-color: #e5dfcd; }
+		.hover\:text-gray-300:hover { color: #586e75; }
+		.hover\:text-red-400:hover  { color: #dc322f; }
 
 		/* Functional status (keep red/yellow/green for semantic meaning) */
-		.bg-yellow-700\/60 { background-color: #7a5010; }
-		.bg-yellow-800\/50 { background-color: #5e3e0e; }
-		.bg-yellow-950\/20 { background-color: #2d2310; }
-		.bg-red-800\/50    { background-color: #3d1a1a; }
-		.bg-red-950\/30    { background-color: #2d1010; }
-		.bg-green-900\/40  { background-color: #1a2d1a; }
-		.border-yellow-700\/40 { border-color: #7a5010; }
-		.border-red-800\/60    { border-color: #7a2222; }
-		.border-green-800\/50  { border-color: #3a5330; }
-		.hover\:bg-yellow-600\/70:hover { background-color: #8a6018; }
-		.hover\:bg-yellow-700\/60:hover { background-color: #7a5010; }
-		.hover\:bg-red-700\/60:hover    { background-color: #6b1e1e; }
-		.hover\:bg-red-900\/50:hover    { background-color: #3d1a1a; }
-		.text-yellow-400\/70 { color: #fbbf24; }
-		.text-red-400\/80    { color: #f87171; }
+		.bg-yellow-700\/60 { background-color: #b58900; }
+		.bg-yellow-800\/50 { background-color: #967a0e; }
+		.bg-yellow-950\/20 { background-color: #fcf4e0; }
+		.bg-red-800\/50    { background-color: #dc322f; }
+		.bg-red-950\/30    { background-color: #fce8e8; }
+		.bg-green-900\/40  { background-color: #859900; }
+		.border-yellow-700\/40 { border-color: #b58900; }
+		.border-red-800\/60    { border-color: #dc322f; }
+		.border-green-800\/50  { border-color: #859900; }
+		.hover\:bg-yellow-600\/70:hover { background-color: #b58900; }
+		.hover\:bg-yellow-700\/60:hover { background-color: #967a0e; }
+		.hover\:bg-red-700\/60:hover    { background-color: #b52929; }
+		.hover\:bg-red-900\/50:hover    { background-color: #fce8e8; }
+		.text-yellow-400\/70 { color: #b58900; }
+		.text-red-400\/80    { color: #dc322f; }
 	</style>
 </head>
 <body x-data="app()" x-init="init()" x-cloak
@@ -140,7 +141,7 @@
 	<!-- ── Header ─────────────────────────────────────────────────────────────── -->
 	<header class="flex items-center gap-5 px-4 h-10 cl-bg-1 border-b cl-b0 flex-shrink-0 select-none">
 		<div class="flex items-center gap-2">
-			<div class="w-2 h-2 rounded-full cl-bg-acc dot-glow" style="background:#C2B280"></div>
+			<div class="w-2 h-2 rounded-full cl-bg-acc dot-glow" style="background:#268bd2"></div>
 			<span class="text-xs font-bold cl-t2 tracking-widest">DOC OHARA</span>
 		</div>
 		<div class="flex gap-4 text-xs cl-t3">
@@ -383,7 +384,7 @@
 							<template x-for="(r, i) in (queryResults.tiers && queryResults.tiers.principal || [])" :key="i">
 								<div @click="highlightResultNode(r.node)"
 									class="text-xs p-2 rounded border cursor-pointer transition"
-									style="background-color:#2a1f0e; border-color:#8B5B29;">
+									style="background-color:#e8f0fc; border-color:#268bd2;">
 									<div class="flex justify-between items-center mb-1">
 										<span class="text-amber-500 text-sm font-bold">★ Core</span>
 										<div class="flex items-center gap-2">
@@ -839,17 +840,17 @@
 				{ id: 'analytics', icon: '◎', label: 'Analytics' },
 			],
 			legend: [
-				['#C2B280', 'Document'],
-				['#C2B280', 'Section L1'],
-				['#D9CBA0', 'Section L2'],
-				['#E3D4B9', 'Section L3'],
-				['#b8975a', 'Section L4'],
-				['#a07840', 'Section L5'],
-				['#D9CBA0', 'Paragraph'],
-				['#E3D4B9', 'Figure'],
-				['#8B5B29', 'Table'],
-				['#c9a96e', 'Entity'],
-				['#b8975a', 'Tag'],
+				['#268bd2', 'Document'],
+				['#268bd2', 'Section L1'],
+				['#586e75', 'Section L2'],
+				['#657b83', 'Section L3'],
+				['#839496', 'Section L4'],
+				['#93a1a1', 'Section L5'],
+				['#586e75', 'Paragraph'],
+				['#657b83', 'Figure'],
+				['#cb4b16', 'Table'],
+				['#d33682', 'Entity'],
+				['#b58900', 'Tag'],
 			],
 
 			graphData: { documents: [], sections: [], paragraphs: [], tables: [], entities: [], edges: [] },
@@ -1301,7 +1302,7 @@
 			},
 
 			jobStatusColor(status) {
-				return { failed: '#f87171', waiting: '#fbbf24', active: '#C2B280', completed: '#4ade80' }[status] || '#8B5B29';
+				return { failed: '#dc322f', waiting: '#b58900', active: '#268bd2', completed: '#859900' }[status] || '#268bd2';
 			},
 
 			nodeColor(node) { return getNodeColor(node, this.colorMode); },
@@ -1311,20 +1312,20 @@
 	// ── SVG Graph Renderer ────────────────────────────────────────────────────
 
 	// One color per section level (index 0 = level 1, etc.)
-	const LEVEL_COLORS = ['#C2B280','#D9CBA0','#E3D4B9','#b8975a','#a07840','#8B5B29','#c9a96e'];
+	const LEVEL_COLORS = ['#268bd2','#586e75','#657b83','#839496','#93a1a1','#cb4b16','#d33682'];
 
 	const FIXED_COLORS = {
-		document:  '#C2B280',
-		paragraph: '#D9CBA0',
-		figure:    '#E3D4B9',
-		table:     '#8B5B29',
-		entity:    '#c9a96e',
-		tag:       '#b8975a',
+		document:  '#268bd2',
+		paragraph: '#586e75',
+		figure:    '#657b83',
+		table:     '#cb4b16',
+		entity:    '#d33682',
+		tag:       '#b58900',
 	};
 
 	const CLUSTER_PALETTE = [
-		'#C2B280','#D9CBA0','#E3D4B9','#b8975a',
-		'#a07840','#8B5B29','#c9a96e','#6b5235',
+		'#268bd2','#586e75','#657b83','#839496',
+		'#93a1a1','#cb4b16','#d33682','#b58900',
 	];
 
 	// Returns a stable colKey string for a node.
@@ -1357,7 +1358,7 @@
 	}
 
 	function getNodeColor(node, colorMode) {
-		if (!node) return '#8B5B29';
+		if (!node) return '#268bd2';
 		if (colorMode === 'sumo') {
 			const tags = node.sumo_tags || [];
 			if (tags.length > 0) {
@@ -1371,7 +1372,7 @@
 			const lvl = parseInt(ck.replace('section_L', ''), 10);
 			return LEVEL_COLORS[(lvl - 1) % LEVEL_COLORS.length];
 		}
-		return FIXED_COLORS[ck] || '#8B5B29';
+		return FIXED_COLORS[ck] || '#268bd2';
 	}
 
 	// ── Three.js 3D Space-Time Graph Renderer ────────────────────────────────────
@@ -1428,10 +1429,10 @@
 	// Returns a stable HSL color for a SUMO category index (0-based out of N categories).
 	// Uses golden-ratio hue spacing for maximum perceptual distinctness.
 	function _categoryColor(cat) {
-		if (!_sumoCategories || !_sumoCategories.categories.length) return '#C2B280';
+		if (!_sumoCategories || !_sumoCategories.categories.length) return '#268bd2';
 		const cats = _sumoCategories.categories;
 		const idx = cats.indexOf(cat);
-		if (idx < 0) return '#C2B280';
+		if (idx < 0) return '#268bd2';
 		const hue = Math.round((idx / cats.length) * 360 * 1.6180339887) % 360;
 		return `hsl(${hue},55%,62%)`;
 	}
@@ -1439,9 +1440,9 @@
 	// Resolve top sumo_tag of a document to its ontology category color.
 	function _sumoDocColor(doc) {
 		const tags = doc.sumo_tags || [];
-		if (!tags.length || !_sumoCategories) return '#C2B280';
+		if (!tags.length || !_sumoCategories) return '#268bd2';
 		const cat = _sumoCategories.map[tags[0]];
-		return cat ? _categoryColor(cat) : '#C2B280';
+		return cat ? _categoryColor(cat) : '#268bd2';
 	}
 
 	function _titleColor(title) {
@@ -1452,11 +1453,11 @@
 
 	function _nodeColorHex(node, colKey, colorMode, docColorMap) {
 		if (colorMode === 'doc' && docColorMap) {
-			if (colKey === 'tag') return '#b8975a';
-			if (colKey === 'entity') return '#c9a96e';
+			if (colKey === 'tag') return '#b58900';
+			if (colKey === 'entity') return '#d33682';
 			if (colKey === '_label' || colKey === '_tick') return null;
 			const dk = node && (node.document_id || node._key);
-			return (dk && docColorMap.get(dk)) || '#C2B280';
+			return (dk && docColorMap.get(dk)) || '#268bd2';
 		}
 		if (colorMode === 'sumo') {
 			const tags = node.sumo_tags || [];
@@ -1465,14 +1466,14 @@
 				return CLUSTER_PALETTE[h % CLUSTER_PALETTE.length];
 			}
 		}
-		if (colKey === 'tag') return '#b8975a';
-		if (colKey === 'entity') return '#c9a96e';
-		if (colKey === 'document') return '#C2B280';
+		if (colKey === 'tag') return '#b58900';
+		if (colKey === 'entity') return '#d33682';
+		if (colKey === 'document') return '#268bd2';
 		if (colKey.startsWith('section_L')) {
 			const lvl = parseInt(colKey.replace('section_L',''), 10);
 			return LEVEL_COLORS[(lvl - 1) % LEVEL_COLORS.length];
 		}
-		return FIXED_COLORS[colKey] || '#D9CBA0';
+		return FIXED_COLORS[colKey] || '#586e75';
 	}
 
 	function _disposeG3D() {
@@ -1503,7 +1504,7 @@
 		const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
 		renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 		renderer.setSize(w, h);
-		renderer.setClearColor(0x1a1108, 1);
+		renderer.setClearColor(0x002b36, 1);
 
 		const scene = new THREE.Scene();
 		const camera = new THREE.PerspectiveCamera(55, w / h, 1, 20000);
@@ -1540,7 +1541,7 @@
 		// Tooltip
 		const tip = document.createElement('div');
 		tip.id = 'g3d-tooltip';
-		tip.style.cssText = 'position:absolute;background:#3d2e1c;color:#E3D4B9;font:10px ui-monospace,monospace;padding:3px 8px;border-radius:4px;pointer-events:none;white-space:nowrap;display:none;z-index:20;border:1px solid #8B5B29;max-width:300px;overflow:hidden;text-overflow:ellipsis;box-shadow:0 2px 8px #0006;';
+		tip.style.cssText = 'position:absolute;background:#eee8d5;color:#657b83;font:10px ui-monospace,monospace;padding:3px 8px;border-radius:4px;pointer-events:none;white-space:nowrap;display:none;z-index:20;border:1px solid #268bd2;max-width:300px;overflow:hidden;text-overflow:ellipsis;box-shadow:0 2px 8px #0000001a;';
 		container.appendChild(tip);
 
 		Object.assign(G3D, { renderer, scene, camera, controls, tooltipEl: tip, initialized: true });
@@ -1903,7 +1904,7 @@
 				dummy.updateMatrix();
 				mesh.setMatrixAt(idx, dummy.matrix);
 				const hex = _nodeColorHex(node, colKey, colorMode, docColorMap);
-				col3.set(hex || '#C2B280');
+				col3.set(hex || '#268bd2');
 				if (isDim) col3.lerp(new THREE.Color(0x4B3D2D), 0.72);
 				mesh.setColorAt(idx, col3);
 				G3D.keyToMeshIdx.set(key, { mesh, idx });
@@ -1922,7 +1923,7 @@
 			const se = nodePos.get(selectedKey);
 			if (se) {
 				const ringGeo = new THREE.RingGeometry(se.r * 1.9, se.r * 2.4, 32);
-				const hex = _nodeColorHex(se.node, se.colKey, colorMode, docColorMap) || '#C2B280';
+				const hex = _nodeColorHex(se.node, se.colKey, colorMode, docColorMap) || '#268bd2';
 				const ringMat = new THREE.MeshBasicMaterial({ color: hex, transparent: true, opacity: 0.75, side: THREE.DoubleSide });
 				const ring = new THREE.Mesh(ringGeo, ringMat);
 				ring.position.set(se.x, se.y, se.z);
@@ -1940,10 +1941,10 @@
 		// Width = node.r * 2.5 (spans tangentially), height = decay-class Z extent.
 		// zH = fin extent along tunnel (Z) axis; longer decay class = longer temporal reach
 		const DECAY_FIN = {
-			EVERGREEN: { hex: '#C2B280', op: 0.16, zH: Z_SPACING * 5   },  // timeless — spans 5 discs
-			SCHOLARLY: { hex: '#D9CBA0', op: 0.14, zH: Z_SPACING * 2.5 },  // long-lived — 2.5 discs
-			CURRENT:   { hex: '#8B5B29', op: 0.12, zH: Z_SPACING * 1   },  // one disc span
-			EPHEMERAL: { hex: '#6b5235', op: 0.10, zH: Z_SPACING * 0.4 },  // short reach
+		EVERGREEN: { hex: '#268bd2', op: 0.16, zH: Z_SPACING * 5   },  // timeless — spans 5 discs
+		SCHOLARLY: { hex: '#586e75', op: 0.14, zH: Z_SPACING * 2.5 },  // long-lived — 2.5 discs
+		CURRENT:   { hex: '#657b83', op: 0.12, zH: Z_SPACING * 1   },  // one disc span
+		EPHEMERAL: { hex: '#93a1a1', op: 0.10, zH: Z_SPACING * 0.4 },  // short reach
 		};
 		// Base fin geometry: 1×1 in XY plane (default). Instance matrix rotates to XZ.
 		// rotX(-90°) via instance: scale.y becomes Z extent, scale.x becomes X extent.
@@ -1992,7 +1993,7 @@
 			const dk         = d._key || d.id;
 			const { cx, cy, cz } = docCenter.get(dk) ?? { cx:0, cy:0, cz:di*Z_SPACING };
 			const dr  = (docDiscR.get(dk) ?? maxDiscR) + 20;
-			const hex = _nodeColorHex(d, 'document', colorMode, docColorMap) || '#C2B280';
+			const hex = _nodeColorHex(d, 'document', colorMode, docColorMap) || '#268bd2';
 			const c   = new THREE.Color(hex).multiplyScalar(0.32);
 			const N   = 64, pts = [], cols = [];
 			for (let i = 0; i < N; i++) {
@@ -2012,7 +2013,7 @@
 			const dk         = d._key || d.id;
 			const { cx, cy, cz } = docCenter.get(dk) ?? { cx:0, cy:0, cz:di*Z_SPACING };
 			const dr  = (docDiscR.get(dk) ?? maxDiscR) + 18;
-			const hex = _nodeColorHex(d, 'document', colorMode, docColorMap) || '#C2B280';
+			const hex = _nodeColorHex(d, 'document', colorMode, docColorMap) || '#268bd2';
 			const planeMesh = new THREE.Mesh(
 				new THREE.CircleGeometry(dr, 64),
 				new THREE.MeshBasicMaterial({ color: new THREE.Color(hex), transparent: true, opacity: 0.04, side: THREE.DoubleSide, depthWrite: false })
@@ -2075,7 +2076,7 @@
 				const el = document.createElement('div');
 				const lkey = '__tick__' + cur;
 				el.dataset.lk = lkey;
-				el.style.cssText = 'position:absolute;font:8px ui-monospace,monospace;color:#8B5B29;pointer-events:none;white-space:nowrap;';
+				el.style.cssText = 'position:absolute;font:8px ui-monospace,monospace;color:#586e75;pointer-events:none;white-space:nowrap;';
 				el.textContent = _fmtBucket(cur);
 				labelContainer.appendChild(el);
 				G3D.labelEls.push(el);
@@ -2092,7 +2093,7 @@
 		// c) Entity/Tag tether lines to disc centers
 		{
 			const tetherPts = [], tetherCols = [];
-			const tc = new THREE.Color('#8B5B29').multiplyScalar(0.5);
+			const tc = new THREE.Color('#268bd2').multiplyScalar(0.5);
 			for (const e of entities) {
 				const ep = nodePos.get(e._key || e.id);
 				const docKeys = (e.doc_keys || [e.doc_key || e.document_id]).filter(Boolean);
