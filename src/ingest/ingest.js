@@ -1917,15 +1917,17 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
 				// Roll up entity_slugs and sumo_tags onto the document record for O(docs) pre-filtering
 				{
 					const entitySlugSet = new Set();
-					const sumoTagSet = new Set();
+					const sumoTagFreq = new Map();
 					for (const p of docsParagraphs) {
 						for (const e of (p.entities || [])) entitySlugSet.add(e.slug);
-						for (const t of (p.sumo_tags || [])) sumoTagSet.add(t);
+						for (const t of (p.sumo_tags || [])) sumoTagFreq.set(t, (sumoTagFreq.get(t) || 0) + 1);
 					}
+					// Sort by frequency descending so sumo_tags[0] is the dominant tag
+					const sumoTags = [...sumoTagFreq.entries()].sort((a, b) => b[1] - a[1]).map(([t]) => t);
 					const entitySlugs = [...entitySlugSet];
 					await arangoClient.updateDocument(inserted._key, {
 						entity_slugs: entitySlugs,
-						sumo_tags: [...sumoTagSet],
+						sumo_tags: sumoTags,
 						entity_count: entitySlugs.length,
 					}).catch(() => {});
 

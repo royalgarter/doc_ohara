@@ -892,7 +892,7 @@
 			analyticsData: null,
 
 			async init() {
-				await Promise.all([this.loadDocuments(), this.loadInputFiles(), this.loadJobs()]);
+				await Promise.all([this.loadDocuments(), this.loadInputFiles(), this.loadJobs(), _loadSumoCategories()]);
 				setInterval(() => this.pollPipeline(), 2500);
 				setInterval(() => this.loadJobs(), 5000);
 
@@ -1415,6 +1415,35 @@
 		return (d.getFullYear() - 2010) * 60;
 	}
 
+	// SUMO category palette — loaded once from /ontology/sumo_tag_categories.json
+	let _sumoCategories = null; // { categories: string[], map: {tag: category} }
+
+	async function _loadSumoCategories() {
+		try {
+			const r = await fetch('/ontology/sumo_tag_categories.json');
+			_sumoCategories = await r.json();
+		} catch (_) { _sumoCategories = { categories: [], map: {} }; }
+	}
+
+	// Returns a stable HSL color for a SUMO category index (0-based out of N categories).
+	// Uses golden-ratio hue spacing for maximum perceptual distinctness.
+	function _categoryColor(cat) {
+		if (!_sumoCategories || !_sumoCategories.categories.length) return '#C2B280';
+		const cats = _sumoCategories.categories;
+		const idx = cats.indexOf(cat);
+		if (idx < 0) return '#C2B280';
+		const hue = Math.round((idx / cats.length) * 360 * 1.6180339887) % 360;
+		return `hsl(${hue},55%,62%)`;
+	}
+
+	// Resolve top sumo_tag of a document to its ontology category color.
+	function _sumoDocColor(doc) {
+		const tags = doc.sumo_tags || [];
+		if (!tags.length || !_sumoCategories) return '#C2B280';
+		const cat = _sumoCategories.map[tags[0]];
+		return cat ? _categoryColor(cat) : '#C2B280';
+	}
+
 	function _titleColor(title) {
 		let h = 0;
 		for (const c of (title || '')) h = (h * 31 + c.charCodeAt(0)) & 0x7fffffff;
@@ -1611,9 +1640,9 @@
 			return ya - yb;
 		});
 
-		// Build per-document color map from title hash
+		// Build per-document color map from top SUMO tag ontology category
 		const docColorMap = new Map();
-		sortedDocs.forEach(d => docColorMap.set(d._key || d.id, _titleColor(d.title || d.source_file || d._key || '')));
+		sortedDocs.forEach(d => docColorMap.set(d._key || d.id, _sumoDocColor(d)));
 
 		const docDiscZ = new Map();   // docKey → Z position (kept for tunnel visuals compat)
 		const docDiscR = new Map();   // docKey → max ring radius
