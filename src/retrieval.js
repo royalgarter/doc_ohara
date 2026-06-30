@@ -617,6 +617,32 @@ export class RetrievalEngine {
 				} catch (_) {}
 			}
 
+			// E8: attach community summary to pivot results for synthesis context
+			const communityEnabled = process.env.OHARA_COMMUNITY !== 'false';
+			if (communityEnabled && entitySlugs.length > 0) {
+				try {
+					const commRows = await this.db.executeAQL(`
+						LET slugs = @slugs
+						FOR e IN entities
+							FILTER e.slug IN slugs
+							FOR cm_edge IN edges
+								FILTER cm_edge._from == e._id AND cm_edge.relation == "COMMUNITY_MEMBER"
+								FOR c IN communities
+									FILTER c._id == cm_edge._to
+									COLLECT comm = c INTO grp
+									SORT LENGTH(grp) DESC
+									LIMIT 3
+									RETURN { summary: comm.summary, member_count: comm.member_count, member_entity_slugs: comm.member_entity_slugs }
+					`, { slugs: entitySlugs });
+					if (commRows.length > 0) {
+						// Attach as metadata — consumers can use for synthesis context
+						for (const row of rows) {
+							row.community_context = commRows;
+						}
+					}
+				} catch (_) {}
+			}
+
 			return rows;
 		} catch (_) {
 			return [];
@@ -1140,10 +1166,39 @@ export class RetrievalEngine {
 			}));
 		} catch (_) {}
 
+		// E8: Unexpected Connection cards — cross-community RELATED_TO edges near principal nodes
+		let unexpectedConnections = [];
+		try {
+			const principalEntitySlugs = [...new Set(
+				principal.flatMap(e => e.node?.entity_slugs || [])
+			)].slice(0, 15);
+			if (principalEntitySlugs.length > 0) {
+				const surprising = await this.db.executeAQL(`
+					LET slugs = @slugs
+					FOR e IN entities
+						FILTER e.slug IN slugs
+						FOR rel IN edges
+							FILTER rel._from == e._id AND rel.relation == "RELATED_TO" AND rel.is_surprising == true
+							FOR other IN entities
+								FILTER other._id == rel._to
+								LIMIT 5
+								RETURN { from_name: e.name, from_slug: e.slug, to_name: other.name, to_slug: other.slug }
+				`, { slugs: principalEntitySlugs });
+				unexpectedConnections = surprising.map(r => ({
+					type: 'unexpected_connection',
+					from_entity: r.from_name,
+					from_slug: r.from_slug,
+					to_entity: r.to_name,
+					to_slug: r.to_slug,
+					hint: `"${r.from_name}" and "${r.to_name}" are connected despite belonging to different topic communities`,
+				}));
+			}
+		} catch (_) {}
+
 		return {
 			principal: principal.map(e => ({ node: e.node, score: e.score, sources: e.sources })),
 			integrity,
-			explorer: { frontier, stopped_reason: stoppedReason, knowledge_gaps: knowledgeGaps },
+			explorer: { frontier, stopped_reason: stoppedReason, knowledge_gaps: knowledgeGaps, unexpected_connections: unexpectedConnections },
 		};
 	}
 

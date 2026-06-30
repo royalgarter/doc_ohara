@@ -30,7 +30,7 @@ export async function initArangoClient() {
 	if (username) db.useBasicAuth(username, password);
 
 	// ensure collections exist
-	const docCollections = ['documents', 'sections', 'paragraphs', 'tables', 'llm_cache', 'entities', 'jobs', 'feedback', 'config', 'clusters'];
+	const docCollections = ['documents', 'sections', 'paragraphs', 'tables', 'llm_cache', 'entities', 'jobs', 'feedback', 'config', 'clusters', 'communities'];
 	for (const name of docCollections) {
 		const coll = db.collection(name);
 		const exists = await coll.exists().catch(() => false);

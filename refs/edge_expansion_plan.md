@@ -100,7 +100,7 @@ The plan is to expand from **7 edge types → 14 edge types**, each encoding a d
 **New collection**: `clusters` — `{ _key, summary, member_count, sumo_tags[], centroid_entity_slugs[] }`  
 **Effort**: High. Requires `OHARA_EMBED_PARAGRAPHS=true`.
 
-#### E8. `COMMUNITY_MEMBER` — Topological Community (Louvain on entity graph)
+#### E8. `COMMUNITY_MEMBER` — Topological Community (Louvain on entity graph) ✅ IMPLEMENTED
 **Direction**: entity → community node (new `communities` collection)  
 **Source**: LLM Wiki (Louvain), GraphRAG (community summaries)  
 **Encodes**: "This entity belongs to topic community X, discovered by graph topology — not embedding similarity."  
