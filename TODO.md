@@ -320,3 +320,12 @@ Current scoring is weighted sum; final Principal ordering is noisy. Add optional
 - [ ] Wire `query`, `answer`, `get_graph_context` tools to real `RetrievalEngine` methods
 - [ ] Test with `claude mcp add ohara node bin/ohara-mcp.js`
 - [ ] `.env.example` — `OHARA_MCP_PORT=3001`
+
+---
+
+```sh
+curl https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/ai/run/@cf/google/embeddinggemma-300m  \
+  -X POST  \
+  -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN"  \
+  -d '{ "text": ["This is a story about an orange cloud", "This is a story about a llama", "This is a story about a hugging emoji"] }'
+```
