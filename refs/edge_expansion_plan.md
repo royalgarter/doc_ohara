@@ -179,14 +179,14 @@ Phase 4 structural traversal filter extended to `["HAS_CHILD", "NEXT_SIBLING", "
 **Two-Step Contradiction enrichment** — extend E2: in cross-doc edge enrichment prompt (`prompts/enrich_cross_doc_edge.md`), add explicit contradiction detection field `contradiction_note` (a 1-sentence description of the conceptual tension, if any, not just temporal). Store on SIMILAR_TO edge AND use when creating CONTRADICTS edge.  
 **Web Search tool for Agentic RAG** — add `web_search` as 5th tool in `prompts/agent_strategy.md`. When Gemini picks `web_search`, call Tavily/SerpApi (env: `OHARA_WEB_SEARCH_KEY`), results stored as ephemeral paragraphs merged into agent accumulator. Controlled by `OHARA_WEB_SEARCH=false`.
 
-### Sprint 2 — Offline enrichment scripts
+### Sprint 2 — Offline enrichment scripts ✅ IMPLEMENTED
 
-**E4 `ANSWERS_SAME`** — `scripts/build_pseudo_query_edges.js`  
-**E5 `ADAMIC_ADAR`** — `scripts/build_adamic_adar_edges.js`  
-**E6 `KNOWLEDGE_GAP`** — `scripts/find_knowledge_gaps.js`  
-Activate E4 as Phase 1e in retrieval (controlled by `OHARA_ANSWERS_SAME=false`, opt-in).  
-Activate E5 as re-scorer in Phase 3.  
-Activate E6 in Explorer tier and Speculative RAG.
+**E4 `ANSWERS_SAME`** — `scripts/build_pseudo_query_edges.js`: Gemini generates 1-2 pseudo-questions per paragraph (≥100 chars, cached), shared-question pairs get bidirectional ANSWERS_SAME edges.  
+**E5 `ADAMIC_ADAR`** — `scripts/build_adamic_adar_edges.js`: Pure JS/graph: entity pairs sharing ≥2 RELATED_TO neighbors get AA-weighted edges (threshold=0.3 default).  
+**E6 `KNOWLEDGE_GAP`** — `scripts/find_knowledge_gaps.js`: Flags entities (RELATED_TO degree < 2) and documents (similar_to_indegree=0) with `isolated=true`.  
+Phase 1e `_phase1eAnswersSame` added to retrieval (controlled by `OHARA_ANSWERS_SAME=true`, opt-in).  
+Phase 3 Adamic-Adar boost activated in `_phase3EntityPivot` (controlled by `OHARA_ADAMIC_ADAR=true`, opt-in).  
+Explorer tier `knowledge_gaps` array added: surfaces isolated entities as Knowledge Gap cards with ingest hints.
 
 ### Sprint 3 — Cluster layer
 

@@ -576,7 +576,72 @@ export class RetrievalEngine {
 							LIMIT @limit
 							RETURN { node: para, score: shared / LENGTH(entity_slugs), source: "entity_pivot" }
 			`, { entity_slugs: entitySlugs, seen_ids: [...seenIds], limit });
+
+			// E5: Adamic-Adar boost — if ADAMIC_ADAR edges exist between query entities and
+			// para entities, add AA weight to the paragraph's score
+			const aaEnabled = process.env.OHARA_ADAMIC_ADAR !== 'false';
+			if (aaEnabled && rows.length > 0 && entitySlugs.length > 0) {
+				try {
+					const aaRows = await this.db.executeAQL(`
+						LET query_entity_ids = (FOR e IN entities FILTER e.slug IN @slugs RETURN e._id)
+						FOR edge IN edges
+							FILTER edge.relation == "ADAMIC_ADAR"
+							FILTER edge._from IN query_entity_ids OR edge._to IN query_entity_ids
+							RETURN { from: edge._from, to: edge._to, weight: edge.weight }
+					`, { slugs: entitySlugs });
+
+					// Build lookup: entityId → max AA weight to any query entity
+					const aaWeightByEntity = new Map();
+					for (const { from, to, weight } of aaRows) {
+						for (const id of [from, to]) {
+							aaWeightByEntity.set(id, Math.max(aaWeightByEntity.get(id) || 0, weight || 0));
+						}
+					}
+
+					if (aaWeightByEntity.size > 0) {
+						// Get entity _ids for each result paragraph
+						for (const row of rows) {
+							const slugs = row.node?.entity_slugs || [];
+							if (!slugs.length) continue;
+							const entityIds = await this.db.executeAQL(
+								`FOR e IN entities FILTER e.slug IN @slugs RETURN e._id`,
+								{ slugs }
+							).then(c => c.all()).catch(() => []);
+							const maxAA = Math.max(0, ...entityIds.map(id => aaWeightByEntity.get(id) || 0));
+							if (maxAA > 0) {
+								row.score += 0.2 * maxAA;
+								row.sources = row.sources ? [...row.sources, 'adamic_adar'] : ['entity_pivot', 'adamic_adar'];
+							}
+						}
+					}
+				} catch (_) {}
+			}
+
 			return rows;
+		} catch (_) {
+			return [];
+		}
+	}
+
+	// ── Phase 1e — ANSWERS_SAME Logical Co-Relevance ────────────────────────────
+	// Follows ANSWERS_SAME edges from top BM25 seed paragraphs to find paragraphs
+	// that answer the same pseudo-question, even with zero vocabulary/entity overlap.
+	async _phase1eAnswersSame(bm25Results, seenIds, limit) {
+		const seedIds = bm25Results.slice(0, 5).map(r => r.node?._id).filter(Boolean);
+		if (!seedIds.length) return [];
+		try {
+			const rows = await this.db.executeAQL(`
+				LET seed_ids = @seed_ids
+				FOR e IN edges
+					FILTER e._from IN seed_ids AND e.relation == "ANSWERS_SAME"
+					FOR p IN paragraphs
+						FILTER p._id == e._to
+						FILTER p._id NOT IN @seen_ids
+						SORT e.weight DESC
+						LIMIT @limit
+						RETURN { node: p, score: 0.7, source: "answers_same", shared_query: e.shared_query }
+			`, { seed_ids: seedIds, seen_ids: [...seenIds], limit });
+			return rows.filter(r => r.node?._id);
 		} catch (_) {
 			return [];
 		}
@@ -799,7 +864,7 @@ export class RetrievalEngine {
 
 	// ── Phase 5 — Score Fusion ───────────────────────────────────────────────────
 
-	_fuseResults(bm25, sumo, entity, crossDoc, struct, weights, vector = []) {
+	_fuseResults(bm25, sumo, entity, crossDoc, struct, weights, vector = [], answersSame = []) {
 		const scoreMap = new Map(); // _id → { node, score, sources, contributions, edge_verb }
 
 		const add = (results, weight, phase) => {
@@ -828,12 +893,13 @@ export class RetrievalEngine {
 			}
 		};
 
-		add(bm25,     weights.bm25,     'fulltext');
-		add(sumo,     weights.sumo,     'sumo');
-		add(entity,   weights.entity,   'entity_pivot');
-		add(crossDoc, weights.crossDoc, 'cross_doc_edge');
-		add(struct,   weights.struct,   'structural');
-		add(vector,   weights.vector,   'vector');
+		add(bm25,        weights.bm25,        'fulltext');
+		add(sumo,        weights.sumo,        'sumo');
+		add(entity,      weights.entity,      'entity_pivot');
+		add(crossDoc,    weights.crossDoc,    'cross_doc_edge');
+		add(struct,      weights.struct,      'structural');
+		add(vector,      weights.vector,      'vector');
+		add(answersSame, weights.answersSame ?? 0.5, 'answers_same');
 
 		return [...scoreMap.values()].sort((a, b) => b.score - a.score);
 	}
@@ -951,10 +1017,28 @@ export class RetrievalEngine {
 			stoppedReason = frontier.length ? 'weight_below_threshold' : 'no_candidates_in_band';
 		}
 
+		// E6: Knowledge Gap cards — isolated entities surface in Explorer
+		let knowledgeGaps = [];
+		try {
+			const gapEntities = await this.db.executeAQL(`
+				FOR e IN entities
+					FILTER e.isolated == true
+					LIMIT 10
+					RETURN { name: e.name, slug: e.slug, isolation_reason: e.isolation_reason }
+			`, {});
+			knowledgeGaps = gapEntities.map(e => ({
+				type: 'knowledge_gap',
+				entity_name: e.name,
+				entity_slug: e.slug,
+				reason: e.isolation_reason || 'No connecting documents found',
+				hint: `Ingest documents related to "${e.name}" to connect this knowledge island`,
+			}));
+		} catch (_) {}
+
 		return {
 			principal: principal.map(e => ({ node: e.node, score: e.score, sources: e.sources })),
 			integrity,
-			explorer: { frontier, stopped_reason: stoppedReason },
+			explorer: { frontier, stopped_reason: stoppedReason, knowledge_gaps: knowledgeGaps },
 		};
 	}
 
@@ -1090,10 +1174,12 @@ export class RetrievalEngine {
 		const crossDocLimit = options.crossDocLimit || parseInt(process.env.OHARA_CROSS_DOC_LIMIT || '5', 10);
 		const expandDepth = options.expandDepth || parseInt(process.env.OHARA_CROSS_DOC_EXPAND_DEPTH || '1', 10);
 		const vectorLimit = options.vectorLimit || parseInt(process.env.OHARA_VECTOR_LIMIT || '10', 10);
-		const [entityResults, crossDocResults, vectorResults] = await Promise.all([
+		const answersSameEnabled = options.answersSame ?? (process.env.OHARA_ANSWERS_SAME === 'true');
+		const [entityResults, crossDocResults, vectorResults, answersSameResults] = await Promise.all([
 			this._phase3EntityPivot(processedQuery, bm25Results, seenAfterPhase2, limit),
 			this._phase1cCrossDocEdge(processedQuery, bm25Results, seenAfterPhase2, crossDocLimit, expandDepth),
 			this._phase1dVector(processedQuery, vectorLimit),
+			answersSameEnabled ? this._phase1eAnswersSame(bm25Results, seenAfterPhase2, Math.ceil(limit / 2)) : Promise.resolve([]),
 		]);
 
 		// Phase 0b: TOC-guided section selection for phrase/paragraph queries
@@ -1110,6 +1196,7 @@ export class RetrievalEngine {
 			...entityResults.map(r => r.node._id),
 			...crossDocResults.map(r => r.node._id),
 			...vectorResults.map(r => r.node._id),
+			...answersSameResults.map(r => r.node._id),
 		]);
 		let structResults = await this._phase4Structural(topNodeId, depth, seenAfterPhase3);
 
@@ -1141,7 +1228,7 @@ export class RetrievalEngine {
 			);
 		}
 
-		const fused = this._fuseResults(bm25Results, sumoResults, entityResults, crossDocResults, structResults, weights, vectorResults);
+		const fused = this._fuseResults(bm25Results, sumoResults, entityResults, crossDocResults, structResults, weights, vectorResults, answersSameResults);
 
 		// Apply temporal scoring post-fusion (before tier classification so tiers see adjusted scores)
 		const principalSet = new Set(); // populated below after tier classification; first pass uses empty set
