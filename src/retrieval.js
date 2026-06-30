@@ -647,6 +647,52 @@ export class RetrievalEngine {
 		}
 	}
 
+	// ── Phase 0 StructRAG Query Router ──────────────────────────────────────────
+	// Classifies query as factoid | synthesis | exploratory. Used to gate Phase 1f
+	// cluster retrieval and future query-type-specific strategies.
+	_detectQueryMode(rawQuery) {
+		const q = rawQuery.toLowerCase();
+		// Synthesis/exploratory: asks for overview, comparison, list, or broad summary
+		if (/\b(summarize|summarise|overview|compare|comparison|differences?|similarities|types of|kinds of|list all|explain all|what are (all|the different)|how does .{0,30} relate|survey|landscape|categories|taxonomy|outline)\b/.test(q)) {
+			return 'synthesis';
+		}
+		if (/\b(explore|discover|what else|tell me (more|everything) about|what do you know about|give me an? (overview|summary|introduction))\b/.test(q)) {
+			return 'exploratory';
+		}
+		return 'factoid';
+	}
+
+	// ── Phase 1f — Cluster Summary Retrieval (RAPTOR-inspired) ──────────────────
+	// For synthesis/exploratory queries: find clusters whose summaries match the
+	// query keywords; return cluster summary nodes as synthetic top-level results.
+	async _phase1fCluster(processedQuery, seenIds, limit) {
+		const keywords = processedQuery.keywords;
+		if (!keywords.length) return [];
+		try {
+			const rows = await this.db.executeAQL(`
+				LET kws = @keywords
+				FOR c IN clusters
+					LET summary_lower = LOWER(c.summary)
+					LET hits = LENGTH(
+						FOR kw IN kws
+							FILTER CONTAINS(summary_lower, kw)
+							RETURN 1
+					)
+					FILTER hits > 0
+					SORT hits DESC
+					LIMIT @limit
+					RETURN {
+						node: MERGE(c, { _type: "cluster", content: c.summary }),
+						score: hits / LENGTH(kws),
+						source: "cluster_summary"
+					}
+			`, { keywords, limit });
+			return rows.filter(r => !seenIds.has(r.node._id));
+		} catch (_) {
+			return [];
+		}
+	}
+
 	// ── Phase 1c — Cross-Document Edge Expansion ─────────────────────────────────
 	// Follows SIMILAR_TO edges from seed documents to find related paragraphs in
 	// other documents. Uses edge.verb/tags for semantic filtering when available.
@@ -864,7 +910,7 @@ export class RetrievalEngine {
 
 	// ── Phase 5 — Score Fusion ───────────────────────────────────────────────────
 
-	_fuseResults(bm25, sumo, entity, crossDoc, struct, weights, vector = [], answersSame = []) {
+	_fuseResults(bm25, sumo, entity, crossDoc, struct, weights, vector = [], answersSame = [], cluster = []) {
 		const scoreMap = new Map(); // _id → { node, score, sources, contributions, edge_verb }
 
 		const add = (results, weight, phase) => {
@@ -900,6 +946,7 @@ export class RetrievalEngine {
 		add(struct,      weights.struct,      'structural');
 		add(vector,      weights.vector,      'vector');
 		add(answersSame, weights.answersSame ?? 0.5, 'answers_same');
+		add(cluster,     weights.cluster     ?? 0.6, 'cluster_summary');
 
 		return [...scoreMap.values()].sort((a, b) => b.score - a.score);
 	}
@@ -1146,6 +1193,7 @@ export class RetrievalEngine {
 
 		const sessionHistory = Array.isArray(options.sessionHistory) ? options.sessionHistory : [];
 		const processedQuery = await this.preprocessInput(rawInput, sessionHistory);
+		const queryMode = this._detectQueryMode(rawInput); // 'factoid' | 'synthesis' | 'exploratory'
 
 		let bm25Results = await this._phase1BM25(processedQuery, limit);
 
@@ -1175,11 +1223,14 @@ export class RetrievalEngine {
 		const expandDepth = options.expandDepth || parseInt(process.env.OHARA_CROSS_DOC_EXPAND_DEPTH || '1', 10);
 		const vectorLimit = options.vectorLimit || parseInt(process.env.OHARA_VECTOR_LIMIT || '10', 10);
 		const answersSameEnabled = options.answersSame ?? (process.env.OHARA_ANSWERS_SAME === 'true');
-		const [entityResults, crossDocResults, vectorResults, answersSameResults] = await Promise.all([
+		const clusterEnabled = options.clusterRetrieval ?? (process.env.OHARA_CLUSTER_RETRIEVAL === 'true');
+		const clusterActive = clusterEnabled && (queryMode === 'synthesis' || queryMode === 'exploratory');
+		const [entityResults, crossDocResults, vectorResults, answersSameResults, clusterResults] = await Promise.all([
 			this._phase3EntityPivot(processedQuery, bm25Results, seenAfterPhase2, limit),
 			this._phase1cCrossDocEdge(processedQuery, bm25Results, seenAfterPhase2, crossDocLimit, expandDepth),
 			this._phase1dVector(processedQuery, vectorLimit),
 			answersSameEnabled ? this._phase1eAnswersSame(bm25Results, seenAfterPhase2, Math.ceil(limit / 2)) : Promise.resolve([]),
+			clusterActive ? this._phase1fCluster(processedQuery, seenAfterPhase2, Math.ceil(limit / 2)) : Promise.resolve([]),
 		]);
 
 		// Phase 0b: TOC-guided section selection for phrase/paragraph queries
@@ -1197,6 +1248,7 @@ export class RetrievalEngine {
 			...crossDocResults.map(r => r.node._id),
 			...vectorResults.map(r => r.node._id),
 			...answersSameResults.map(r => r.node._id),
+			...clusterResults.map(r => r.node._id),
 		]);
 		let structResults = await this._phase4Structural(topNodeId, depth, seenAfterPhase3);
 
@@ -1228,7 +1280,7 @@ export class RetrievalEngine {
 			);
 		}
 
-		const fused = this._fuseResults(bm25Results, sumoResults, entityResults, crossDocResults, structResults, weights, vectorResults, answersSameResults);
+		const fused = this._fuseResults(bm25Results, sumoResults, entityResults, crossDocResults, structResults, weights, vectorResults, answersSameResults, clusterResults);
 
 		// Apply temporal scoring post-fusion (before tier classification so tiers see adjusted scores)
 		const principalSet = new Set(); // populated below after tier classification; first pass uses empty set
@@ -1260,6 +1312,7 @@ export class RetrievalEngine {
 
 		const response = {
 			processedQuery,
+			queryMode,
 			results: topK,
 			tiers,
 			// legacy fields for backwards compat with existing server routes

@@ -188,11 +188,14 @@ Phase 1e `_phase1eAnswersSame` added to retrieval (controlled by `OHARA_ANSWERS_
 Phase 3 Adamic-Adar boost activated in `_phase3EntityPivot` (controlled by `OHARA_ADAMIC_ADAR=true`, opt-in).  
 Explorer tier `knowledge_gaps` array added: surfaces isolated entities as Knowledge Gap cards with ingest hints.
 
-### Sprint 3 — Cluster layer
+### Sprint 3 — Cluster layer ✅ IMPLEMENTED
 
-**E7 `CLUSTER_MEMBER`** — `scripts/build_clusters.js` + new `clusters` ArangoDB collection  
-New Phase 1f in retrieval (controlled by `OHARA_CLUSTER_RETRIEVAL=false`, opt-in).  
-StructRAG query router in Phase 0 to gate Phase 1f on `synthesis`/`exploratory` queries.
+**E7 `CLUSTER_MEMBER`** — `scripts/build_clusters.js`: k-means++ on paragraph embeddings (auto k=√(n/2), capped 50), Gemini summary per cluster, stores in `clusters` collection, creates CLUSTER_MEMBER edges.  
+Phase 0 StructRAG router `_detectQueryMode`: classifies query as `factoid` | `synthesis` | `exploratory` via heuristic regex.  
+Phase 1f `_phase1fCluster`: returns matching cluster summary nodes for synthesis/exploratory queries (BM25 on cluster summaries). Gated by `OHARA_CLUSTER_RETRIEVAL=true` AND queryMode in [synthesis, exploratory].  
+`queryMode` exposed in query() response.  
+`clusters` collection auto-created in `client.js`.  
+Fusion: cluster_summary channel added (weight 0.6).
 
 ---
 
