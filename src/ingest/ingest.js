@@ -1106,7 +1106,9 @@ function transformRawToCollections(rawOutputDir) {
 		documents: [],
 		sections: [],
 		paragraphs: [],
-		tables: []
+		tables: [],
+		adjacency: [],    // {fromId, fromCollection, toId, toCollection} for ADJACENT_TO edges
+		para_sequence: [], // {fromId, toId} for NEXT_PARA edges
 	};
 
 	const documentFolders = fs.readdirSync(rawOutputDir).filter(f => !f.startsWith('.'));
@@ -1145,6 +1147,10 @@ function transformRawToCollections(rawOutputDir) {
 				// When the same section header re-appears in a later chunk we reuse the
 				// existing section node instead of creating a duplicate.
 				const sectionDedup = new Map(); // key → section id
+
+				// Adjacency tracking for ADJACENT_TO and NEXT_PARA edges
+				const lastContentBySec = new Map(); // sectionId → {id, collection: 'para'|'table'}
+				const lastParaBySec = new Map();    // sectionId → paraId
 
 				rawContent.nodes.forEach((node, blockIdx) => {
 					const nodeId = `okf_node_${blockIdx}_${Date.now()}`;
@@ -1221,6 +1227,14 @@ function transformRawToCollections(rawOutputDir) {
 							sumo_resolved_map: node.sumo_resolved_map || {},
 							entities: node.entities || [],
 						});
+						// NEXT_PARA: record sequential order within section
+						const prevParaId = lastParaBySec.get(currentSectionId);
+						if (prevParaId) dbCollections.para_sequence.push({ fromId: prevParaId, toId: nodeId });
+						lastParaBySec.set(currentSectionId, nodeId);
+						// ADJACENT_TO: para after table in same section
+						const lastC = lastContentBySec.get(currentSectionId);
+						if (lastC?.collection === 'table') dbCollections.adjacency.push({ fromId: lastC.id, fromCollection: 'table', toId: nodeId, toCollection: 'para' });
+						lastContentBySec.set(currentSectionId, { id: nodeId, collection: 'para' });
 					} else if (ntype === 'Figure') {
 						// LLM returns Figure as: caption, figure (object with description/url), label
 						const figureDesc = typeof node.figure === 'object'
@@ -1241,6 +1255,10 @@ function transformRawToCollections(rawOutputDir) {
 							sumo_resolved_map: node.sumo_resolved_map || {},
 							entities: node.entities || [],
 						});
+						// ADJACENT_TO: figure adjacent to previous para or table in same section
+						const lastC = lastContentBySec.get(currentSectionId);
+						if (lastC) dbCollections.adjacency.push({ fromId: lastC.id, fromCollection: lastC.collection, toId: nodeId, toCollection: 'para' });
+						lastContentBySec.set(currentSectionId, { id: nodeId, collection: 'para' });
 					} else if (ntype === 'Table') {
 						const contentData = node.table?.content_data || node.metadata?.table_cells || node.table || [];
 						const hasValidData = Array.isArray(contentData) && contentData.length > 0
@@ -1263,6 +1281,10 @@ function transformRawToCollections(rawOutputDir) {
 								matrix_data: contentData,
 								markdown_representation: mdRep,
 							});
+							// ADJACENT_TO: table adjacent to previous para in same section
+							const lastC = lastContentBySec.get(currentSectionId);
+							if (lastC?.collection === 'para') dbCollections.adjacency.push({ fromId: lastC.id, fromCollection: 'para', toId: nodeId, toCollection: 'table' });
+							lastContentBySec.set(currentSectionId, { id: nodeId, collection: 'table' });
 						} else {
 							// Table data missing or malformed — preserve as raw Paragraph so no content is lost
 							const fallback = [node.caption, node.label, node.markdown, node.metadata?.markdown]
@@ -1872,6 +1894,7 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
 					addPipelineLog('info', `Embeddings ready for ${embeddingMap.size} paragraph(s) in ${doc.id}`);
 				}
 
+				const paraHandleMap = new Map(); // internal para id → ArangoDB _id (for NEXT_PARA + ADJACENT_TO)
 				for (let piBatch = 0; piBatch < docsParagraphs.length; piBatch += BATCH_SIZE) {
 					await Promise.all(docsParagraphs.slice(piBatch, piBatch + BATCH_SIZE).map(async (p, batchLocal) => {
 						const pIdx = piBatch + batchLocal;
@@ -1894,6 +1917,7 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
 					});
 					nodeCount += 1;
 					const paraHandle = paraRes._id || `paragraphs/${paraRes._key}`;
+					paraHandleMap.set(p.id, paraHandle);
 
 					const edgePromises = [
 						arangoClient.insertEdge({ _from: paraHandle, _to: docHandle, relation: 'BELONGS_TO', type: 'BELONGS_TO' }).catch(()=>{}),
@@ -2022,6 +2046,18 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
 										await updateArangoEdge(edgeRes._id, { ...enrichment, temporal_relation: temporalRelation }).catch(() => {});
 										addPipelineLog('info', `Cross-doc edge enriched: "${enrichment.verb}" (${temporalRelation}) between ${doc.id} ↔ ${otherDoc.id}`);
 
+										// E2: CONTRADICTS edge when newer doc supersedes older
+										if (temporalRelation === 'supersedes') {
+											await arangoClient.insertEdge({
+												_from: docHandle,
+												_to: otherHandle,
+												relation: 'CONTRADICTS',
+												type: 'CONTRADICTS',
+												contradiction_note: enrichment.summary || null,
+											}).catch(() => {});
+											addPipelineLog('info', `CONTRADICTS edge: ${doc.id} → ${otherDoc.id}`);
+										}
+
 										// Increment similar_to_indegree on the target document
 										await arangoClient.updateDocument(otherDoc.id, {
 											similar_to_indegree: (otherDoc.similar_to_indegree || 0) + 1,
@@ -2090,6 +2126,7 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
 
 				// Insert tables in parallel batches — same pattern as paragraphs
 				const docsTables = transformedDocs.tables.filter(t => t.document_id === doc.id);
+				const tableHandleMap = new Map(); // internal table id → ArangoDB _id (for ADJACENT_TO)
 				await runBatched(docsTables, async (t) => {
 					const secHandle = t.section_id ? sectionIdMap.get(t.section_id) : null;
 					const tblRes = await arangoClient.insertTable({
@@ -2101,6 +2138,7 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
 					});
 					nodeCount += 1;
 					const tblHandle = tblRes._id || `tables/${tblRes._key}`;
+					tableHandleMap.set(t.id, tblHandle);
 					await Promise.all([
 						arangoClient.insertEdge({ _from: tblHandle, _to: docHandle, relation: 'BELONGS_TO', type: 'BELONGS_TO' }).catch(()=>{}),
 						secHandle
@@ -2108,6 +2146,31 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
 							: Promise.resolve(),
 					]);
 				});
+
+				// E3: NEXT_PARA edges — sequential paragraph order within sections
+				if (process.env.OHARA_NEXT_PARA !== 'false') {
+					const paraSeq = (transformedDocs.para_sequence || []).filter(s => s.fromId && s.toId);
+					await runBatched(paraSeq, async ({ fromId, toId }) => {
+						const fromHandle = paraHandleMap.get(fromId);
+						const toHandle = paraHandleMap.get(toId);
+						if (fromHandle && toHandle) await arangoClient.insertEdge({ _from: fromHandle, _to: toHandle, relation: 'NEXT_PARA', type: 'NEXT_PARA' }).catch(() => {});
+					});
+					if (paraSeq.length) addPipelineLog('info', `NEXT_PARA: ${paraSeq.length} sequential paragraph edge(s)`);
+				}
+
+				// E1: ADJACENT_TO edges — bidirectional between consecutive para↔figure/table in same section
+				if (process.env.OHARA_ADJACENT_TO !== 'false') {
+					const adjacency = (transformedDocs.adjacency || []).filter(a => a.fromId && a.toId);
+					await runBatched(adjacency, async ({ fromId, fromCollection, toId, toCollection }) => {
+						const fromHandle = fromCollection === 'table' ? tableHandleMap.get(fromId) : paraHandleMap.get(fromId);
+						const toHandle = toCollection === 'table' ? tableHandleMap.get(toId) : paraHandleMap.get(toId);
+						if (fromHandle && toHandle) {
+							await arangoClient.insertEdge({ _from: fromHandle, _to: toHandle, relation: 'ADJACENT_TO', type: 'ADJACENT_TO' }).catch(() => {});
+							await arangoClient.insertEdge({ _from: toHandle, _to: fromHandle, relation: 'ADJACENT_TO', type: 'ADJACENT_TO' }).catch(() => {});
+						}
+					});
+					if (adjacency.length) addPipelineLog('info', `ADJACENT_TO: ${adjacency.length * 2} adjacency edge(s)`);
+				}
 
 			} catch (err) {
 				addPipelineLog('error', `ArangoDB persistence failed for ${doc.source_file}: ${err.message}`);

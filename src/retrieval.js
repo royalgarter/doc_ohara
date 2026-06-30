@@ -690,7 +690,7 @@ export class RetrievalEngine {
 		try {
 			const rows = await this.db.executeAQL(`
 				FOR v, e IN 1..@depth OUTBOUND @startId edges
-					FILTER e.relation IN ["HAS_CHILD", "NEXT_SIBLING", "BELONGS_TO"]
+					FILTER e.relation IN ["HAS_CHILD", "NEXT_SIBLING", "BELONGS_TO", "ADJACENT_TO", "NEXT_PARA"]
 					FILTER v._id NOT IN @seen_ids
 					RETURN { node: v, score: 1.0, source: "structural" }
 			`, { startId: topNodeId, depth, seen_ids: [...seenIds] });
@@ -886,6 +886,24 @@ export class RetrievalEngine {
 				integrityExtra.push({ node: r.node, score: r.score, sources: ['cross_doc_edge'], contributions: [{ phase: 'cross_doc_edge', score: r.score, document_id: r.node.document_id, edge_verb: r.edge_verb, hops: r.hops }], edge_verb: r.edge_verb, edge_summary: r.edge_summary });
 			}
 		}
+
+		// E2: flag Principal nodes that have incoming CONTRADICTS edges
+		await Promise.all(principal.map(async (entry) => {
+			if (!entry.node?._id) return;
+			try {
+				const rows = await this.db.executeAQL(`
+					FOR e IN edges
+						FILTER e._to == @nodeId AND e.relation == "CONTRADICTS"
+						LIMIT 1
+						RETURN { contradiction_note: e.contradiction_note }
+				`, { nodeId: entry.node._id });
+				if (rows.length > 0) {
+					entry.integrity_flags = entry.integrity_flags || [];
+					entry.integrity_flags.push('contradicted');
+					if (rows[0].contradiction_note) entry.contradiction_note = rows[0].contradiction_note;
+				}
+			} catch (_) {}
+		}));
 
 		let integrity = [
 			...principal.map(e => ({ ...e, provenance: e.contributions })),
