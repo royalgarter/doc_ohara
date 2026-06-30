@@ -794,6 +794,64 @@ export class RetrievalEngine {
 		}
 	}
 
+	// ── Web Search (Agentic RAG) ──────────────────────────────────────────────────
+	// Calls Tavily (OHARA_WEB_SEARCH_PROVIDER=tavily, default) or SerpApi.
+	// Results become ephemeral paragraph-shaped nodes with source='web_search'.
+	async _webSearch(query) {
+		const key = process.env.OHARA_WEB_SEARCH_KEY;
+		if (!key) return [];
+		const provider = process.env.OHARA_WEB_SEARCH_PROVIDER || 'tavily';
+		try {
+			let results = [];
+			if (provider === 'tavily') {
+				const resp = await fetch('https://api.tavily.com/search', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ api_key: key, query: query.slice(0, 400), max_results: 5, search_depth: 'basic' }),
+				});
+				if (!resp.ok) return [];
+				const data = await resp.json();
+				results = (data.results || []).map(r => ({
+					node: {
+						_id: `web_search/${encodeURIComponent(r.url || r.title || Math.random())}`,
+						content: `${r.title || ''}\n\n${r.content || r.snippet || ''}`.trim().slice(0, 2000),
+						title: r.title || '',
+						url: r.url || '',
+						document_id: null,
+						entity_slugs: [],
+						_type: 'web_result',
+					},
+					score: r.score || 0.5,
+					source: 'web_search',
+				}));
+			} else if (provider === 'serpapi') {
+				const url = new URL('https://serpapi.com/search');
+				url.searchParams.set('api_key', key);
+				url.searchParams.set('q', query.slice(0, 400));
+				url.searchParams.set('num', '5');
+				const resp = await fetch(url.toString());
+				if (!resp.ok) return [];
+				const data = await resp.json();
+				results = (data.organic_results || []).map((r, i) => ({
+					node: {
+						_id: `web_search/${encodeURIComponent(r.link || r.title || i)}`,
+						content: `${r.title || ''}\n\n${r.snippet || ''}`.trim().slice(0, 2000),
+						title: r.title || '',
+						url: r.link || '',
+						document_id: null,
+						entity_slugs: [],
+						_type: 'web_result',
+					},
+					score: 1 - (i * 0.1),
+					source: 'web_search',
+				}));
+			}
+			return results.filter(r => r.node.content.trim());
+		} catch (_) {
+			return [];
+		}
+	}
+
 	// ── Phase 4 — Structural Traversal ───────────────────────────────────────────
 
 	async _phase4Structural(topNodeId, depth, seenIds) {
@@ -1386,11 +1444,13 @@ export class RetrievalEngine {
 			if (!strategyRaw) {
 				try {
 					const ai = this._getAI();
+					const webSearchAvailable = process.env.OHARA_WEB_SEARCH === 'true' && !!process.env.OHARA_WEB_SEARCH_KEY;
 					const prompt = [
 						AGENT_STRATEGY_PROMPT,
 						`\nQuery: ${rawInput}`,
 						`Found so far (${foundCount} nodes): ${topSnippets.join(' | ') || 'none'}`,
 						`Tools used: ${toolHistory.join(', ') || 'none'}`,
+						`web_search_available: ${webSearchAvailable}`,
 					].join('\n');
 					const res = await ai.models.generateContent({
 						model: GEMINI_MODEL,
@@ -1429,6 +1489,9 @@ export class RetrievalEngine {
 			} else if (tool === 'structural') {
 				const topId = [...merged.values()].sort((a, b) => b.score - a.score)[0]?.node?._id;
 				if (topId) _mergeIn(await this._phase4Structural(topId, 2, seenIds), 'structural');
+			} else if (tool === 'web_search') {
+				const webResults = await this._webSearch(strategy.hint || rawInput);
+				_mergeIn(webResults, 'web_search');
 			}
 		}
 

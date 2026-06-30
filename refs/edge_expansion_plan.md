@@ -174,10 +174,10 @@ AFTER (15 edges + 2 node flags):
 **E3 `NEXT_PARA`** — `ingestSingleFile`: collect paragraph handles during insertion into `paraHandleMap`. After all paragraphs inserted, iterate `docsParagraphs` in order grouped by section to insert `NEXT_PARA` edges. Controlled by `OHARA_NEXT_PARA=true`.  
 Phase 4 structural traversal filter extended to `["HAS_CHILD", "NEXT_SIBLING", "BELONGS_TO", "ADJACENT_TO", "NEXT_PARA"]`.
 
-### Sprint 1b — LLM Wiki gaps (missing from original plan)
+### Sprint 1b — LLM Wiki gaps ✅ IMPLEMENTED
 
-**Two-Step Contradiction enrichment** — extend E2: in cross-doc edge enrichment prompt (`prompts/enrich_cross_doc_edge.md`), add explicit contradiction detection field `contradiction_note` (a 1-sentence description of the conceptual tension, if any, not just temporal). Store on SIMILAR_TO edge AND use when creating CONTRADICTS edge.  
-**Web Search tool for Agentic RAG** — add `web_search` as 5th tool in `prompts/agent_strategy.md`. When Gemini picks `web_search`, call Tavily/SerpApi (env: `OHARA_WEB_SEARCH_KEY`), results stored as ephemeral paragraphs merged into agent accumulator. Controlled by `OHARA_WEB_SEARCH=false`.
+**Two-Step Contradiction enrichment** — `prompts/enrich_cross_doc_edge.md` now outputs `contradiction_note` field (explicit conceptual conflict, or null). `ingest.js` creates CONTRADICTS edge when `temporalRelation === 'supersedes'` OR `contradiction_note` is non-null — tagged with `source: 'temporal_supersession' | 'conceptual_conflict'`. CONTRADICTS edge now uses the dedicated `contradiction_note` (not just summary).  
+**Web Search tool for Agentic RAG** — `web_search` added as 5th tool in `prompts/agent_strategy.md` (only shown when `web_search_available: true`). `_webSearch()` in `retrieval.js` supports Tavily (default) and SerpApi via `OHARA_WEB_SEARCH_PROVIDER`. Results returned as ephemeral paragraph-shaped nodes (`_type: 'web_result'`) merged into agent accumulator. Controlled by `OHARA_WEB_SEARCH=true` + `OHARA_WEB_SEARCH_KEY=<key>`.
 
 ### Sprint 2 — Offline enrichment scripts ✅ IMPLEMENTED
 

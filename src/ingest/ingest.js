@@ -2046,16 +2046,20 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
 										await updateArangoEdge(edgeRes._id, { ...enrichment, temporal_relation: temporalRelation }).catch(() => {});
 										addPipelineLog('info', `Cross-doc edge enriched: "${enrichment.verb}" (${temporalRelation}) between ${doc.id} ↔ ${otherDoc.id}`);
 
-										// E2: CONTRADICTS edge when newer doc supersedes older
-										if (temporalRelation === 'supersedes') {
+										// E2: CONTRADICTS edge — temporal supersession OR explicit conceptual conflict
+										const contradictionNote = (typeof enrichment.contradiction_note === 'string' && enrichment.contradiction_note.trim() && enrichment.contradiction_note.trim().toLowerCase() !== 'null')
+											? enrichment.contradiction_note.trim()
+											: null;
+										if (temporalRelation === 'supersedes' || contradictionNote) {
 											await arangoClient.insertEdge({
 												_from: docHandle,
 												_to: otherHandle,
 												relation: 'CONTRADICTS',
 												type: 'CONTRADICTS',
-												contradiction_note: enrichment.summary || null,
+												contradiction_note: contradictionNote || enrichment.summary || null,
+												source: temporalRelation === 'supersedes' ? 'temporal_supersession' : 'conceptual_conflict',
 											}).catch(() => {});
-											addPipelineLog('info', `CONTRADICTS edge: ${doc.id} → ${otherDoc.id}`);
+											addPipelineLog('info', `CONTRADICTS edge (${temporalRelation === 'supersedes' ? 'temporal' : 'conceptual'}): ${doc.id} → ${otherDoc.id}`);
 										}
 
 										// Increment similar_to_indegree on the target document
