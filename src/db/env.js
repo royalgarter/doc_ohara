@@ -9,6 +9,8 @@
  */
 import { initArangoClient } from './client.js';
 
+process?.loadEnvFile?.(); 
+
 const COLLECTION = 'env';
 
 async function getDB() {
