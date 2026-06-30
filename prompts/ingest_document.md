@@ -44,10 +44,13 @@ candidate_entities: [           # named entities mentioned in this node
 # Part        title: string
 # Chapter     label?: string   # e.g. "Chapter 1"
 #             title:  string   # REQUIRED
+#             summary?: string # 1-2 sentences describing what this chapter covers (omit if obvious from title)
 # Section     label?: string   # e.g. "1.1"
 #             title:  string   # REQUIRED
+#             summary?: string # 1-2 sentences describing what this section covers (omit if obvious from title)
 # Subsection  label?: string
 #             title:  string   # REQUIRED
+#             summary?: string # 1-2 sentences describing what this subsection covers (omit if obvious from title)
 # Paragraph   content: string  # full paragraph text — preserve verbatim, do NOT split by sentence
 # ListItem    content: string
 # Figure      label?:   string   # e.g. "Figure 3"

@@ -1190,6 +1190,7 @@ function transformRawToCollections(rawOutputDir) {
 								level,
 								page: resolvedPage,
 								page_source: pageSource,
+								summary: typeof node.summary === 'string' && node.summary.trim() ? node.summary.trim() : null,
 							});
 						}
 					} else if (['Paragraph', 'ListItem'].includes(ntype)) {
@@ -1945,10 +1946,38 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
 					// Sort by frequency descending so sumo_tags[0] is the dominant tag
 					const sumoTags = [...sumoTagFreq.entries()].sort((a, b) => b[1] - a[1]).map(([t]) => t);
 					const entitySlugs = [...entitySlugSet];
+					// Generate a one-sentence document description from top paragraphs for cross-doc fingerprinting
+					let docDescription = null;
+					if (ai) {
+						const snippets = docsParagraphs
+							.filter(p => typeof p.content === 'string' && p.content.length > 80)
+							.slice(0, 4)
+							.map(p => p.content.slice(0, 400))
+							.join('\n\n');
+						if (snippets) {
+							const descKey = cacheKeyFor(['doc_description_v1', snippets, GEMINI_MODEL]);
+							const descCached = readCacheSync(descKey);
+							if (descCached?.description) {
+								docDescription = descCached.description;
+							} else {
+								try {
+									const raw = await callLLM(
+										`Summarize what this document is about in one sentence (≤25 words). Focus on topic, domain, and key argument. Output only the sentence.\n\n${snippets}`,
+										{ model: GEMINI_MODEL, cache: false, serviceTier: 'flex' }
+									);
+									docDescription = (raw || '').trim().slice(0, 200) || null;
+									if (docDescription) writeCacheSync(descKey, { description: docDescription });
+								} catch (_) {}
+							}
+							if (docDescription) addPipelineLog('info', `Doc description: "${docDescription.slice(0, 80)}…"`);
+						}
+					}
+
 					await arangoClient.updateDocument(inserted._key, {
 						entity_slugs: entitySlugs,
 						sumo_tags: sumoTags,
 						entity_count: entitySlugs.length,
+						...(docDescription ? { description: docDescription } : {}),
 					}).catch(() => {});
 
 					// Compute Jaccard similarity against all other documents and insert SIMILAR_TO edges
@@ -2035,6 +2064,27 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
 								}).catch(() => {});
 							}
 						}
+					}
+				}
+
+				// Structural verification: check HAS_CHILD edge consistency (no orphaned sections, no level jumps >1)
+				{
+					const docSecs = transformedDocs.sections.filter(s => s.document_id === doc.id);
+					let structureOk = true;
+					const levelById = new Map(docSecs.map(s => [s.id, s.level ?? 1]));
+					for (const sec of docSecs) {
+						if (sec.parent_section_id) {
+							const parentLevel = levelById.get(sec.parent_section_id);
+							if (parentLevel != null && (sec.level ?? 1) - parentLevel > 1) {
+								structureOk = false;
+								addPipelineLog('warn', `Structure anomaly in ${doc.id}: section "${sec.title}" (level ${sec.level}) jumps from parent level ${parentLevel}`);
+								break;
+							}
+						}
+					}
+					if (!structureOk) {
+						await arangoClient.updateDocument(inserted._key, { structure_needs_review: true }).catch(() => {});
+						addPipelineLog('warn', `Document ${doc.id} flagged structure_needs_review=true`);
 					}
 				}
 

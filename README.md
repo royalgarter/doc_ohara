@@ -70,8 +70,8 @@ flowchart TD
 
 | Collection | Contents |
 |---|---|
-| `documents` | Metadata root: source file, parser, title, upload time, entity_slugs, sumo_tags, published_date, temporal_coverage, temporal_granularity, temporal_confidence, decay_class, effective_decay_class, similar_to_indegree |
-| `sections` | Structural hierarchy: chapter, section, subsection with level and title |
+| `documents` | Metadata root: source file, parser, title, upload time, entity_slugs, sumo_tags, published_date, temporal_coverage, temporal_granularity, temporal_confidence, decay_class, effective_decay_class, similar_to_indegree, description (LLM-generated one-sentence summary), structure_needs_review |
+| `sections` | Structural hierarchy: chapter, section, subsection with level, title, and optional LLM-generated summary |
 | `paragraphs` | Content nodes: body text, figures, list items with sumo_tags, entity_slugs, entity_types |
 | `tables` | 2-D matrix data with markdown representation |
 | `entities` | Named entities: canonical name, type, aliases, description, document_ids |
@@ -148,7 +148,7 @@ flowchart TD
 6. **Entity extraction** — validates `candidate_entities` from the LLM. Supported types: `PERSON`, `ORG`, `LOCATION`, `DATE`, `TECH`, `AMOUNT`, `EVENT`, `CONCEPT`. Canonical deduplication within each node.
 7. **Collection transform** — normalizes nodes into `documents`, `sections`, `paragraphs`, `tables`. Artifact filter removes separator lines, TOC noise, and very short nodes. Fragment reattachment merges orphaned short paragraphs.
 8. **Persistence** — inserts into ArangoDB with `HAS_CHILD`, `NEXT_SIBLING`, `BELONGS_TO` structural edges; upserts entity nodes and inserts `MENTIONS` / `RELATED_TO` edges.
-9. **Document rollup** — after all paragraphs are inserted, unions `entity_slugs` and `sumo_tags` onto the `documents` record for O(docs) pre-filtering.
+9. **Document rollup** — after all paragraphs are inserted, unions `entity_slugs` and `sumo_tags` onto the `documents` record for O(docs) pre-filtering. Also generates a one-sentence `description` via Gemini from top paragraph snippets (cached). Runs structural verification: checks `HAS_CHILD` edge consistency; flags `structure_needs_review: true` if level jumps > 1 are detected.
 10. **Cross-document similarity** — computes Jaccard similarity between the new document's entity set and all existing documents. Creates `SIMILAR_TO` edges where similarity ≥ `OHARA_SIMILARITY_THRESHOLD` (default 0.1).
 11. **Cross-document edge enrichment** — for each new `SIMILAR_TO` edge, calls Gemini (Flex Inference, cached) with representative snippets from both documents to generate a `verb` (e.g. `"extends the argument of"`), `tags` (1–4 SUMO-style concept tags), and `summary` (≤ 60 words). Result is stored on the edge for use at retrieval time. Prompt: `prompts/enrich_cross_doc_edge.md`. A `temporal_relation` field (`extends` | `supersedes` | `discusses`) is also set on the edge from the verb — no extra LLM call. After all `SIMILAR_TO` edges are created, `similar_to_indegree` is computed for the new document; if it exceeds `OHARA_SIMILAR_TO_EVERGREEN_THRESHOLD`, `effective_decay_class` is promoted to `EVERGREEN`.
 
@@ -236,6 +236,9 @@ flowchart TD
 
 ### Phase 0 — Input Parsing
 Tokenizes raw input: lowercase, `[a-z0-9]+` regex, strips stopwords, drops tokens ≤ 2 chars. Returns `{ keywords, raw }`.
+
+### Phase 0b — TOC-Guided Section Selection (PageIndex-inspired)
+For phrase and paragraph queries, fetches the section tree (titles + LLM-generated summaries) for the top 3 BM25 seed documents and asks Gemini (`prompts/toc_section_selector.md`, temperature 0, cached) which sections are most likely to contain the answer. The selected section IDs are used as additional entry points for Phase 3 structural traversal — in addition to the top BM25 node — so retrieval descends from semantically pre-validated positions in the document hierarchy rather than the single highest-BM25 leaf. TOC-guided structural nodes are exempt from Corrective RAG's SUMO-overlap filter (Gemini already validated them via section summary). Controlled by `OHARA_TOC_GUIDANCE` (default `true`).
 
 ### Phase 1 — Shallow Context
 ArangoSearch BM25 full-text search over `content`, `title`, and `markdown_representation`. Returns top N results (default 20). Falls back to term-overlap scoring when the ArangoSearch view is unavailable.
@@ -414,7 +417,8 @@ All tunables are set via environment variables. Copy `.env.example` to `.env`:
 | `OHARA_DECAY_RATE_CURRENT` | `0.01` | λ decay rate for CURRENT documents (news, blogs — ~70 day half-life) |
 | `OHARA_DECAY_RATE_EPHEMERAL` | `0.1` | λ decay rate for EPHEMERAL documents (social posts, changelogs — ~7 day half-life) |
 | `OHARA_SIMILAR_TO_EVERGREEN_THRESHOLD` | `5` | Min incoming SIMILAR_TO edges to auto-promote a document to EVERGREEN decay class |
-| `OHARA_CORRECTIVE_STRUCT` | `true` | Corrective RAG: filter Phase 3 structural nodes with zero SUMO tag overlap before fusion |
+| `OHARA_CORRECTIVE_STRUCT` | `true` | Corrective RAG: filter Phase 3 structural nodes with zero SUMO tag overlap before fusion (TOC-guided nodes are exempt) |
+| `OHARA_TOC_GUIDANCE` | `true` | TOC-guided Phase 0b: for phrase/paragraph queries, ask Gemini which sections are relevant before structural traversal (PageIndex-inspired) |
 | `OHARA_SELF_RAG_VERIFY` | `false` | Self-RAG: Gemini responsiveness check on Principal tier after classification (opt-in) |
 | `OHARA_SESSION_HISTORY_LIMIT` | `3` | Conversational RAG: number of prior Q&A turns prepended to query fingerprint prompt |
 | `OHARA_COR_MAX_ITER` | `2` | Chain-of-Retrieval: max retrieval iterations chasing Explorer frontier |

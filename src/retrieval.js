@@ -32,6 +32,9 @@ const AGENT_STRATEGY_PROMPT = fs.readFileSync(
 const RERANK_PROMPT = fs.readFileSync(
 	path.resolve(__dirname, '../prompts/rerank.md'), 'utf8'
 );
+const TOC_SECTION_SELECTOR_PROMPT = fs.readFileSync(
+	path.resolve(__dirname, '../prompts/toc_section_selector.md'), 'utf8'
+);
 
 const STOPWORDS = new Set([
 	'a', 'an', 'the', 'and', 'or', 'of', 'in', 'on', 'to', 'is', 'are', 'how',
@@ -338,6 +341,47 @@ export class RetrievalEngine {
 		}
 
 		return { keywords, raw: rawInput, inputType, entityHints, sumoHints, temporalIntent, dateRange };
+	}
+
+	// ── Phase 0b — TOC-Guided Section Selection (PageIndex-inspired) ─────────────
+	// For phrase/paragraph queries: fetch section tree (titles + summaries) for seed
+	// documents, ask Gemini which sections are relevant, return those section _ids
+	// as priority entry points for Phase 4 structural traversal.
+	async _phase0bTocGuidance(rawQuery, seedDocIds) {
+		const ai = this._getAI();
+		if (!ai || !seedDocIds.length) return [];
+		try {
+			const rows = await this.db.executeAQL(`
+				FOR s IN sections
+					FILTER s.document_id IN @doc_ids
+					RETURN { id: s._id, title: s.title, summary: s.summary, level: s.level }
+			`, { doc_ids: seedDocIds });
+			if (!rows.length) return [];
+
+			const tree = rows.map(s => ({
+				id: s.id,
+				title: s.title || '',
+				...(s.summary ? { summary: s.summary } : {}),
+				level: s.level || 1,
+			}));
+			const payload = JSON.stringify({ query: rawQuery.slice(0, 400), sections: tree });
+			const key = cacheKeyFor([TOC_SECTION_SELECTOR_PROMPT, payload, 'gemini-2.5-flash-lite']);
+			const cached = readCacheSync(key);
+			if (cached?.relevant_section_ids) return cached.relevant_section_ids;
+
+			const resp = await ai.models.generateContent({
+				model: 'gemini-2.5-flash-lite',
+				contents: TOC_SECTION_SELECTOR_PROMPT + rawQuery.slice(0, 400) + '\n\nSECTION TREE:\n' + JSON.stringify(tree, null, 2),
+				config: { serviceTier: 'flex', temperature: 0 },
+			});
+			const raw = (resp.text || '').replace(/^```json\s*/i, '').replace(/```\s*$/, '').trim();
+			const parsed = JSON.parse(raw);
+			const ids = (parsed.relevant_section_ids || []).filter(id => typeof id === 'string').slice(0, 5);
+			writeCache(key, { relevant_section_ids: ids });
+			return ids;
+		} catch (_) {
+			return [];
+		}
 	}
 
 	// ── Phase 1 — ArangoSearch BM25 ──────────────────────────────────────────────
@@ -1034,6 +1078,14 @@ export class RetrievalEngine {
 			this._phase1dVector(processedQuery, vectorLimit),
 		]);
 
+		// Phase 0b: TOC-guided section selection for phrase/paragraph queries
+		let tocGuidedSectionIds = [];
+		const tocGuidanceEnabled = process.env.OHARA_TOC_GUIDANCE !== 'false';
+		if (tocGuidanceEnabled && processedQuery.inputType !== 'keyword' && bm25Results.length > 0) {
+			const seedDocIds = [...new Set(bm25Results.slice(0, 3).map(r => r.node?.document_id).filter(Boolean))];
+			tocGuidedSectionIds = await this._phase0bTocGuidance(rawInput, seedDocIds);
+		}
+
 		const topNodeId = bm25Results[0]?.node?._id;
 		const seenAfterPhase3 = new Set([
 			...seenAfterPhase2,
@@ -1043,12 +1095,30 @@ export class RetrievalEngine {
 		]);
 		let structResults = await this._phase4Structural(topNodeId, depth, seenAfterPhase3);
 
-		// Corrective RAG: drop structural nodes with zero SUMO overlap when query has hints
+		// Augment structural results with TOC-guided entry points (each selected section traversed)
+		if (tocGuidedSectionIds.length > 0) {
+			const tocStructPromises = tocGuidedSectionIds
+				.filter(id => id !== topNodeId)
+				.map(id => this._phase4Structural(id, depth, seenAfterPhase3));
+			const tocStructBatches = await Promise.all(tocStructPromises);
+			for (const batch of tocStructBatches) {
+				for (const r of batch) {
+					if (!seenAfterPhase3.has(r.node._id)) {
+						structResults.push({ ...r, source: 'toc_guided_structural' });
+						seenAfterPhase3.add(r.node._id);
+					}
+				}
+			}
+		}
+
+		// Corrective RAG: drop structural nodes with zero SUMO overlap when query has hints.
+		// TOC-guided structural nodes are exempt — Gemini already validated their relevance via section summary.
 		const correctiveEnabled = process.env.OHARA_CORRECTIVE_STRUCT !== 'false';
 		const queryHints = processedQuery.sumoHints;
 		if (correctiveEnabled && Array.isArray(queryHints) && queryHints.length > 0) {
 			const sumoSet = new Set(queryHints);
 			structResults = structResults.filter(r =>
+				r.source === 'toc_guided_structural' ||
 				(r.node?.sumo_tags || []).some(t => sumoSet.has(t))
 			);
 		}
