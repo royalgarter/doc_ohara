@@ -4,7 +4,7 @@ import { execSync } from 'node:child_process';
 import crypto from 'node:crypto';
 import { GoogleGenAI } from '@google/genai';
 import { getArangoDBSimulator } from '../db/simulator.js';
-import { cacheKeyFor, readCacheAsync, writeCache, readCacheSync, hasCache, credFingerprint, getCacheDir } from '../cache.js';
+import { cacheKeyFor, readCacheAsync, writeCache, readCacheSync, writeCacheSync, hasCache, credFingerprint, getCacheDir } from '../cache.js';
 import { chunkMarkdown, readMarkdownFile } from './chunker.js';
 import * as arangoClient from '../db/client.js';
 import { updateEdge as updateArangoEdge } from '../db/client.js';
@@ -1827,28 +1827,48 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
 				// Pre-compute embeddings for all paragraphs before inserting so the vector index is satisfied at insert time.
 				const embeddingMap = new Map(); // index → float[]
 				if (process.env.OHARA_EMBED_PARAGRAPHS === 'true' && ai) {
+					const EMBED_MODEL = 'gemini-embedding-2';
 					const embedBatch = parseInt(process.env.OHARA_EMBED_BATCH_SIZE || '20', 10);
 					const embeddable = docsParagraphs
 						.map((p, idx) => ({ idx, text: typeof p.content === 'string' && p.content.length >= 20 ? p.content.slice(0, 8192) : null }))
 						.filter(e => e.text !== null);
-					for (let i = 0; i < embeddable.length; i += embedBatch) {
-						const batch = embeddable.slice(i, i + embedBatch);
+
+					// Resolve cache hits first; collect misses for API call
+					const misses = [];
+					let cacheHits = 0;
+					for (const item of embeddable) {
+						const cacheKey = cacheKeyFor(['embed_v1', EMBED_MODEL, item.text]);
+						const cached = readCacheSync(cacheKey);
+						if (cached?.vec) {
+							embeddingMap.set(item.idx, cached.vec);
+							cacheHits++;
+						} else {
+							misses.push({ ...item, cacheKey });
+						}
+					}
+					if (cacheHits > 0) addPipelineLog('info', `Embedding cache: ${cacheHits} hit(s), ${misses.length} miss(es) for ${doc.id}`);
+
+					for (let i = 0; i < misses.length; i += embedBatch) {
+						const batch = misses.slice(i, i + embedBatch);
 						try {
 							const resp = await ai.models.embedContent({
-								model: 'gemini-embedding-2',
+								model: EMBED_MODEL,
 								contents: batch.map(b => b.text),
 								config: { taskType: 'RETRIEVAL_DOCUMENT', outputDimensionality: 768 },
 							});
 							const embeddings = resp.embeddings || [];
 							for (let j = 0; j < batch.length; j++) {
 								const vec = embeddings[j]?.values;
-								if (vec) embeddingMap.set(batch[j].idx, vec);
+								if (vec) {
+									embeddingMap.set(batch[j].idx, vec);
+									writeCacheSync(batch[j].cacheKey, { vec });
+								}
 							}
 						} catch (embErr) {
 							addPipelineLog('warn', `Embedding batch ${i}–${i + embedBatch} failed: ${embErr.message}`);
 						}
 					}
-					addPipelineLog('info', `Embeddings generated for ${embeddingMap.size} paragraph(s) in ${doc.id}`);
+					addPipelineLog('info', `Embeddings ready for ${embeddingMap.size} paragraph(s) in ${doc.id}`);
 				}
 
 				for (let piBatch = 0; piBatch < docsParagraphs.length; piBatch += BATCH_SIZE) {
