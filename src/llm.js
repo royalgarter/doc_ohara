@@ -27,6 +27,7 @@ async function _callGemini(prompt, { model, systemPrompt, json, ...extraConfig }
 	const resolvedModel = model || DEFAULT_MODEL;
 	const config = { serviceTier: 'flex', ...extraConfig };
 	if (json) config.responseMimeType = 'application/json';
+	console.log(`[llm] gemini • model=${resolvedModel} • json=${!!json} • tier=${config.serviceTier}`);
 
 	const contents = systemPrompt
 		? [{ role: 'user', parts: [{ text: `${systemPrompt}\n\n${prompt}` }] }]
@@ -47,6 +48,7 @@ function _cfGatewayUrl() {
 
 async function _callCloudflare(prompt, { model, systemPrompt, json } = {}) {
 	const resolvedModel = model || DEFAULT_MODEL;
+	console.log(`[llm] cloudflare-gateway • model=${resolvedModel} • json=${!!json}`);
 	const messages = [];
 	if (systemPrompt) messages.push({ role: 'system', content: systemPrompt });
 	messages.push({ role: 'user', content: prompt });
@@ -80,6 +82,7 @@ async function _callCFWorkersAI(prompt, { model, systemPrompt, json } = {}) {
 	if (!accountId || !token) throw new Error('CF_ACCOUNT_ID and CF_API_TOKEN must be set for Workers AI fallback');
 
 	const resolvedModel = model || CF_WORKERS_FALLBACK_MODEL;
+	console.log(`[llm] cf-workers • model=${resolvedModel} • json=${!!json}`);
 	const messages = [];
 	if (systemPrompt) messages.push({ role: 'system', content: systemPrompt });
 	messages.push({ role: 'user', content: typeof prompt === 'string' ? prompt : JSON.stringify(prompt) });
@@ -131,12 +134,16 @@ export async function callLLM(prompt, { model, systemPrompt, json, cache = true,
 	if (cache) {
 		const key = cacheKeyFor([PROVIDER, resolvedModel, credFingerprint(), systemPrompt || '', prompt, json ? 'json' : '']);
 		const cached = await readCacheAsync(key);
-		if (cached?.result !== undefined) return cached.result;
+		if (cached?.result !== undefined) {
+			console.log(`[llm] cache-hit • provider=${PROVIDER} • model=${resolvedModel}`);
+			return cached.result;
+		}
 		const result = await invoke();
 		await writeCacheAsync(key, { result });
 		return result;
 	}
 
+	console.log(`[llm] no-cache • provider=${PROVIDER} • model=${resolvedModel}`);
 	return invoke();
 }
 
