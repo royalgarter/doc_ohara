@@ -877,7 +877,7 @@ async function structureMarkdownWithRetries(ai, filename, mdContent) {
 				diag.outcome = 'success';
 				return parsed;
 			} catch (err) {
-				addPipelineLog('warn', `LLM error on chunk ${chunk.id}: ${err.message}`);
+				addPipelineLog('warn', `LLM error on chunk ${chunk.id} (model=${modelId}): ${err.message}`);
 				if (attempt < maxAttempts) {
 					const retryDelay = 5000 * Math.pow(3, attempt - 1); // 5s, 15s, 45s
 					addPipelineLog('info', `Retrying chunk ${chunk.id} in ${retryDelay / 1000}s...`);
