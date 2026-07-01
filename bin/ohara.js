@@ -745,22 +745,27 @@ program
 	});
 
 program
-	.command('rm <doc_id>')
-	.description('Delete a document and all its associated nodes/edges')
+	.command('rm <doc_ids...>')
+	.description('Delete one or more documents and all their associated nodes/edges')
 	.option('--json', 'machine-readable output')
-	.action(async (docId, opts) => {
-		let deleted;
-		if (useRealDB) {
-			deleted = await arangoClient.deleteDocumentAndNodes(docId).catch(() => false);
-		} else {
-			deleted = getArangoDBSimulator().deleteDocument(docId);
-		}
-		emit(opts.json, { success: deleted }, () => {
-			if (deleted) console.log(chalk.green(`✔ Deleted document "${docId}" and its graph nodes/edges.`));
-			else {
-				console.error(chalk.red(`✖ Document "${docId}" not found.`));
-				process.exitCode = 1;
+	.action(async (docIds, opts) => {
+		const results = [];
+		for (const docId of docIds) {
+			let deleted;
+			if (useRealDB) {
+				deleted = await arangoClient.deleteDocumentAndNodes(docId).catch(() => false);
+			} else {
+				deleted = getArangoDBSimulator().deleteDocument(docId);
 			}
+			results.push({ id: docId, deleted });
+		}
+		const failed = results.filter(r => !r.deleted);
+		emit(opts.json, { results, success: failed.length === 0 }, () => {
+			for (const r of results) {
+				if (r.deleted) console.log(chalk.green(`✔ Deleted "${r.id}" and its graph nodes/edges.`));
+				else console.error(chalk.red(`✖ Document "${r.id}" not found.`));
+			}
+			if (failed.length > 0) process.exitCode = 1;
 		});
 	});
 
