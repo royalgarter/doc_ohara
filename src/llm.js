@@ -2,7 +2,7 @@ import { GoogleGenAI } from '@google/genai';
 import { cacheKeyFor, readCacheAsync, writeCacheAsync, credFingerprint } from './cache.js';
 
 const PROVIDER = process.env.LLM_PROVIDER || 'gemini';
-const DEFAULT_MODEL = process.env.LLM_MODEL || 'gemini-2.5-flash-lite';
+const DEFAULT_MODEL = process.env.LLM_MODEL || 'gemma-4-26b-a4b-it';
 const DEFAULT_EMBEDDING_MODEL = process.env.LLM_EMBEDDING_MODEL || 'gemini-embedding-2';
 const CF_WORKERS_FALLBACK_MODEL = process.env.CF_WORKERS_MODEL || '@cf/zai-org/glm-4.7-flash';
 

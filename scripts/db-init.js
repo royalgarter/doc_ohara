@@ -3,6 +3,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+process?.loadEnvFile?.();
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // Credentials and infra keys — never stored in the config collection.
