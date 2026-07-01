@@ -2075,7 +2075,7 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
 						sumo_tags: sumoTags,
 						entity_count: entitySlugs.length,
 						...(docDescription ? { description: docDescription } : {}),
-						token_usage: { ..._tokenUsage, recorded_at: new Date().toISOString() },
+						...(_tokenUsage.calls > 0 ? { token_usage: { ..._tokenUsage, recorded_at: new Date().toISOString() } } : {}),
 					}).catch(() => {});
 
 					// Compute Jaccard similarity against all other documents and insert SIMILAR_TO edges
@@ -2295,7 +2295,11 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
 	onProgress(100, `Completed ingestion of ${filename} (${nodeCount} nodes).`);
 
 	clearTokenUsageHandler();
-	addPipelineLog('info', `[token summary] calls=${_tokenUsage.calls} prompt=${_tokenUsage.prompt} output=${_tokenUsage.output} cached=${_tokenUsage.cached} thoughts=${_tokenUsage.thoughts} total=${_tokenUsage.total}`);
+	if (_tokenUsage.calls > 0) {
+		addPipelineLog('info', `[token summary] calls=${_tokenUsage.calls} prompt=${_tokenUsage.prompt} output=${_tokenUsage.output} cached=${_tokenUsage.cached} thoughts=${_tokenUsage.thoughts} total=${_tokenUsage.total}`);
+	} else {
+		addPipelineLog('info', '[token summary] 0 LLM calls — all chunks served from disk cache');
+	}
 
 	// Auto entity dedup after ingest
 	if (process.env.OHARA_AUTO_ENTITY_DEDUP === 'true') {
