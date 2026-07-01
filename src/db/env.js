@@ -7,9 +7,10 @@
  *
  * CLI: `ohara env list|get|set|unset`
  */
+import fs from 'node:fs';
 import { initArangoClient } from './client.js';
 
-// process?.loadEnvFile?.();
+if (fs.existSync('.env')) process?.loadEnvFile?.();
 
 const COLLECTION = 'env';
 
