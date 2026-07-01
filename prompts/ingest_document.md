@@ -52,12 +52,14 @@ candidate_entities: [           # named entities mentioned in this node
 #             title:  string   # REQUIRED
 #             summary?: string # 1-2 sentences describing what this subsection covers (omit if obvious from title)
 # Paragraph   content: string  # full paragraph text — preserve verbatim, do NOT split by sentence
-# ListItem    content: string
+#                               # Use Paragraph for list items too — preserve the original list marker
+#                               # (e.g. "- ", "* ", "1. ") verbatim at the start of content
 # Figure      label?:   string   # e.g. "Figure 3"
 #             caption?: string   # human-readable caption — REQUIRED if any caption text exists
 #             figure: { description: string, url?: string }
 # Table       label?:   string   # e.g. "Table 2"
 #             caption?: string
+#             markdown?: string  # verbatim markdown table string from source (| col | col | …)
 #             table: { content_data: [[header…], [row…], …] }   # row-major 2-D array
 
 # ── BACK MATTER types ────────────────────────────────────────────────
@@ -76,8 +78,8 @@ candidate_entities: [           # named entities mentioned in this node
 2. **Map** every content block to exactly one DoCO type — do not skip sections.
 3. **Preserve** raw text verbatim inside `content`; do not paraphrase or summarize.
 4. **Respect granularity**:
-   - `Paragraph` uses a flat `content: string` — the full paragraph text as-is. Do NOT split a paragraph into individual sentences. Do NOT create multiple Paragraph nodes for what is one natural paragraph in the source. If the source has several consecutive sentences that form a cohesive paragraph, they belong in ONE Paragraph node.
-   - `Table` must carry a nested `table.content_data` 2-D array, not a flat string.
+   - `Paragraph` uses a flat `content: string` — the full paragraph text as-is. Do NOT split a paragraph into individual sentences. Do NOT create multiple Paragraph nodes for what is one natural paragraph in the source. If the source has several consecutive sentences that form a cohesive paragraph, they belong in ONE Paragraph node. List items also use `Paragraph` — preserve the original list marker (`- `, `* `, `1. `, etc.) verbatim at the start of `content`.
+   - `Table` must carry a nested `table.content_data` 2-D array, not a flat string. Also output `markdown` as the verbatim markdown table string from the source (e.g. `| Col | Col |\n|---|---|\n| val | val |`).
    - `Figure` must carry a nested `figure` object with a `description` string (not an object within `figure`).
 5. **Assign `part`** to every node: anything before the first chapter is `front_matter`; bibliography, appendixes, glossary, index are `back_matter`; everything else is `body_matter`.
 6. **Populate `sumo_candidate_tags`** per node with short SUMO concept local names (e.g. `Agent`, `Transaction`, `Text`, `Quantity`). Not full URIs. These are validated against the local SUMO index.
@@ -158,6 +160,7 @@ candidate_entities: [           # named entities mentioned in this node
       "part": "body_matter",
       "label": "Table 1-1",
       "caption": "Bitcoin vs Traditional Currency",
+      "markdown": "| Property | Bitcoin | Traditional |\n|---|---|---|\n| Issuer | None (decentralized) | Central bank |\n| Supply cap | 21 million | Unlimited |",
       "table": {
         "content_data": [
           ["Property", "Bitcoin", "Traditional"],
@@ -214,8 +217,8 @@ If you cannot determine a value, use `null`. `temporal_granularity` defaults to 
 
 - Output must start with `{` and end with `}` — pure JSON, no fences. Top-level keys are `nodes` and `temporal`.
 - Every node must have `type`, `part`, and `metadata`.
-- `Paragraph` nodes must use a flat `content: string` — **never** a `sentences[]` array.
-- `Table` nodes must use `table.content_data` (2-D array), not a flat string.
+- `Paragraph` nodes must use a flat `content: string` — **never** a `sentences[]` array. Use `Paragraph` for list items; preserve the original list marker verbatim.
+- `Table` nodes must use `table.content_data` (2-D array), not a flat string. Also include `markdown` (verbatim markdown table string from source) at the top level of the Table node.
 - `Figure` nodes must use a nested `figure` object with `description` as a plain string.
 - `Authors` must use `agents_group` with a typed `agents[]` array.
 - `Bibliography` must list individual `references[]` with at minimum `citation_text`.

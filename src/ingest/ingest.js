@@ -179,7 +179,9 @@ export async function runPipelineExecution(aiKey) {
 							document_id: inserted._key,
 							section_id: p.section_id ? `sections/${p.section_id}` : null,
 							content: p.content,
-							is_latex: typeof p.content === 'string' && (p.content.includes('\\') || p.content.includes('^') || p.content.includes('_'))
+							is_latex: typeof p.content === 'string' && (p.content.includes('\\') || p.content.includes('^') || p.content.includes('_')),
+							llm_pending: p.llm_pending || false,
+							llm_error: p.llm_error || null,
 						});
 					}
 
@@ -227,7 +229,9 @@ export async function runPipelineExecution(aiKey) {
 						document_id: insertedDoc._key,
 						section_id: p.section_id ? `sections/${p.section_id}` : null,
 						content: p.content,
-						is_latex: typeof p.content === 'string' && (p.content.includes('\\') || p.content.includes('^') || p.content.includes('_'))
+						is_latex: typeof p.content === 'string' && (p.content.includes('\\') || p.content.includes('^') || p.content.includes('_')),
+						llm_pending: p.llm_pending || false,
+						llm_error: p.llm_error || null,
 					});
 				});
 
@@ -953,6 +957,22 @@ async function structureMarkdownWithRetries(ai, filename, mdContent) {
 	for (const entry of ordered) {
 		if (entry.error) {
 			failedChunks.push({ id: entry.chunk.id, error: entry.error.message });
+			// Preserve raw chunk text so no content is lost — LLM can reprocess later
+			if (entry.chunk.text && entry.chunk.text.trim()) {
+				mergedNodes.push({
+					type: 'Paragraph',
+					part: 'body_matter',
+					content: entry.chunk.text.trim(),
+					llm_pending: true,
+					llm_error: entry.error.message,
+					metadata: { page: entry.chunk.startPage ?? 1 },
+					_chunk_start_page: entry.chunk.startPage,
+					_chunk_end_page: entry.chunk.endPage,
+					_page_source: entry.chunk.pageSource,
+					sumo_tags: [],
+					entities: [],
+				});
+			}
 			continue;
 		}
 		const parsed = entry.res;
@@ -989,12 +1009,10 @@ async function structureMarkdownWithRetries(ai, filename, mdContent) {
 		}
 	}
 
-	// If all chunks failed, throw so caller knows nothing was produced
-	if (mergedNodes.length === 0 && failedChunks.length > 0) {
-		const err = new Error(`All ${failedChunks.length} chunk(s) failed: ${failedChunks.map(e => e.error).join('; ')}`);
-		err.code = 'LLM_FAILED';
-		err.failedChunks = failedChunks;
-		throw err;
+	// All chunks failed — raw fallback nodes were added above, so mergedNodes is non-empty.
+	// Log a clear warning but do NOT throw; content is preserved with llm_pending=true.
+	if (failedChunks.length > 0) {
+		addPipelineLog('warn', `${failedChunks.length} chunk(s) failed LLM structuring — stored as raw llm_pending paragraphs for later reprocessing`);
 	}
 
 	// Validate SUMO candidate tags for each node and promote to sumo_tags.
@@ -1266,10 +1284,12 @@ function transformRawToCollections(rawOutputDir) {
 							id: nodeId,
 							document_id: docId,
 							section_id: currentSectionId,
-							node_type: ntype,
+							node_type: 'Paragraph',
 							content: content.trim(),
 							page: resolvedPage,
 							page_source: pageSource,
+							llm_pending: node.llm_pending || false,
+							llm_error: node.llm_error || null,
 							sumo_tags: node.sumo_tags || [],
 							sumo_candidate_tags_raw: node.sumo_candidate_tags_raw || [],
 							sumo_resolved_map: node.sumo_resolved_map || {},
