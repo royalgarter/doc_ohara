@@ -19,3 +19,4 @@ coverage/
 /doc_pipeline/diagnostics
 /.data
 /doc_pipeline
+/eval/eval_report_*.json
