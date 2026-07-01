@@ -698,6 +698,9 @@
 		<!-- ── Right: graph canvas + inspector ────────────────────────────────── -->
 		<div class="flex flex-col flex-1 min-w-0 overflow-hidden cl-bg-0">
 
+			<!-- Top row: canvas + disc section panel -->
+			<div class="flex flex-row flex-1 min-h-0">
+
 			<!-- 3D Space-Time Graph canvas -->
 			<div class="flex-1 overflow-hidden relative cl-bg-0" id="graph-container" style="min-height:300px;">
 				<canvas id="graph-canvas" style="display:block;width:100%;height:100%;"></canvas>
@@ -732,6 +735,32 @@
 					<span class="cl-t5 text-xs">Select a document from the left panel to view its graph</span>
 				</div>
 			</div>
+
+			<!-- Disc section panel (right) -->
+			<div x-show="discPanelOpen"
+				class="flex flex-col border-l cl-b0 cl-bg-1 flex-shrink-0 overflow-hidden"
+				style="width:220px;">
+				<div class="flex items-center justify-between px-3 py-2 border-b cl-b0">
+					<span class="text-xs font-bold cl-t3 uppercase tracking-widest truncate"
+						x-text="discPanelDoc && (discPanelDoc.title || discPanelDoc._key) || 'Sections'"></span>
+					<button @click="discPanelOpen = false" class="cl-t5 hover:cl-t2 text-xs flex-shrink-0 ml-1">✕</button>
+				</div>
+				<div class="flex-1 overflow-y-auto scrollbar-thin p-2 flex flex-col gap-1">
+					<template x-for="(sec, i) in discPanelSections" :key="sec._id || sec._key">
+						<button @click="selectSectionFromPanel(sec)"
+							:class="selectedNode && selectedNode._key === sec._key ? 'cl-card-on' : 'cl-card'"
+							class="text-left p-1.5 rounded border cursor-pointer transition text-xs flex flex-col gap-0.5">
+							<div class="flex items-center gap-1">
+								<span class="cl-t5 font-mono" x-text="'L' + (sec.level || 1)"></span>
+								<span class="cl-t1 truncate" x-text="sec.title || sec._key"></span>
+							</div>
+						</button>
+					</template>
+					<div x-show="discPanelSections.length === 0" class="text-xs cl-t5 text-center py-4">No sections</div>
+				</div>
+			</div>
+
+			</div><!-- end top row -->
 
 			<!-- Node inspector strip -->
 			<div x-show="selectedNode"
@@ -863,6 +892,10 @@
 			timelineResolution: 'year',
 			docsOpen: true,
 			graphZoom: 1.0,
+
+			discPanelOpen: false,
+			discPanelDoc: null,
+			discPanelSections: [],
 
 			pipelineActive: false,
 			pipelineLogs: [],
@@ -1053,8 +1086,27 @@
 						self.selectedNode = node;
 						self.expandNode(node);
 						self.$nextTick(() => self.renderCurrentGraph());
-					});
+					},
+					(dk) => { self.openDiscPanel(dk); });
 				if (autoFit) requestAnimationFrame(() => requestAnimationFrame(_g3dFitScene));
+			},
+
+			openDiscPanel(dk) {
+				const doc = this.graphData.documents.find(d => (d._key || d.id) === dk);
+				this.discPanelDoc = doc || { _key: dk };
+				const secs = this.graphData.sections.filter(s => s.document_id === dk);
+				secs.sort((a, b) => {
+					if ((a.level || 1) !== (b.level || 1)) return (a.level || 1) - (b.level || 1);
+					return (a._key || '').localeCompare(b._key || '');
+				});
+				this.discPanelSections = secs;
+				this.discPanelOpen = true;
+			},
+
+			selectSectionFromPanel(section) {
+				this.selectedNode = section;
+				this.expandNode(section);
+				this.$nextTick(() => this.renderCurrentGraph());
 			},
 
 			_clearSelEdges() {
@@ -1585,7 +1637,7 @@
 		G3D.controls.update();
 	}
 
-	function renderGraph(data, colorMode, selectedKey, zoom, selectedDocKeys, timelineResolution, onSelect) {
+	function renderGraph(data, colorMode, selectedKey, zoom, selectedDocKeys, timelineResolution, onSelect, onDiscSelect) {
 		if (!window.THREE) return;
 		if (!G3D.initialized) _initG3D();
 		if (!G3D.renderer) return;
@@ -1593,6 +1645,7 @@
 		_disposeG3D();
 
 		G3D.onSelect = onSelect;
+		G3D.onDiscSelect = onDiscSelect || null;
 		const { scene, camera, controls } = G3D;
 
 		let { documents, sections, paragraphs, tables, edges } = data;
@@ -1755,29 +1808,7 @@
 				curR = r + D_SEC + RING_PAD;
 			}
 
-			// Paragraphs on outermost ring
-			const docParas = paragraphs.filter(p => p.document_id === dk);
-			const paraR = Math.max(curR, ringR(docParas.length, D_PARA, GAP_PARA));
-			docParas.forEach((p, i) => {
-				const theta = (2 * Math.PI * i) / Math.max(docParas.length, 1);
-				nodePos.set(p._key || p.id, {
-					x: cx + paraR * Math.cos(theta), y: cy + paraR * Math.sin(theta), z: cz,
-					r: 4, node: p, colKey: 'paragraph', decayClass: _dc(p) || docDecay,
-				});
-			});
-
-			// Tables just outside para ring
-			const docTables = tables.filter(t => t.document_id === dk);
-			const tableR = paraR + D_PARA + 10;
-			docTables.forEach((t, i) => {
-				const theta = (2 * Math.PI * i) / Math.max(docTables.length, 1);
-				nodePos.set(t._key || t.id, {
-					x: cx + tableR * Math.cos(theta), y: cy + tableR * Math.sin(theta), z: cz,
-					r: 4, node: t, colKey: 'table', decayClass: _dc(t) || docDecay,
-				});
-			});
-
-			docDiscR.set(dk, Math.max(paraR, docTables.length ? tableR : 0, curR) + D_PARA);
+			docDiscR.set(dk, curR + D_SEC);
 		});
 
 		const maxDiscR = Math.max(...docDiscR.values(), 100);
@@ -2105,17 +2136,7 @@
 					}
 				}
 			}
-			for (const p of paragraphs) {
-				const ep = nodePos.get(p._key);
-				if (!ep) continue;
-				for (const tname of (p.sumo_tags || []).slice(0, 3)) {
-					const tp = nodePos.get('tag:' + tname);
-					if (tp) {
-						tetherPts.push(tp.x, tp.y, tp.z,  ep.x, ep.y, ep.z);
-						tetherCols.push(tc.r, tc.g, tc.b,  tc.r, tc.g, tc.b);
-					}
-				}
-			}
+			// Paragraph nodes removed from 3D — no tag-to-para tethers
 			if (tetherPts.length) {
 				const tgeo = new THREE.BufferGeometry();
 				tgeo.setAttribute('position', new THREE.Float32BufferAttribute(tetherPts, 3));
@@ -2209,27 +2230,8 @@
 			const useDisc = !nodeHits.length || (discHits.length && discHits[0].distance < nodeHits[0].distance - 5);
 
 			if (useDisc && discHits.length) {
-				// Disc click: show all radial edges for that document
-				const dk    = discHits[0].object.userData.docKey;
-				const dz    = docDiscZ.get(dk);
-				const docP  = nodePos.get(dk);
-				if (docP != null) {
-					const sePts = [], seCol = [];
-					for (const [key, p] of nodePos) {
-						if (key === dk || !Number.isFinite(p.z) || Math.abs(p.z - dz) > 1) continue;
-						if (p.colKey === '_label') continue;
-						const dc = new THREE.Color(_nodeColorHex(p.node, p.colKey, colorMode, docColorMap) || '#94a3b8');
-						sePts.push(docP.x, docP.y, docP.z,  p.x, p.y, p.z);
-						seCol.push(dc.r, dc.g, dc.b,  dc.r, dc.g, dc.b);
-					}
-					if (sePts.length) {
-						const segeo = new THREE.BufferGeometry();
-						segeo.setAttribute('position', new THREE.Float32BufferAttribute(sePts, 3));
-						segeo.setAttribute('color',    new THREE.Float32BufferAttribute(seCol, 3));
-						G3D.selEdges = new THREE.LineSegments(segeo, new THREE.LineBasicMaterial({ vertexColors: true, transparent: true, opacity: 0.35 }));
-						scene.add(G3D.selEdges);
-					}
-				}
+				const dk = discHits[0].object.userData.docKey;
+				if (G3D.onDiscSelect) G3D.onDiscSelect(dk);
 				return;
 			}
 
