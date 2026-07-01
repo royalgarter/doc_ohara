@@ -429,7 +429,8 @@ export class RetrievalEngine {
 					SEARCH ANALYZER(
 						doc.content IN TOKENS(@phrase, "text_en") OR
 						doc.title   IN TOKENS(@phrase, "text_en") OR
-						doc.markdown_representation IN TOKENS(@phrase, "text_en")
+						doc.markdown_representation IN TOKENS(@phrase, "text_en") OR
+						doc.contextual_prefix IN TOKENS(@phrase, "text_en")
 					, "text_en")
 					SORT BM25(doc) DESC
 					LIMIT @limit
@@ -1153,19 +1154,82 @@ export class RetrievalEngine {
 		let stoppedReason = 'no_principal_seeds';
 		if (principal.length > 0) {
 			const principalSeeds = principal.map(e => ({ node: { document_id: e.node.document_id } }));
+			const principalNodeIds = principal.map(e => e.node._id).filter(Boolean);
+			const principalEntitySlugsForFrontier = [...new Set(principal.flatMap(e => e.node?.entity_slugs || []))].slice(0, 20);
 			const crossDocLimit = options.crossDocLimit
 				?? parseInt(process.env.OHARA_CROSS_DOC_LIMIT || '5', 10);
 			const expandDepth = (options.expandDepth ?? parseInt(process.env.OHARA_CROSS_DOC_EXPAND_DEPTH || '1', 10)) + 1;
 			const frontierSeen = new Set([...seenIds, ...integrityIds]);
-			const frontierResults = await this._phase1cCrossDocEdge(processedQuery, principalSeeds, frontierSeen, crossDocLimit, expandDepth);
-			frontier = frontierResults
+
+			// Original: SIMILAR_TO cross-doc hops
+			const crossDocFrontier = await this._phase1cCrossDocEdge(processedQuery, principalSeeds, frontierSeen, crossDocLimit, expandDepth);
+
+			// ANSWERS_SAME frontier: paragraphs sharing pseudo-questions with principal nodes
+			let answersSameFrontier = [];
+			if (principalNodeIds.length > 0) {
+				try {
+					answersSameFrontier = await this.db.executeAQL(`
+						FOR e IN edges
+							FILTER e._from IN @node_ids AND e.relation == "ANSWERS_SAME"
+							FOR p IN paragraphs
+								FILTER p._id == e._to AND p._id NOT IN @seen_ids
+								LIMIT @limit
+								RETURN { node: p, score: 0.4, source: "answers_same_frontier", shared_query: e.shared_query, edge_verb: "answers same question as", hops: 1 }
+					`, { node_ids: principalNodeIds, seen_ids: [...frontierSeen], limit: crossDocLimit });
+				} catch (_) {}
+			}
+
+			// ADAMIC_ADAR frontier: entities strongly co-cited with principal entities → their paragraphs
+			let aaFrontier = [];
+			if (principalEntitySlugsForFrontier.length > 0) {
+				try {
+					aaFrontier = await this.db.executeAQL(`
+						LET query_entity_ids = (FOR e IN entities FILTER e.slug IN @slugs RETURN e._id)
+						FOR aa_edge IN edges
+							FILTER aa_edge._from IN query_entity_ids AND aa_edge.relation == "ADAMIC_ADAR" AND aa_edge.weight >= 0.5
+							FOR mention IN edges
+								FILTER mention._to == aa_edge._to AND mention.relation == "MENTIONS"
+								FOR p IN paragraphs
+									FILTER p._id == mention._from AND p._id NOT IN @seen_ids
+									SORT aa_edge.weight DESC
+									LIMIT @limit
+									RETURN { node: p, score: aa_edge.weight * 0.4, source: "adamic_adar_frontier", edge_verb: "co-cited with", hops: 2 }
+					`, { slugs: principalEntitySlugsForFrontier, seen_ids: [...frontierSeen], limit: crossDocLimit });
+				} catch (_) {}
+			}
+
+			// COMMUNITY_MEMBER frontier: other entities in same community → their paragraphs
+			let communityFrontier = [];
+			if (principalEntitySlugsForFrontier.length > 0) {
+				try {
+					communityFrontier = await this.db.executeAQL(`
+						LET query_entity_ids = (FOR e IN entities FILTER e.slug IN @slugs RETURN e._id)
+						FOR cm IN edges
+							FILTER cm._from IN query_entity_ids AND cm.relation == "COMMUNITY_MEMBER"
+							FOR cm2 IN edges
+								FILTER cm2._to == cm._to AND cm2.relation == "COMMUNITY_MEMBER" AND cm2._from NOT IN query_entity_ids
+								FOR mention IN edges
+									FILTER mention._to == cm2._from AND mention.relation == "MENTIONS"
+									FOR p IN paragraphs
+										FILTER p._id == mention._from AND p._id NOT IN @seen_ids
+										LIMIT @limit
+										RETURN { node: p, score: 0.35, source: "community_frontier", edge_verb: "in same topic community as", hops: 2 }
+					`, { slugs: principalEntitySlugsForFrontier, seen_ids: [...frontierSeen], limit: crossDocLimit });
+				} catch (_) {}
+			}
+
+			const allFrontierResults = [...crossDocFrontier, ...answersSameFrontier, ...aaFrontier, ...communityFrontier];
+			frontier = allFrontierResults
 				.filter(r => (r.score || 0) >= explorerStopWeight && (r.score || 0) < integrityWeightMin)
 				.map(r => ({
-					document_id: r.node.document_id,
+					document_id: r.node?.document_id,
+					node_id: r.node?._id,
 					edge_verb: r.edge_verb,
 					edge_summary: r.edge_summary,
+					shared_query: r.shared_query,
 					score: r.score,
 					hops: r.hops,
+					source: r.source || 'cross_doc_edge',
 				}));
 			stoppedReason = frontier.length ? 'weight_below_threshold' : 'no_candidates_in_band';
 		}

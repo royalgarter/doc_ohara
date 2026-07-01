@@ -637,6 +637,54 @@ async function enrichCrossDocEdge(ai, docA, docB, snippetsA, snippetsB, sharedEn
 	}
 }
 
+// Generate contextual prefix for a paragraph (Anthropic Contextual Retrieval pattern).
+// Format: "[Document: {title}] [Section: {section_title}] This paragraph discusses {role}."
+// Improves BM25 vocabulary coverage and embedding quality.
+// Controlled by OHARA_CONTEXTUAL_PREFIX=true (opt-in; adds ~1 Gemini call per 8 paras via batching).
+async function generateContextualPrefixes(ai, paragraphs, docTitle, sectionTitles) {
+	if (!ai || !paragraphs.length) return new Map();
+	const result = new Map(); // para.id → prefix string
+
+	// Batch paragraphs to reduce Gemini calls (8 per call)
+	const BATCH = 8;
+	for (let i = 0; i < paragraphs.length; i += BATCH) {
+		const batch = paragraphs.slice(i, i + BATCH);
+		const items = batch.map(p => ({
+			id: p.id,
+			section: sectionTitles.get(p.section_id) || '',
+			content: (p.content || '').slice(0, 600),
+		}));
+
+		const key = cacheKeyFor(['contextual_prefix_v1', GEMINI_MODEL, docTitle, JSON.stringify(items)]);
+		const cached = readCacheSync(key);
+		if (cached?.prefixes) {
+			for (const { id, prefix } of cached.prefixes) result.set(id, prefix);
+			continue;
+		}
+
+		const prompt = `Document title: "${docTitle}"
+
+For each passage below, write ONE sentence (≤20 words) describing what specific aspect of the document topic this passage covers.
+Format: "[Document: ${docTitle}] [Section: {section}] This passage {role}."
+Output ONLY a JSON array matching input order: ["sentence1", "sentence2", ...]
+
+Passages:
+${items.map((it, idx) => `${idx + 1}. [Section: ${it.section || 'unknown'}] ${it.content}`).join('\n\n')}`;
+
+		try {
+			const raw = ((await callLLM(prompt, { model: GEMINI_MODEL, cache: false, serviceTier: 'flex' })) || '')
+				.replace(/^```json\s*/i, '').replace(/```\s*$/, '').trim();
+			const prefixes = JSON.parse(raw);
+			if (!Array.isArray(prefixes)) continue;
+			const pairs = batch.map((p, idx) => ({ id: p.id, prefix: (prefixes[idx] || '').trim() })).filter(x => x.prefix);
+			writeCache(key, { prefixes: pairs });
+			for (const { id, prefix } of pairs) result.set(id, prefix);
+		} catch (_) {}
+	}
+
+	return result;
+}
+
 // Generate a 2-3 sentence document context summary from the first chunk.
 // Result is cached so re-ingest on the same doc is free.
 async function generateDocContext(ai, firstChunkText) {
@@ -1847,6 +1895,18 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
 				// Insert paragraphs in parallel batches — section IDs are all resolved by now
 				const docsParagraphs = transformedDocs.paragraphs.filter(p => p.document_id === doc.id);
 
+				// Contextual prefix (Anthropic Contextual Retrieval): prepend "[Document: X] [Section: Y] This paragraph…"
+				// to improve BM25 vocabulary coverage and embedding quality. Opt-in via OHARA_CONTEXTUAL_PREFIX=true.
+				const contextualPrefixMap = new Map(); // para.id → prefix string
+				if (process.env.OHARA_CONTEXTUAL_PREFIX === 'true' && ai) {
+					// Build section title lookup: internal section id → title
+					const secTitles = new Map(transformedDocs.sections.map(s => [s.id, s.title || '']));
+					const prefixable = docsParagraphs.filter(p => typeof p.content === 'string' && p.content.length >= 80);
+					const prefixes = await generateContextualPrefixes(ai, prefixable, doc.title || '', secTitles);
+					for (const [id, prefix] of prefixes) contextualPrefixMap.set(id, prefix);
+					addPipelineLog('info', `Contextual prefixes generated for ${contextualPrefixMap.size}/${prefixable.length} paragraphs`);
+				}
+
 				// Pre-compute embeddings for all paragraphs before inserting so the vector index is satisfied at insert time.
 				const embeddingMap = new Map(); // index → float[]
 				if (process.env.OHARA_EMBED_PARAGRAPHS === 'true' && ai) {
@@ -1900,11 +1960,13 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
 						const pIdx = piBatch + batchLocal;
 					const secHandle = p.section_id ? sectionIdMap.get(p.section_id) : null;
 					const embedding = embeddingMap.get(pIdx) ?? new Array(768).fill(0);
+					const contextualPrefix = contextualPrefixMap.get(p.id) || null;
 					const paraRes = await arangoClient.insertParagraph({
 						document_id: inserted._key,
 						section_id: secHandle || null,
 						node_type: p.node_type || 'Paragraph',
 						content: p.content,
+						contextual_prefix: contextualPrefix,
 						is_latex: typeof p.content === 'string' && (p.content.includes('\\') || p.content.includes('^') || p.content.includes('_')),
 						page: p.page ?? null,
 						page_source: p.page_source ?? null,
