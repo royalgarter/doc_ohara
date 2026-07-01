@@ -2009,6 +2009,8 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
 						entity_slugs: (p.entities || []).map(e => e.slug),
 						entity_types: (p.entities || []).map(e => e.type),
 						embedding,
+						llm_pending: p.llm_pending || false,
+						llm_error: p.llm_error || null,
 					});
 					nodeCount += 1;
 					const paraHandle = paraRes._id || `paragraphs/${paraRes._key}`;
