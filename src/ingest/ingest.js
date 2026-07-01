@@ -15,7 +15,7 @@ import { PseudoTOCGenerator, GeminiTocLLMClient, GeminiEmbeddingClient } from '.
 import { extractHtmlTitle, htmlToMarkdown } from '../helper.js';
 import { callLLM, createGeminiCache, callLLMWithCache } from '../llm.js';
 
-const GEMINI_MODEL = 'gemini-2.5-flash-lite';
+const GEMINI_MODEL = process.env.LLM_MODEL || 'gemini-2.5-flash-lite';
 
 // Global log tracking for the active pipeline run
 let currentLogs = [];
