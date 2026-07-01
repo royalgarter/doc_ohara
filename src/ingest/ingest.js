@@ -1824,6 +1824,8 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
 
 				const inserted = await arangoClient.insertDocument({
 					source_file: doc.source_file,
+					origin_path: fileExists ? path.resolve(fileContentPath) : null,
+					source_url: options.source_url || null,
 					parser_engine: doc.parser_engine,
 					title: doc.title,
 					file_size: doc.file_size || '350 KB',
@@ -2275,7 +2277,7 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
 				throw err;
 			}
 		} else {
-			const insertedDoc = arangoDb.insertDocument({ _key: doc.id, source_file: doc.source_file, parser_engine: doc.parser_engine, title: doc.title, file_size: doc.file_size || '350 KB', upload_time: new Date().toISOString(), toc_raw: detectedToc?.raw || null, toc_source: detectedToc?.source || null, toc_entries: detectedToc?.entries || [], glossary_entries: detectedGlossary?.entries || [], ingestion_status: ingestionStatus, ingestion_error: ingestionError, total_chunks: totalChunks || null, completed_chunks: completedChunks || null });
+			const insertedDoc = arangoDb.insertDocument({ _key: doc.id, source_file: doc.source_file, origin_path: fileExists ? path.resolve(fileContentPath) : null, source_url: options.source_url || null, parser_engine: doc.parser_engine, title: doc.title, file_size: doc.file_size || '350 KB', upload_time: new Date().toISOString(), toc_raw: detectedToc?.raw || null, toc_source: detectedToc?.source || null, toc_entries: detectedToc?.entries || [], glossary_entries: detectedGlossary?.entries || [], ingestion_status: ingestionStatus, ingestion_error: ingestionError, total_chunks: totalChunks || null, completed_chunks: completedChunks || null });
 
 			const docsSections = transformedDocs.sections.filter(s => s.document_id === doc.id);
 			docsSections.forEach(sec => { arangoDb.insertSection({ _key: sec.id, document_id: insertedDoc._key, title: sec.title, level: sec.level, page: sec.page ?? null, page_source: sec.page_source ?? null }); nodeCount += 1; });
@@ -2408,7 +2410,7 @@ export async function ingestCrawledDomain(domain, aiKey, onProgress = () => {}, 
 		addPipelineLog('info', `Bundled ${domainPages.length} pages → ${filename}`);
 
 		try {
-			await ingestSingleFile(filename, aiKey, () => {}, opts);
+			await ingestSingleFile(filename, aiKey, () => {}, { ...opts, source_url: `https://${hostname}` });
 			ingested++;
 			addPipelineLog('info', `[${di + 1}/${domainList.length}] Ingested domain bundle: ${hostname}`);
 		} catch (err) {

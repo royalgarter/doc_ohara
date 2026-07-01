@@ -438,11 +438,11 @@ async function startServer() {
 	// API: Queue a single document for background ingestion (used by CLI `ohara ingest` and agents)
 	app.post('/api/queue/ingest', async (req, res) => {
 		try {
-			const { filename } = req.body;
+			const { filename, force = false } = req.body;
 			if (!filename || !fs.existsSync(path.join(INPUT_DIR, filename))) {
 				return res.status(400).json({ success: false, error: `File not staged in input dir: ${filename}` });
 			}
-			const job = await ingestionQueue.add('ingestion', { filename });
+			const job = await ingestionQueue.add('ingestion', { filename, force: !!force });
 			res.json({ success: true, job });
 		} catch (err) {
 			res.status(500).json({ success: false, error: err.message });
