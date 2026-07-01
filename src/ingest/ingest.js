@@ -13,7 +13,7 @@ import { processNodeEntities, normalizeEntity } from '../entities.js';
 import { runEntityDedup } from './entity_dedup.js';
 import { PseudoTOCGenerator, GeminiTocLLMClient, GeminiEmbeddingClient } from '../toc.js';
 import { extractHtmlTitle, htmlToMarkdown } from '../helper.js';
-import { callLLM, createGeminiCache, callLLMWithCache } from '../llm.js';
+import { callLLM, createGeminiCache, callLLMWithCache, onTokenUsage, clearTokenUsageHandler } from '../llm.js';
 
 const GEMINI_MODEL = process.env.LLM_MODEL || 'gemini-2.5-flash-lite';
 
@@ -1651,6 +1651,17 @@ const delay = (ms) => new Promise(res => setTimeout(res, ms));
 // Mirrors the per-file body of runPipelineExecution but reports progress via callback
 // and classifies OOM / Gemini rate-limit errors so the worker can decide whether to retry.
 export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, options = {}) {
+	// Token usage accumulator for this ingest run
+	const _tokenUsage = { prompt: 0, output: 0, cached: 0, thoughts: 0, total: 0, calls: 0 };
+	onTokenUsage(u => {
+		_tokenUsage.prompt   += u.prompt;
+		_tokenUsage.output   += u.output;
+		_tokenUsage.cached   += u.cached;
+		_tokenUsage.thoughts += u.thoughts;
+		_tokenUsage.total    += u.total;
+		_tokenUsage.calls    += 1;
+	});
+
 	// Preflight: ensure env credentials & tools
 	preflightChecks(filename);
 
@@ -2064,6 +2075,7 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
 						sumo_tags: sumoTags,
 						entity_count: entitySlugs.length,
 						...(docDescription ? { description: docDescription } : {}),
+						token_usage: { ..._tokenUsage, recorded_at: new Date().toISOString() },
 					}).catch(() => {});
 
 					// Compute Jaccard similarity against all other documents and insert SIMILAR_TO edges
@@ -2282,6 +2294,9 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
 
 	onProgress(100, `Completed ingestion of ${filename} (${nodeCount} nodes).`);
 
+	clearTokenUsageHandler();
+	addPipelineLog('info', `[token summary] calls=${_tokenUsage.calls} prompt=${_tokenUsage.prompt} output=${_tokenUsage.output} cached=${_tokenUsage.cached} thoughts=${_tokenUsage.thoughts} total=${_tokenUsage.total}`);
+
 	// Auto entity dedup after ingest
 	if (process.env.OHARA_AUTO_ENTITY_DEDUP === 'true') {
 		try { await runEntityDedup(); } catch (e) { addPipelineLog('warn', `Auto entity dedup failed: ${e.message}`); }
@@ -2292,6 +2307,7 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
 		documents: docsForThisFile.length,
 		nodes: nodeCount,
 		llm_usage: llmUsage || null,
+		token_usage: _tokenUsage,
 		ingestion_status: ingestionStatus,
 		ingestion_error: ingestionError,
 		total_chunks: totalChunks || null,

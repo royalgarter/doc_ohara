@@ -1,6 +1,25 @@
 import { GoogleGenAI } from '@google/genai';
 import { cacheKeyFor, readCacheAsync, writeCacheAsync, credFingerprint } from './cache.js';
 
+// Token usage accumulator — callers attach a handler via onTokenUsage()
+let _tokenUsageHandler = null;
+export function onTokenUsage(fn) { _tokenUsageHandler = fn; }
+export function clearTokenUsageHandler() { _tokenUsageHandler = null; }
+
+function _emitUsage(usageMeta, label) {
+	if (!usageMeta) return;
+	const u = {
+		label,
+		prompt:    usageMeta.promptTokenCount    ?? 0,
+		output:    usageMeta.candidatesTokenCount ?? 0,
+		cached:    usageMeta.cachedContentTokenCount ?? 0,
+		thoughts:  usageMeta.thoughtsTokenCount   ?? 0,
+		total:     usageMeta.totalTokenCount      ?? 0,
+	};
+	console.log(`[llm:tokens] ${label} • prompt=${u.prompt} output=${u.output} cached=${u.cached} thoughts=${u.thoughts} total=${u.total}`);
+	if (_tokenUsageHandler) _tokenUsageHandler(u);
+}
+
 const PROVIDER = process.env.LLM_PROVIDER || 'gemini';
 const DEFAULT_MODEL = process.env.LLM_MODEL || 'gemma-4-26b-a4b-it';
 const DEFAULT_EMBEDDING_MODEL = process.env.LLM_EMBEDDING_MODEL || 'gemini-embedding-2';
@@ -34,6 +53,7 @@ async function _callGemini(prompt, { model, systemPrompt, json, ...extraConfig }
 		: prompt;
 
 	const result = await ai.models.generateContent({ model: resolvedModel, contents, config });
+	_emitUsage(result.usageMetadata, `gemini:${resolvedModel}`);
 	const text = result.text?.trim() || '';
 	if (json) return JSON.parse(text);
 	return text;
@@ -196,6 +216,7 @@ export async function callLLMWithCache(cachedContentName, prompt, { model, json,
 			contents: prompt,
 			config: { ...config, cachedContent: cachedContentName },
 		});
+		_emitUsage(result_obj.usageMetadata, `gemini-cached:${resolvedModel}`);
 		const text = result_obj.text?.trim() || '';
 		const result = json ? JSON.parse(text) : text;
 		await writeCacheAsync(key, { result });
@@ -210,6 +231,7 @@ export async function callLLMWithCache(cachedContentName, prompt, { model, json,
 		contents: prompt,
 		config: { ...config, cachedContent: cachedContentName },
 	});
+	_emitUsage(result_obj.usageMetadata, `gemini-cached:${resolvedModel}`);
 	const text = result_obj.text?.trim() || '';
 	return json ? JSON.parse(text) : text;
 }

@@ -694,6 +694,25 @@ program
 				for (const [k, v] of statLines) {
 					console.log(`  ${chalk.dim(k.padEnd(22))} ${chalk.white(v)}`);
 				}
+
+				// Token usage summary from ingest
+				const tu = doc.token_usage;
+				if (tu) {
+					console.log('');
+					console.log(chalk.bold('  Token usage (ingest)'));
+					const tuLines = [
+						['LLM calls',   tu.calls],
+						['Prompt',      tu.prompt?.toLocaleString()],
+						['Output',      tu.output?.toLocaleString()],
+						['Cached',      tu.cached?.toLocaleString()],
+						['Thoughts',    tu.thoughts?.toLocaleString()],
+						['Total',       tu.total?.toLocaleString()],
+					];
+					if (tu.recorded_at) tuLines.push(['Recorded at', new Date(tu.recorded_at).toLocaleString()]);
+					for (const [k, v] of tuLines) {
+						console.log(`  ${chalk.dim(k.padEnd(22))} ${chalk.white(v ?? '—')}`);
+					}
+				}
 				console.log('');
 
 				if (issues.length === 0) {
