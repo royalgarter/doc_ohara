@@ -183,10 +183,14 @@ export async function callLLMWithCache(cachedContentName, prompt, { model, json,
 	if (cache) {
 		const key = cacheKeyFor(['gemini-cached', resolvedModel, credFingerprint(), cachedContentName, prompt, json ? 'json' : '']);
 		const cached = await readCacheAsync(key);
-		if (cached?.result !== undefined) return cached.result;
+		if (cached?.result !== undefined) {
+			console.log(`[llm] cache-hit • provider=gemini-cached • model=${resolvedModel}`);
+			return cached.result;
+		}
 
 		const config = { serviceTier: 'flex', ...extraConfig };
 		if (json) config.responseMimeType = 'application/json';
+		console.log(`[llm] gemini-cached • model=${resolvedModel} • json=${!!json} • cache=${cachedContentName.slice(-12)}`);
 		const result_obj = await ai.models.generateContent({
 			model: resolvedModel,
 			contents: prompt,
@@ -200,6 +204,7 @@ export async function callLLMWithCache(cachedContentName, prompt, { model, json,
 
 	const config = { serviceTier: 'flex', ...extraConfig };
 	if (json) config.responseMimeType = 'application/json';
+	console.log(`[llm] gemini-cached (no-diskcache) • model=${resolvedModel} • json=${!!json} • cache=${cachedContentName.slice(-12)}`);
 	const result_obj = await ai.models.generateContent({
 		model: resolvedModel,
 		contents: prompt,
