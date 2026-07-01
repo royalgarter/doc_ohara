@@ -1069,8 +1069,12 @@
 					if (paraMap.has(id)) children.push({ kind: 'paragraph', node: paraMap.get(id) });
 					else if (tableMap.has(id)) children.push({ kind: 'table', node: tableMap.get(id) });
 				}
-				// Stable sort: paragraphs before tables, then by _key lexicographic order
+				// Sort by doc_position (reading order) when available; fall back to kind+key
 				children.sort((a, b) => {
+					const pa = a.node.doc_position, pb = b.node.doc_position;
+					if (pa != null && pb != null) return pa - pb;
+					if (pa != null) return -1;
+					if (pb != null) return 1;
 					if (a.kind !== b.kind) return a.kind === 'paragraph' ? -1 : 1;
 					return (a.node._key || '').localeCompare(b.node._key || '');
 				});
@@ -1095,7 +1099,11 @@
 				const doc = this.graphData.documents.find(d => (d._key || d.id) === dk);
 				this.discPanelDoc = doc || { _key: dk };
 				const secs = this.graphData.sections.filter(s => s.document_id === dk);
+				// Sort by doc_position (reading order) when available; fall back to level+key
 				secs.sort((a, b) => {
+					if (a.doc_position != null && b.doc_position != null) return a.doc_position - b.doc_position;
+					if (a.doc_position != null) return -1;
+					if (b.doc_position != null) return 1;
 					if ((a.level || 1) !== (b.level || 1)) return (a.level || 1) - (b.level || 1);
 					return (a._key || '').localeCompare(b._key || '');
 				});
@@ -1808,7 +1816,7 @@
 				curR = r + D_SEC + RING_PAD;
 			}
 
-			docDiscR.set(dk, curR + D_SEC);
+			docDiscR.set(dk, curR);
 		});
 
 		const maxDiscR = Math.max(...docDiscR.values(), 100);
@@ -1983,7 +1991,8 @@
 		const finDummy = new THREE.Object3D();
 		G3D.auraPoints = {};
 		for (const [cls, cfg] of Object.entries(DECAY_FIN)) {
-			const clsEntries = entries.filter(e => e.decayClass === cls);
+			// Aura applies to document disc only — one fin per document, not per section/paragraph node
+			const clsEntries = entries.filter(e => e.colKey === 'document' && e.decayClass === cls);
 			if (!clsEntries.length) continue;
 			const finMat = new THREE.MeshBasicMaterial({
 				color: new THREE.Color(cfg.hex), transparent: true, opacity: cfg.op,
@@ -2001,8 +2010,9 @@
 				// rotation.x = -90° stands fin up in XZ; rotation.y = radAngle aligns radially
 				finDummy.position.set(e.x, e.y, e.z);
 				finDummy.rotation.set(-Math.PI / 2, radAngle, 0);
-				// scale.x = tangential width, scale.y = Z extent (after rotX, Y maps to Z)
-				finDummy.scale.set(e.r * 2.5, cfg.zH, 1);
+				// scale.x = disc diameter (aura spans the whole disc), scale.y = Z extent
+				const discR = dk ? (docDiscR.get(dk) ?? maxDiscR) : e.r;
+				finDummy.scale.set(discR * 2, cfg.zH, 1);
 				finDummy.updateMatrix();
 				finMesh.setMatrixAt(i, finDummy.matrix);
 				// Per-instance color: use doc color when in 'doc' mode, else decay class color

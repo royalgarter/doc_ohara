@@ -689,6 +689,47 @@ ${items.map((it, idx) => `${idx + 1}. [Section: ${it.section || 'unknown'}] ${it
 	return result;
 }
 
+// Extract structured document metadata (authors, journal, DOI, review dates) from the raw markdown.
+// Runs once per document; cached. Result stored on the document node — not as graph nodes.
+async function extractDocumentMetadata(ai, rawMarkdown) {
+	if (!ai || !rawMarkdown) return null;
+	const sample = rawMarkdown.slice(0, 4000);
+	const prompt = `Extract document metadata from the text below. Return ONLY a JSON object with these fields (use null for any field not found):
+{
+  "authors": [{ "name": string, "affiliation": string|null, "email": string|null }],
+  "journal": string|null,
+  "doi": string|null,
+  "volume": string|null,
+  "issue": string|null,
+  "pages": string|null,
+  "review_dates": { "received": string|null, "revised": string|null, "accepted": string|null }
+}
+
+Rules:
+- "authors": all named authors. Split combined author+affiliation footnotes.
+- "journal": journal or conference name only (e.g. "Journal of Finance & Accounting Research"). null if not found.
+- "doi": DOI string if present (e.g. "10.1000/xyz"). null if not found.
+- "review_dates": parse any "Date of receipt", "Received", "Accepted", "Date of approval" lines.
+- Return pure JSON only — no markdown fences, no commentary.
+
+TEXT:
+${sample}`;
+
+	const credFp = credFingerprint();
+	const key = cacheKeyFor(['doc_metadata_v1', sample, GEMINI_MODEL, credFp]);
+	const cached = readCacheSync(key);
+	if (cached && cached.authors !== undefined) return cached;
+	try {
+		const raw = ((await callLLM(prompt, { model: GEMINI_MODEL, cache: false, serviceTier: 'flex' })) || '').trim();
+		const parsed = JSON.parse(raw.replace(/^```json\s*|```$/g, '').trim());
+		if (parsed) writeCache(key, parsed);
+		return parsed;
+	} catch (err) {
+		addPipelineLog('warn', `Doc metadata extraction failed: ${err.message}`);
+		return null;
+	}
+}
+
 // Generate a 2-3 sentence document context summary from the first chunk.
 // Result is cached so re-ingest on the same doc is free.
 async function generateDocContext(ai, firstChunkText) {
@@ -778,6 +819,10 @@ async function structureMarkdownWithRetries(ai, filename, mdContent) {
 	} else if (!needsDocContext) {
 		addPipelineLog('info', `Doc context injection skipped (${chunks.length} chunk(s), ~${totalCharsApprox} chars — below threshold)`);
 	}
+
+	// Extract structured document metadata (authors, journal, DOI, etc.) from the raw markdown.
+	// Runs in parallel with the cache creation below — result is awaited before document insert.
+	const docMetadataPromise = extractDocumentMetadata(ai, cleanedMarkdown);
 
 	// parallel pool
 	const concurrency = parseInt(process.env.OHARA_INGEST_CONCURRENCY || '4', 10) || 4;
@@ -1083,6 +1128,7 @@ async function structureMarkdownWithRetries(ai, filename, mdContent) {
 		total_chunks: chunks.length,
 		completed_chunks: completedChunks,
 		chunk_errors: failedChunks,
+		docMetadataPromise,
 	};
 }
 
@@ -1187,6 +1233,10 @@ function transformRawToCollections(rawOutputDir) {
 		// Custom uuid-like reference keys
 		const docId = `doc_trans_${idx}_${Date.now()}`;
 
+		// Global position counter reset per document — shared across all chunk JSON files so that
+		// ORDER BY doc_position across sections + paragraphs + tables reconstructs reading order.
+		let docPositionCounter = 0;
+
 		files.forEach(file => {
 			if (!file.endsWith('.json')) return;
 			const rawContent = JSON.parse(fs.readFileSync(path.join(fullPath, file), 'utf-8'));
@@ -1214,12 +1264,17 @@ function transformRawToCollections(rawOutputDir) {
 				// existing section node instead of creating a duplicate.
 				const sectionDedup = new Map(); // key → section id
 
+	
 				// Adjacency tracking for ADJACENT_TO and NEXT_PARA edges
 				const lastContentBySec = new Map(); // sectionId → {id, collection: 'para'|'table'}
 				const lastParaBySec = new Map();    // sectionId → paraId
 
 				rawContent.nodes.forEach((node, blockIdx) => {
 					const nodeId = `okf_node_${blockIdx}_${Date.now()}`;
+					// Global document position: sequential integer across all nodes in all chunks.
+					// Sections, paragraphs, tables, and figures all share the same counter so any
+					// ORDER BY doc_position query reconstructs the original reading order.
+					const docPosition = docPositionCounter++;
 					const ntype = node.type || (node.metadata && node.metadata.type) || 'Paragraph';
 
 					// Resolve page number: trust LLM's value only if it falls within the chunk's known range;
@@ -1263,6 +1318,7 @@ function transformRawToCollections(rawOutputDir) {
 								page: resolvedPage,
 								page_source: pageSource,
 								summary: typeof node.summary === 'string' && node.summary.trim() ? node.summary.trim() : null,
+								doc_position: docPosition,
 							});
 						}
 					} else if (['Paragraph', 'ListItem'].includes(ntype)) {
@@ -1294,6 +1350,7 @@ function transformRawToCollections(rawOutputDir) {
 							sumo_candidate_tags_raw: node.sumo_candidate_tags_raw || [],
 							sumo_resolved_map: node.sumo_resolved_map || {},
 							entities: node.entities || [],
+							doc_position: docPosition,
 						});
 						// NEXT_PARA: record sequential order within section
 						const prevParaId = lastParaBySec.get(currentSectionId);
@@ -1322,6 +1379,7 @@ function transformRawToCollections(rawOutputDir) {
 							sumo_candidate_tags_raw: node.sumo_candidate_tags_raw || [],
 							sumo_resolved_map: node.sumo_resolved_map || {},
 							entities: node.entities || [],
+							doc_position: docPosition,
 						});
 						// ADJACENT_TO: figure adjacent to previous para or table in same section
 						const lastC = lastContentBySec.get(currentSectionId);
@@ -1348,6 +1406,7 @@ function transformRawToCollections(rawOutputDir) {
 								caption: node.caption || node.label || null,
 								matrix_data: contentData,
 								markdown_representation: mdRep,
+								doc_position: docPosition,
 							});
 							// ADJACENT_TO: table adjacent to previous para in same section
 							const lastC = lastContentBySec.get(currentSectionId);
@@ -1368,6 +1427,7 @@ function transformRawToCollections(rawOutputDir) {
 									sumo_candidate_tags_raw: node.sumo_candidate_tags_raw || [],
 									sumo_resolved_map: node.sumo_resolved_map || {},
 									entities: node.entities || [],
+									doc_position: docPosition,
 								});
 							}
 						}
@@ -1384,6 +1444,7 @@ function transformRawToCollections(rawOutputDir) {
 							sumo_candidate_tags_raw: node.sumo_candidate_tags_raw || [],
 							sumo_resolved_map: node.sumo_resolved_map || {},
 							entities: node.entities || [],
+							doc_position: docPosition,
 						});
 					} else if (ntype === 'Authors') {
 						const agents = node.agents_group?.agents || [];
@@ -1399,6 +1460,7 @@ function transformRawToCollections(rawOutputDir) {
 							sumo_candidate_tags_raw: node.sumo_candidate_tags_raw || [],
 							sumo_resolved_map: node.sumo_resolved_map || {},
 							entities: node.entities || [],
+							doc_position: docPosition,
 						});
 					} else if (ntype === 'Bibliography') {
 						const refs = node.references || [];
@@ -1414,6 +1476,7 @@ function transformRawToCollections(rawOutputDir) {
 							sumo_candidate_tags_raw: node.sumo_candidate_tags_raw || [],
 							sumo_resolved_map: node.sumo_resolved_map || {},
 							entities: node.entities || [],
+							doc_position: docPosition,
 						});
 					} else if (ntype === 'Part') {
 						const level = node.metadata?.level ?? 0;
@@ -1430,6 +1493,7 @@ function transformRawToCollections(rawOutputDir) {
 							node_type: 'Part',
 							title,
 							level,
+							doc_position: docPosition,
 						});
 					}
 				});
@@ -1608,9 +1672,38 @@ function transformRawToCollections(rawOutputDir) {
 		// Fewer than 3 alphabetic characters — almost certainly not real prose
 		const wordChars = (t.match(/[a-zA-Z]/g) || []).length;
 		if (wordChars < 3) return true;
+		// Author footnotes: lines starting with *, †, ‡ or superscript digit + affiliation/email
+		if (/^[*†‡\d]\s+[A-Z]/.test(t) && (/@/.test(t) || /university|institute|school|department|college|faculty/i.test(t))) return true;
+		// Publication timeline metadata lines
+		if (/^(Date of (receipt|delivery|revision|approval)|Received:|Accepted:|Published online:)/i.test(t)) return true;
+		// Figure/table source or note lines
+		if (/^(Source|Note):\s/i.test(t) && t.length < 200) return true;
+		// Page number merged with journal/publisher name: starts with digits then space then capitals
+		if (/^\d+\s+[A-Z][A-Za-z\s&]+$/.test(t)) return true;
+		// PDF page-break marker produced by markdown converters
+		if (/^-{3,}\s*$/.test(t)) return true;
 		return false;
 	}
 
+	// Filter artifact sections: page headers/footers that the LLM mistakenly promoted to Section nodes.
+	// These are short title-like strings with no verb and no colon that match known header/footer patterns.
+	function isArtifactSection(title) {
+		if (typeof title !== 'string') return false;
+		const t = title.trim();
+		if (!t) return true;
+		// Page number merged with a journal/publisher name
+		if (/^\d+\s+[A-Z][A-Za-z\s&]+$/.test(t)) return true;
+		// Standalone journal/conference/publisher name: short, no verb, no colon, no number
+		// Heuristic: ≤60 chars, all title-case or caps words, no lowercase connective verbs
+		if (t.length <= 60 && /^[A-Z][A-Za-z\s&:,\-\.]+$/.test(t) && !/\b(is|are|was|were|has|have|of|and|the|in|for|with|by|on|at|an|a)\b/.test(t)) {
+			// Must not look like a real section heading (those typically contain prepositions/articles)
+			// Extra signal: matches known academic publishing patterns
+			if (/\b(journal|review|proceedings|transactions|conference|bulletin|annals|quarterly|gazette|press|publications?)\b/i.test(t)) return true;
+		}
+		return false;
+	}
+
+	dbCollections.sections = dbCollections.sections.filter(s => !isArtifactSection(s.title));
 	dbCollections.paragraphs = dbCollections.paragraphs.filter(p => !isArtifact(p.content));
 
 	// ── Post-process pass 2: reattach Paragraph fragments to their sibling ───
@@ -1790,15 +1883,17 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
 		}
 	}
 
-	// Extract and carry llm_usage, toc, glossary, temporal separately; parsedLayoutJSON itself only needs the nodes
+	// Extract and carry llm_usage, toc, glossary, temporal, metadata promise separately
 	const llmUsage = parsedLayoutJSON?.llm_usage || null;
 	const detectedToc = parsedLayoutJSON?.toc || null;
 	const detectedGlossary = parsedLayoutJSON?.glossary || null;
 	const detectedTemporal = parsedLayoutJSON?.temporal || null;
+	const docMetadataPromise = parsedLayoutJSON?.docMetadataPromise || Promise.resolve(null);
 	if (llmUsage) delete parsedLayoutJSON.llm_usage;
 	if (parsedLayoutJSON?.toc) delete parsedLayoutJSON.toc;
 	if (parsedLayoutJSON?.glossary) delete parsedLayoutJSON.glossary;
 	if (parsedLayoutJSON?.temporal) delete parsedLayoutJSON.temporal;
+	if (parsedLayoutJSON?.docMetadataPromise) delete parsedLayoutJSON.docMetadataPromise;
 
 	onProgress(60, 'Writing raw layout output...');
 	const rawJsonPath = path.join(targetSubDir, `${filenameNoExt}.json`);
@@ -1821,6 +1916,10 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
 				// Derive temporal_relation mapping for SIMILAR_TO edge enrichment
 				const EXTENDS_VERBS = new Set(['extends', 'builds on', 'is based on', 'expands on', 'derives from', 'elaborates on', 'continues']);
 				const SUPERSEDES_VERBS = new Set(['contradicts', 'supersedes', 'corrects', 'refutes', 'disproves', 'replaces', 'overrides', 'disputes']);
+
+				// Await metadata extraction (ran in parallel with chunk structuring)
+				const docMeta = await docMetadataPromise.catch(() => null);
+				if (docMeta) addPipelineLog('info', `Doc metadata extracted: ${docMeta.authors?.length || 0} author(s), journal="${docMeta.journal || 'n/a'}", doi="${docMeta.doi || 'n/a'}"`);
 
 				const inserted = await arangoClient.insertDocument({
 					source_file: doc.source_file,
@@ -1850,6 +1949,14 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
 					decay_class: detectedTemporal?.decay_class || 'SCHOLARLY',
 					effective_decay_class: detectedTemporal?.decay_class || 'SCHOLARLY',
 					similar_to_indegree: 0,
+					// Provenance metadata extracted from artifacts in the raw markdown
+					meta_authors: docMeta?.authors || null,
+					meta_journal: docMeta?.journal || null,
+					meta_doi: docMeta?.doi || null,
+					meta_volume: docMeta?.volume || null,
+					meta_issue: docMeta?.issue || null,
+					meta_pages: docMeta?.pages || null,
+					meta_review_dates: docMeta?.review_dates || null,
 				});
 
 				const docHandle = inserted._id || `documents/${inserted._key}`;
@@ -1905,6 +2012,7 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
 								page_source: sec.page_source ?? null,
 								// Store the resolved ArangoDB _id so verify/queries can follow the reference
 								parent_section_id: parentHandle || null,
+								doc_position: sec.doc_position ?? null,
 							});
 							nodeCount += 1;
 							const secHandle = secRes._id || `sections/${secRes._key}`;
@@ -2011,6 +2119,7 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
 						embedding,
 						llm_pending: p.llm_pending || false,
 						llm_error: p.llm_error || null,
+						doc_position: p.doc_position ?? null,
 					});
 					nodeCount += 1;
 					const paraHandle = paraRes._id || `paragraphs/${paraRes._key}`;
@@ -2237,6 +2346,7 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
 						node_type: 'Table',
 						matrix_data: t.matrix_data || [],
 						markdown_representation: t.markdown_representation || '',
+						doc_position: t.doc_position ?? null,
 					});
 					nodeCount += 1;
 					const tblHandle = tblRes._id || `tables/${tblRes._key}`;

@@ -186,6 +186,7 @@ function normalize(s) {
 //   1. exact match
 //   2. case + separator insensitive exact
 //   3. alias table lookup → first candidate that exists in index
+//   4. CamelCase component decomposition → longest valid component wins
 export function resolveTag(tag) {
 	if (!tag) return null;
 	loadSumoIndex(); // ensure Maps are built
@@ -204,6 +205,21 @@ export function resolveTag(tag) {
 	if (candidates) {
 		for (const c of candidates) {
 			if (exactMap.has(c)) return c;
+		}
+	}
+
+	// 4. CamelCase decomposition — split compound LLM-invented terms into their
+	//    component words and resolve each. Return the longest-word valid component
+	//    so "ResearchMethod" → ["Research","Method"] → "Method" (valid, 6 chars).
+	//    This handles any domain without requiring manual aliases per term.
+	const components = t.replace(/([A-Z])/g, ' $1').trim().split(/\s+/).filter(w => w.length >= 3);
+	if (components.length > 1) {
+		// Sort by word length descending — prefer longer, more specific components
+		const sorted = [...components].sort((a, b) => b.length - a.length);
+		for (const word of sorted) {
+			const wNorm = normalize(word);
+			const wExact = normMap.get(wNorm);
+			if (wExact) return wExact;
 		}
 	}
 
