@@ -36,7 +36,17 @@
     "admin:missing-tags": "node --env-file=.env scripts/admin-queries.js missing-tags",
     "admin:repair-stats": "node --env-file=.env scripts/admin-queries.js repair-stats",
     "admin:missing-temporal": "node --env-file=.env scripts/admin-queries.js missing-temporal",
-    "admin:decay-distribution": "node --env-file=.env scripts/admin-queries.js decay-distribution"
+    "admin:decay-distribution": "node --env-file=.env scripts/admin-queries.js decay-distribution",
+    "enrich:pseudo-queries": "node --env-file=.env scripts/build_pseudo_query_edges.js",
+    "enrich:adamic-adar": "node --env-file=.env scripts/build_adamic_adar_edges.js",
+    "enrich:knowledge-gaps": "node --env-file=.env scripts/find_knowledge_gaps.js",
+    "enrich:clusters": "node --env-file=.env scripts/build_clusters.js",
+    "enrich:communities": "node --env-file=.env scripts/build_communities.js",
+    "enrich:all": "npm run enrich:pseudo-queries && npm run enrich:adamic-adar && npm run enrich:knowledge-gaps && npm run enrich:communities",
+    "eval:generate": "node --env-file=.env scripts/generate_eval_set.js",
+    "eval:run": "node --env-file=.env scripts/run_eval.js",
+    "eval:ablate": "node --env-file=.env scripts/run_eval.js --ablate",
+    "eval:compare": "node scripts/compare_eval_reports.js"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",

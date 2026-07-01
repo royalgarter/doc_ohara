@@ -77,6 +77,28 @@ const sections = [
 		],
 	},
 	{
+		title: 'Graph enrichment  (run after ingest to build edge types)',
+		cmds: [
+			['npm run enrich:pseudo-queries',                             'E4 ANSWERS_SAME — Gemini generates pseudo-questions per paragraph; paragraphs sharing a question get edges'],
+			['npm run enrich:adamic-adar',                                'E5 ADAMIC_ADAR  — entity pairs sharing ≥2 RELATED_TO neighbors get structural co-citation weight edges'],
+			['npm run enrich:knowledge-gaps',                             'E6 isolation    — flags entities (degree<2) and docs (indegree=0) with isolated=true'],
+			['npm run enrich:clusters',                                   'E7 CLUSTER_MEMBER — k-means++ on paragraph embeddings; Gemini summary per cluster (requires embeddings)'],
+			['npm run enrich:communities',                                'E8 COMMUNITY_MEMBER — Louvain on entity graph; Gemini summary per community; flags cross-community edges'],
+			['npm run enrich:all',                                        'Run E4+E5+E6+E8 in sequence (skips E7 — requires embeddings)'],
+		],
+	},
+	{
+		title: 'Evaluation harness',
+		cmds: [
+			['npm run eval:generate',                                     'Generate ground-truth Q&A pairs from ingested paragraphs → eval/eval_set.json'],
+			['npm run eval:generate -- --count=50',                       'Generate 50 Q&A pairs (default 100)'],
+			['npm run eval:run',                                          'Run Recall@k / MRR / NDCG@10 evaluation against eval/eval_set.json'],
+			['npm run eval:ablate',                                       'Ablation mode: zero out each phase weight, report delta Recall@10 per phase'],
+			['npm run eval:run -- --limit=20',                            'Eval on first 20 questions only (faster)'],
+			['npm run eval:compare -- eval/A.json eval/B.json',           'Side-by-side diff of two eval reports'],
+		],
+	},
+	{
 		title: 'Backfill & maintenance',
 		cmds: [
 			['node scripts/backfill-temporal.js',                     'Dry-run: show docs missing temporal metadata'],

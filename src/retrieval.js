@@ -45,15 +45,37 @@ const STOPWORDS = new Set([
 
 const GEMINI_MODEL = 'gemini-2.5-flash-lite';
 
-// Weight env vars
+// Base weight env vars — used as-is for factoid queries and as multiplier floor for others
 const w = () => ({
-	bm25:     parseFloat(process.env.OHARA_BM25_WEIGHT          || '1.0'),
-	sumo:     parseFloat(process.env.OHARA_SUMO_WEIGHT          || '0.4'),
-	entity:   parseFloat(process.env.OHARA_ENTITY_PIVOT_WEIGHT  || '0.6'),
-	struct:   parseFloat(process.env.OHARA_STRUCT_WEIGHT        || '0.3'),
-	crossDoc: parseFloat(process.env.OHARA_CROSS_DOC_WEIGHT     || '0.4'),
-	vector:   parseFloat(process.env.OHARA_VECTOR_WEIGHT        || '0.5'),
+	bm25:        parseFloat(process.env.OHARA_BM25_WEIGHT          || '1.0'),
+	sumo:        parseFloat(process.env.OHARA_SUMO_WEIGHT          || '0.4'),
+	entity:      parseFloat(process.env.OHARA_ENTITY_PIVOT_WEIGHT  || '0.6'),
+	struct:      parseFloat(process.env.OHARA_STRUCT_WEIGHT        || '0.3'),
+	crossDoc:    parseFloat(process.env.OHARA_CROSS_DOC_WEIGHT     || '0.4'),
+	vector:      parseFloat(process.env.OHARA_VECTOR_WEIGHT        || '0.5'),
+	answersSame: 0.5,
+	cluster:     0.6,
 });
+
+// Adaptive weight multipliers per query mode.
+// Applied on top of base env-var weights so users can still tune the floor.
+// factoid  = exact recall task   → heavy BM25, light synthesis channels
+// synthesis= multi-doc summary   → heavy cluster+community, lighter BM25
+// exploratory= open-ended browse → heavy cross-doc+entity, balanced everything
+const ADAPTIVE_MULTIPLIERS = {
+	factoid: {
+		bm25: 1.0, sumo: 0.8, entity: 0.7, struct: 0.6,
+		crossDoc: 0.5, vector: 0.8, answersSame: 0.4, cluster: 0.2,
+	},
+	synthesis: {
+		bm25: 0.6, sumo: 1.0, entity: 0.8, struct: 0.4,
+		crossDoc: 0.8, vector: 1.0, answersSame: 0.8, cluster: 1.2,
+	},
+	exploratory: {
+		bm25: 0.7, sumo: 0.9, entity: 1.2, struct: 0.5,
+		crossDoc: 1.2, vector: 0.9, answersSame: 1.0, cluster: 0.8,
+	},
+};
 
 // Temporal decay rates by class (λ in exp(−λ·Δdays))
 const DECAY_RATES = () => ({
@@ -1299,14 +1321,19 @@ export class RetrievalEngine {
 	async query(rawInput, options = {}) {
 		const limit = options.limit || parseInt(process.env.OHARA_RESULT_LIMIT || '20', 10);
 		const depth = options.depth || 2;
-		const weights = {
-			...w(),
-			...(options.crossDocWeight != null ? { crossDoc: options.crossDocWeight } : {}),
-		};
 
 		const sessionHistory = Array.isArray(options.sessionHistory) ? options.sessionHistory : [];
 		const processedQuery = await this.preprocessInput(rawInput, sessionHistory);
 		const queryMode = this._detectQueryMode(rawInput); // 'factoid' | 'synthesis' | 'exploratory'
+
+		// Adaptive weights: base × mode multiplier (disabled via OHARA_ADAPTIVE_WEIGHTS=false)
+		const adaptiveEnabled = process.env.OHARA_ADAPTIVE_WEIGHTS !== 'false';
+		const base = w();
+		const mults = adaptiveEnabled ? (ADAPTIVE_MULTIPLIERS[queryMode] || ADAPTIVE_MULTIPLIERS.factoid) : null;
+		const weights = {
+			...(mults ? Object.fromEntries(Object.entries(base).map(([k, v]) => [k, v * (mults[k] ?? 1)])) : base),
+			...(options.crossDocWeight != null ? { crossDoc: options.crossDocWeight } : {}),
+		};
 
 		let bm25Results = await this._phase1BM25(processedQuery, limit);
 
@@ -1426,6 +1453,7 @@ export class RetrievalEngine {
 		const response = {
 			processedQuery,
 			queryMode,
+			weights,
 			results: topK,
 			tiers,
 			// legacy fields for backwards compat with existing server routes
