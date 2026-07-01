@@ -2136,7 +2136,20 @@
 					}
 				}
 			}
-			// Paragraph nodes removed from 3D — no tag-to-para tethers
+			// Tag tethers: connect each tag to sections containing tagged paragraphs
+			for (const p of paragraphs) {
+				const sectionKey = parentOf.get(p._key);
+				if (!sectionKey) continue;
+				const sp = nodePos.get(sectionKey);
+				if (!sp) continue;
+				for (const tname of (p.sumo_tags || []).slice(0, 3)) {
+					const tp = nodePos.get('tag:' + tname);
+					if (tp) {
+						tetherPts.push(tp.x, tp.y, tp.z,  sp.x, sp.y, sp.z);
+						tetherCols.push(tc.r, tc.g, tc.b,  tc.r, tc.g, tc.b);
+					}
+				}
+			}
 			if (tetherPts.length) {
 				const tgeo = new THREE.BufferGeometry();
 				tgeo.setAttribute('position', new THREE.Float32BufferAttribute(tetherPts, 3));
