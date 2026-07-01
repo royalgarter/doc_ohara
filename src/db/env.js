@@ -9,7 +9,7 @@
  */
 import { initArangoClient } from './client.js';
 
-process?.loadEnvFile?.(); 
+// process?.loadEnvFile?.();
 
 const COLLECTION = 'env';
 
