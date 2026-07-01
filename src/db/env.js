@@ -10,7 +10,7 @@
 import fs from 'node:fs';
 import { initArangoClient } from './client.js';
 
-if (fs.existSync('.env')) process?.loadEnvFile?.();
+if (fs.existsSync('.env')) process?.loadEnvFile?.();
 
 const COLLECTION = 'env';
 
