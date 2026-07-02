@@ -256,6 +256,64 @@ async function startServer() {
 		}
 	});
 
+	// API: Cross-document edges for a document (SIMILAR_TO + MENTIONS)
+	app.get('/api/graph/doc/:key/cross-edges', async (req, res) => {
+		try {
+			if (!process.env.ARANGO_URL) return res.json({ success: true, edges: [], entities: [], docs: [] });
+			const db = await arangoClient.initArangoClient();
+			const docId = `documents/${req.params.key}`;
+
+			const [similarEdges, mentionEdges] = await Promise.all([
+				// SIMILAR_TO edges where this doc is source or target
+				db.query(
+					`FOR e IN edges
+					FILTER (e._from == @id OR e._to == @id) AND e.relation == 'SIMILAR_TO'
+					RETURN { _key: e._key, _id: e._id, _from: e._from, _to: e._to, relation: e.relation, similarity: e.similarity }`,
+					{ id: docId }
+				).then(c => c.all()),
+				// MENTIONS edges from this doc's paragraphs to entities
+				db.query(
+					`FOR p IN paragraphs
+					FILTER p.document_id == @dk
+					FOR e IN edges
+					FILTER e._from == p._id AND e.relation == 'MENTIONS'
+					RETURN { _key: e._key, _id: e._id, _from: e._from, _to: e._to, relation: e.relation }`,
+					{ dk: req.params.key }
+				).then(c => c.all()),
+			]);
+
+			const allEdges = [...similarEdges, ...mentionEdges];
+
+			// Collect entity IDs referenced by MENTIONS edges
+			const entityIds = [...new Set(mentionEdges.map(e => e._to).filter(id => id.startsWith('entities/')))];
+			// Collect doc IDs referenced by SIMILAR_TO edges (other than self)
+			const docIds = [...new Set(
+				similarEdges.flatMap(e => [e._from, e._to]).filter(id => id !== docId && id.startsWith('documents/'))
+			)];
+
+			const [entities, docs] = await Promise.all([
+				entityIds.length
+					? db.query(
+						`FOR e IN entities FILTER e._id IN @ids
+						RETURN { _key: e._key, _id: e._id, name: e.name, type: e.type, mention_count: e.mention_count, document_ids: e.document_ids }`,
+						{ ids: entityIds }
+					).then(c => c.all())
+					: [],
+				docIds.length
+					? db.query(
+						`FOR d IN documents FILTER d._id IN @ids
+						RETURN { _key: d._key, _id: d._id, title: d.title, published_date: d.published_date, temporal_coverage_start: d.temporal_coverage_start, sumo_tags: d.sumo_tags }`,
+						{ ids: docIds }
+					).then(c => c.all())
+					: [],
+			]);
+
+			res.json({ success: true, edges: allEdges, entities, docs });
+		} catch (err) {
+			res.status(500).json({ success: false, error: err.message });
+		}
+	});
+
 	// API: Re-seed database with default samples
 	app.post('/api/database/seed', (req, res) => {
 		try {

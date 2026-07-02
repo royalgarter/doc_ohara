@@ -707,7 +707,7 @@
 
 				<!-- Clear selection button overlay -->
 				<div x-show="selectedNode" class="absolute top-2 left-2 z-10 select-none">
-					<button @click="selectedNode = null; renderCurrentGraph()"
+					<button @click="selectedNode = null; crossEdges = []; crossEdgeDocKey = null; renderCurrentGraph()"
 						class="cl-btn-gh text-xs px-2 py-1 rounded border transition">✕ clear selection</button>
 				</div>
 
@@ -851,7 +851,7 @@
 					</div>
 				</div>
 
-				<button @click="selectedNode = null; renderCurrentGraph()"
+				<button @click="selectedNode = null; crossEdges = []; crossEdgeDocKey = null; renderCurrentGraph()"
 					class="flex-shrink-0 cl-t5 cl-t4 transition text-xs mt-0.5">✕</button>
 			</div>
 
@@ -896,6 +896,8 @@
 			timelineResolution: 'year',
 			docsOpen: true,
 			graphZoom: 1.0,
+			crossEdges: [],      // SIMILAR_TO + MENTIONS edges for selected doc
+			crossEdgeDocKey: null,
 
 			discPanelOpen: false,
 			discPanelDoc: null,
@@ -978,6 +980,7 @@
 					this.graphData.entities = [];
 					this.graphData.edges = [];
 					this.selectedNode = null;
+					this.crossEdges = []; this.crossEdgeDocKey = null;
 					this.$nextTick(() => this.renderCurrentGraph());
 					return;
 				}
@@ -1093,9 +1096,16 @@
 					(node) => {
 						self.selectedNode = node;
 						self.expandNode(node);
+						// Load cross-edges when a document node is selected
+						const nid = node._id || '';
+						if (nid.startsWith('documents/')) self.loadCrossEdges(node._key || node.id);
 						self.$nextTick(() => self.renderCurrentGraph());
 					},
-					(dk) => { self.openDiscPanel(dk); });
+					(dk) => {
+						self.openDiscPanel(dk);
+						self.loadCrossEdges(dk);
+					},
+					this.crossEdges);
 				if (autoFit) requestAnimationFrame(() => requestAnimationFrame(_g3dFitScene));
 			},
 
@@ -1113,6 +1123,25 @@
 				});
 				this.discPanelSections = secs;
 				this.discPanelOpen = true;
+			},
+
+			async loadCrossEdges(docKey) {
+				if (!docKey || this.crossEdgeDocKey === docKey) return;
+				this.crossEdgeDocKey = docKey;
+				this.crossEdges = [];
+				try {
+					const r = await fetch(`/api/graph/doc/${encodeURIComponent(docKey)}/cross-edges`);
+					const d = await r.json();
+					if (!d.success) return;
+					this.crossEdges = d.edges || [];
+					// Merge referenced entities into graphData
+					const existingEntityIds = new Set(this.graphData.entities.map(e => e._id));
+					for (const e of (d.entities || [])) if (!existingEntityIds.has(e._id)) this.graphData.entities.push(e);
+					// Merge referenced docs (needed so their positions resolve in 3D)
+					const existingDocIds = new Set(this.graphData.documents.map(d => d._id));
+					for (const doc of (d.docs || [])) if (!existingDocIds.has(doc._id)) this.graphData.documents.push(doc);
+					this.$nextTick(() => this.renderCurrentGraph());
+				} catch(e) { console.error('loadCrossEdges:', e); }
 			},
 
 			selectSectionFromPanel(section) {
@@ -1688,7 +1717,7 @@
 		G3D.controls.update();
 	}
 
-	function renderGraph(data, colorMode, selectedKey, zoom, selectedDocKeys, timelineResolution, onSelect, onDiscSelect) {
+	function renderGraph(data, colorMode, selectedKey, zoom, selectedDocKeys, timelineResolution, onSelect, onDiscSelect, crossEdges) {
 		if (!window.THREE) return;
 		if (!G3D.initialized) _initG3D();
 		if (!G3D.renderer) return;
@@ -2246,6 +2275,44 @@
 				tgeo.setAttribute('position', new THREE.Float32BufferAttribute(tetherPts, 3));
 				tgeo.setAttribute('color',    new THREE.Float32BufferAttribute(tetherCols, 3));
 				scene.add(new THREE.LineSegments(tgeo, new THREE.LineBasicMaterial({ vertexColors: true, transparent: true, opacity: 0.28 })));
+			}
+		}
+
+		// c2) Cross-document edges overlay (SIMILAR_TO + MENTIONS for selected doc)
+		if (crossEdges && crossEdges.length) {
+			const simPts = [], simCols = [], menPts = [], menCols = [];
+			const simC = new THREE.Color('#b58900');  // amber for SIMILAR_TO
+			const menC = new THREE.Color('#d33682');  // magenta for MENTIONS
+			for (const e of crossEdges) {
+				if (e.relation === 'SIMILAR_TO') {
+					// from/to are document IDs: documents/key
+					const fromKey = e._from.split('/')[1], toKey = e._to.split('/')[1];
+					const fp = nodePos.get(fromKey), tp = nodePos.get(toKey);
+					if (!fp || !tp) continue;
+					const alpha = Math.min(1, Math.max(0.3, e.similarity || 0.5));
+					simPts.push(fp.x, fp.y, fp.z,  tp.x, tp.y, tp.z);
+					simCols.push(simC.r * alpha, simC.g * alpha, simC.b * alpha,
+					             simC.r * alpha, simC.g * alpha, simC.b * alpha);
+				} else if (e.relation === 'MENTIONS') {
+					// from = paragraphs/key, to = entities/key
+					const fromKey = e._from.split('/')[1], toKey = e._to.split('/')[1];
+					const fp = nodePos.get(fromKey), tp = nodePos.get(toKey);
+					if (!fp || !tp) continue;
+					menPts.push(fp.x, fp.y, fp.z,  tp.x, tp.y, tp.z);
+					menCols.push(menC.r, menC.g, menC.b,  menC.r * 0.5, menC.g * 0.5, menC.b * 0.5);
+				}
+			}
+			if (simPts.length) {
+				const sgeo = new THREE.BufferGeometry();
+				sgeo.setAttribute('position', new THREE.Float32BufferAttribute(simPts, 3));
+				sgeo.setAttribute('color',    new THREE.Float32BufferAttribute(simCols, 3));
+				scene.add(new THREE.LineSegments(sgeo, new THREE.LineBasicMaterial({ vertexColors: true, transparent: true, opacity: 0.75, linewidth: 2 })));
+			}
+			if (menPts.length) {
+				const mgeo = new THREE.BufferGeometry();
+				mgeo.setAttribute('position', new THREE.Float32BufferAttribute(menPts, 3));
+				mgeo.setAttribute('color',    new THREE.Float32BufferAttribute(menCols, 3));
+				scene.add(new THREE.LineSegments(mgeo, new THREE.LineBasicMaterial({ vertexColors: true, transparent: true, opacity: 0.55 })));
 			}
 		}
 
