@@ -44,7 +44,7 @@ function _getGeminiAI() {
 async function _callGemini(prompt, { model, systemPrompt, json, ...extraConfig } = {}) {
 	const ai = _getGeminiAI();
 	const resolvedModel = model || DEFAULT_MODEL;
-	const config = { serviceTier: 'flex', ...extraConfig };
+	const config = { temperature: 0, serviceTier: 'flex', ...extraConfig };
 	if (json) config.responseMimeType = 'application/json';
 	console.log(`[llm] gemini • model=${resolvedModel} • json=${!!json} • tier=${config.serviceTier}`);
 
@@ -73,7 +73,7 @@ async function _callCloudflare(prompt, { model, systemPrompt, json } = {}) {
 	if (systemPrompt) messages.push({ role: 'system', content: systemPrompt });
 	messages.push({ role: 'user', content: prompt });
 
-	const body = { model: resolvedModel, messages };
+	const body = { model: resolvedModel, messages, temperature: 0 };
 	if (json) body.response_format = { type: 'json_object' };
 
 	const resp = await fetch(_cfGatewayUrl(), {
@@ -111,7 +111,7 @@ async function _callCFWorkersAI(prompt, { model, systemPrompt, json } = {}) {
 	const resp = await fetch(url, {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-		body: JSON.stringify({ messages }),
+		body: JSON.stringify({ messages, temperature: 0 }),
 	});
 	if (!resp.ok) {
 		const errText = await resp.text();
@@ -208,7 +208,7 @@ export async function callLLMWithCache(cachedContentName, prompt, { model, json,
 			return cached.result;
 		}
 
-		const config = { serviceTier: 'flex', ...extraConfig };
+		const config = { temperature: 0, serviceTier: 'flex', ...extraConfig };
 		if (json) config.responseMimeType = 'application/json';
 		console.log(`[llm] gemini-cached • model=${resolvedModel} • json=${!!json} • cache=${cachedContentName.slice(-12)}`);
 		const result_obj = await ai.models.generateContent({
@@ -223,7 +223,7 @@ export async function callLLMWithCache(cachedContentName, prompt, { model, json,
 		return result;
 	}
 
-	const config = { serviceTier: 'flex', ...extraConfig };
+	const config = { temperature: 0, serviceTier: 'flex', ...extraConfig };
 	if (json) config.responseMimeType = 'application/json';
 	console.log(`[llm] gemini-cached (no-diskcache) • model=${resolvedModel} • json=${!!json} • cache=${cachedContentName.slice(-12)}`);
 	const result_obj = await ai.models.generateContent({
