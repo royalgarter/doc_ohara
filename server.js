@@ -156,8 +156,8 @@ async function startServer() {
 					db.query(`
 						FOR s IN sections
 						FILTER s.document_id IN @docKeys
-						SORT s.level ASC, s._key ASC
-						RETURN { _key: s._key, _id: s._id, title: s.title, document_id: s.document_id, level: s.level, node_type: s.node_type, parent_section_id: s.parent_section_id }
+						SORT s.doc_position ASC, s.level ASC, s._key ASC
+						RETURN { _key: s._key, _id: s._id, title: s.title, document_id: s.document_id, level: s.level, node_type: s.node_type, parent_section_id: s.parent_section_id, doc_position: s.doc_position }
 					`, { docKeys }).then(c => c.all()),
 					db.query(`
 						FOR p IN paragraphs
@@ -236,7 +236,7 @@ async function startServer() {
 					? db.query(
 						`FOR s IN sections
 						FILTER s._id IN @ids
-						RETURN { _key: s._key, _id: s._id, title: s.title, document_id: s.document_id, level: s.level, node_type: s.node_type, parent_section_id: s.parent_section_id }`,
+						RETURN { _key: s._key, _id: s._id, title: s.title, document_id: s.document_id, level: s.level, node_type: s.node_type, parent_section_id: s.parent_section_id, doc_position: s.doc_position }`,
 						{ ids: sectionIds }
 					).then(c => c.all())
 					: [],
