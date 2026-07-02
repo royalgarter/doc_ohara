@@ -1913,28 +1913,75 @@
 			return h >>> 0;
 		}
 
-		// Entities - comet shell outside tunnel
-		const SHELL_MIN = maxDiscR + 80, SHELL_MAX = maxDiscR + 320;
+		// Entities — placed at centroid of their mentioning docs, offset outward from centroid.
+		// Entities spanning multiple docs float between them; single-doc entities hover near their doc.
+		const ENTITY_OFFSET = maxDiscR + 120;  // distance pushed outward from doc centroid
+		const clusterCX = sortedDocs.reduce((s, d) => s + (docCenter.get(d._key||d.id)?.cx||0), 0) / Math.max(sortedDocs.length, 1);
+		const clusterCY = sortedDocs.reduce((s, d) => s + (docCenter.get(d._key||d.id)?.cy||0), 0) / Math.max(sortedDocs.length, 1);
 		entities.forEach((e) => {
-			const h = _sh(e._key || e.id || '');
-			const theta = (h & 0x7fff) / 0x7fff * 2 * Math.PI;
-			const r   = SHELL_MIN + ((h >>> 15) & 0x7fff) / 0x7fff * (SHELL_MAX - SHELL_MIN);
-			const ez  = ((h >>> 8) & 0xff) / 255 * totalZ;
+			const docIds = (e.document_ids || (e.document_id ? [e.document_id] : []));
+			let sumX = 0, sumY = 0, sumZ = 0, cnt = 0;
+			for (const dk of docIds) {
+				const dc = docCenter.get(dk);
+				if (dc) { sumX += dc.cx; sumY += dc.cy; sumZ += dc.cz; cnt++; }
+			}
+			let ex, ey, ez;
+			if (cnt > 0) {
+				// Centroid of mentioning docs + radial offset outward from cluster center
+				const cx = sumX / cnt, cy = sumY / cnt;
+				const dx = cx - clusterCX, dy = cy - clusterCY;
+				const dist = Math.sqrt(dx*dx + dy*dy) || 1;
+				const h = _sh(e._key || e.id || '');
+				const jitter = ((h & 0xff) / 255 - 0.5) * 80;  // small hash jitter to avoid stacking
+				ex = cx + (dx / dist) * ENTITY_OFFSET + jitter;
+				ey = cy + (dy / dist) * ENTITY_OFFSET + jitter;
+				ez = sumZ / cnt;
+			} else {
+				// Fallback: hash-based position near cluster center
+				const h = _sh(e._key || e.id || '');
+				const theta = (h & 0x7fff) / 0x7fff * 2 * Math.PI;
+				ex = clusterCX + ENTITY_OFFSET * Math.cos(theta);
+				ey = clusterCY + ENTITY_OFFSET * Math.sin(theta);
+				ez = ((h >>> 8) & 0xff) / 255 * totalZ;
+			}
 			nodePos.set(e._key || e.id, {
-				x: r * Math.cos(theta), y: r * Math.sin(theta), z: ez,
-				r: 9, node: e, colKey: 'entity', decayClass: _dc(e),
+				x: ex, y: ey, z: ez,
+				r: Math.min(18, 6 + (e.mention_count || 1) * 0.8),
+				node: e, colKey: 'entity', decayClass: _dc(e),
 			});
 		});
 
-		// Tags (virtual top-25) - comet shell, slightly further out
+		// Tags (virtual top-25) — placed near their tagged sections' centroid
 		tagNodes.forEach((t) => {
-			const h = _sh('tag:' + t.title);
-			const theta = (h & 0x7fff) / 0x7fff * 2 * Math.PI;
-			const r   = SHELL_MIN + 40 + ((h >>> 15) & 0x7fff) / 0x7fff * (SHELL_MAX - SHELL_MIN - 40);
-			const tz  = ((h >>> 8) & 0xff) / 255 * totalZ;
+			const tagName = t.title;
+			let sumX = 0, sumY = 0, sumZ = 0, cnt = 0;
+			for (const p of paragraphs) {
+				if (!(p.sumo_tags || []).includes(tagName)) continue;
+				const skey = (p.section_id || '').split('/')[1];
+				const sp = skey && nodePos.get(skey);
+				if (sp) { sumX += sp.x; sumY += sp.y; sumZ += sp.z; cnt++; }
+			}
+			let tx, ty, tz;
+			if (cnt > 0) {
+				const cx = sumX / cnt, cy = sumY / cnt;
+				const dx = cx - clusterCX, dy = cy - clusterCY;
+				const dist = Math.sqrt(dx*dx + dy*dy) || 1;
+				const h = _sh('tag:' + tagName);
+				const jitter = ((h & 0xff) / 255 - 0.5) * 60;
+				tx = cx + (dx / dist) * (ENTITY_OFFSET + 80) + jitter;
+				ty = cy + (dy / dist) * (ENTITY_OFFSET + 80) + jitter;
+				tz = sumZ / cnt;
+			} else {
+				const h = _sh('tag:' + tagName);
+				const theta = (h & 0x7fff) / 0x7fff * 2 * Math.PI;
+				tx = clusterCX + (ENTITY_OFFSET + 80) * Math.cos(theta);
+				ty = clusterCY + (ENTITY_OFFSET + 80) * Math.sin(theta);
+				tz = ((h >>> 8) & 0xff) / 255 * totalZ;
+			}
 			nodePos.set(t._key, {
-				x: r * Math.cos(theta), y: r * Math.sin(theta), z: tz,
-				r: 9, node: t, colKey: 'tag', decayClass: null,
+				x: tx, y: ty, z: tz,
+				r: Math.min(16, 5 + (t._tagCount || 1) * 0.5),
+				node: t, colKey: 'tag', decayClass: null,
 			});
 		});
 
