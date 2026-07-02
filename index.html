@@ -1424,6 +1424,8 @@
 	function getNodeColor(node, colorMode) {
 		if (!node) return '#268bd2';
 		if (colorMode === 'sumo') {
+			const cat = _docCategory(node);
+			if (cat) return _categoryColor(cat);
 			const tags = node.sumo_tags || [];
 			if (tags.length > 0) {
 				let h = 0;
@@ -1509,6 +1511,41 @@
 		return cat ? _categoryColor(cat) : '#268bd2';
 	}
 
+	// Returns doc's SUMO category (top tag → category map).
+	function _docCategory(doc) {
+		if (!_sumoCategories) return null;
+		const tags = doc.sumo_tags || [];
+		if (!tags.length) return null;
+		return _sumoCategories.map[tags[0]] || null;
+	}
+
+	// X lane position for a category — uses L2 subgroup index (15 lanes, Abstract left / Physical right).
+	const LANE_SPACING = 420;
+	function _catLaneX(cat) {
+		if (!_sumoCategories || !_sumoCategories.l2_order || !_sumoCategories.cat_groups) return 0;
+		const l2 = (_sumoCategories.cat_groups[cat] || {}).L2;
+		if (!l2) return 0;
+		const idx = _sumoCategories.l2_order.indexOf(l2);
+		if (idx < 0) return 0;
+		const mid = (_sumoCategories.l2_order.length - 1) / 2;
+		return (idx - mid) * LANE_SPACING;
+	}
+
+	// Y depth position for a category (ontology depth, shallow=bottom, deep=top).
+	const DEPTH_SPACING = 300;
+	function _catDepthY(cat) {
+		if (!_sumoCategories || !_sumoCategories.cat_depth) return 0;
+		const depth = _sumoCategories.cat_depth[cat] ?? 2;
+		return (depth - 1) * DEPTH_SPACING;
+	}
+
+	// Resolve doc → (laneX, depthY) from its top SUMO category.
+	function _docLaneXY(doc) {
+		const cat = _docCategory(doc);
+		if (!cat) return { lx: 0, ly: 0 };
+		return { lx: _catLaneX(cat), ly: _catDepthY(cat) };
+	}
+
 	function _titleColor(title) {
 		let h = 0;
 		for (const c of (title || '')) h = (h * 31 + c.charCodeAt(0)) & 0x7fffffff;
@@ -1524,6 +1561,8 @@
 			return (dk && docColorMap.get(dk)) || '#268bd2';
 		}
 		if (colorMode === 'sumo') {
+			const cat = _docCategory(node);
+			if (cat) return _categoryColor(cat);
 			const tags = node.sumo_tags || [];
 			if (tags.length) {
 				let h = 0; for (const c of tags[0]) h = (h * 31 + c.charCodeAt(0)) & 0xffff;
@@ -1771,21 +1810,32 @@
 			zGroups.get(z).push(d._key || d.id);
 		});
 
-		const SAME_Z_RADIAL = 160;
+		// Group docs by (laneX, depthY, Z) bucket to handle true collisions
+		const SAME_Z_RADIAL = 80;
 		const docCenter = new Map();  // docKey → {cx, cy, cz}
 		sortedDocs.forEach((d, di) => {
-			const dk    = d._key || d.id;
-			const cz    = _temporalZ(d, di);
-			const group = zGroups.get(cz);
-			const idx   = group.indexOf(dk);
-			const total = group.length;
-			let cx = 0, cy = 0;
+			const dk         = d._key || d.id;
+			const cz         = _temporalZ(d, di);
+			const { lx, ly } = _docLaneXY(d);
+			// Collision: multiple docs at same (lx, ly, cz) → small radial offset
+			const slotKey = `${lx}|${ly}|${cz}`;
+			if (!zGroups._slotMap) zGroups._slotMap = new Map();
+			if (!zGroups._slotMap.has(slotKey)) zGroups._slotMap.set(slotKey, []);
+			zGroups._slotMap.get(slotKey).push(dk);
+			docCenter.set(dk, { cx: lx, cy: ly, cz, _slot: slotKey });
+		});
+		// Apply radial collision offset for same-slot docs
+		sortedDocs.forEach((d) => {
+			const dk  = d._key || d.id;
+			const entry = docCenter.get(dk);
+			const slot  = zGroups._slotMap.get(entry._slot);
+			const total = slot.length;
 			if (total > 1) {
+				const idx   = slot.indexOf(dk);
 				const angle = (2 * Math.PI * idx) / total;
-				cx = SAME_Z_RADIAL * Math.cos(angle);
-				cy = SAME_Z_RADIAL * Math.sin(angle);
+				entry.cx += SAME_Z_RADIAL * Math.cos(angle);
+				entry.cy += SAME_Z_RADIAL * Math.sin(angle);
 			}
-			docCenter.set(dk, { cx, cy, cz });
 		});
 
 		sortedDocs.forEach((d, di) => {
@@ -2062,7 +2112,41 @@
 			G3D.discPlanes.push(planeMesh);
 		});
 
-		// b) Tunnel spine (Z axis line)
+		// b) Category lane ghost axes — one vertical line per L2 subgroup at its X lane, spanning full Z.
+		// Y position is fixed at depth=2 (the L2 level itself) for the spine line.
+		if (_sumoCategories && _sumoCategories.l2_order) {
+			const laneLinePts = [], laneCols = [];
+			// Determine L1 membership of each L2 group from any category in that group
+			const l2ToL1 = {};
+			Object.entries(_sumoCategories.cat_groups || {}).forEach(([cat, g]) => { l2ToL1[g.L2] = g.L1; });
+			const L1_COLS = { Abstract: new THREE.Color('#2d6a9f'), Physical: new THREE.Color('#7a3d8c'), Unknown: new THREE.Color('#5a4530') };
+			const mid = (_sumoCategories.l2_order.length - 1) / 2;
+			_sumoCategories.l2_order.forEach((l2, i) => {
+				const lx = (i - mid) * LANE_SPACING;
+				const L1 = l2ToL1[l2] || 'Unknown';
+				const c  = L1_COLS[L1] || L1_COLS.Unknown;
+				// Vertical spine at this lane X, Y=0 (base of depth axis)
+				laneLinePts.push(lx, 0, -80,  lx, 0, totalZ + 80);
+				laneCols.push(c.r * 0.4, c.g * 0.4, c.b * 0.4,  c.r * 0.4, c.g * 0.4, c.b * 0.4);
+				// Label at front face
+				const el = document.createElement('div');
+				el.dataset.lk = '__lane__' + l2;
+				el.style.cssText = 'position:absolute;font:8px ui-monospace,monospace;pointer-events:none;white-space:nowrap;opacity:0.75;';
+				el.style.color = L1 === 'Abstract' ? '#4a6fa0' : '#7a5090';
+				el.textContent = l2;
+				labelContainer.appendChild(el);
+				G3D.labelEls.push(el);
+				nodePos.set('__lane__' + l2, { x: lx, y: -20, z: -80, r: 0, node: null, colKey: '_label' });
+			});
+			if (laneLinePts.length) {
+				const lgeo = new THREE.BufferGeometry();
+				lgeo.setAttribute('position', new THREE.Float32BufferAttribute(laneLinePts, 3));
+				lgeo.setAttribute('color',    new THREE.Float32BufferAttribute(laneCols, 3));
+				scene.add(new THREE.LineSegments(lgeo, new THREE.LineBasicMaterial({ vertexColors: true, transparent: true, opacity: 0.3 })));
+			}
+		}
+
+		// b1) Tunnel spine (Z axis line at origin for reference)
 		{
 			const spGeo = new THREE.BufferGeometry();
 			spGeo.setAttribute('position', new THREE.Float32BufferAttribute([0, 0, -80,  0, 0, totalZ + 80], 3));
