@@ -1691,6 +1691,8 @@ function transformRawToCollections(rawOutputDir) {
 		if (typeof title !== 'string') return false;
 		const t = title.trim();
 		if (!t) return true;
+		// Very short title: 1-3 chars — PDF column-break fragment or noise (e.g. "Ne", "A", "1")
+		if (t.length <= 3) return true;
 		// Page number merged with a journal/publisher name
 		if (/^\d+\s+[A-Z][A-Za-z\s&]+$/.test(t)) return true;
 		// Standalone journal/conference/publisher name: short, no verb, no colon, no number
