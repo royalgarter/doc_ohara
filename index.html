@@ -749,10 +749,17 @@
 					<template x-for="(sec, i) in discPanelSections" :key="sec._id || sec._key">
 						<button @click="selectSectionFromPanel(sec)"
 							:class="selectedNode && selectedNode._key === sec._key ? 'cl-card-on' : 'cl-card'"
-							class="text-left p-1.5 rounded border cursor-pointer transition text-xs flex flex-col gap-0.5">
+							class="text-left p-1.5 rounded border cursor-pointer transition flex flex-col gap-0.5">
 							<div class="flex items-center gap-1">
-								<span class="cl-t5 font-mono" x-text="'L' + (sec.level || 1)"></span>
-								<span class="cl-t1 truncate" x-text="sec.title || sec._key"></span>
+								<span class="cl-t5 font-mono text-xs" x-text="'L' + (sec.level || 1)"></span>
+								<span class="cl-t1 truncate"
+									:class="{
+										'text-xl font-bold':   (sec.level || 1) === 1,
+										'text-lg font-bold':   (sec.level || 1) === 2,
+										'text-lg font-semibold': (sec.level || 1) === 3,
+										'text-lg':             (sec.level || 1) >= 4
+									}"
+									x-text="sec.title || sec._key"></span>
 							</div>
 						</button>
 					</template>
