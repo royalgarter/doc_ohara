@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * E6: Knowledge Gap flagging — isolation signal.
+ * E6: Knowledge Gap flagging - isolation signal.
  *
  * Flags isolated nodes:
  *   - Entities with RELATED_TO degree < 2 → entity.isolated = true

@@ -1,7 +1,7 @@
 import { GoogleGenAI } from '@google/genai';
 import { cacheKeyFor, readCacheAsync, writeCacheAsync, credFingerprint } from './cache.js';
 
-// Token usage accumulator — callers attach a handler via onTokenUsage()
+// Token usage accumulator - callers attach a handler via onTokenUsage()
 let _tokenUsageHandler = null;
 export function onTokenUsage(fn) { _tokenUsageHandler = fn; }
 export function clearTokenUsageHandler() { _tokenUsageHandler = null; }
@@ -94,7 +94,7 @@ async function _callCloudflare(prompt, { model, systemPrompt, json } = {}) {
 	return text;
 }
 
-// Cloudflare Workers AI — direct API (CF_ACCOUNT_ID + CF_API_TOKEN required)
+// Cloudflare Workers AI - direct API (CF_ACCOUNT_ID + CF_API_TOKEN required)
 // Used as Gemini fallback; model default: @cf/zai-org/glm-4.7-flash
 async function _callCFWorkersAI(prompt, { model, systemPrompt, json } = {}) {
 	const accountId = process.env.CF_ACCOUNT_ID;
@@ -144,7 +144,7 @@ export async function callLLM(prompt, { model, systemPrompt, json, cache = true,
 		} catch (err) {
 			// Fallback to CF Workers AI when Gemini is overloaded/rate-limited
 			if (PROVIDER === 'gemini' && _isGeminiFallbackError(err) && process.env.CF_API_TOKEN) {
-				console.error(`[llm] Gemini error (${err.message}) — falling back to CF Workers AI`);
+				console.error(`[llm] Gemini error (${err.message}) - falling back to CF Workers AI`);
 				return _callCFWorkersAI(prompt, { systemPrompt, json });
 			}
 			throw err;
@@ -169,7 +169,7 @@ export async function callLLM(prompt, { model, systemPrompt, json, cache = true,
 
 /**
  * Create a Gemini server-side CachedContent for a large repeated system prompt.
- * Returns the cache name (e.g. "cachedContents/abc123") — pass to callLLMWithCache.
+ * Returns the cache name (e.g. "cachedContents/abc123") - pass to callLLMWithCache.
  * Minimum ~32K tokens required. Gemini provider only.
  *
  * @param {string} systemPrompt - Large system prompt to cache server-side
@@ -237,7 +237,7 @@ export async function callLLMWithCache(cachedContentName, prompt, { model, json,
 }
 
 /**
- * Generate embeddings. Gemini only — cloudflare provider throws.
+ * Generate embeddings. Gemini only - cloudflare provider throws.
  */
 export async function callEmbedding(text, { model, cache = true } = {}) {
 	if (PROVIDER !== 'gemini') {

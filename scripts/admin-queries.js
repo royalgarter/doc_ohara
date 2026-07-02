@@ -8,7 +8,7 @@ import { getArangoDBSimulator } from '../src/db/simulator.js';
 import fs from 'fs';
 import path from 'path';
 
-// Unified query executor — real ArangoDB or simulator
+// Unified query executor - real ArangoDB or simulator
 async function makeExec() {
 	if (process.env.ARANGO_URL) {
 		await loadEnvFromDB();
@@ -23,7 +23,7 @@ async function makeExec() {
 }
 
 function pct(n, total) {
-	if (!total) return '—';
+	if (!total) return '-';
 	return `${((n / total) * 100).toFixed(1)}%`;
 }
 
@@ -77,7 +77,7 @@ const queries = {
 		const rows = await exec('FOR p IN paragraphs RETURN { key: p._key, sumo_tags: p.sumo_tags, raw: p.sumo_candidate_tags_raw, content: p.content }');
 		const gaps = rows.filter(p => p.raw && p.raw.length > 0 && (!p.sumo_tags || p.sumo_tags.length === 0));
 		console.log('\n=== Paragraphs with unresolved candidate tags ===');
-		if (!gaps.length) { console.log('  (none — great coverage!)'); return; }
+		if (!gaps.length) { console.log('  (none - great coverage!)'); return; }
 		gaps.forEach(p => {
 			console.log(`  [${p.key}] candidates: ${p.raw.join(', ')}`);
 			console.log(`    content: ${String(p.content || '').slice(0, 100)}…`);

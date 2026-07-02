@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<title>Doc Ohara — Agent Command Center</title>
+<title>Doc Ohara - Agent Command Center</title>
 <style>
 	body { font-family: ui-monospace, monospace; background: #0b0e14; color: #d6e2ff; margin: 0; padding: 24px; }
 	h1 { font-size: 18px; color: #7fd8ff; }
@@ -24,12 +24,12 @@
 </style>
 </head>
 <body>
-	<h1>🛰️ Doc Ohara — Agentic Command Center</h1>
+	<h1>🛰️ Doc Ohara - Agentic Command Center</h1>
 	<p>Bridges the Space-Time Graph to AI agents. Tool catalog: <a href="/tools">/tools</a></p>
 
 	<div class="grid">
 		<div class="panel">
-			<h2>Context View — focused node</h2>
+			<h2>Context View - focused node</h2>
 			<input id="nodeIdInput" placeholder='e.g. documents/quantum_paper_001' />
 			<button onclick="focusNode()">Focus</button>
 			<div id="contextView"><em>Use ?node=&lt;id&gt; in the URL or the field above.</em></div>
@@ -57,7 +57,7 @@
 			document.getElementById('jobsView').innerHTML = last10.map(j => `
 				<div class="row">
 					<span class="tag ${j.status}">${j.status}</span>
-					${j.data.filename} — ${j.progressMessage || ''} (${j.progress}%)
+					${j.data.filename} - ${j.progressMessage || ''} (${j.progress}%)
 				</div>
 			`).join('') || '<em>No jobs yet.</em>';
 		}

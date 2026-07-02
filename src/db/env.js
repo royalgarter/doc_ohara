@@ -37,7 +37,7 @@ export async function loadEnvFromDB() {
 		}
 		return rows.length;
 	} catch {
-		// DB not available yet or collection missing — silently skip
+		// DB not available yet or collection missing - silently skip
 		return 0;
 	}
 }
@@ -64,7 +64,7 @@ export async function getEnv(key) {
 /** Set / upsert a key. */
 export async function setEnv(key, value) {
 	if (key === 'ARANGO_URL') {
-		throw new Error(`ARANGO_URL must stay in .env — it is required to connect to the DB in the first place.`);
+		throw new Error(`ARANGO_URL must stay in .env - it is required to connect to the DB in the first place.`);
 	}
 	const { coll } = await getDB();
 	await coll.save({ _key: key, value: String(value) }, { overwriteMode: 'replace' });

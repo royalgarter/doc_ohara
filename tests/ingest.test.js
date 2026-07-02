@@ -173,7 +173,7 @@ describe('temporal scoring', () => {
 	});
 
 	function makeEngine() {
-		// Minimal stub db — temporal scoring doesn't need real DB calls
+		// Minimal stub db - temporal scoring doesn't need real DB calls
 		return new RetrievalEngine({
 			executeAQL: async () => [],
 			query: async () => ({ all: async () => [] }),

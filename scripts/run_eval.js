@@ -3,14 +3,14 @@
  * Run OHARA retrieval evaluation against a ground-truth Q&A set.
  *
  * Metrics:
- *   Recall@k  — fraction of questions where ground_truth_para_id in top-k results
- *   MRR       — mean reciprocal rank (0 if not found in top-20)
- *   NDCG@10   — normalized discounted cumulative gain (binary relevance)
+ *   Recall@k  - fraction of questions where ground_truth_para_id in top-k results
+ *   MRR       - mean reciprocal rank (0 if not found in top-20)
+ *   NDCG@10   - normalized discounted cumulative gain (binary relevance)
  *
  * Phase source breakdown: which retrieval phases contributed to hits.
  *
  * Ablation mode (--ablate): zeroes out one OHARA_*_WEIGHT env var per run
- * and reports delta Recall@10 — shows which phases actually contribute.
+ * and reports delta Recall@10 - shows which phases actually contribute.
  *
  * Usage:
  *   node --env-file=.env scripts/run_eval.js
@@ -116,7 +116,7 @@ async function runPass(engine, questions) {
 
 		if ((i + 1) % 10 === 0) {
 			const sofar = perQuestion.filter(x => x.rank !== null).length;
-			console.log(`  ${i + 1}/${questions.length} — Recall@10 so far: ${(recallAtK(perQuestion, 10) * 100).toFixed(1)}% (${sofar} hits)`);
+			console.log(`  ${i + 1}/${questions.length} - Recall@10 so far: ${(recallAtK(perQuestion, 10) * 100).toFixed(1)}% (${sofar} hits)`);
 		}
 	}
 

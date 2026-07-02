@@ -17,7 +17,7 @@ async function processJob(queue, job, aiKey) {
 		await queue.update(job.id, { status: 'completed', progress: 100, result, error: null });
 		return result;
 	} catch (err) {
-		// ALREADY_INGESTED is not a failure — mark completed with a skipped flag
+		// ALREADY_INGESTED is not a failure - mark completed with a skipped flag
 		if (NON_ERROR_CODES.has(err.code)) {
 			const result = { skipped: true, reason: err.message, existingDoc: err.existingDoc };
 			await queue.update(job.id, { status: 'completed', progress: 100, result, error: null });

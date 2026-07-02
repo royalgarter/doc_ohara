@@ -20,7 +20,7 @@ const B = JSON.parse(fs.readFileSync(fileB, 'utf8'));
 const mA = A.baseline?.metrics || A.metrics;
 const mB = B.baseline?.metrics || B.metrics;
 
-if (!mA || !mB) { console.error('Invalid report format — missing metrics'); process.exit(1); }
+if (!mA || !mB) { console.error('Invalid report format - missing metrics'); process.exit(1); }
 
 const delta = (key) => {
 	const d = mB[key] - mA[key];

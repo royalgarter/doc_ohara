@@ -62,7 +62,7 @@ export async function initArangoClient() {
 		await db.createEdgeCollection('edges').catch(err => { throw err; });
 	}
 
-	// Ensure indexes for query performance (idempotent — ArangoDB skips if already exists)
+	// Ensure indexes for query performance (idempotent - ArangoDB skips if already exists)
 	Promise.all([
 		// document_id filters on sections/paragraphs/tables (deleteDocumentAndNodes, getState, etc.)
 		db.collection('sections').ensureIndex({ type: 'persistent', fields: ['document_id'], name: 'idx_sections_document_id' }).catch(() => {}),
@@ -70,7 +70,7 @@ export async function initArangoClient() {
 		db.collection('tables').ensureIndex({ type: 'persistent', fields: ['document_id'], name: 'idx_tables_document_id' }).catch(() => {}),
 		// level sort on sections (initial graph load: SORT s.level ASC)
 		db.collection('sections').ensureIndex({ type: 'persistent', fields: ['level', '_key'], name: 'idx_sections_level_key' }).catch(() => {}),
-		// _to index on edges — ArangoDB's built-in edge index only covers _from
+		// _to index on edges - ArangoDB's built-in edge index only covers _from
 		db.collection('edges').ensureIndex({ type: 'persistent', fields: ['_to'], name: 'idx_edges_to' }).catch(() => {}),
 		// relation index for the initial graph-load filter
 		db.collection('edges').ensureIndex({ type: 'persistent', fields: ['relation'], name: 'idx_edges_relation' }).catch(() => {}),
@@ -79,7 +79,7 @@ export async function initArangoClient() {
 		// entity slug uniqueness + normKey lookup for dedup
 		db.collection('entities').ensureIndex({ type: 'persistent', fields: ['slug'], unique: true, name: 'idx_entities_slug' }).catch(() => {}),
 		db.collection('entities').ensureIndex({ type: 'persistent', fields: ['norm_key'], name: 'idx_entities_norm_key' }).catch(() => {}),
-		// array index on document_ids — backs the /api/graph entity-scoping filter
+		// array index on document_ids - backs the /api/graph entity-scoping filter
 		db.collection('entities').ensureIndex({ type: 'persistent', fields: ['document_ids[*]'], name: 'idx_entities_document_ids' }).catch(() => {}),
 		// jobs: queue + status + createdAt for claimNext and list queries
 		db.collection('jobs').ensureIndex({ type: 'persistent', fields: ['queue', 'status', 'createdAt'], name: 'idx_jobs_queue_status_created' }).catch(() => {}),

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * E7: CLUSTER_MEMBER edges — RAPTOR-inspired semantic cluster retrieval.
+ * E7: CLUSTER_MEMBER edges - RAPTOR-inspired semantic cluster retrieval.
  *
  * Fetches all paragraphs with embeddings, runs k-means clustering,
  * generates a Gemini summary per cluster, stores cluster nodes in `clusters`
@@ -110,7 +110,7 @@ async function summariseCluster(ai, members) {
 	const cached = readCacheSync(key);
 	if (cached?.summary) return cached;
 
-	const prompt = `Summarise the common theme across these ${members.length} document passages in 1-2 sentences. Be specific — name the topic/concept/domain they share.\n\nKey entities: ${entityNames || '(none)'}\n\nPASSAGES:\n${snippets.slice(0, 4000)}`;
+	const prompt = `Summarise the common theme across these ${members.length} document passages in 1-2 sentences. Be specific - name the topic/concept/domain they share.\n\nKey entities: ${entityNames || '(none)'}\n\nPASSAGES:\n${snippets.slice(0, 4000)}`;
 	try {
 		const resp = await ai.models.generateContent({
 			model: GEMINI_MODEL,
@@ -152,7 +152,7 @@ async function main() {
 		process.exit(0);
 	}
 
-	// Load embeddings separately (large — avoid loading all at once in same query)
+	// Load embeddings separately (large - avoid loading all at once in same query)
 	console.log(`Loading ${paragraphs.length} embeddings…`);
 	const embCursor = await db.query(`
 		FOR p IN paragraphs
@@ -194,7 +194,7 @@ async function main() {
 		if (members.length < MIN_SIZE) continue;
 
 		const { summary, centroid_entity_slugs } = await summariseCluster(ai, members);
-		console.log(`Cluster ${idx}: ${members.length} members — "${summary.slice(0, 80)}…"`);
+		console.log(`Cluster ${idx}: ${members.length} members - "${summary.slice(0, 80)}…"`);
 
 		const clusterDoc = await clustersColl.save({
 			summary,

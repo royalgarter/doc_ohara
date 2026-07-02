@@ -155,7 +155,7 @@ const ALIASES = {
 export function loadSumoIndex() {
 	if (index) return index;
 	if (!fs.existsSync(SUMO_INDEX_PATH)) {
-		console.warn('SUMO index not found — all tags will be treated as invalid');
+		console.warn('SUMO index not found - all tags will be treated as invalid');
 		index = [];
 		exactMap = new Map();
 		normMap = new Map();
@@ -193,10 +193,10 @@ export function resolveTag(tag) {
 	const t = String(tag).trim();
 	const norm = normalize(t);
 
-	// 1. exact — O(1)
+	// 1. exact - O(1)
 	if (exactMap.has(t)) return t;
 
-	// 2. case + separator insensitive — O(1)
+	// 2. case + separator insensitive - O(1)
 	const ci = normMap.get(norm);
 	if (ci) return ci;
 
@@ -208,13 +208,13 @@ export function resolveTag(tag) {
 		}
 	}
 
-	// 4. CamelCase decomposition — split compound LLM-invented terms into their
+	// 4. CamelCase decomposition - split compound LLM-invented terms into their
 	//    component words and resolve each. Return the longest-word valid component
 	//    so "ResearchMethod" → ["Research","Method"] → "Method" (valid, 6 chars).
 	//    This handles any domain without requiring manual aliases per term.
 	const components = t.replace(/([A-Z])/g, ' $1').trim().split(/\s+/).filter(w => w.length >= 3);
 	if (components.length > 1) {
-		// Sort by word length descending — prefer longer, more specific components
+		// Sort by word length descending - prefer longer, more specific components
 		const sorted = [...components].sort((a, b) => b.length - a.length);
 		for (const word of sorted) {
 			const wNorm = normalize(word);
@@ -262,7 +262,7 @@ function loadHierarchy() {
 	try {
 		hierarchyMap = JSON.parse(fs.readFileSync(SUMO_HIERARCHY_PATH, 'utf-8'));
 	} catch (_) {
-		hierarchyMap = {}; // hierarchy file not yet generated — degrade gracefully
+		hierarchyMap = {}; // hierarchy file not yet generated - degrade gracefully
 	}
 	return hierarchyMap;
 }

@@ -1117,7 +1117,7 @@ view information about a bitcoin transaction mp
 
 0.0845
 
-— 0.08 BT
+- 0.08 BT
 
 Summary
 

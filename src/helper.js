@@ -1,9 +1,9 @@
 // Shared helper utilities extracted from ingest.js and retrieval.js.
-// Original files still contain these — this module re-exports them for callers
+// Original files still contain these - this module re-exports them for callers
 // that want a single import point.
 
 // Remove \X escape sequences that are invalid in JSON (markdown escapes like \*, \_, \[, \(, etc.).
-// Valid JSON escapes are: \" \\ \/ \b \f \n \r \t \uXXXX — everything else is illegal.
+// Valid JSON escapes are: \" \\ \/ \b \f \n \r \t \uXXXX - everything else is illegal.
 export function sanitizeJsonEscapes(s) {
 	return s.replace(/\\([^"\\\/bfnrtu\n\r])/g, (_, ch) => ch);
 }

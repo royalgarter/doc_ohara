@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Doc_Ohara MCP Server — exposes ingest/query/answer/get_graph_context to MCP clients
+// Doc_Ohara MCP Server - exposes ingest/query/answer/get_graph_context to MCP clients
 // Register with Claude Code: claude mcp add ohara -- node bin/ohara-mcp.js
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';

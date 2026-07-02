@@ -21,7 +21,7 @@ function normalizeEntity(canonical) {
 /**
  * Detects opaque, machine-generated identifier tokens (hashes, UUIDs, addresses,
  * base58/base64-ish strings, etc.) that LLM extraction sometimes mistakes for
- * named entities. Deliberately domain-agnostic — not specific to any one kind
+ * named entities. Deliberately domain-agnostic - not specific to any one kind
  * of document or identifier scheme.
  */
 function isOpaqueToken(str) {
@@ -29,7 +29,7 @@ function isOpaqueToken(str) {
 	const s = str.trim();
 	if (!s) return false;
 
-	// UUID shape (hyphenated hex) — checked first since it contains hyphens.
+	// UUID shape (hyphenated hex) - checked first since it contains hyphens.
 	if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s)) return true;
 
 	if (/\s/.test(s)) return false;          // real names/phrases usually have whitespace
@@ -65,10 +65,10 @@ function repairCanonicalName(s) {
 	if (fixed.includes('-')) {
 		fixed = fixed.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 	} else if (fixed.includes(' ')) {
-		// spaces already present — title-case each word
+		// spaces already present - title-case each word
 		fixed = fixed.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 	} else if (fixed.length > 0) {
-		// single word — capitalize first letter
+		// single word - capitalize first letter
 		fixed = fixed.charAt(0).toUpperCase() + fixed.slice(1);
 	}
 

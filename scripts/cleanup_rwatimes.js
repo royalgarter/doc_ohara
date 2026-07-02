@@ -21,7 +21,7 @@ const cursor = await db.query(`
 const docs = await cursor.all();
 
 if (docs.length === 0) {
-	console.log('No rwatimes.io documents found — nothing to delete.');
+	console.log('No rwatimes.io documents found - nothing to delete.');
 	process.exit(0);
 }
 
@@ -31,7 +31,7 @@ for (const doc of docs) {
 }
 
 if (DRY_RUN) {
-	console.log('\nDry run — no changes made. Remove --dry-run to delete.');
+	console.log('\nDry run - no changes made. Remove --dry-run to delete.');
 	process.exit(0);
 }
 

@@ -9,7 +9,7 @@
  * Stratified sampling: up to ceil(count/docCount) paragraphs per document
  * so the eval set covers all ingested docs, not just one large book.
  *
- * Cache: Gemini calls are cached by paragraph content — reruns are free.
+ * Cache: Gemini calls are cached by paragraph content - reruns are free.
  *
  * Usage:
  *   node scripts/generate_eval_set.js                         # 100 pairs → eval/eval_set.json

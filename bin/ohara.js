@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Doc_Ohara CLI (ohara 2.0) — multi-action front-end over the Space-Time Graph.
+// Doc_Ohara CLI (ohara 2.0) - multi-action front-end over the Space-Time Graph.
 import { loadEnvFromDB, listEnv, getEnv, setEnv, unsetEnv } from '../src/db/env.js';
 import { Command } from 'commander';
 import chalk from 'chalk';
@@ -40,7 +40,7 @@ function emit(json, data, humanFn) {
 const program = new Command();
 program
 	.name('ohara')
-	.description('Doc Ohara CLI — ingest, query, and manage the Space-Time Graph')
+	.description('Doc Ohara CLI - ingest, query, and manage the Space-Time Graph')
 	.version('2.0.0');
 
 program
@@ -241,9 +241,9 @@ program
 			}
 			const dr = processedQuery?.dateRange;
 			if (dr && (dr.from || dr.to)) {
-				console.log(chalk.dim(`  date range: ${dr.from || '—'} → ${dr.to || '—'}`));
+				console.log(chalk.dim(`  date range: ${dr.from || '-'} → ${dr.to || '-'}`));
 			}
-			console.log(chalk.dim(`  ${results.length} result(s) — depth=${opts.depth} limit=${opts.limit}`));
+			console.log(chalk.dim(`  ${results.length} result(s) - depth=${opts.depth} limit=${opts.limit}`));
 			console.log('');
 
 			if (results.length === 0) {
@@ -271,7 +271,7 @@ program
 					if (opts.verbose) {
 						tiers.integrity.forEach(({ node, score, provenance }) => {
 							const prov = (provenance || []).map(p => `${p.phase}${p.document_id ? `@${p.document_id}` : ''}`).join(', ');
-							console.log(chalk.dim(`  [${chalk.green((score||0).toFixed(3))}] ${node._id} — provenance: ${prov}`));
+							console.log(chalk.dim(`  [${chalk.green((score||0).toFixed(3))}] ${node._id} - provenance: ${prov}`));
 						});
 					}
 					console.log(integrityMarkdown);
@@ -280,10 +280,10 @@ program
 				console.log(chalk.bold.cyan('━━ Explorer ━━'));
 				const frontier = tiers?.explorer?.frontier || [];
 				if (!frontier.length) {
-					console.log(chalk.dim(`  (no frontier candidates — ${tiers?.explorer?.stopped_reason || 'unknown'})`));
+					console.log(chalk.dim(`  (no frontier candidates - ${tiers?.explorer?.stopped_reason || 'unknown'})`));
 				} else {
 					frontier.forEach((f, i) => {
-						console.log(`  ${chalk.dim(`${i + 1}.`)} ${chalk.green((f.score||0).toFixed(3))}  ${f.edge_verb || 'related to'} — ${f.edge_summary || f.document_id}`);
+						console.log(`  ${chalk.dim(`${i + 1}.`)} ${chalk.green((f.score||0).toFixed(3))}  ${f.edge_verb || 'related to'} - ${f.edge_summary || f.document_id}`);
 					});
 					console.log(chalk.dim(`  stopped: ${tiers?.explorer?.stopped_reason}`));
 				}
@@ -373,7 +373,7 @@ program
 		stats.nodes      = sections.length + paragraphs.length + tables.length;
 
 		if (stats.nodes === 0) {
-			fail('NO_NODES', 'Document has no child nodes at all — ingestion may have failed');
+			fail('NO_NODES', 'Document has no child nodes at all - ingestion may have failed');
 		}
 
 		// ── 2. Fetch all edges touching any node of this document ────────────
@@ -444,7 +444,7 @@ program
 			s.parent_section_id.startsWith('sections/') &&
 			!secById.has(s.parent_section_id)
 		);
-		// Legacy docs may store internal okf_node_ IDs — warn instead of error
+		// Legacy docs may store internal okf_node_ IDs - warn instead of error
 		const legacyParentRef = sections.filter(s =>
 			s.parent_section_id && !s.parent_section_id.startsWith('sections/')
 		);
@@ -458,7 +458,7 @@ program
 				`${legacyParentRef.length} section(s) have legacy internal parent_section_id (re-ingest with --force to fix)`);
 		}
 
-		// 4c. Level continuity — no section should jump more than 1 level below its parent
+		// 4c. Level continuity - no section should jump more than 1 level below its parent
 		let levelGaps = 0;
 		for (const sec of sections) {
 			if (!sec.parent_section_id || !sec.parent_section_id.startsWith('sections/')) continue;
@@ -476,7 +476,7 @@ program
 		});
 		stats.leaf_sections = leafSections.length;
 		if (leafSections.length > 0 && leafSections.length === sections.length) {
-			warn('ALL_SECTIONS_LEAF', 'Every section is a leaf — no section has children. Hierarchy may not have been wired.');
+			warn('ALL_SECTIONS_LEAF', 'Every section is a leaf - no section has children. Hierarchy may not have been wired.');
 		}
 
 		// ── 5. Paragraph / table edge checks ─────────────────────────────────
@@ -527,7 +527,7 @@ program
 		}
 
 		// ── 8. Empty content ─────────────────────────────────────────────────
-		// Figures have no extractable text — exclude them from this check
+		// Figures have no extractable text - exclude them from this check
 		const textParas    = paragraphs.filter(p => p.node_type !== 'Figure');
 		const emptyParas   = textParas.filter(p => !p.content || p.content.trim().length === 0);
 		stats.text_paragraphs  = textParas.length;
@@ -536,7 +536,7 @@ program
 			const emptyRatio = emptyParas.length / textParas.length;
 			if (emptyRatio > 0.5) {
 				fail('EMPTY_PARAGRAPHS',
-					`${emptyParas.length}/${textParas.length} text paragraphs (${Math.round(emptyRatio * 100)}%) have empty content — possible extraction failure`);
+					`${emptyParas.length}/${textParas.length} text paragraphs (${Math.round(emptyRatio * 100)}%) have empty content - possible extraction failure`);
 			} else if (emptyParas.length > 0) {
 				warn('EMPTY_PARAGRAPHS', `${emptyParas.length} paragraph(s) have empty content`);
 			}
@@ -586,10 +586,10 @@ program
 			stats.content_coverage_ratio = Math.round(ratio * 100) + '%';
 			if (ratio < 0.3) {
 				fail('LOW_CONTENT_COVERAGE',
-					`Extracted text (${totalContentLen} chars) is only ${Math.round(ratio * 100)}% of the parsed markdown (${originalLen} bytes) — expected ≥30%`);
+					`Extracted text (${totalContentLen} chars) is only ${Math.round(ratio * 100)}% of the parsed markdown (${originalLen} bytes) - expected ≥30%`);
 			} else if (ratio < 0.5) {
 				warn('PARTIAL_CONTENT_COVERAGE',
-					`Extracted text is ${Math.round(ratio * 100)}% of parsed markdown — may indicate missing sections`);
+					`Extracted text is ${Math.round(ratio * 100)}% of parsed markdown - may indicate missing sections`);
 			}
 		} else {
 			warn('ORIGINAL_FILE_NOT_FOUND', `Could not find parsed markdown for "${srcFile}" to compare content length`);
@@ -629,14 +629,14 @@ program
 				}
 
 				stats.spot_check = `${hits}/${n} matched`;
-				// Note: ~20-30% misses are expected — TOC lines, figure captions with markdown
+				// Note: ~20-30% misses are expected - TOC lines, figure captions with markdown
 				// syntax, and numbered list items don't match verbatim against stored content.
 				if (hits < Math.ceil(n * 0.4)) {
 					fail('SPOT_CHECK_FAILED',
 						`Only ${hits}/${n} sampled markdown paragraphs found in DB. First miss: "${misses[0]}"`);
 				} else if (hits < Math.ceil(n * 0.6)) {
 					warn('SPOT_CHECK_PARTIAL',
-						`${hits}/${n} sampled markdown paragraphs found in DB — some content may be missing`);
+						`${hits}/${n} sampled markdown paragraphs found in DB - some content may be missing`);
 				}
 			}
 		}
@@ -657,7 +657,7 @@ program
 			? Math.round(taggedParas / paragraphs.length * 100) + '%'
 			: 'N/A';
 		if (paragraphs.length > 0 && taggedParas === 0) {
-			warn('NO_SUMO_TAGS', 'No paragraphs have SUMO tags — semantic tagging may not have run');
+			warn('NO_SUMO_TAGS', 'No paragraphs have SUMO tags - semantic tagging may not have run');
 		}
 
 		// ── Result ────────────────────────────────────────────────────────────
@@ -710,7 +710,7 @@ program
 					];
 					if (tu.recorded_at) tuLines.push(['Recorded at', new Date(tu.recorded_at).toLocaleString()]);
 					for (const [k, v] of tuLines) {
-						console.log(`  ${chalk.dim(k.padEnd(22))} ${chalk.white(v ?? '—')}`);
+						console.log(`  ${chalk.dim(k.padEnd(22))} ${chalk.white(v ?? '-')}`);
 					}
 				}
 				console.log('');

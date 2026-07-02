@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * E4: ANSWERS_SAME edges — HopRAG-inspired logical co-relevance.
+ * E4: ANSWERS_SAME edges - HopRAG-inspired logical co-relevance.
  *
  * For each paragraph (≥100 chars), Gemini generates 1-2 pseudo-questions
  * the paragraph answers. Paragraphs sharing a pseudo-question get

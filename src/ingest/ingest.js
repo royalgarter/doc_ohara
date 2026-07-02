@@ -323,7 +323,7 @@ function attemptLiteParse(sourcePath, outMdPath) {
 }
 
 // Remove \X escape sequences that are invalid in JSON (markdown escapes like \*, \_, \[, \(, etc.).
-// Valid JSON escapes are: \" \\ \/ \b \f \n \r \t \uXXXX — everything else is illegal.
+// Valid JSON escapes are: \" \\ \/ \b \f \n \r \t \uXXXX - everything else is illegal.
 function sanitizeJsonEscapes(s) {
 	return s.replace(/\\([^"\\\/bfnrtu\n\r])/g, (_, ch) => ch);
 }
@@ -465,13 +465,13 @@ function preDetectSpecialSections(markdown) {
 
 			// Parse TOC entries from block lines.
 			// Handles several LiteParse-output formats:
-			//   1. Markdown links:  [Title](#anchor)  — page inline or omitted
-			//   2. Numbered bold:   1. **Title. . . .**  — pages appear later as **N** bulk lines
-			//   3. Dotted leaders:  Title . . . . . . 42  — page inline
+			//   1. Markdown links:  [Title](#anchor)  - page inline or omitted
+			//   2. Numbered bold:   1. **Title. . . .**  - pages appear later as **N** bulk lines
+			//   3. Dotted leaders:  Title . . . . . . 42  - page inline
 			//
 			// Strategy: two passes.
-			//   Pass 1 — collect chapter-level entries (formats 1 & 2) in order, no pages yet.
-			//   Pass 2 — extract all numeric page values from bold/plain page lines in order,
+			//   Pass 1 - collect chapter-level entries (formats 1 & 2) in order, no pages yet.
+			//   Pass 2 - extract all numeric page values from bold/plain page lines in order,
 			//            then zip them onto entries that still lack a page.
 			const chapterEntries = [];
 			const pageCandidates = []; // integers in document order
@@ -485,7 +485,7 @@ function preDetectSpecialSections(markdown) {
 				const numberedBold = l.match(/^(\d+)\.\s+\*{1,2}([^*]+?)[.*\s]+\*{0,2}\s*$/);
 				if (numberedBold) { chapterEntries.push({ title: numberedBold[2].trim().replace(/\.+$/, '').trim(), level: 1, page: null }); continue; }
 
-				// Format 3: dotted leader with inline page — treat as sub-entry, keep page
+				// Format 3: dotted leader with inline page - treat as sub-entry, keep page
 				const dottedPage = l.match(/^(.+?)\s*[.\s]{4,}\s*(\d+)\s*$/);
 				if (dottedPage) {
 					const title = dottedPage[1].replace(/\*+/g, '').trim();
@@ -495,8 +495,8 @@ function preDetectSpecialSections(markdown) {
 					continue;
 				}
 
-				// Bold page line: "**N**" or "**ix N**" (roman prefix + arabic) — extract rightmost integer.
-				// These are chapter-start pages; plain-number lines are sub-section pages — ignore for chapter zipping.
+				// Bold page line: "**N**" or "**ix N**" (roman prefix + arabic) - extract rightmost integer.
+				// These are chapter-start pages; plain-number lines are sub-section pages - ignore for chapter zipping.
 				const boldPageLine = l.match(/^\*{1,2}[^*]*?(\d+)\s*\*{0,2}\s*$/);
 				if (boldPageLine) { pageCandidates.push(parseInt(boldPageLine[1], 10)); continue; }
 			}
@@ -511,7 +511,7 @@ function preDetectSpecialSections(markdown) {
 				tocEntries.push(entry);
 			}
 
-			addPipelineLog('info', `Pre-detected TOC block (${blockLines.length} lines, ${tocEntries.length} entries) — excluded from LLM chunking`);
+			addPipelineLog('info', `Pre-detected TOC block (${blockLines.length} lines, ${tocEntries.length} entries) - excluded from LLM chunking`);
 			continue; // don't push these lines to keepLines
 		}
 
@@ -531,10 +531,10 @@ function preDetectSpecialSections(markdown) {
 					if (linkM) tocEntries.push({ title: linkM[1].trim(), level: 1, page: null });
 					else if (numM) tocEntries.push({ title: numM[1].trim(), level: 1, page: parseInt(numM[2], 10) });
 				});
-				addPipelineLog('info', `Pre-detected TOC block (heuristic, ${run.length} lines, ${tocEntries.length} entries) — excluded from LLM chunking`);
+				addPipelineLog('info', `Pre-detected TOC block (heuristic, ${run.length} lines, ${tocEntries.length} entries) - excluded from LLM chunking`);
 				continue;
 			} else {
-				// Not a TOC run — keep lines
+				// Not a TOC run - keep lines
 				run.forEach(l => keepLines.push(l));
 				continue;
 			}
@@ -551,8 +551,8 @@ function preDetectSpecialSections(markdown) {
 				if (nextHeadMatch && nextHeadMatch[1].length <= headLevel) break;
 				blockLines.push(lines[i]);
 
-				// Parse definition list: `**term** — definition` or `term: definition` or `| term | def |`
-				const defListMatch = lines[i].match(/^\*{1,2}(.+?)\*{1,2}\s*[—:\-]\s*(.+)/);
+				// Parse definition list: `**term** - definition` or `term: definition` or `| term | def |`
+				const defListMatch = lines[i].match(/^\*{1,2}(.+?)\*{1,2}\s*[-:\-]\s*(.+)/);
 				const colonMatch = !defListMatch && lines[i].match(/^([^|:]{2,40})\s*:\s{1,4}(.{5,})/);
 				const tableMatch = !defListMatch && !colonMatch && lines[i].match(/^\|\s*([^|]+?)\s*\|\s*([^|]+?)\s*\|/);
 				if (defListMatch) glossaryEntries.push({ term: defListMatch[1].trim(), definition: defListMatch[2].trim() });
@@ -561,7 +561,7 @@ function preDetectSpecialSections(markdown) {
 				i++;
 			}
 			glossaryRaw = blockLines.join('\n');
-			addPipelineLog('info', `Pre-detected Glossary block (${blockLines.length} lines, ${glossaryEntries.length} entries) — will be stored as structured entries`);
+			addPipelineLog('info', `Pre-detected Glossary block (${blockLines.length} lines, ${glossaryEntries.length} entries) - will be stored as structured entries`);
 			continue;
 		}
 
@@ -690,7 +690,7 @@ ${items.map((it, idx) => `${idx + 1}. [Section: ${it.section || 'unknown'}] ${it
 }
 
 // Extract structured document metadata (authors, journal, DOI, review dates) from the raw markdown.
-// Runs once per document; cached. Result stored on the document node — not as graph nodes.
+// Runs once per document; cached. Result stored on the document node - not as graph nodes.
 async function extractDocumentMetadata(ai, rawMarkdown) {
 	if (!ai || !rawMarkdown) return null;
 	const sample = rawMarkdown.slice(0, 4000);
@@ -710,7 +710,7 @@ Rules:
 - "journal": journal or conference name only (e.g. "Journal of Finance & Accounting Research"). null if not found.
 - "doi": DOI string if present (e.g. "10.1000/xyz"). null if not found.
 - "review_dates": parse any "Date of receipt", "Received", "Accepted", "Date of approval" lines.
-- Return pure JSON only — no markdown fences, no commentary.
+- Return pure JSON only - no markdown fences, no commentary.
 
 TEXT:
 ${sample}`;
@@ -781,9 +781,9 @@ async function structureMarkdownWithRetries(ai, filename, mdContent) {
 			if (llmToc.source === 'explicit' && llmToc.entries.length > 0) {
 				detectedToc = llmToc;
 			} else {
-				// LLM says no explicit TOC — run PseudoTOC as final fallback.
+				// LLM says no explicit TOC - run PseudoTOC as final fallback.
 				try {
-					addPipelineLog('info', 'No explicit TOC found — running PseudoTOC (DocsRay Algorithm 1)...');
+					addPipelineLog('info', 'No explicit TOC found - running PseudoTOC (DocsRay Algorithm 1)...');
 					const boundaryPrompt = fs.readFileSync(path.join('prompts', 'boundary_detection.md'), 'utf-8').trim();
 					const titlePrompt = fs.readFileSync(path.join('prompts', 'generate_section_title.md'), 'utf-8').trim();
 					const credFp = credFingerprint();
@@ -817,25 +817,25 @@ async function structureMarkdownWithRetries(ai, filename, mdContent) {
 	if (docContextSummary) {
 		addPipelineLog('info', `Doc context summary (${chunks.length} chunks, ~${totalCharsApprox} chars): "${docContextSummary.slice(0, 120)}..."`);
 	} else if (!needsDocContext) {
-		addPipelineLog('info', `Doc context injection skipped (${chunks.length} chunk(s), ~${totalCharsApprox} chars — below threshold)`);
+		addPipelineLog('info', `Doc context injection skipped (${chunks.length} chunk(s), ~${totalCharsApprox} chars - below threshold)`);
 	}
 
 	// Extract structured document metadata (authors, journal, DOI, etc.) from the raw markdown.
-	// Runs in parallel with the cache creation below — result is awaited before document insert.
+	// Runs in parallel with the cache creation below - result is awaited before document insert.
 	const docMetadataPromise = extractDocumentMetadata(ai, cleanedMarkdown);
 
 	// parallel pool
 	const concurrency = parseInt(process.env.OHARA_INGEST_CONCURRENCY || '4', 10) || 4;
 
 	// Try to create a Gemini server-side cache for the system prompt (needs ~32K tokens minimum).
-	// Falls back gracefully — chunks just send the full prompt if cache creation fails.
+	// Falls back gracefully - chunks just send the full prompt if cache creation fails.
 	const systemPromptContent = fs.readFileSync(path.join('prompts', 'ingest_document.md'), 'utf-8').trim();
 	let geminiCacheName = null;
 	try {
 		geminiCacheName = await createGeminiCache(systemPromptContent, { model: GEMINI_MODEL, ttlSeconds: 300 });
 		addPipelineLog('info', `Gemini CachedContent created: ${geminiCacheName}`);
 	} catch (cacheErr) {
-		addPipelineLog('info', `Gemini CachedContent skipped (${cacheErr.message}) — sending full prompt per chunk`);
+		addPipelineLog('info', `Gemini CachedContent skipped (${cacheErr.message}) - sending full prompt per chunk`);
 	}
 
 	// per-run diagnostics: one entry per chunk, written to doc_pipeline/diagnostics/
@@ -986,7 +986,7 @@ async function structureMarkdownWithRetries(ai, filename, mdContent) {
 		};
 		fs.writeFileSync(diagFile, JSON.stringify(summary, null, 2), 'utf-8');
 		addPipelineLog('info', `Chunk diagnostics written to ${diagFile}`);
-		addPipelineLog('info', `LLM usage — prompt: ${usageTotals.prompt_tokens} tokens, generated: ${usageTotals.candidates_tokens} tokens, total: ${usageTotals.total_tokens} tokens`);
+		addPipelineLog('info', `LLM usage - prompt: ${usageTotals.prompt_tokens} tokens, generated: ${usageTotals.candidates_tokens} tokens, total: ${usageTotals.total_tokens} tokens`);
 	} catch (diagErr) {
 		addPipelineLog('warn', `Failed to write diagnostics: ${diagErr.message}`);
 	}
@@ -1002,7 +1002,7 @@ async function structureMarkdownWithRetries(ai, filename, mdContent) {
 	for (const entry of ordered) {
 		if (entry.error) {
 			failedChunks.push({ id: entry.chunk.id, error: entry.error.message });
-			// Preserve raw chunk text so no content is lost — LLM can reprocess later
+			// Preserve raw chunk text so no content is lost - LLM can reprocess later
 			if (entry.chunk.text && entry.chunk.text.trim()) {
 				mergedNodes.push({
 					type: 'Paragraph',
@@ -1022,7 +1022,7 @@ async function structureMarkdownWithRetries(ai, filename, mdContent) {
 		}
 		const parsed = entry.res;
 		if (!parsed) {
-			addPipelineLog('warn', `Empty parsed output for chunk ${entry.chunk.id} — skipping`);
+			addPipelineLog('warn', `Empty parsed output for chunk ${entry.chunk.id} - skipping`);
 			continue;
 		}
 		// Collect temporal metadata from this chunk (document-level, take highest confidence later)
@@ -1049,15 +1049,15 @@ async function structureMarkdownWithRetries(ai, filename, mdContent) {
 		} else if (parsed.document && Array.isArray(parsed.document.texts)) {
 			parsed.document.texts.forEach(t => mergedNodes.push({ type: t.label === 'paragraph' ? 'Paragraph' : 'Paragraph', content: t.text, title: t.label && t.label.startsWith('heading') ? t.text : undefined }));
 		} else {
-			addPipelineLog('warn', `Unexpected parsed schema from LLM for chunk ${entry.chunk.id} — skipping`);
+			addPipelineLog('warn', `Unexpected parsed schema from LLM for chunk ${entry.chunk.id} - skipping`);
 			continue;
 		}
 	}
 
-	// All chunks failed — raw fallback nodes were added above, so mergedNodes is non-empty.
+	// All chunks failed - raw fallback nodes were added above, so mergedNodes is non-empty.
 	// Log a clear warning but do NOT throw; content is preserved with llm_pending=true.
 	if (failedChunks.length > 0) {
-		addPipelineLog('warn', `${failedChunks.length} chunk(s) failed LLM structuring — stored as raw llm_pending paragraphs for later reprocessing`);
+		addPipelineLog('warn', `${failedChunks.length} chunk(s) failed LLM structuring - stored as raw llm_pending paragraphs for later reprocessing`);
 	}
 
 	// Validate SUMO candidate tags for each node and promote to sumo_tags.
@@ -1083,7 +1083,7 @@ async function structureMarkdownWithRetries(ai, filename, mdContent) {
 		if (totalSumoDrop > 0) {
 			const top = Object.entries(sumoDropCounts).sort((a, b) => b[1] - a[1]).slice(0, 8)
 				.map(([t, n]) => `${t}×${n}`).join(', ');
-			addPipelineLog('warn', `SUMO validation dropped ${totalSumoDrop} tag(s) across ${Object.keys(sumoDropCounts).length} distinct term(s) — top: ${top}`);
+			addPipelineLog('warn', `SUMO validation dropped ${totalSumoDrop} tag(s) across ${Object.keys(sumoDropCounts).length} distinct term(s) - top: ${top}`);
 		}
 	} catch (e) {
 		addPipelineLog('error', `SUMO tag validation failed: ${e.message}`);
@@ -1092,7 +1092,7 @@ async function structureMarkdownWithRetries(ai, filename, mdContent) {
 		throw err;
 	}
 
-	// Process candidate_entities from each node — validate types, deduplicate within node.
+	// Process candidate_entities from each node - validate types, deduplicate within node.
 	let entityDropTotal = 0;
 	for (const node of mergedNodes) {
 		if (node && Array.isArray(node.candidate_entities) && node.candidate_entities.length > 0) {
@@ -1233,7 +1233,7 @@ function transformRawToCollections(rawOutputDir) {
 		// Custom uuid-like reference keys
 		const docId = `doc_trans_${idx}_${Date.now()}`;
 
-		// Global position counter reset per document — shared across all chunk JSON files so that
+		// Global position counter reset per document - shared across all chunk JSON files so that
 		// ORDER BY doc_position across sections + paragraphs + tables reconstructs reading order.
 		let docPositionCounter = 0;
 
@@ -1299,7 +1299,7 @@ function transformRawToCollections(rawOutputDir) {
 						}
 
 						if (sectionDedup.has(dedupKey)) {
-							// Reuse the existing section — just restore it as the current context.
+							// Reuse the existing section - just restore it as the current context.
 							const existingId = sectionDedup.get(dedupKey);
 							sectionStack.push({ id: existingId, level });
 							currentSectionId = existingId;
@@ -1413,7 +1413,7 @@ function transformRawToCollections(rawOutputDir) {
 							if (lastC?.collection === 'para') dbCollections.adjacency.push({ fromId: lastC.id, fromCollection: 'para', toId: nodeId, toCollection: 'table' });
 							lastContentBySec.set(currentSectionId, { id: nodeId, collection: 'table' });
 						} else {
-							// Table data missing or malformed — preserve as raw Paragraph so no content is lost
+							// Table data missing or malformed - preserve as raw Paragraph so no content is lost
 							const fallback = [node.caption, node.label, node.markdown, node.metadata?.markdown]
 								.filter(s => typeof s === 'string' && s.trim()).join('\n').trim();
 							if (fallback) {
@@ -1655,7 +1655,7 @@ function transformRawToCollections(rawOutputDir) {
 	// ── Post-process pass 1: strip PDF/Markdown artifacts ───────────────────
 	// Artifacts are nodes whose content is structural noise: separator lines,
 	// LLM placeholders, TOC page-number entries, pure-symbol strings, etc.
-	// We drop these entirely — they carry no semantic content.
+	// We drop these entirely - they carry no semantic content.
 	function isArtifact(content) {
 		if (typeof content !== 'string') return false;
 		const t = content.trim();
@@ -1669,7 +1669,7 @@ function transformRawToCollections(rawOutputDir) {
 		if (/#{2,}/.test(t) && /[-|]{2,}/.test(t)) return true;
 		// Starts with markdown heading fence inside body text (leaked from chunker boundary)
 		if (/^#{3,}\s/.test(t)) return true;
-		// Fewer than 3 alphabetic characters — almost certainly not real prose
+		// Fewer than 3 alphabetic characters - almost certainly not real prose
 		const wordChars = (t.match(/[a-zA-Z]/g) || []).length;
 		if (wordChars < 3) return true;
 		// Author footnotes: lines starting with *, †, ‡ or superscript digit + affiliation/email
@@ -1709,7 +1709,7 @@ function transformRawToCollections(rawOutputDir) {
 	// ── Post-process pass 2: reattach Paragraph fragments to their sibling ───
 	// A "fragment" is a Paragraph node that got split away from its predecessor
 	// (e.g. at a chunk boundary or by LLM over-segmentation). We never break an
-	// existing paragraph apart — we only APPEND a fragment to the last real
+	// existing paragraph apart - we only APPEND a fragment to the last real
 	// Paragraph that precedes it in the same section.
 	//
 	// Detection: a Paragraph (not ListItem/Figure/Table) is a fragment when:
@@ -1740,7 +1740,7 @@ function transformRawToCollections(rawOutputDir) {
 				const prev = reattached[k];
 				if (prev.document_id === p.document_id && prev.section_id === p.section_id && prev.node_type === 'Paragraph') {
 					// Determine join separator: if prev ends with a sentence-ending char, use a space;
-					// otherwise (mid-sentence break) join with a single space too — content is verbatim.
+					// otherwise (mid-sentence break) join with a single space too - content is verbatim.
 					prev.content = prev.content.trimEnd() + ' ' + p.content.trimStart();
 					absorbed = true;
 					break;
@@ -1748,7 +1748,7 @@ function transformRawToCollections(rawOutputDir) {
 				// Stop searching if we hit a section boundary marker (different section)
 				if (prev.section_id !== p.section_id) break;
 			}
-			if (!absorbed) reattached.push(p); // no sibling found — keep as-is
+			if (!absorbed) reattached.push(p); // no sibling found - keep as-is
 		} else {
 			reattached.push(p);
 		}
@@ -1800,7 +1800,7 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
 		throw new Error(`Input file not found and no cached LiteParse output available: ${fileContentPath}`);
 	}
 	if (!fileExists) {
-		addPipelineLog('warn', `Input file missing (${filename}) — will use cached LiteParse output at ${mdCachePath}`);
+		addPipelineLog('warn', `Input file missing (${filename}) - will use cached LiteParse output at ${mdCachePath}`);
 	}
 
 	let fileHash = null;
@@ -2021,7 +2021,7 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
 							const fromHandle = parentHandle || docHandle;
 							await arangoClient.insertEdge({ _from: fromHandle, _to: secHandle, relation: 'HAS_CHILD', type: 'HAS_CHILD' }).catch(()=>{});
 						}));
-						// Now all handles in this batch are in sectionIdMap — add NEXT_SIBLING edges
+						// Now all handles in this batch are in sectionIdMap - add NEXT_SIBLING edges
 						await Promise.all(batch.map(async (sec) => {
 							const secHandle = sectionIdMap.get(sec.id);
 							const prevSibId = siblingPrev.get(sec.id);
@@ -2033,7 +2033,7 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
 					}
 				}
 
-				// Insert paragraphs in parallel batches — section IDs are all resolved by now
+				// Insert paragraphs in parallel batches - section IDs are all resolved by now
 				const docsParagraphs = transformedDocs.paragraphs.filter(p => p.document_id === doc.id);
 
 				// Contextual prefix (Anthropic Contextual Retrieval): prepend "[Document: X] [Section: Y] This paragraph…"
@@ -2253,7 +2253,7 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
 										await updateArangoEdge(edgeRes._id, { ...enrichment, temporal_relation: temporalRelation }).catch(() => {});
 										addPipelineLog('info', `Cross-doc edge enriched: "${enrichment.verb}" (${temporalRelation}) between ${doc.id} ↔ ${otherDoc.id}`);
 
-										// E2: CONTRADICTS edge — temporal supersession OR explicit conceptual conflict
+										// E2: CONTRADICTS edge - temporal supersession OR explicit conceptual conflict
 										const contradictionNote = (typeof enrichment.contradiction_note === 'string' && enrichment.contradiction_note.trim() && enrichment.contradiction_note.trim().toLowerCase() !== 'null')
 											? enrichment.contradiction_note.trim()
 											: null;
@@ -2335,7 +2335,7 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
 					}
 				}
 
-				// Insert tables in parallel batches — same pattern as paragraphs
+				// Insert tables in parallel batches - same pattern as paragraphs
 				const docsTables = transformedDocs.tables.filter(t => t.document_id === doc.id);
 				const tableHandleMap = new Map(); // internal table id → ArangoDB _id (for ADJACENT_TO)
 				await runBatched(docsTables, async (t) => {
@@ -2359,7 +2359,7 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
 					]);
 				});
 
-				// E3: NEXT_PARA edges — sequential paragraph order within sections
+				// E3: NEXT_PARA edges - sequential paragraph order within sections
 				if (process.env.OHARA_NEXT_PARA !== 'false') {
 					const paraSeq = (transformedDocs.para_sequence || []).filter(s => s.fromId && s.toId);
 					await runBatched(paraSeq, async ({ fromId, toId }) => {
@@ -2370,7 +2370,7 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
 					if (paraSeq.length) addPipelineLog('info', `NEXT_PARA: ${paraSeq.length} sequential paragraph edge(s)`);
 				}
 
-				// E1: ADJACENT_TO edges — bidirectional between consecutive para↔figure/table in same section
+				// E1: ADJACENT_TO edges - bidirectional between consecutive para↔figure/table in same section
 				if (process.env.OHARA_ADJACENT_TO !== 'false') {
 					const adjacency = (transformedDocs.adjacency || []).filter(a => a.fromId && a.toId);
 					await runBatched(adjacency, async ({ fromId, fromCollection, toId, toCollection }) => {
@@ -2432,7 +2432,7 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
 	if (_tokenUsage.calls > 0) {
 		addPipelineLog('info', `[token summary] calls=${_tokenUsage.calls} prompt=${_tokenUsage.prompt} output=${_tokenUsage.output} cached=${_tokenUsage.cached} thoughts=${_tokenUsage.thoughts} total=${_tokenUsage.total}`);
 	} else {
-		addPipelineLog('info', '[token summary] 0 LLM calls — all chunks served from disk cache');
+		addPipelineLog('info', '[token summary] 0 LLM calls - all chunks served from disk cache');
 	}
 
 	// Auto entity dedup after ingest
@@ -2455,7 +2455,7 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
 
 /**
  * Ingest HTML pages already stored in the `crawl` ArangoDB collection.
- * Does NOT crawl — reads only from the database.
+ * Does NOT crawl - reads only from the database.
  *
  * @param {string|null} domain - Filter by hostname (e.g. "rwatimes.io"). Null/omit = all records.
  * @param {string} aiKey - Gemini API key

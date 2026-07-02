@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 /**
- * E5: ADAMIC_ADAR edges — structural co-citation weight between entities.
+ * E5: ADAMIC_ADAR edges - structural co-citation weight between entities.
  *
  * For all entity pairs sharing ≥2 common RELATED_TO neighbors:
  *   AA(u,v) = Σ_{w ∈ N(u)∩N(v)} 1 / log(|N(w)|)
  *
  * Insert ADAMIC_ADAR edges (bidirectional) where AA score > threshold.
- * No LLM calls — pure graph math.
+ * No LLM calls - pure graph math.
  *
  * Usage:
  *   node scripts/build_adamic_adar_edges.js --dry-run

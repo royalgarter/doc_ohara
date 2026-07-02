@@ -87,7 +87,7 @@ export function chunkMarkdown(mdText, opts = {}) {
 	for (const chunk of result) {
 		const prev = merged[merged.length - 1];
 		if (prev && chunk.text.length < minChars && prev.text.length + chunk.text.length <= maxChars) {
-			// short chunk — absorb into previous sibling
+			// short chunk - absorb into previous sibling
 			prev.text += '\n' + chunk.text;
 			prev.endPage = chunk.endPage;
 		} else {

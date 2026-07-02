@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * E8: COMMUNITY_MEMBER edges — Louvain community detection on entity graph.
+ * E8: COMMUNITY_MEMBER edges - Louvain community detection on entity graph.
  *
  * Uses ArangoDB Pregel to run Louvain on the entities + RELATED_TO subgraph.
  * Each detected community gets a Gemini summary. Stores community docs in the
@@ -79,7 +79,7 @@ async function summariseCommunity(ai, memberNames, snippets) {
 	const cached = readCacheSync(key);
 	if (cached?.summary) return cached.summary;
 
-	const prompt = `These entities form a topological community in a knowledge graph based on co-occurrence patterns.\nEntities: ${memberNames.slice(0, 20).join(', ')}\n\nRepresentative passages:\n${snippets.slice(0, 3000)}\n\nDescribe the emergent topic this community represents in 1-2 sentences. Be specific about the domain/concept cluster — do not just list entity names.`;
+	const prompt = `These entities form a topological community in a knowledge graph based on co-occurrence patterns.\nEntities: ${memberNames.slice(0, 20).join(', ')}\n\nRepresentative passages:\n${snippets.slice(0, 3000)}\n\nDescribe the emergent topic this community represents in 1-2 sentences. Be specific about the domain/concept cluster - do not just list entity names.`;
 	try {
 		const resp = await ai.models.generateContent({
 			model: GEMINI_MODEL,
@@ -143,7 +143,7 @@ async function main() {
 		usedPreg = true;
 		console.log('Pregel done.');
 	} catch (err) {
-		console.warn(`Pregel unavailable (${err.message}) — using JS label propagation fallback`);
+		console.warn(`Pregel unavailable (${err.message}) - using JS label propagation fallback`);
 		communityMap = labelPropagation(entityList.map(e => e._id), adjMap);
 	}
 
@@ -209,7 +209,7 @@ async function main() {
 			edgeCount++;
 		}
 
-		console.log(`Community [${String(label).slice(0, 8)}]: ${members.length} entities — "${summary.slice(0, 70)}…"`);
+		console.log(`Community [${String(label).slice(0, 8)}]: ${members.length} entities - "${summary.slice(0, 70)}…"`);
 	}
 
 	// Flag RELATED_TO edges that cross community boundaries as is_surprising=true

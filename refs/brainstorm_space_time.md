@@ -8,7 +8,7 @@
 
 Doc Ohara calls itself a "Space-Time Graph" but currently only has Space:
 - **Spatial axes**: document → section → paragraph (structural), entity/SUMO (semantic), SIMILAR_TO (cross-doc)
-- **Time axis**: missing. Only `upload_time` exists — no published date, no covered period, no temporal decay in scoring.
+- **Time axis**: missing. Only `upload_time` exists - no published date, no covered period, no temporal decay in scoring.
 
 The user's vision: documents are 2D semantic planes stacked on a timeline axis. Each document has a position in time (when it was created / what period it covers), and its influence degrades along that axis at a rate determined by document type.
 
@@ -18,10 +18,10 @@ The user's vision: documents are 2D semantic planes stacked on a timeline axis. 
 
 ### 🗄️ Dr. Archive (Library Science / Information Science)
 
-**Two independent time axes exist — must not be conflated:**
+**Two independent time axes exist - must not be conflated:**
 
-1. **T_creation** — when the document was produced (publication date, commit date, broadcast date)
-2. **T_coverage** — what period the *content* describes (a 2024 paper about the 1929 crash covers 1929–1933, not 2024)
+1. **T_creation** - when the document was produced (publication date, commit date, broadcast date)
+2. **T_coverage** - what period the *content* describes (a 2024 paper about the 1929 crash covers 1929–1933, not 2024)
 
 These behave *oppositely* in retrieval:
 - Query: *"what happened in 1929"* → high T_coverage relevance for 1929, regardless of T_creation
@@ -31,19 +31,19 @@ These behave *oppositely* in retrieval:
 ```
 published_date:          ISO date string (nullable)
 temporal_coverage_start: ISO date string (nullable)
-temporal_coverage_end:   ISO date string (nullable — open if ongoing)
+temporal_coverage_end:   ISO date string (nullable - open if ongoing)
 temporal_granularity:    'day' | 'month' | 'year' | 'decade' | 'century'
 temporal_confidence:     Number  // 0.0–1.0
 temporal_needs_review:   Boolean // true = LLM extracted, awaiting human confirm
 ```
 
-LLM extracts at ingest from front matter, abstract, byline — cheap (same call, extra JSON keys). Low-confidence extractions flagged for human review.
+LLM extracts at ingest from front matter, abstract, byline - cheap (same call, extra JSON keys). Low-confidence extractions flagged for human review.
 
 ---
 
 ### 📊 Dr. Signal (Data Science / Information Retrieval)
 
-**Decay taxonomy — four classes with distinct half-lives:**
+**Decay taxonomy - four classes with distinct half-lives:**
 
 | Class | Examples | Half-life | λ (decay rate) |
 |---|---|---|---|
@@ -65,7 +65,7 @@ where:
 ```
 fused_score += OHARA_TEMPORAL_WEIGHT × temporal_score
 ```
-Default `OHARA_TEMPORAL_WEIGHT = 0.2` (conservative — see Gold Article Problem below).
+Default `OHARA_TEMPORAL_WEIGHT = 0.2` (conservative - see Gold Article Problem below).
 
 **T_coverage scoring** (separate from decay):
 When query contains a date hint (detected via `DATE` entity type), score by T_coverage overlap:
@@ -80,16 +80,16 @@ Additive with decay. A 1929 document about 1929 scores high even if old.
 
 **Three distinct kinds of "influence" that decay at different rates:**
 
-1. **Epistemic authority** — how much we trust this document's claims as *currently true*
+1. **Epistemic authority** - how much we trust this document's claims as *currently true*
    - 1990 HIV treatment paper: low authority today (medicine advanced)
    - 1905 Einstein special relativity paper: full authority (theory unchanged)
    - Governed by: `decay_class` + domain (SUMO `Medicine` decays faster than `Mathematics`)
 
-2. **Historical evidence weight** — how much this document *proves something happened*
+2. **Historical evidence weight** - how much this document *proves something happened*
    - A 1929 newspaper is *more* authoritative about 1929 than a 2024 retrospective
-   - Decay should *reverse* for T_coverage queries — older primary sources gain authority
+   - Decay should *reverse* for T_coverage queries - older primary sources gain authority
 
-3. **Citation influence** — how much this document shaped subsequent documents
+3. **Citation influence** - how much this document shaped subsequent documents
    - Proxied by SIMILAR_TO in-degree (many documents similar to this one → foundational)
 
 **Query temporal intent classification** (add to `prompts/extract_query_fingerprint.md`):
@@ -103,7 +103,7 @@ Additive with decay. A 1929 document about 1929 scores high even if old.
 - `influence_chain` → weight by SIMILAR_TO in-degree
 - `none` → temporal weight = 0 (skip decay entirely)
 
-**Key insight**: *Old ≠ Superseded.* A foundational 1953 paper hasn't decayed — the field still builds on it. The signal for supersession vs. foundation is whether newer documents *extend* or *contradict* the older one. This is available from the existing `verb` field on SIMILAR_TO edges.
+**Key insight**: *Old ≠ Superseded.* A foundational 1953 paper hasn't decayed - the field still builds on it. The signal for supersession vs. foundation is whether newer documents *extend* or *contradict* the older one. This is available from the existing `verb` field on SIMILAR_TO edges.
 
 ---
 
@@ -119,7 +119,7 @@ Additive with decay. A 1929 document about 1929 scores high even if old.
 If query has no detected temporal intent → `OHARA_TEMPORAL_WEIGHT = 0`. Decay simply doesn't fire. Most archival and factual queries will fall here.
 
 **Layer 2: Principal tier immunity**
-Principal-tier nodes (multi-phase corroboration, already implemented) get `temporal_contribution = 0`. A gold article will appear in BM25 + entity pivot + SUMO simultaneously — Principal status makes it immune to decay.
+Principal-tier nodes (multi-phase corroboration, already implemented) get `temporal_contribution = 0`. A gold article will appear in BM25 + entity pivot + SUMO simultaneously - Principal status makes it immune to decay.
 
 **Layer 3: Semantic floor gate**
 Nodes with `bm25_score > TEMPORAL_GATE_FLOOR` (default 0.5) get `temporal_contribution = 0`. Temporal only acts as tiebreaker in the weak-relevance band.
@@ -144,7 +144,7 @@ Documents with many `extends` incoming edges → promote to EVERGREEN.
 Documents with many `supersedes` incoming edges → bump decay class up one level (toward EPHEMERAL).
 
 **Layer 5: Conservative default weight**
-`OHARA_TEMPORAL_WEIGHT = 0.2` (not 0.3). Max temporal penalty < 0.2 points — never enough to bury a genuinely relevant result against a weak competitor.
+`OHARA_TEMPORAL_WEIGHT = 0.2` (not 0.3). Max temporal penalty < 0.2 points - never enough to bury a genuinely relevant result against a weak competitor.
 
 **Net result**: Decay only meaningfully affects documents that are simultaneously:
 - Weakly relevant semantically (low BM25, not Principal)
@@ -157,7 +157,7 @@ That is the correct population: old, weakly-relevant, non-foundational documents
 
 ## Complete Schema Changes
 
-### `documents` collection — new fields
+### `documents` collection - new fields
 ```js
 published_date:          String | null   // "YYYY-MM-DD" or partial "YYYY"
 temporal_coverage_start: String | null   // what period content describes
@@ -171,7 +171,7 @@ effective_decay_class:   String          // computed post-ingest (may differ fro
 similar_to_indegree:     Number          // count of incoming SIMILAR_TO edges
 ```
 
-### `edges` collection (SIMILAR_TO only) — new field
+### `edges` collection (SIMILAR_TO only) - new field
 ```js
 temporal_relation: String | null  // 'extends'|'supersedes'|'discusses'|null
                                   // derived from existing `verb` field at ingest time
@@ -179,7 +179,7 @@ temporal_relation: String | null  // 'extends'|'supersedes'|'discusses'|null
 ```
 
 ### No new edge type needed
-Timeline traversal uses AQL `FILTER / SORT doc.published_date` on existing collections. No PRECEDES edge — avoids O(n²) edge explosion.
+Timeline traversal uses AQL `FILTER / SORT doc.published_date` on existing collections. No PRECEDES edge - avoids O(n²) edge explosion.
 
 ---
 

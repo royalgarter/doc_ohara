@@ -1,4 +1,4 @@
-# Dense Embeddings — Implementation Plan
+# Dense Embeddings - Implementation Plan
 
 ## Goal
 Add a vector similarity phase (Phase 1d) alongside BM25 to improve recall for
@@ -8,10 +8,10 @@ paraphrase queries ("explain PoW" finds "proof-of-work" content even without BM2
 
 ### Embedding model
 Gemini `text-embedding-004` (768 dimensions, free tier available).
-Same API key as ingest — no new credentials.
+Same API key as ingest - no new credentials.
 
 ### Storage
-- `paragraphs.embedding` — float array [768] stored on each paragraph node
+- `paragraphs.embedding` - float array [768] stored on each paragraph node
 - ArangoDB 3.12 Enterprise vector index on `paragraphs.embedding`
   - type: `vector`, metric: `cosine`, dimensions: 768
 

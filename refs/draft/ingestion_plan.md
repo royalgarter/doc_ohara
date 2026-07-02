@@ -1,4 +1,4 @@
-Doc Ohara — Strict Ingest Implementation Plan
+Doc Ohara - Strict Ingest Implementation Plan
 
 Purpose
 -------
@@ -129,7 +129,7 @@ Implementation details (changes/additions)
 -----------------------------------------
 - Prompting:
   - Update prompts/ingest_document.md to require DoCO JSON output and to request `sumo_candidate_tags` for each node (the LLM may return candidate tag names). Example additions:
-    - "For each node output 'sumo_candidate_tags': [ ... ] — these will be validated and converted to 'sumo_tags' after validation."
+    - "For each node output 'sumo_candidate_tags': [ ... ] - these will be validated and converted to 'sumo_tags' after validation."
   - Keep system prompt minimal; attach a lightweight SUMO concept index file (refs/sumo_index.json) if needed for local lookups.
 
 - SUMO index and validation:
@@ -157,7 +157,7 @@ Implementation details (changes/additions)
 
 --------
 
-# Main Functions — Ingest Pipeline
+# Main Functions - Ingest Pipeline
 
 ohara ingest <path>                              [bin/ohara.js]
 │

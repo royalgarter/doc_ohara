@@ -45,7 +45,7 @@ const STOPWORDS = new Set([
 
 const GEMINI_MODEL = 'gemini-2.5-flash-lite';
 
-// Base weight env vars — used as-is for factoid queries and as multiplier floor for others
+// Base weight env vars - used as-is for factoid queries and as multiplier floor for others
 const w = () => ({
 	bm25:        parseFloat(process.env.OHARA_BM25_WEIGHT          || '1.0'),
 	sumo:        parseFloat(process.env.OHARA_SUMO_WEIGHT          || '0.4'),
@@ -104,7 +104,7 @@ function _toDate(val) {
 
 export class RetrievalEngine {
 	/**
-	 * @param {object} db  — object exposing `executeAQL(query, bindVars)` (real DB or simulator shim)
+	 * @param {object} db  - object exposing `executeAQL(query, bindVars)` (real DB or simulator shim)
 	 */
 	constructor(db) {
 		this.db = db;
@@ -179,7 +179,7 @@ export class RetrievalEngine {
 	}
 
 	// One-shot, temperature-0 Gemini cross-check for an Integrity-tier candidate.
-	// Single system+user turn, no chat history — matches enrich_cross_doc_edge.md call shape.
+	// Single system+user turn, no chat history - matches enrich_cross_doc_edge.md call shape.
 	async _verifyIntegrityClaim(claimContent, corroboratingSnippets) {
 		const ai = this._getAI();
 		if (!ai || !claimContent || corroboratingSnippets.length === 0) return { verified: true, reason: 'skipped' };
@@ -365,7 +365,7 @@ export class RetrievalEngine {
 		return { keywords, raw: rawInput, inputType, entityHints, sumoHints, temporalIntent, dateRange };
 	}
 
-	// ── Phase 0b — TOC-Guided Section Selection (PageIndex-inspired) ─────────────
+	// ── Phase 0b - TOC-Guided Section Selection (PageIndex-inspired) ─────────────
 	// For phrase/paragraph queries: fetch section tree (titles + summaries) for seed
 	// documents, ask Gemini which sections are relevant, return those section _ids
 	// as priority entry points for Phase 4 structural traversal.
@@ -406,7 +406,7 @@ export class RetrievalEngine {
 		}
 	}
 
-	// ── Phase 1 — ArangoSearch BM25 ──────────────────────────────────────────────
+	// ── Phase 1 - ArangoSearch BM25 ──────────────────────────────────────────────
 
 	async _phase1BM25(processedQuery, limit) {
 		const { keywords, raw, dateRange } = processedQuery;
@@ -414,7 +414,7 @@ export class RetrievalEngine {
 
 		const hasDateFilter = dateRange && (dateRange.from || dateRange.to);
 		// Strict date filter: exclude docs whose temporal window falls outside the query range.
-		// Applies for all intents EXCEPT historical_fact — for that, a 2012 textbook may still
+		// Applies for all intents EXCEPT historical_fact - for that, a 2012 textbook may still
 		// contain authoritative content about the 1990s, so we use coverage SCORING (boost)
 		// rather than hard exclusion. All other intents (current_state, influence_chain, none)
 		// are treated as hard filters when a date range is present.
@@ -463,7 +463,7 @@ export class RetrievalEngine {
 				phrase:   raw,
 				limit:    limit * 2,
 				// Pass date bounds to AQL only in strict mode (current_state).
-				// historical_fact uses date range for scoring only — AQL filter stays open.
+				// historical_fact uses date range for scoring only - AQL filter stays open.
 				dateFrom: strictDateFilter ? (dateRange.from || null) : null,
 				dateTo:   strictDateFilter ? (dateRange.to   || null) : null,
 				strict:   strictDateFilter,
@@ -497,7 +497,7 @@ export class RetrievalEngine {
 		}
 	}
 
-	// ── Phase 2 — SUMO Tag Expansion ─────────────────────────────────────────────
+	// ── Phase 2 - SUMO Tag Expansion ─────────────────────────────────────────────
 
 	async _phase2SUMO(processedQuery, bm25Results, limit) {
 		// Query-derived SUMO tags first; BM25 result tags as supplementary signal
@@ -570,7 +570,7 @@ export class RetrievalEngine {
 		}
 	}
 
-	// ── Phase 3 — Entity Graph Pivot ─────────────────────────────────────────────
+	// ── Phase 3 - Entity Graph Pivot ─────────────────────────────────────────────
 
 	async _phase3EntityPivot(processedQuery, bm25Results, seenIds, limit) {
 		// Gather entity slugs from hints (now {slug,type} objects) + top BM25 result entity_slugs
@@ -600,7 +600,7 @@ export class RetrievalEngine {
 							RETURN { node: para, score: shared / LENGTH(entity_slugs), source: "entity_pivot" }
 			`, { entity_slugs: entitySlugs, seen_ids: [...seenIds], limit });
 
-			// E5: Adamic-Adar boost — if ADAMIC_ADAR edges exist between query entities and
+			// E5: Adamic-Adar boost - if ADAMIC_ADAR edges exist between query entities and
 			// para entities, add AA weight to the paragraph's score
 			const aaEnabled = process.env.OHARA_ADAMIC_ADAR !== 'false';
 			if (aaEnabled && rows.length > 0 && entitySlugs.length > 0) {
@@ -658,7 +658,7 @@ export class RetrievalEngine {
 									RETURN { summary: comm.summary, member_count: comm.member_count, member_entity_slugs: comm.member_entity_slugs }
 					`, { slugs: entitySlugs });
 					if (commRows.length > 0) {
-						// Attach as metadata — consumers can use for synthesis context
+						// Attach as metadata - consumers can use for synthesis context
 						for (const row of rows) {
 							row.community_context = commRows;
 						}
@@ -672,7 +672,7 @@ export class RetrievalEngine {
 		}
 	}
 
-	// ── Phase 1e — ANSWERS_SAME Logical Co-Relevance ────────────────────────────
+	// ── Phase 1e - ANSWERS_SAME Logical Co-Relevance ────────────────────────────
 	// Follows ANSWERS_SAME edges from top BM25 seed paragraphs to find paragraphs
 	// that answer the same pseudo-question, even with zero vocabulary/entity overlap.
 	async _phase1eAnswersSame(bm25Results, seenIds, limit) {
@@ -711,7 +711,7 @@ export class RetrievalEngine {
 		return 'factoid';
 	}
 
-	// ── Phase 1f — Cluster Summary Retrieval (RAPTOR-inspired) ──────────────────
+	// ── Phase 1f - Cluster Summary Retrieval (RAPTOR-inspired) ──────────────────
 	// For synthesis/exploratory queries: find clusters whose summaries match the
 	// query keywords; return cluster summary nodes as synthetic top-level results.
 	async _phase1fCluster(processedQuery, seenIds, limit) {
@@ -742,7 +742,7 @@ export class RetrievalEngine {
 		}
 	}
 
-	// ── Phase 1c — Cross-Document Edge Expansion ─────────────────────────────────
+	// ── Phase 1c - Cross-Document Edge Expansion ─────────────────────────────────
 	// Follows SIMILAR_TO edges from seed documents to find related paragraphs in
 	// other documents. Uses edge.verb/tags for semantic filtering when available.
 
@@ -804,7 +804,7 @@ export class RetrievalEngine {
 		}
 	}
 
-	// ── Phase 1d — Vector Similarity (ANN cosine) ───────────────────────────────
+	// ── Phase 1d - Vector Similarity (ANN cosine) ───────────────────────────────
 
 	async _phase1dVector(processedQuery, limit) {
 		if (process.env.OHARA_VECTOR_WEIGHT === '0') return [];
@@ -839,7 +839,7 @@ export class RetrievalEngine {
 			`, { vec: queryVec, limit });
 			return rows.filter(r => r.score > 0);
 		} catch (_) {
-			return []; // vector index not yet created or no embeddings — degrade gracefully
+			return []; // vector index not yet created or no embeddings - degrade gracefully
 		}
 	}
 
@@ -901,7 +901,7 @@ export class RetrievalEngine {
 		}
 	}
 
-	// ── Phase 4 — Structural Traversal ───────────────────────────────────────────
+	// ── Phase 4 - Structural Traversal ───────────────────────────────────────────
 
 	async _phase4Structural(topNodeId, depth, seenIds) {
 		if (!topNodeId) return [];
@@ -921,7 +921,7 @@ export class RetrievalEngine {
 	// ── Temporal Scoring ────────────────────────────────────────────────────────
 
 	// Coverage overlap score: how well doc's temporal_coverage_start/end spans the query date range.
-	// Returns [0, 1] — 1 = perfect overlap, 0 = no overlap or missing fields.
+	// Returns [0, 1] - 1 = perfect overlap, 0 = no overlap or missing fields.
 	_computeCoverageScore(doc, queryDateRange) {
 		if (!queryDateRange || (!queryDateRange.from && !queryDateRange.to)) return 0;
 
@@ -980,7 +980,7 @@ export class RetrievalEngine {
 		const lambda = rates[decayClass] ?? rates.SCHOLARLY;
 		const publishedDate = doc.published_date || doc.document_published_date || null;
 
-		// T_coverage scoring — applies whenever a date range was extracted from the query,
+		// T_coverage scoring - applies whenever a date range was extracted from the query,
 		// regardless of temporal_intent. A document whose coverage span overlaps the query
 		// window is boosted; one that doesn't may still score via decay.
 		const dateRange = processedQuery.dateRange || {};
@@ -1015,7 +1015,7 @@ export class RetrievalEngine {
 		return temporalWeight * (decayScore + 0.3 * coverageScore);
 	}
 
-	// ── Phase 5 — Score Fusion ───────────────────────────────────────────────────
+	// ── Phase 5 - Score Fusion ───────────────────────────────────────────────────
 
 	_fuseResults(bm25, sumo, entity, crossDoc, struct, weights, vector = [], answersSame = [], cluster = []) {
 		const scoreMap = new Map(); // _id → { node, score, sources, contributions, edge_verb }
@@ -1058,7 +1058,7 @@ export class RetrievalEngine {
 		return [...scoreMap.values()].sort((a, b) => b.score - a.score);
 	}
 
-	// ── Tier Classification — Principal / Integrity / Explorer ──────────────────
+	// ── Tier Classification - Principal / Integrity / Explorer ──────────────────
 	// Principal: compact, corroborated-by-many-angles core answer.
 	// Integrity: Principal + structurally/cross-doc verified entries, with provenance.
 	// Explorer: frontier one hop beyond Integrity, cut off once edge "scent" weakens.
@@ -1080,7 +1080,7 @@ export class RetrievalEngine {
 		const principalScoreFloor = sortedScores.length ? sortedScores[pctlIdx] : 0;
 
 		// Principal: ≥2 phase contributions + top-quartile score.
-		// Cross-doc diversity (docDiversity >= 2) is a bonus qualifier but not required —
+		// Cross-doc diversity (docDiversity >= 2) is a bonus qualifier but not required -
 		// small corpora rarely produce cross-doc hits, yet multi-phase agreement is itself
 		// strong corroboration. Set OHARA_PRINCIPAL_REQUIRE_MULTI_DOC=true to restore strict rule.
 		const requireMultiDoc = process.env.OHARA_PRINCIPAL_REQUIRE_MULTI_DOC === 'true';
@@ -1234,7 +1234,7 @@ export class RetrievalEngine {
 			stoppedReason = frontier.length ? 'weight_below_threshold' : 'no_candidates_in_band';
 		}
 
-		// E6: Knowledge Gap cards — isolated entities surface in Explorer
+		// E6: Knowledge Gap cards - isolated entities surface in Explorer
 		let knowledgeGaps = [];
 		try {
 			const gapEntities = await this.db.executeAQL(`
@@ -1252,7 +1252,7 @@ export class RetrievalEngine {
 			}));
 		} catch (_) {}
 
-		// E8: Unexpected Connection cards — cross-community RELATED_TO edges near principal nodes
+		// E8: Unexpected Connection cards - cross-community RELATED_TO edges near principal nodes
 		let unexpectedConnections = [];
 		try {
 			const principalEntitySlugs = [...new Set(
@@ -1294,7 +1294,7 @@ export class RetrievalEngine {
 	 * Groups fused result nodes by document → section and renders them as Markdown.
 	 * Fetches parent section/document titles from the DB so the caller doesn't need them.
 	 *
-	 * @param {Array<{node, score, sources}>} results  — fused result list from query()
+	 * @param {Array<{node, score, sources}>} results  - fused result list from query()
 	 * @returns {string}  Markdown string
 	 */
 	async formatAsMarkdown(results) {
@@ -1473,7 +1473,7 @@ export class RetrievalEngine {
 		}
 
 		// Corrective RAG: drop structural nodes with zero SUMO overlap when query has hints.
-		// TOC-guided structural nodes are exempt — Gemini already validated their relevance via section summary.
+		// TOC-guided structural nodes are exempt - Gemini already validated their relevance via section summary.
 		const correctiveEnabled = process.env.OHARA_CORRECTIVE_STRUCT !== 'false';
 		const queryHints = processedQuery.sumoHints;
 		if (correctiveEnabled && Array.isArray(queryHints) && queryHints.length > 0) {

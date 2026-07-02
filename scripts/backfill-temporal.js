@@ -2,7 +2,7 @@
 /**
  * Backfill temporal metadata for documents that were ingested before Phase A.
  * Makes one small Gemini call per document using the document's first few paragraphs
- * as context — far cheaper than full re-ingest.
+ * as context - far cheaper than full re-ingest.
  *
  * Usage:
  *   node scripts/backfill-temporal.js          # dry-run (show what would change)
@@ -72,7 +72,7 @@ async function main() {
 	}
 
 	console.log(`Found ${docs.length} document(s) missing temporal metadata.`);
-	if (DRY_RUN) console.log('DRY RUN — pass --write to apply.\n');
+	if (DRY_RUN) console.log('DRY RUN - pass --write to apply.\n');
 
 	for (const doc of docs) {
 		console.log(`\n[${doc.key}] ${doc.title}`);
@@ -90,12 +90,12 @@ async function main() {
 		const excerpt = paras.join('\n\n');
 
 		if (!excerpt) {
-			console.log('  (no paragraph content found — skipping)');
+			console.log('  (no paragraph content found - skipping)');
 			continue;
 		}
 
 		const meta = await extractTemporalMetadata(ai, doc.title || '', excerpt);
-		if (!meta) { console.log('  (extraction failed — skipping)'); continue; }
+		if (!meta) { console.log('  (extraction failed - skipping)'); continue; }
 
 		console.log(`  published_date:    ${meta.published_date}`);
 		console.log(`  decay_class:       ${meta.decay_class}`);

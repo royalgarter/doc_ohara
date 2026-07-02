@@ -75,7 +75,7 @@ async function startServer() {
 	const ingestionQueue = getIngestionQueue();
 	startWorkerLoop(process.env.GEMINI_API_KEY);
 
-	// API: Get database stats — real ArangoDB when ARANGO_URL is set, otherwise simulator
+	// API: Get database stats - real ArangoDB when ARANGO_URL is set, otherwise simulator
 	app.get('/api/database/state', async (req, res) => {
 		try {
 			if (process.env.ARANGO_URL) {
@@ -88,7 +88,7 @@ async function startServer() {
 		}
 	});
 
-	// API: Document list only — cheap, used for the initial page load before any
+	// API: Document list only - cheap, used for the initial page load before any
 	// document is selected (the full graph is no longer fetched eagerly).
 	app.get('/api/documents', async (req, res) => {
 		try {
@@ -142,7 +142,7 @@ async function startServer() {
 	});
 
 	// API: Structural graph (sections/paragraphs/tables) for a set of selected documents.
-	// Entities, SUMO tags, and edges are intentionally NOT included here — those are
+	// Entities, SUMO tags, and edges are intentionally NOT included here - those are
 	// only ever fetched per-node via /api/graph/node/:collection/:key/neighbors, on click.
 	app.get('/api/graph', async (req, res) => {
 		try {
@@ -172,7 +172,7 @@ async function startServer() {
 				]);
 				return res.json({ success: true, source: 'arangodb', sections, paragraphs, tables });
 			}
-			// Simulator is tiny/in-memory — not the perf problem, so it isn't scoped by docKeys.
+			// Simulator is tiny/in-memory - not the perf problem, so it isn't scoped by docKeys.
 			const state = dbSim.getState();
 			res.json({ success: true, source: 'simulator', sections: state.sections, paragraphs: state.paragraphs, tables: state.tables });
 		} catch (err) {
@@ -380,7 +380,7 @@ async function startServer() {
 		}
 	});
 
-	// API: Post-ingest entity resolution — dedup and variant-link entities across all ingested docs
+	// API: Post-ingest entity resolution - dedup and variant-link entities across all ingested docs
 	app.post('/api/pipeline/resolve-entities', async (req, res) => {
 		try {
 			const apiKey = process.env.GEMINI_API_KEY;
@@ -449,7 +449,7 @@ async function startServer() {
 		}
 	});
 
-	// API: Queue / worker status — optionally filtered by ?status=failed|completed|waiting
+	// API: Queue / worker status - optionally filtered by ?status=failed|completed|waiting
 	app.get('/api/queue/jobs', async (req, res) => {
 		try {
 			const { status } = req.query;
@@ -495,7 +495,7 @@ async function startServer() {
 		}
 	});
 
-	// API: Answer synthesis — run retrieval then Gemini-generate a grounded answer with citations
+	// API: Answer synthesis - run retrieval then Gemini-generate a grounded answer with citations
 	app.post('/api/retrieval/answer', async (req, res) => {
 		try {
 			const { query, sessionHistory, cor, agent, reasoningRag, selfRagVerify } = req.body;
@@ -575,7 +575,7 @@ async function startServer() {
 		res.json({ success: true, prompt });
 	});
 
-	// API: Query Analytics — feedback accuracy by rank, top entities, tier summary
+	// API: Query Analytics - feedback accuracy by rank, top entities, tier summary
 	app.get('/api/analytics', async (req, res) => {
 		try {
 			if (!process.env.ARANGO_URL) return res.json({ success: true, source: 'simulator', byRank: [], topEntities: [], summary: {} });

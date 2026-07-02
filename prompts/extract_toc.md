@@ -27,8 +27,8 @@ Extract the skeleton of the document to build a **P-TOC (Positional Table of Con
 ```
 
 ## `toc_source` Values
-- `"explicit"` — there is a literal Table of Contents section present in the document text (e.g., a page or section titled "Contents", "Table of Contents", listing chapters with page numbers).
-- `"implicit"` — no dedicated TOC section was found; the structure is inferred from headings and chapter markers found throughout the document.
+- `"explicit"` - there is a literal Table of Contents section present in the document text (e.g., a page or section titled "Contents", "Table of Contents", listing chapters with page numbers).
+- `"implicit"` - no dedicated TOC section was found; the structure is inferred from headings and chapter markers found throughout the document.
 
 ## Constraints
 - Always output `toc_source` first.

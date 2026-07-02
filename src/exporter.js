@@ -201,7 +201,7 @@ export class QuartzExporter {
 					const snippet = (context || para.content || '').slice(0, 150).replace(/\n/g, ' ');
 					const docSlug = doc ? `documents/${this.slugify(docTitle)}` : '';
 					const secSlug = sec ? `/${this.slugify(secTitle)}` : '';
-					content += `- [[${docSlug}${secSlug}|${docTitle}${secTitle ? ' › ' + secTitle : ''}]] — "${snippet}…"\n`;
+					content += `- [[${docSlug}${secSlug}|${docTitle}${secTitle ? ' › ' + secTitle : ''}]] - "${snippet}…"\n`;
 				}
 			}
 

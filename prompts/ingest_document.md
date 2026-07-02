@@ -10,8 +10,8 @@ Output a **flat, ordered array** of nodes. Every node belongs to one of the thre
 
 ```
 # ── FIELDS COMMON TO ALL NODES ──────────────────────────────────────
-type:    string   # REQUIRED — see type catalogue below
-part:    string   # REQUIRED — front_matter | body_matter | back_matter
+type:    string   # REQUIRED - see type catalogue below
+part:    string   # REQUIRED - front_matter | body_matter | back_matter
 metadata:
   page:  number   # page number if detectable from layout
   level: number   # hierarchy depth (0=Part, 1=Chapter, 2=Section, 3=Subsection…)
@@ -22,12 +22,12 @@ candidate_entities: [           # named entities mentioned in this node
     name:       string          # exact surface form as it appears in text
     canonical:  string          # normalized canonical name, e.g. "BTC" → "Bitcoin"
     type:       string          # one of: PERSON | ORG | LOCATION | DATE | TECH | AMOUNT | EVENT | CONCEPT
-    confidence: number          # 0.0–1.0 — how clearly the text supports this extraction
+    confidence: number          # 0.0–1.0 - how clearly the text supports this extraction
     context:    string          # exact quote from text where this entity appears (≤120 chars)
     aliases:    [string]        # other known surface forms (optional)
   }
 ]
-# Do NOT extract opaque, machine-generated identifiers as entities — cryptographic
+# Do NOT extract opaque, machine-generated identifiers as entities - cryptographic
 # addresses, hashes, UUIDs, transaction/serial IDs, API keys, raw code tokens, etc.
 # These are literal example data, not named entities, regardless of the document's
 # subject matter (applies to any domain, not just crypto/technical content).
@@ -51,11 +51,11 @@ candidate_entities: [           # named entities mentioned in this node
 # Subsection  label?: string
 #             title:  string   # REQUIRED
 #             summary?: string # 1-2 sentences describing what this subsection covers (omit if obvious from title)
-# Paragraph   content: string  # full paragraph text — preserve verbatim, do NOT split by sentence
-#                               # Use Paragraph for list items too — preserve the original list marker
+# Paragraph   content: string  # full paragraph text - preserve verbatim, do NOT split by sentence
+#                               # Use Paragraph for list items too - preserve the original list marker
 #                               # (e.g. "- ", "* ", "1. ") verbatim at the start of content
 # Figure      label?:   string   # e.g. "Figure 3"
-#             caption?: string   # human-readable caption — REQUIRED if any caption text exists
+#             caption?: string   # human-readable caption - REQUIRED if any caption text exists
 #             figure: { description: string, url?: string }
 # Table       label?:   string   # e.g. "Table 2"
 #             caption?: string
@@ -75,24 +75,24 @@ candidate_entities: [           # named entities mentioned in this node
 ## Instructions
 
 1. **Analyze** the layout and hierarchy of the input chunk. If a `HEADING_LEVEL` prefix is present (e.g. `HEADING_LEVEL:2`), treat it as the authoritative `metadata.level` for the leading heading node of this chunk (1=Chapter, 2=Section, 3=Subsection). Nested headings within the chunk should have incrementally deeper levels. If a `PAGE_RANGE:N-M` prefix is present, use `N` as `metadata.page` for the leading node of this chunk unless you can identify a more precise page from the content itself (e.g. from a visible page number in the text).
-2. **Map** every content block to exactly one DoCO type — do not skip sections.
+2. **Map** every content block to exactly one DoCO type - do not skip sections.
 3. **Preserve** raw text verbatim inside `content`; do not paraphrase or summarize.
-3a. **Skip PDF document artifacts** — do NOT emit nodes for any of the following. They are layout noise, not document content:
-   - Standalone journal, conference, or publisher names appearing as isolated lines (e.g. "Journal of Finance & Accounting Research", "Proceedings of ICML 2023") — these are page headers/footers, not sections or paragraphs.
+3a. **Skip PDF document artifacts** - do NOT emit nodes for any of the following. They are layout noise, not document content:
+   - Standalone journal, conference, or publisher names appearing as isolated lines (e.g. "Journal of Finance & Accounting Research", "Proceedings of ICML 2023") - these are page headers/footers, not sections or paragraphs.
    - Page numbers, issue numbers, or volume info appearing alone or merged with a journal name (e.g. "114 Journal of Finance & Accounting Research", "Vol. 12, No. 3").
    - Author footnotes: lines beginning with `*`, `†`, `‡`, or a superscript digit followed by an affiliation or email address (e.g. "* School of Accounting, University of Economics Ho Chi Minh City; email: bqhung@ueh.edu.vn").
-   - Publication timeline metadata: lines matching patterns like "Date of receipt:", "Date of delivery revision:", "Date of approval:", "Received:", "Accepted:", "Published online:" — even if they contain real dates.
+   - Publication timeline metadata: lines matching patterns like "Date of receipt:", "Date of delivery revision:", "Date of approval:", "Received:", "Accepted:", "Published online:" - even if they contain real dates.
    - Figure/table source lines: short lines beginning with "Source:" or "Note:" immediately following a figure or table (e.g. "Source: Synthetized by the author").
    - Repeated document title fragments that appear mid-body due to multi-column PDF layout reflow (e.g. a line that exactly repeats the document title or a portion of it, surrounded by body text).
    - `-----` page-break markers produced by PDF-to-markdown converters.
    If a line is ambiguous, prefer skipping it over creating a spurious node.
-3b. **PDF column-break fragments** — multi-column PDFs sometimes produce paragraph text whose opening clause is missing (split to a different column). If a Paragraph would start mid-sentence (first word lowercase, no list marker, no natural continuation from the preceding node), merge it with the immediately preceding Paragraph node in the same section if they form a coherent whole. Do NOT invent or fabricate missing content.
+3b. **PDF column-break fragments** - multi-column PDFs sometimes produce paragraph text whose opening clause is missing (split to a different column). If a Paragraph would start mid-sentence (first word lowercase, no list marker, no natural continuation from the preceding node), merge it with the immediately preceding Paragraph node in the same section if they form a coherent whole. Do NOT invent or fabricate missing content.
 4. **Respect granularity**:
-   - `Paragraph` uses a flat `content: string` — the full paragraph text as-is. Do NOT split a paragraph into individual sentences. Do NOT create multiple Paragraph nodes for what is one natural paragraph in the source. If the source has several consecutive sentences that form a cohesive paragraph, they belong in ONE Paragraph node. List items also use `Paragraph` — preserve the original list marker (`- `, `* `, `1. `, etc.) verbatim at the start of `content`.
+   - `Paragraph` uses a flat `content: string` - the full paragraph text as-is. Do NOT split a paragraph into individual sentences. Do NOT create multiple Paragraph nodes for what is one natural paragraph in the source. If the source has several consecutive sentences that form a cohesive paragraph, they belong in ONE Paragraph node. List items also use `Paragraph` - preserve the original list marker (`- `, `* `, `1. `, etc.) verbatim at the start of `content`.
    - `Table` must carry a nested `table.content_data` 2-D array, not a flat string. Also output `markdown` as the verbatim markdown table string from the source (e.g. `| Col | Col |\n|---|---|\n| val | val |`).
    - `Figure` must carry a nested `figure` object with a `description` string (not an object within `figure`).
 5. **Assign `part`** to every node: anything before the first chapter is `front_matter`; bibliography, appendixes, glossary, index are `back_matter`; everything else is `body_matter`.
-6. **Populate `sumo_candidate_tags`** per node with short SUMO concept local names. Not full URIs. These are validated against the local SUMO index — **only emit terms that exist in the SUMO ontology**. Prefer established SUMO terms over invented compounds: if no specific SUMO term fits, fall back to the nearest valid abstract parent such as `Procedure`, `Process`, `Proposition`, `Organization`, `Agent`, `Attribute`, `SocialInteraction`, `ContentBearingObject`, `PoliticalProcess`, `FieldOfStudy`, `Investigating`, `Method`, `Report`, `EconomicIndicator`, `EnvironmentalIssue`, `LegalDecision`, `Employment`, `Communication`, `Investment`, `FinancialTransaction`. Do NOT invent compound terms like `ResearchMethod`, `SocialPolicy`, `EnvironmentalPolicy`, `Framework`, or `Sustainability` — these are not in the SUMO index and will be discarded.
+6. **Populate `sumo_candidate_tags`** per node with short SUMO concept local names. Not full URIs. These are validated against the local SUMO index - **only emit terms that exist in the SUMO ontology**. Prefer established SUMO terms over invented compounds: if no specific SUMO term fits, fall back to the nearest valid abstract parent such as `Procedure`, `Process`, `Proposition`, `Organization`, `Agent`, `Attribute`, `SocialInteraction`, `ContentBearingObject`, `PoliticalProcess`, `FieldOfStudy`, `Investigating`, `Method`, `Report`, `EconomicIndicator`, `EnvironmentalIssue`, `LegalDecision`, `Employment`, `Communication`, `Investment`, `FinancialTransaction`. Do NOT invent compound terms like `ResearchMethod`, `SocialPolicy`, `EnvironmentalPolicy`, `Framework`, or `Sustainability` - these are not in the SUMO index and will be discarded.
 6b. **Populate `candidate_entities`** per node with every named entity mentioned in the node's text. Use the canonical name for well-known aliases (e.g. "BTC" → canonical `"Bitcoin"`). Only include entities you are confident about. Valid types: `PERSON`, `ORG`, `LOCATION`, `DATE`, `TECH`, `AMOUNT`, `EVENT`, `CONCEPT`. Omit this field entirely if the node has no named entities. For each entity set `confidence` (0.0–1.0, how clearly the text supports this extraction) and `context` (a short verbatim quote ≤120 chars from the node text where the entity appears).
 7. **Output only** a JSON object `{ "nodes": [...], "temporal": {...} }`. No markdown fences, no commentary.
 8. **Never emit empty nodes**: every Paragraph must have non-empty `content`, every Figure must have a non-empty `caption` or `figure.description`, every Section/Chapter must have a non-empty `title`. Skip any block with no extractable text.
@@ -186,7 +186,7 @@ candidate_entities: [           # named entities mentioned in this node
       "part": "back_matter",
       "references": [
         { "citation_text": "Nakamoto, S. (2008). Bitcoin: A Peer-to-Peer Electronic Cash System.", "url": "https://bitcoin.org/bitcoin.pdf" },
-        { "citation_text": "Back, A. (2002). Hashcash — A Denial of Service Counter-Measure.", "doi": "10.1000/xyz123" }
+        { "citation_text": "Back, A. (2002). Hashcash - A Denial of Service Counter-Measure.", "doi": "10.1000/xyz123" }
       ],
       "metadata": { "page": 280, "level": 0 },
       "sumo_candidate_tags": ["Text"]
@@ -205,11 +205,11 @@ Output a `temporal` object at the top level of your response, alongside `nodes`:
 {
   "nodes": [...],
   "temporal": {
-    "published_date":          string | null,   // "YYYY-MM-DD", "YYYY-MM", or "YYYY" — from title page, byline, or copyright notice. null if absent.
+    "published_date":          string | null,   // "YYYY-MM-DD", "YYYY-MM", or "YYYY" - from title page, byline, or copyright notice. null if absent.
     "temporal_coverage_start": string | null,   // earliest year/date the *content* describes, e.g. "1929" for a paper about the Great Depression
     "temporal_coverage_end":   string | null,   // latest year/date content describes. null if open-ended or same as start
-    "temporal_granularity":    string,          // "day" | "month" | "year" | "decade" | "century" — precision of your date estimates
-    "temporal_confidence":     number,          // 0.0–1.0 — how confident you are in these dates
+    "temporal_granularity":    string,          // "day" | "month" | "year" | "decade" | "century" - precision of your date estimates
+    "temporal_confidence":     number,          // 0.0–1.0 - how confident you are in these dates
     "decay_class":             string           // "EVERGREEN" | "SCHOLARLY" | "CURRENT" | "EPHEMERAL"
                                                 // EVERGREEN: timeless facts, laws, classic literature, mathematics
                                                 // SCHOLARLY: peer-reviewed papers, textbooks, encyclopedias (5–20 year relevance)
@@ -225,17 +225,17 @@ If you cannot determine a value, use `null`. `temporal_granularity` defaults to 
 
 ## Hard Constraints
 
-- Output must start with `{` and end with `}` — pure JSON, no fences. Top-level keys are `nodes` and `temporal`.
+- Output must start with `{` and end with `}` - pure JSON, no fences. Top-level keys are `nodes` and `temporal`.
 - Every node must have `type`, `part`, and `metadata`.
-- `Paragraph` nodes must use a flat `content: string` — **never** a `sentences[]` array. Use `Paragraph` for list items; preserve the original list marker verbatim.
+- `Paragraph` nodes must use a flat `content: string` - **never** a `sentences[]` array. Use `Paragraph` for list items; preserve the original list marker verbatim.
 - `Table` nodes must use `table.content_data` (2-D array), not a flat string. Also include `markdown` (verbatim markdown table string from source) at the top level of the Table node.
 - `Figure` nodes must use a nested `figure` object with `description` as a plain string.
 - `Authors` must use `agents_group` with a typed `agents[]` array.
 - `Bibliography` must list individual `references[]` with at minimum `citation_text`.
-- Never emit a Paragraph with empty `content` — skip it entirely.
+- Never emit a Paragraph with empty `content` - skip it entirely.
 - Never split one source paragraph into multiple Paragraph nodes.
 - Preserve document order in the array.
-- Short SUMO local names only — no full URIs, no SUMO namespace prefixes.
+- Short SUMO local names only - no full URIs, no SUMO namespace prefixes.
 - `candidate_entities` type must be exactly one of: `PERSON`, `ORG`, `LOCATION`, `DATE`, `TECH`, `AMOUNT`, `EVENT`, `CONCEPT`. No other values.
 - `candidate_entities[].canonical` must be the well-known English name, not an abbreviation or symbol.
 - `candidate_entities[].confidence` must be a number 0.0–1.0.

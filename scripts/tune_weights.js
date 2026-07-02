@@ -9,11 +9,11 @@ const APPLY = process.argv.includes('--apply');
 const ENV_PATH = path.resolve(process.cwd(), '.env');
 
 const PHASE_WEIGHTS = {
-	fulltext: 'OHARA_BM25_WEIGHT (fusion weight for BM25 results, default 1.0 — not an env var yet)',
-	sumo: 'OHARA_SUMO_WEIGHT (fusion weight for SUMO expansion, default 0.4 — not an env var yet)',
+	fulltext: 'OHARA_BM25_WEIGHT (fusion weight for BM25 results, default 1.0 - not an env var yet)',
+	sumo: 'OHARA_SUMO_WEIGHT (fusion weight for SUMO expansion, default 0.4 - not an env var yet)',
 	entity: 'OHARA_ENTITY_PIVOT_WEIGHT',
 	crossdoc: 'OHARA_CROSS_DOC_WEIGHT',
-	structural: 'OHARA_STRUCT_WEIGHT (fusion weight for structural traversal, default 0.3 — not an env var yet)',
+	structural: 'OHARA_STRUCT_WEIGHT (fusion weight for structural traversal, default 0.3 - not an env var yet)',
 	temporal: 'OHARA_TEMPORAL_WEIGHT',
 };
 
@@ -49,7 +49,7 @@ const PHASE_WEIGHTS = {
 		}
 
 		// Per-node accuracy: join with retrieval results to get source phases
-		// (requires node_id to carry phase info — stored if passed from UI)
+		// (requires node_id to carry phase info - stored if passed from UI)
 		const positive = rows.filter(r => r.signal === 'positive').length;
 		const negative = rows.filter(r => r.signal === 'negative').length;
 		const overallAcc = (positive / rows.length * 100).toFixed(1);

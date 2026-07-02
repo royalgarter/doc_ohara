@@ -18,7 +18,7 @@
 
 | OHARA capability | LLM Wiki equivalent |
 |---|---|
-| SUMO ontology tagging | None — relies on emergent clusters |
+| SUMO ontology tagging | None - relies on emergent clusters |
 | Temporal scoring / decay classes | None |
 | Structural Document Graph (DoCO) | Markdown files with wiki links |
 | Tier system (Principal / Integrity / Explorer) | None |
@@ -56,8 +56,8 @@ LLM Wiki can reach out to the web (via Tavily/SerpApi) to fill knowledge gaps.
 
 | # | Feature | Effort | Payoff |
 |---|---|---|---|
-| 1 | Graph Insights (Gaps & Surprises) | Medium | High — Drives proactive system behavior and user exploration |
-| 2 | Louvain Community Detection | Medium | High — Enhances visualization and broad semantic navigation |
-| 3 | Advanced Edge Weighting (Adamic-Adar) | Low | Medium — Better ranking accuracy for Phase 1c (Cross-doc) |
-| 4 | Two-Step Ingest | High | Medium — Improves data quality, but increases ingest latency and cost |
-| 5 | Web-Augmented Deep Research | Medium | Medium — Broadens scope, but deviates from "local ground truth" philosophy |
+| 1 | Graph Insights (Gaps & Surprises) | Medium | High - Drives proactive system behavior and user exploration |
+| 2 | Louvain Community Detection | Medium | High - Enhances visualization and broad semantic navigation |
+| 3 | Advanced Edge Weighting (Adamic-Adar) | Low | Medium - Better ranking accuracy for Phase 1c (Cross-doc) |
+| 4 | Two-Step Ingest | High | Medium - Improves data quality, but increases ingest latency and cost |
+| 5 | Web-Augmented Deep Research | Medium | Medium - Broadens scope, but deviates from "local ground truth" philosophy |

@@ -2,8 +2,8 @@
  * Seed SUMO ontology hierarchy into ArangoDB.
  *
  * Creates:
- *   sumo_concepts  — vertex per SUMO class (4500+ nodes)
- *   edges          — SUB_CLASS_OF edges (child → parent)
+ *   sumo_concepts  - vertex per SUMO class (4500+ nodes)
+ *   edges          - SUB_CLASS_OF edges (child → parent)
  *
  * Safe to re-run: upserts everything.
  */

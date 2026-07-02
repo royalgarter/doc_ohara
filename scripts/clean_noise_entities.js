@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Removes opaque-identifier noise entities (hashes, UUIDs, addresses, etc. that
- * LLM extraction mistook for named entities — see src/entities.js isOpaqueToken)
+ * LLM extraction mistook for named entities - see src/entities.js isOpaqueToken)
  * from already-ingested data: the entities collection, MENTIONS/RELATED_TO edges,
  * and the entity_slugs rollup arrays on paragraphs and documents.
  *
@@ -26,7 +26,7 @@ async function run() {
 		return;
 	}
 
-	console.log(`Found ${noise.length} noise entity/entities${dryRun ? ' (dry run — no changes will be made)' : ''}:`);
+	console.log(`Found ${noise.length} noise entity/entities${dryRun ? ' (dry run - no changes will be made)' : ''}:`);
 	for (const e of noise) console.log(`  ${e._key}  "${e.name || e.canonical}"  (${e.type})`);
 
 	if (dryRun) return;

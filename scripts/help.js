@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Doc Ohara — CLI reference. Run: npm run help
+// Doc Ohara - CLI reference. Run: npm run help
 
 const RESET  = '\x1b[0m';
 const BOLD   = '\x1b[1m';
@@ -79,12 +79,12 @@ const sections = [
 	{
 		title: 'Graph enrichment  (run after ingest to build edge types)',
 		cmds: [
-			['npm run enrich:pseudo-queries',                             'E4 ANSWERS_SAME — Gemini generates pseudo-questions per paragraph; paragraphs sharing a question get edges'],
-			['npm run enrich:adamic-adar',                                'E5 ADAMIC_ADAR  — entity pairs sharing ≥2 RELATED_TO neighbors get structural co-citation weight edges'],
-			['npm run enrich:knowledge-gaps',                             'E6 isolation    — flags entities (degree<2) and docs (indegree=0) with isolated=true'],
-			['npm run enrich:clusters',                                   'E7 CLUSTER_MEMBER — k-means++ on paragraph embeddings; Gemini summary per cluster (requires embeddings)'],
-			['npm run enrich:communities',                                'E8 COMMUNITY_MEMBER — Louvain on entity graph; Gemini summary per community; flags cross-community edges'],
-			['npm run enrich:all',                                        'Run E4+E5+E6+E8 in sequence (skips E7 — requires embeddings)'],
+			['npm run enrich:pseudo-queries',                             'E4 ANSWERS_SAME - Gemini generates pseudo-questions per paragraph; paragraphs sharing a question get edges'],
+			['npm run enrich:adamic-adar',                                'E5 ADAMIC_ADAR  - entity pairs sharing ≥2 RELATED_TO neighbors get structural co-citation weight edges'],
+			['npm run enrich:knowledge-gaps',                             'E6 isolation    - flags entities (degree<2) and docs (indegree=0) with isolated=true'],
+			['npm run enrich:clusters',                                   'E7 CLUSTER_MEMBER - k-means++ on paragraph embeddings; Gemini summary per cluster (requires embeddings)'],
+			['npm run enrich:communities',                                'E8 COMMUNITY_MEMBER - Louvain on entity graph; Gemini summary per community; flags cross-community edges'],
+			['npm run enrich:all',                                        'Run E4+E5+E6+E8 in sequence (skips E7 - requires embeddings)'],
 		],
 	},
 	{
@@ -151,7 +151,7 @@ const sections = [
 const PAD = 52;
 
 console.log();
-console.log(b(`  Doc Ohara — Command Reference`));
+console.log(b(`  Doc Ohara - Command Reference`));
 console.log(d(`  Space-Time Graph · ArangoDB · Gemini · BM25 + SUMO + Entity + Vector`));
 console.log();
 

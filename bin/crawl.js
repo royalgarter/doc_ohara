@@ -69,8 +69,8 @@ async function processOne({ url, currentDepth }) {
 	try {
 		({ html, via } = await fetchHtml(browser, url, timeout));
 	} catch (err) {
-		// Log and skip — never let one URL crash the crawl
-		console.error(`  SKIP [${currentDepth}] ${url} — ${err.message}`);
+		// Log and skip - never let one URL crash the crawl
+		console.error(`  SKIP [${currentDepth}] ${url} - ${err.message}`);
 		return;
 	}
 

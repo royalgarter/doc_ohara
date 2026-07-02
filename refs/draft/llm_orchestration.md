@@ -1,6 +1,6 @@
 # LLM Role: The Semantic Orchestrator
 
-In the Doc Ohara pipeline, the LLM is not just a summarizer—it is a **Structural Architect**. It bridges the gap between raw text strings and the complex **OKF/DoCO** graph schema.
+In the Doc Ohara pipeline, the LLM is not just a summarizer-it is a **Structural Architect**. It bridges the gap between raw text strings and the complex **OKF/DoCO** graph schema.
 
 ---
 

@@ -26,7 +26,7 @@ Vietnam has committed to achieving net-zero carbon emissions by 2050 under its N
 
 ### Social Factors
 
-Vietnam's demographic dividend—with over 60% of the population below age 35—presents both opportunities and challenges for social governance. Key social ESG metrics include:
+Vietnam's demographic dividend-with over 60% of the population below age 35-presents both opportunities and challenges for social governance. Key social ESG metrics include:
 
 - Labor rights compliance under the 2019 Labor Code
 - Gender diversity on corporate boards (currently averaging 18% female representation)
@@ -75,7 +75,7 @@ The European Union's Carbon Border Adjustment Mechanism (CBAM), effective 2026, 
 
 ### Opportunities in Renewable Energy
 
-Vietnam's renewable energy sector presents significant ESG investment opportunities. The country's solar capacity has expanded from 86 MW in 2018 to over 21 GW in 2023—one of the fastest buildouts in Southeast Asia. Wind energy capacity reached 4.8 GW, with additional offshore wind projects under development in Binh Thuan and Ba Ria-Vung Tau provinces.
+Vietnam's renewable energy sector presents significant ESG investment opportunities. The country's solar capacity has expanded from 86 MW in 2018 to over 21 GW in 2023-one of the fastest buildouts in Southeast Asia. Wind energy capacity reached 4.8 GW, with additional offshore wind projects under development in Binh Thuan and Ba Ria-Vung Tau provinces.
 
 The Just Energy Transition Partnership (JETP) committed USD 15.5 billion in 2022 to support Vietnam's transition away from coal power, coordinated through the Ministry of Industry and Trade (MOIT) and Development Finance Institutions including ADB, IFC, and AIIB.
 

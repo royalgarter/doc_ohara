@@ -43,7 +43,7 @@ async function main() {
 	}
 
 	console.log(`Found ${similarEdges.length} SIMILAR_TO edge(s) with temporal ordering.`);
-	if (DRY_RUN) console.log('DRY RUN — pass --write to apply.\n');
+	if (DRY_RUN) console.log('DRY RUN - pass --write to apply.\n');
 
 	// Fetch all published_dates once
 	const docCursor = await db.query(`

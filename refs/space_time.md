@@ -38,7 +38,7 @@
   ⎿  /plan to preview
   ⎿  User rejected Claude's plan:
      ╭─────────────────────────────────────────────────────────────────────────╮
-     │ Time Dimension in Doc Ohara — Expert Panel Design                       │
+     │ Time Dimension in Doc Ohara - Expert Panel Design                       │
      │                                                                         │
      │ Context                                                                 │
      │                                                                         │
@@ -48,7 +48,7 @@
      │ NEXT_SIBLING)                                                           │
      │ - Semantic plane: entities, SUMO tags, SIMILAR_TO cross-doc edges       │
      │                                                                         │
-     │ Time is missing. Only upload_time exists on documents — there is no     │
+     │ Time is missing. Only upload_time exists on documents - there is no     │
      │ published date, no covered-period range, no temporal decay in scoring.  │
      │ This panel designs the Time axis end-to-end.                            │
      │                                                                         │
@@ -60,20 +60,20 @@
      │ Panel Discussion                                                        │
      │                                                                         │
      │ ▎ Moderator: The user proposes stacking 2D semantic planes on a         │
-     │ ▎ timeline axis — each document is a slice, and time governs both where │
+     │ ▎ timeline axis - each document is a slice, and time governs both where │
      │ ▎ it sits and how much influence it exerts. Let's hear from three       │
      │ ▎ domains.                                                              │
      │                                                                         │
      │ ---                                                                     │
      │ 🗄️ Dr. Archive (Library Science / Information Science)                  │
      │                                                                         │
-     │ On document temporality — two distinct time axes exist, not one:        │
+     │ On document temporality - two distinct time axes exist, not one:        │
      │                                                                         │
      │ Documents carry two independent timestamps that must not be conflated:  │
      │                                                                         │
-     │ 1. T_creation — when the document was produced (publication date,       │
+     │ 1. T_creation - when the document was produced (publication date,       │
      │ commit date, broadcast date)                                            │
-     │ 2. T_coverage — what period the content describes (a 2024 paper about   │
+     │ 2. T_coverage - what period the content describes (a 2024 paper about   │
      │ the 1929 crash covers 1929–1933, not 2024)                              │
      │                                                                         │
      │ For retrieval these behave oppositely. A user asking "what happened in  │
@@ -84,7 +84,7 @@
      │ Proposed fields on documents collection:                                │
      │ published_date:          ISO date string (nullable)                     │
      │ temporal_coverage_start: ISO date string (nullable)                     │
-     │ temporal_coverage_end:   ISO date string (nullable — open if ongoing)   │
+     │ temporal_coverage_end:   ISO date string (nullable - open if ongoing)   │
      │ temporal_granularity:    'day' | 'month' | 'year' | 'decade' |          │
      │ 'century'                                                               │
      │                                                                         │
@@ -101,13 +101,13 @@
      │   "temporal_confidence": 0.85                                           │
      │ }                                                                       │
      │                                                                         │
-     │ This is cheap — one extra JSON key in an already-running LLM call, no   │
+     │ This is cheap - one extra JSON key in an already-running LLM call, no   │
      │ extra API cost.                                                         │
      │                                                                         │
      │ ---                                                                     │
      │ 📊 Dr. Signal (Data Science / Information Retrieval)                    │
      │                                                                         │
-     │ On decay functions — not one curve, a taxonomy of decay classes:        │
+     │ On decay functions - not one curve, a taxonomy of decay classes:        │
      │                                                                         │
      │ The user's intuition is correct: different document types degrade       │
      │ differently. I propose a decay taxonomy with four classes:              │
@@ -178,19 +178,19 @@
      │ extracted), score documents by T_coverage overlap:                      │
      │ coverage_score = overlap(query_date_range, doc.temporal_coverage) /     │
      │ query_range_length                                                      │
-     │ This is additive with decay score, not multiplicative — a 1929 document │
+     │ This is additive with decay score, not multiplicative - a 1929 document │
      │ about 1929 should score high even if it's old.                          │
      │                                                                         │
      │ ---                                                                     │
      │ 🧠 Dr. Logos (Philosophy of Knowledge / Epistemology)                   │
      │                                                                         │
-     │ On what "influence" actually means across time — three distinct         │
+     │ On what "influence" actually means across time - three distinct         │
      │ phenomena:                                                              │
      │                                                                         │
      │ The user says documents should "degrade influence along the timeline."  │
      │ But which kind of influence? I distinguish three:                       │
      │                                                                         │
-     │ 1. Epistemic authority — how much we trust this document's claims as    │
+     │ 1. Epistemic authority - how much we trust this document's claims as    │
      │ currently true.                                                         │
      │ - A 1990 paper on HIV treatment has low epistemic authority today       │
      │ (medicine advanced).                                                    │
@@ -199,14 +199,14 @@
      │ - Governed by: decay_class + domain tag (SUMO tags like Medicine decay  │
      │ faster than Mathematics).                                               │
      │                                                                         │
-     │ 2. Historical evidence weight — how much this document proves something │
+     │ 2. Historical evidence weight - how much this document proves something │
      │ happened.                                                               │
      │ - A 1929 newspaper article is more authoritative about 1929 than a 2024 │
      │ retrospective.                                                          │
      │ - Governed by: T_coverage alignment. Decay should reverse for           │
-     │ T_coverage queries — older primary sources gain authority.              │
+     │ T_coverage queries - older primary sources gain authority.              │
      │                                                                         │
-     │ 3. Citation influence — how much this document shaped subsequent        │
+     │ 3. Citation influence - how much this document shaped subsequent        │
      │ documents.                                                              │
      │ - Not currently modeled in Doc Ohara but could be: SIMILAR_TO edge      │
      │ density could proxy citation network.                                   │
@@ -232,7 +232,7 @@
      │ ---                                                                     │
      │ Panel Consensus: Implementation Roadmap                                 │
      │                                                                         │
-     │ Phase A — Temporal Metadata (Schema)                                    │
+     │ Phase A - Temporal Metadata (Schema)                                    │
      │                                                                         │
      │ New fields on documents collection:                                     │
      │ published_date:          String | null   // "YYYY-MM-DD"                │
@@ -246,12 +246,12 @@
      │ decay_rate_override:     Number | null   // manual λ override           │
      │                                                                         │
      │ Files to change:                                                        │
-     │ - prompts/ingest_document.md — add temporal extraction instructions     │
-     │ - src/ingest/pipeline.js — read temporal fields from LLM response,      │
+     │ - prompts/ingest_document.md - add temporal extraction instructions     │
+     │ - src/ingest/pipeline.js - read temporal fields from LLM response,      │
      │ persist to document node                                                │
-     │ - scripts/db-init.js — add ArangoDB persistent index on published_date  │
+     │ - scripts/db-init.js - add ArangoDB persistent index on published_date  │
      │                                                                         │
-     │ Phase B — Temporal Scoring (Retrieval)                                  │
+     │ Phase B - Temporal Scoring (Retrieval)                                  │
      │                                                                         │
      │ New env vars:                                                           │
      │ OHARA_TEMPORAL_WEIGHT          = 0.3    # additive weight in score      │
@@ -263,12 +263,12 @@
      │ OHARA_DECAY_RATE_EPHEMERAL     = 0.1                                    │
      │                                                                         │
      │ Files to change:                                                        │
-     │ - src/retrieval.js — add _computeTemporalScore(node, queryIntent),      │
+     │ - src/retrieval.js - add _computeTemporalScore(node, queryIntent),      │
      │ inject into _fuseResults                                                │
-     │ - prompts/extract_query_fingerprint.md — add temporal_intent field      │
+     │ - prompts/extract_query_fingerprint.md - add temporal_intent field      │
      │ extraction                                                              │
      │                                                                         │
-     │ Phase C — Timeline Axis (Graph)                                         │
+     │ Phase C - Timeline Axis (Graph)                                         │
      │                                                                         │
      │ New edge type: PRECEDES                                                 │
      │ document_A → PRECEDES → document_B                                      │
@@ -281,12 +281,12 @@
      │ earlier/later treatments of the same topic.                             │
      │                                                                         │
      │ Files to change:                                                        │
-     │ - src/ingest/pipeline.js — after SIMILAR_TO creation, also create       │
+     │ - src/ingest/pipeline.js - after SIMILAR_TO creation, also create       │
      │ PRECEDES where date ordering holds                                      │
-     │ - src/retrieval.js — Phase 1c option to follow PRECEDES instead of / in │
+     │ - src/retrieval.js - Phase 1c option to follow PRECEDES instead of / in │
      │ addition to SIMILAR_TO                                                  │
      │                                                                         │
-     │ Phase D — Decay Class Auto-Assignment                                   │
+     │ Phase D - Decay Class Auto-Assignment                                   │
      │                                                                         │
      │ LLM assigns decay_class from document signals. Fallback heuristic if    │
      │ LLM omits it:                                                           │
@@ -313,7 +313,7 @@
      │ Verification                                                            │
      │                                                                         │
      │ After implementation:                                                   │
-     │ 1. Ingest two documents on same topic — one news article (2024), one    │
+     │ 1. Ingest two documents on same topic - one news article (2024), one    │
      │ textbook chapter (1995)                                                 │
      │ 2. Query: "current best practices" → news article should rank higher    │
      │ (CURRENT beats SCHOLARLY on recency)                                    │

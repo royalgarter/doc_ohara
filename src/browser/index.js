@@ -48,7 +48,7 @@ function withTimeout(promise, ms, label) {
 
 export async function connectBrowser() {
 	if (!process.env.CLOAK_CDP) {
-		throw new Error('CLOAK_CDP not set — run: ohara env set CLOAK_CDP <url>');
+		throw new Error('CLOAK_CDP not set - run: ohara env set CLOAK_CDP <url>');
 	}
 	return puppeteer.connect({
 		browserWSEndpoint: process.env.CLOAK_CDP.replace(/^http/, 'ws'),
@@ -57,7 +57,7 @@ export async function connectBrowser() {
 
 /**
  * Open a new page, navigate to url, capture content, then close the page.
- * Guarantees page.close() even on crash/timeout. Throws on failure — caller decides.
+ * Guarantees page.close() even on crash/timeout. Throws on failure - caller decides.
  */
 export async function capturePage(browser, url, type = 'html', timeout = 30000) {
 	let page;
@@ -78,14 +78,14 @@ export async function capturePage(browser, url, type = 'html', timeout = 30000) 
 		}
 	} finally {
 		if (page) {
-			try { await page.close(); } catch { /* already closed/crashed — ignore */ }
+			try { await page.close(); } catch { /* already closed/crashed - ignore */ }
 		}
 	}
 }
 
 /**
  * Smart HTML fetch: plain HTTP first → validate → fall back to browser CDP.
- * Never throws due to browser crash — logs and re-throws as Error with context.
+ * Never throws due to browser crash - logs and re-throws as Error with context.
  */
 export async function fetchHtml(browser, url, timeout = 30000) {
 	// --- 1. Plain fetch ---

@@ -41,7 +41,7 @@
 		.cl-bg-acc:hover { background-color: #1a6ea0; }
 
 		/* Text */
-		.cl-t0 { color: #002b36; }  /* brightest — titles, selected */
+		.cl-t0 { color: #002b36; }  /* brightest - titles, selected */
 		.cl-t1 { color: #657b83; }  /* primary text */
 		.cl-t2 { color: #268bd2; }  /* accent / secondary highlight */
 		.cl-t3 { color: #586e75; }  /* section headers, labels */
@@ -89,7 +89,7 @@
 		.cl-input { background-color: #fdf6e3; border-color: #93a1a1; color: #657b83; }
 		.cl-input:focus { outline: none; border-color: #268bd2; }
 
-		/* Job status card backgrounds — solid, no opacity */
+		/* Job status card backgrounds - solid, no opacity */
 		.cl-job-failed    { background-color: #fce8e8; border-color: #dc322f; }
 		.cl-job-waiting   { background-color: #fcf4e0; border-color: #b58900; }
 		.cl-job-active    { background-color: #e8f0fc; border-color: #268bd2; }
@@ -104,7 +104,7 @@
 		/* SUMO tag chip */
 		.cl-tag { background-color: #eef5e8; border-color: #859900; color: #586e75; }
 
-		/* litewind overrides — remap gray/sky classes to Solarized Light */
+		/* litewind overrides - remap gray/sky classes to Solarized Light */
 		.bg-gray-950 { background-color: #fdf6e3; }
 		.bg-sky-700  { background-color: #268bd2; }
 		.bg-sky-900  { background-color: #eee8d5; }
@@ -366,7 +366,7 @@
 										</div>
 									</div>
 									<div class="cl-t1 text-base leading-relaxed line-clamp-3"
-										x-text="r.node.content || r.node.title || '—'"></div>
+										x-text="r.node.content || r.node.title || '-'"></div>
 									<div class="flex flex-wrap gap-1 mt-1.5">
 										<template x-for="tag in (r.node.sumo_tags || []).slice(0, 4)" :key="tag">
 											<span class="cl-tag text-sm px-1 py-0.5 rounded border" x-text="tag"></span>
@@ -401,7 +401,7 @@
 										</div>
 									</div>
 									<div class="cl-t1 text-base leading-relaxed line-clamp-3"
-										x-text="r.node.content || r.node.title || '—'"></div>
+										x-text="r.node.content || r.node.title || '-'"></div>
 									<div class="flex flex-wrap gap-1 mt-1.5">
 										<template x-for="p in (r.provenance || []).slice(0, 3)" :key="p.phase">
 											<span class="text-xs px-1 py-0.5 rounded border border-amber-900 text-amber-600" x-text="p.phase"></span>
@@ -413,7 +413,7 @@
 								</div>
 							</template>
 							<div x-show="!(queryResults.tiers && queryResults.tiers.principal && queryResults.tiers.principal.length)"
-								class="text-xs cl-t5 text-center py-6">No principal results — query may be too broad or corpus too small</div>
+								class="text-xs cl-t5 text-center py-6">No principal results - query may be too broad or corpus too small</div>
 						</div>
 					</template>
 					<!-- INTEGRITY tab -->
@@ -431,7 +431,7 @@
 										</div>
 									</div>
 									<div class="cl-t1 text-base leading-relaxed line-clamp-3"
-										x-text="r.node.content || r.node.title || '—'"></div>
+										x-text="r.node.content || r.node.title || '-'"></div>
 									<div x-show="r.edge_summary" class="text-xs cl-t4 mt-1 italic line-clamp-2" x-text="r.edge_summary"></div>
 									<div class="flex flex-wrap gap-1 mt-1.5">
 										<template x-for="tag in (r.node.sumo_tags || []).slice(0, 3)" :key="tag">
@@ -447,7 +447,7 @@
 					<!-- EXPLORER tab -->
 					<template x-if="queryResults && resultTab === 'explorer'">
 						<div class="flex flex-col gap-2">
-							<div class="text-xs cl-t4 px-1">Frontier candidates — follow-up directions, not final answers</div>
+							<div class="text-xs cl-t4 px-1">Frontier candidates - follow-up directions, not final answers</div>
 							<template x-for="(f, i) in (queryResults.tiers && queryResults.tiers.explorer && queryResults.tiers.explorer.frontier || [])" :key="i">
 								<div class="text-xs p-2 rounded border transition"
 									style="background-color:#0e0e1f; border-color:#3a3a6a;">
@@ -584,7 +584,7 @@
 
 			<!-- DOCS tab -->
 			<div x-show="tab === 'docs'" x-init="if(tab==='docs') loadDocs()" class="flex flex-col h-full overflow-hidden p-3 gap-3">
-				<div class="text-sm font-bold cl-t3 uppercase tracking-widest">Documents — Ingest Health</div>
+				<div class="text-sm font-bold cl-t3 uppercase tracking-widest">Documents - Ingest Health</div>
 				<!-- Health summary banner -->
 				<div x-show="docsHealth" class="rounded border cl-b0 cl-bg-1 px-2 py-1.5 text-xs flex gap-3 flex-wrap cl-t4">
 					<span>docs: <span class="cl-t1 font-medium" x-text="docsHealth && docsHealth.total || 0"></span></span>
@@ -607,15 +607,15 @@
 								<div class="cl-t1 font-medium truncate" x-text="d.title || d._key"></div>
 								<span x-show="d.temporal_needs_review"
 									class="flex-shrink-0 text-xs px-1 py-0.5 rounded border border-amber-700 text-amber-500"
-									title="Temporal metadata auto-extracted — review recommended">⚑ review</span>
+									title="Temporal metadata auto-extracted - review recommended">⚑ review</span>
 							</div>
 							<div class="cl-t4 flex gap-4 flex-wrap">
 								<span x-show="d.ingestion_status && d.ingestion_status !== 'complete'"
 									class="text-amber-500" x-text="d.ingestion_status"></span>
 								<span x-show="d.entity_count != null">entities: <span class="cl-t2" x-text="d.entity_count"></span></span>
 								<span x-show="d.total_chunks != null">chunks: <span class="cl-t2" x-text="(d.completed_chunks || 0) + '/' + d.total_chunks"></span></span>
-								<span>decay: <span class="cl-t2" x-text="d.decay_class || '—'"></span></span>
-								<span>confidence: <span class="cl-t2" x-text="d.temporal_confidence != null ? d.temporal_confidence.toFixed(2) : '—'"></span></span>
+								<span>decay: <span class="cl-t2" x-text="d.decay_class || '-'"></span></span>
+								<span>confidence: <span class="cl-t2" x-text="d.temporal_confidence != null ? d.temporal_confidence.toFixed(2) : '-'"></span></span>
 							</div>
 							<!-- published_date inline edit -->
 							<div class="flex items-center gap-2">
@@ -660,7 +660,7 @@
 					<span>paragraphs: <span class="cl-t1" x-text="analyticsData && analyticsData.summary && analyticsData.summary.total_paragraphs || 0"></span></span>
 					<span>entities: <span class="cl-t1" x-text="analyticsData && analyticsData.summary && analyticsData.summary.total_entities || 0"></span></span>
 				</div>
-				<!-- Feedback accuracy by rank — inline SVG bar chart -->
+				<!-- Feedback accuracy by rank - inline SVG bar chart -->
 				<div x-show="analyticsData && analyticsData.byRank && analyticsData.byRank.length">
 					<div class="text-xs cl-t4 font-medium mb-1">Feedback accuracy by rank</div>
 					<div class="space-y-1">
@@ -672,7 +672,7 @@
 										:style="'width:' + (r.total ? Math.round(r.positive / r.total * 100) : 0) + '%'"></div>
 								</div>
 								<span class="cl-t4 w-12 flex-shrink-0"
-									x-text="r.total ? Math.round(r.positive / r.total * 100) + '% (' + r.total + ')' : '—'"></span>
+									x-text="r.total ? Math.round(r.positive / r.total * 100) + '% (' + r.total + ')' : '-'"></span>
 							</div>
 						</template>
 					</div>
@@ -785,7 +785,7 @@
 						<div class="text-xs text-green-400 font-semibold"
 							x-text="selectedNode && ('#' + selectedNode.title)"></div>
 						<div class="text-base cl-t3"
-							x-text="selectedNode && selectedNode._tagCount + ' paragraph(s) tagged — full path highlighted in graph'"></div>
+							x-text="selectedNode && selectedNode._tagCount + ' paragraph(s) tagged - full path highlighted in graph'"></div>
 					</div>
 					<div x-show="selectedNode && selectedNode._id && selectedNode._id.startsWith('entities/')"
 						class="flex flex-col gap-1">
@@ -829,7 +829,7 @@
 					<div class="text-base text-yellow-600 italic"
 						x-show="selectedNode && selectedNode._id && selectedNode._id.startsWith('paragraphs/') && expandedNodes.has(selectedNode._id) && selectedNode.content === ''">[EMPTY CONTENT]</div>
 					<div class="text-base cl-t5 italic"
-						x-show="selectedNode && !selectedNode._id?.startsWith('tags/') && !selectedNode._id?.startsWith('sections/') && !selectedNode._id?.startsWith('entities/') && !selectedNode.content && !selectedNode.title && !(selectedNode._id?.startsWith('paragraphs/') && expandedNodes.has(selectedNode._id))">—</div>
+						x-show="selectedNode && !selectedNode._id?.startsWith('tags/') && !selectedNode._id?.startsWith('sections/') && !selectedNode._id?.startsWith('entities/') && !selectedNode.content && !selectedNode.title && !(selectedNode._id?.startsWith('paragraphs/') && expandedNodes.has(selectedNode._id))">-</div>
 				</div>
 
 				<!-- SUMO tags -->
@@ -944,7 +944,7 @@
 
 			// Initial page-load fetch: documents list only. The full graph (sections/
 			// paragraphs/tables) loads per-document on selection; entities/SUMO tags/
-			// edges load per-node on click — see loadDocGraph() and expandNode().
+			// edges load per-node on click - see loadDocGraph() and expandNode().
 			async loadDocuments() {
 				this.graphLoading = true;
 				try {
@@ -964,7 +964,7 @@
 
 			// Fetches the structural graph (sections/paragraphs/tables) for the current
 			// selectedDocKeys. Empty selection just clears everything back to the
-			// "select a document" empty-state — no fetch.
+			// "select a document" empty-state - no fetch.
 			async loadDocGraph() {
 				this.expandedNodes = new Set();
 				if (this.selectedDocKeys.size === 0) {
@@ -986,7 +986,7 @@
 						this.graphData.sections   = d.sections   || [];
 						this.graphData.paragraphs = d.paragraphs || [];
 						this.graphData.tables     = d.tables     || [];
-						// Entities/edges only ever come from expandNode (per-node, on click) —
+						// Entities/edges only ever come from expandNode (per-node, on click) -
 						// drop whatever was attributed to docs no longer in the selection.
 						this.graphData.entities = this.graphData.entities.filter(
 							e => (e.document_ids || []).some(id => this.selectedDocKeys.has(id)));
@@ -1014,7 +1014,7 @@
 			async expandNode(node) {
 				const nodeId = node._id || (node.id ? node.id : null);
 				if (!nodeId || this.expandedNodes.has(nodeId)) return;
-				// SUMO tags are virtual nodes built client-side — they have no DB record.
+				// SUMO tags are virtual nodes built client-side - they have no DB record.
 				// Skip the neighbors fetch; highlighting is handled purely by renderGraph.
 				if (nodeId.startsWith('tags/')) return;
 				this.expandedNodes.add(nodeId);
@@ -1148,7 +1148,7 @@
 			},
 
 			async highlightResultNode(node) {
-				// Query results can reference a doc that hasn't been selected/loaded yet —
+				// Query results can reference a doc that hasn't been selected/loaded yet -
 				// pull it in first so the node actually exists in graphData to highlight.
 				const docId = node.document_id;
 				if (docId && !this.selectedDocKeys.has(docId)) {
@@ -1399,7 +1399,7 @@
 		if (id.startsWith('tags/'))       return 'tag';
 		if (id.startsWith('sections/'))   return 'section_L' + (node.level || 1);
 
-		// legacy / simulator nodes — use type/node_type
+		// legacy / simulator nodes - use type/node_type
 		const nt = (node.node_type || node.type || '').toLowerCase();
 		if (nt === 'chapter')    return 'section_L1';
 		if (nt === 'subsection') return 'section_L3';
@@ -1476,7 +1476,7 @@
 		return (d.getFullYear() - 2010) * 60;
 	}
 
-	// SUMO category palette — loaded once from /ontology/sumo_tag_categories.json
+	// SUMO category palette - loaded once from /ontology/sumo_tag_categories.json
 	let _sumoCategories = null; // { categories: string[], map: {tag: category} }
 
 	async function _loadSumoCategories() {
@@ -1788,7 +1788,7 @@
 			const dk = d._key || d.id;
 			const { cx, cy, cz } = docCenter.get(dk);
 			docDiscZ.set(dk, cz);
-			// Sections/paragraphs/tables don't carry decay_class in graph API response —
+			// Sections/paragraphs/tables don't carry decay_class in graph API response -
 			// inherit from parent document so fins are visible on all disc nodes.
 			const docDecay = _dc(d);
 
@@ -1830,7 +1830,7 @@
 			return h >>> 0;
 		}
 
-		// Entities — comet shell outside tunnel
+		// Entities - comet shell outside tunnel
 		const SHELL_MIN = maxDiscR + 80, SHELL_MAX = maxDiscR + 320;
 		entities.forEach((e) => {
 			const h = _sh(e._key || e.id || '');
@@ -1843,7 +1843,7 @@
 			});
 		});
 
-		// Tags (virtual top-25) — comet shell, slightly further out
+		// Tags (virtual top-25) - comet shell, slightly further out
 		tagNodes.forEach((t) => {
 			const h = _sh('tag:' + t.title);
 			const theta = (h & 0x7fff) / 0x7fff * 2 * Math.PI;
@@ -1980,8 +1980,8 @@
 		// Width = node.r * 2.5 (spans tangentially), height = decay-class Z extent.
 		// zH = fin extent along tunnel (Z) axis; longer decay class = longer temporal reach
 		const DECAY_FIN = {
-		EVERGREEN: { hex: '#268bd2', op: 0.16, zH: Z_SPACING * 5   },  // timeless — spans 5 discs
-		SCHOLARLY: { hex: '#586e75', op: 0.14, zH: Z_SPACING * 2.5 },  // long-lived — 2.5 discs
+		EVERGREEN: { hex: '#268bd2', op: 0.16, zH: Z_SPACING * 5   },  // timeless - spans 5 discs
+		SCHOLARLY: { hex: '#586e75', op: 0.14, zH: Z_SPACING * 2.5 },  // long-lived - 2.5 discs
 		CURRENT:   { hex: '#657b83', op: 0.12, zH: Z_SPACING * 1   },  // one disc span
 		EPHEMERAL: { hex: '#93a1a1', op: 0.10, zH: Z_SPACING * 0.4 },  // short reach
 		};
@@ -2041,7 +2041,7 @@
 			scene.add(new THREE.LineSegments(rgeo, new THREE.LineBasicMaterial({ vertexColors: true, transparent: true, opacity: 0.45 })));
 		});
 
-		// a2) Transparent disc planes (clickable — shows all edges for that doc)
+		// a2) Transparent disc planes (clickable - shows all edges for that doc)
 		G3D.discPlanes = [];
 		sortedDocs.forEach((d, di) => {
 			const dk         = d._key || d.id;
@@ -2329,7 +2329,7 @@
 		step();
 	}
 
-	function pulseDocumentNodes() { /* no-op in 3D — selection highlights handled by renderGraph */ }
+	function pulseDocumentNodes() { /* no-op in 3D - selection highlights handled by renderGraph */ }
 
 	</script>
 </body>

@@ -44,13 +44,13 @@ describe('LLM models', () => {
 	}
 
 	for (const model of GEMINI_MODELS) {
-		test(`${model} — plain text`, async () => {
+		test(`${model} - plain text`, async () => {
 			const text = await callViaGemini(model, PROMPT);
 			assert.ok(text.length > 0, 'should return non-empty text');
 			console.log(`  [gemini:${model}] plain text → "${text.slice(0, 80)}"`);
 		});
 
-		test(`${model} — JSON mode`, async () => {
+		test(`${model} - JSON mode`, async () => {
 			const text = await callViaGemini(model, JSON_PROMPT, { responseMimeType: 'application/json' });
 			const parsed = JSON.parse(text);
 			assert.ok(typeof parsed === 'object', 'should return valid JSON object');
@@ -59,14 +59,14 @@ describe('LLM models', () => {
 	}
 
 	for (const model of CF_WORKERS_MODELS) {
-		test(`${model} — plain text`, async () => {
+		test(`${model} - plain text`, async () => {
 			const text = await callViaCFWorkers(model, PROMPT);
 			assert.ok(text.length > 0, `should return non-empty text, got: "${text}"`);
 			console.log(`  [cf-workers:${model}] plain text → "${text.slice(0, 80)}"`);
 		});
 	}
 
-	test('callLLM (gemini provider) — default model', async () => {
+	test('callLLM (gemini provider) - default model', async () => {
 		const saved = process.env.LLM_PROVIDER;
 		process.env.LLM_PROVIDER = 'gemini';
 		try {
@@ -80,7 +80,7 @@ describe('LLM models', () => {
 		}
 	});
 
-	test('callLLM (cloudflare provider) — through gateway', async () => {
+	test('callLLM (cloudflare provider) - through gateway', async () => {
 		const saved = process.env.LLM_PROVIDER;
 		process.env.LLM_PROVIDER = 'cloudflare';
 		try {
@@ -94,7 +94,7 @@ describe('LLM models', () => {
 		}
 	});
 
-	test('callLLM (cf-workers provider) — direct Workers AI', async () => {
+	test('callLLM (cf-workers provider) - direct Workers AI', async () => {
 		const saved = process.env.LLM_PROVIDER;
 		process.env.LLM_PROVIDER = 'cf-workers';
 		try {

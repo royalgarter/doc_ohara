@@ -33,7 +33,7 @@ async function main() {
 	const paras = await cursor.all();
 
 	console.log(`Found ${paras.length} paragraph(s) missing embeddings.`);
-	if (DRY_RUN) { console.log('DRY RUN — pass --write to apply.'); return; }
+	if (DRY_RUN) { console.log('DRY RUN - pass --write to apply.'); return; }
 
 	let done = 0;
 	for (let i = 0; i < paras.length; i += BATCH) {

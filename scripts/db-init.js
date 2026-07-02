@@ -7,7 +7,7 @@ process?.loadEnvFile?.();
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-// Credentials and infra keys — never stored in the config collection.
+// Credentials and infra keys - never stored in the config collection.
 const SKIP_KEYS = new Set([
 	'ARANGO_URL', 'ARANGO_USER', 'ARANGO_PASSWORD',
 	'GEMINI_API_KEY', 'APP_URL', 'PORT',
@@ -52,13 +52,13 @@ function parseEnvExample(filePath) {
 		}
 
 		// Vector index on paragraphs.embedding for ANN cosine similarity (ArangoDB 3.12+ Enterprise).
-		// Requires at least one paragraph with an embedding field — run backfill_embeddings.js first.
+		// Requires at least one paragraph with an embedding field - run backfill_embeddings.js first.
 		try {
 			const embCount = await db.query(
 				'RETURN LENGTH(FOR p IN paragraphs FILTER p.embedding != null LIMIT 1 RETURN 1)'
 			).then(c => c.next());
 			if (!embCount) {
-				console.warn('Vector index skipped — no paragraphs have embedding field yet. Run: node scripts/backfill_embeddings.js');
+				console.warn('Vector index skipped - no paragraphs have embedding field yet. Run: node scripts/backfill_embeddings.js');
 			} else {
 				const parasCol = db.collection('paragraphs');
 				await parasCol.ensureIndex({
@@ -76,7 +76,7 @@ function parseEnvExample(filePath) {
 
 		// ── Config collection seeding ─────────────────────────────────────────────
 		// Upsert default values from .env.example into the `config` collection.
-		// Only inserts if the key does not already exist — never overwrites user edits.
+		// Only inserts if the key does not already exist - never overwrites user edits.
 		const envExamplePath = path.resolve(__dirname, '../.env.example');
 		const defaults = parseEnvExample(envExamplePath);
 		const configCol = db.collection('config');
@@ -93,7 +93,7 @@ function parseEnvExample(filePath) {
 				console.log(`  config: inserted ${key}=${value}`);
 			}
 		}
-		console.log(`Config seeding done — ${inserted} inserted, ${skipped} already present (${defaults.size} total keys).`);
+		console.log(`Config seeding done - ${inserted} inserted, ${skipped} already present (${defaults.size} total keys).`);
 
 	} catch (e) {
 		console.error('init failed:', e.message);
