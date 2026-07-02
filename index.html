@@ -1985,35 +1985,28 @@
 		CURRENT:   { hex: '#657b83', op: 0.12, zH: Z_SPACING * 1   },  // one disc span
 		EPHEMERAL: { hex: '#93a1a1', op: 0.10, zH: Z_SPACING * 0.4 },  // short reach
 		};
-		// Base fin geometry: hollow ellipse ring (RingGeometry in XY, instanced matrix
-		// rotates and scales into an ellipsoid aura around each document disc).
-		// innerR/outerR define ring thickness; non-uniform scale.x/y makes it elliptical.
-		const FIN_INNER = 0.78; // 78% hollow — thin ring wall
-		const finBaseGeo = new THREE.RingGeometry(FIN_INNER, 1, 64);
+		// Decay aura: unit sphere stretched along tunnel Z axis → hollow transparent ellipsoid.
+		// scale(discR, discR, zH/2) hugs disc radius in XY and extends zH along timeline Z.
+		const finBaseGeo = new THREE.SphereGeometry(1, 32, 16);
 		const finDummy = new THREE.Object3D();
 		G3D.auraPoints = {};
 		for (const [cls, cfg] of Object.entries(DECAY_FIN)) {
-			// Aura applies to document disc only — one fin per document, not per section/paragraph node
+			// One ellipsoid per document disc
 			const clsEntries = entries.filter(e => e.colKey === 'document' && e.decayClass === cls);
 			if (!clsEntries.length) continue;
 			const finMat = new THREE.MeshBasicMaterial({
-				color: new THREE.Color(cfg.hex), transparent: true, opacity: cfg.op * 1.6,
-				side: THREE.DoubleSide, depthWrite: false,
+				color: new THREE.Color(cfg.hex), transparent: true, opacity: cfg.op,
+				side: THREE.FrontSide, depthWrite: false,
 			});
 			const finMesh = new THREE.InstancedMesh(finBaseGeo, finMat, clsEntries.length);
 			finMesh.frustumCulled = false;
 			const finCol3 = new THREE.Color();
 			clsEntries.forEach((e, i) => {
 				const dk = e.node.document_id || (e.colKey === 'document' ? (e.node._key || e.node.id) : null);
-				const dc = dk ? docCenter.get(dk) : null;
-				const cx = dc?.cx ?? 0, cy = dc?.cy ?? 0;
-				const radAngle = Math.atan2(e.y - cy, e.x - cx);
 				finDummy.position.set(e.x, e.y, e.z);
-				// rotation.x = -90° tilts ring into XZ plane (standing up along tunnel axis)
-				finDummy.rotation.set(-Math.PI / 2, radAngle, 0);
-				// scale.x = disc diameter (horizontal), scale.y = Z extent (depth along tunnel)
+				finDummy.rotation.set(0, 0, 0);
 				const discR = dk ? (docDiscR.get(dk) ?? maxDiscR) : e.r;
-				finDummy.scale.set(discR * 2, cfg.zH, 1);
+				finDummy.scale.set(discR, discR, cfg.zH / 2);
 				finDummy.updateMatrix();
 				finMesh.setMatrixAt(i, finDummy.matrix);
 				const nodeHex = colorMode === 'doc' && dk && docColorMap.get(dk);
@@ -2023,7 +2016,7 @@
 			finMesh.instanceMatrix.needsUpdate = true;
 			if (finMesh.instanceColor) finMesh.instanceColor.needsUpdate = true;
 			scene.add(finMesh);
-			G3D.auraPoints[cls] = { mat: finMat, baseOp: cfg.op * 1.6 };
+			G3D.auraPoints[cls] = { mat: finMat, baseOp: cfg.op };
 		}
 
 		// ── Tunnel visual elements ────────────────────────────────────────────────
