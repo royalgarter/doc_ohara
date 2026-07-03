@@ -20,3 +20,8 @@ coverage/
 /.data
 /doc_pipeline
 /eval/eval_report_*.json
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
