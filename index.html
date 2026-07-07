@@ -135,13 +135,13 @@
 		.text-red-400\/80    { color: #dc322f; }
 	</style>
 </head>
-<body x-data="app()" x-init="init()" x-cloak
+<body x-data="app()" x-init="init()" x-cloak @patch-doc.window="patchDoc($event.detail.key, $event.detail.patch)"
 	class="cl-bg-0 cl-t1 h-screen flex flex-col overflow-hidden">
 
 	<!-- ── Header ─────────────────────────────────────────────────────────────── -->
 	<header class="flex items-center gap-5 px-4 h-10 cl-bg-1 border-b cl-b0 flex-shrink-0 select-none">
 		<div class="flex items-center gap-2">
-			<div class="w-2 h-2 rounded-full cl-bg-acc dot-glow" style="background:#268bd2"></div>
+			<div class="w-2 h-2 rounded-full cl-bg-acc dot-glow"></div>
 			<span class="text-xs font-bold cl-t2 tracking-widest">DOC OHARA</span>
 		</div>
 		<div class="flex gap-4 text-xs cl-t3">
@@ -181,7 +181,7 @@
 				<button @click="tab = t.id; if(t.id==='jobs') loadJobs(); if(t.id==='analytics') loadAnalytics()" :title="t.label"
 					:class="tab === t.id ? 'cl-tab-on' : 'cl-tab-off'"
 					class="relative w-7 h-7 flex items-center justify-center rounded text-sm transition">
-					<span x-text="t.icon" class="cursor-pointer" @click="docsOpen = !docsOpen"></span>
+					<span x-text="t.icon"></span>
 					<span x-show="t.id === 'jobs' && jobStats.failed > 0"
 						class="absolute top-0.5 right-0.5 w-1.5 h-1.5 rounded-full bg-red-500 pointer-events-none"></span>
 				</button>
@@ -290,7 +290,7 @@
 				<div class="flex gap-1.5">
 					<input x-model="queryInput" @keydown.enter="runQuery()"
 						placeholder="Search the graph…"
-						:class="sessionHistory.length ? 'border-amber-700' : ''"
+						:class="sessionHistory.length ? 'cl-b2' : ''"
 						class="cl-input flex-1 text-xs rounded px-2.5 py-1.5 border" />
 					<button @click="runQuery()" :disabled="queryLoading"
 						class="cl-btn text-xs px-2.5 py-1.5 rounded transition flex-shrink-0">→</button>
@@ -420,8 +420,7 @@
 						<div class="flex flex-col gap-2">
 							<template x-for="(r, i) in (queryResults.tiers && queryResults.tiers.integrity || [])" :key="i">
 								<div @click="highlightResultNode(r.node)"
-									class="text-xs p-2 rounded border cursor-pointer transition"
-									style="background-color:#0e1f14; border-color:#2d6a4a;">
+									class="text-xs p-2 rounded border cursor-pointer transition cl-job-completed">
 									<div class="flex justify-between items-center mb-1">
 										<span class="text-emerald-500 text-sm font-bold">✓ Verified</span>
 										<div class="flex items-center gap-2">
@@ -448,8 +447,7 @@
 						<div class="flex flex-col gap-2">
 							<div class="text-xs cl-t4 px-1">Frontier candidates - follow-up directions, not final answers</div>
 							<template x-for="(f, i) in (queryResults.tiers && queryResults.tiers.explorer && queryResults.tiers.explorer.frontier || [])" :key="i">
-								<div class="text-xs p-2 rounded border transition"
-									style="background-color:#0e0e1f; border-color:#3a3a6a;">
+								<div class="text-xs p-2 rounded border transition cl-card">
 									<div class="flex justify-between items-center mb-1">
 										<span class="text-purple-400 text-sm font-bold">◎ Frontier</span>
 										<span class="text-xs cl-t4" x-text="Math.round((f.score || 0) * 100) + '%'"></span>
@@ -600,7 +598,8 @@
 				</div>
 				<div class="flex-1 overflow-y-auto space-y-2" x-show="docsAdminList.length > 0">
 					<template x-for="d in docsAdminList" :key="d._key">
-						<div class="rounded border p-2 space-y-1 cl-bg-1 text-xs"
+						<div x-data="{ pubVal: d.published_date || '', decayVal: d.effective_decay_class || d.decay_class || 'SCHOLARLY', saved: false }"
+							class="rounded border p-2 space-y-1 cl-bg-1 text-xs"
 							:class="d.temporal_needs_review ? 'border-amber-800' : 'cl-b0'">
 							<div class="flex items-center justify-between gap-1">
 								<div class="cl-t1 font-medium truncate" x-text="d.title || d._key"></div>
@@ -619,25 +618,24 @@
 							<!-- published_date inline edit -->
 							<div class="flex items-center gap-2">
 								<span class="cl-t4">published:</span>
-								<input :id="'pub-'+d._key" type="text" :value="d.published_date || ''"
+								<input x-model="pubVal" type="text"
 									placeholder="YYYY-MM-DD or YYYY"
 									class="cl-input rounded px-1 py-0.5 text-xs border flex-1" />
-								<button @click="patchDoc(d._key, { published_date: document.getElementById('pub-'+d._key).value || null })"
+								<button @click="$dispatch('patch-doc', { key: d._key, patch: { published_date: pubVal || null } }); saved = true; setTimeout(() => saved = false, 2000)"
 									class="cl-btn-gh text-xs px-2 py-0.5 rounded border transition">✓</button>
 							</div>
 							<!-- decay class select -->
 							<div class="flex items-center gap-2">
 								<span class="cl-t4">effective decay:</span>
-								<select :id="'decay-'+d._key"
-									class="cl-input rounded px-1 py-0.5 text-xs border flex-1"
-									:value="d.effective_decay_class || d.decay_class || 'SCHOLARLY'">
+								<select x-model="decayVal"
+									class="cl-input rounded px-1 py-0.5 text-xs border flex-1">
 									<option>EVERGREEN</option><option>SCHOLARLY</option>
 									<option>CURRENT</option><option>EPHEMERAL</option>
 								</select>
-								<button @click="patchDoc(d._key, { effective_decay_class: document.getElementById('decay-'+d._key).value, temporal_needs_review: false })"
+								<button @click="$dispatch('patch-doc', { key: d._key, patch: { effective_decay_class: decayVal, temporal_needs_review: false } }); saved = true; setTimeout(() => saved = false, 2000)"
 									class="cl-btn-gh text-xs px-2 py-0.5 rounded border transition">✓</button>
 							</div>
-							<span :id="'doc-status-'+d._key" class="text-green-400 text-xs hidden">Saved ✓</span>
+							<span x-show="saved" class="text-green-400 text-xs">Saved ✓</span>
 						</div>
 					</template>
 				</div>
@@ -1278,7 +1276,7 @@
 						// Keep last 6 turns (3 Q&A pairs = OHARA_SESSION_HISTORY_LIMIT=3)
 						if (this.sessionHistory.length > 6) this.sessionHistory = this.sessionHistory.slice(-6);
 					}
-				} catch(e) {}
+				} catch(e) { console.error('runQuery:', e); }
 				this.queryLoading = false;
 			},
 
@@ -1548,31 +1546,28 @@
 		return _sumoCategories.map[tags[0]] || null;
 	}
 
-	// X lane position for a category — uses L2 subgroup index (15 lanes, Abstract left / Physical right).
-	const LANE_SPACING = 420;
-	function _catLaneX(cat) {
-		if (!_sumoCategories || !_sumoCategories.l2_order || !_sumoCategories.cat_groups) return 0;
-		const l2 = (_sumoCategories.cat_groups[cat] || {}).L2;
-		if (!l2) return 0;
-		const idx = _sumoCategories.l2_order.indexOf(l2);
-		if (idx < 0) return 0;
-		const mid = (_sumoCategories.l2_order.length - 1) / 2;
-		return (idx - mid) * LANE_SPACING;
+	// ── Sunburst polar layout ────────────────────────────────────────────────
+	// XY plane encodes ontology position: angle θ = category's sunburst slice
+	// midpoint (precomputed in cat_layout by scripts/build_sunburst_layout.js,
+	// siblings guaranteed angularly adjacent), radius = sqrt-scaled ontology
+	// depth (center = abstract root, rim = specific). Docs of one category form
+	// a fixed "topic column" along Z (time).
+	const POLAR_R_MAX = 700;
+	const POLAR_MAX_DEPTH = 5;
+	function _catPolarXY(cat) {
+		if (!_sumoCategories || !_sumoCategories.cat_layout) return { lx: 0, ly: 0 };
+		const slice = _sumoCategories.cat_layout[cat];
+		if (!slice) return { lx: 0, ly: 0 };
+		const depth = (_sumoCategories.cat_depth || {})[cat] ?? 2;
+		const r = POLAR_R_MAX * Math.sqrt(depth / POLAR_MAX_DEPTH);
+		return { lx: r * Math.cos(slice.theta), ly: r * Math.sin(slice.theta) };
 	}
 
-	// Y depth position for a category (ontology depth, shallow=bottom, deep=top).
-	const DEPTH_SPACING = 300;
-	function _catDepthY(cat) {
-		if (!_sumoCategories || !_sumoCategories.cat_depth) return 0;
-		const depth = _sumoCategories.cat_depth[cat] ?? 2;
-		return (depth - 1) * DEPTH_SPACING;
-	}
-
-	// Resolve doc → (laneX, depthY) from its top SUMO category.
+	// Resolve doc → (x, y) from its top SUMO category.
 	function _docLaneXY(doc) {
 		const cat = _docCategory(doc);
 		if (!cat) return { lx: 0, ly: 0 };
-		return { lx: _catLaneX(cat), ly: _catDepthY(cat) };
+		return _catPolarXY(cat);
 	}
 
 	function _titleColor(title) {
@@ -1651,12 +1646,13 @@
 		controls.maxDistance = 9000;
 		controls.update();
 
-		// Update Alpine graphZoom display on camera move
+		// Update Alpine graphZoom display on camera move — cache comp ref to avoid per-frame DOM query
+		let _alpineComp = null;
 		controls.addEventListener('change', () => {
 			try {
+				if (!_alpineComp) _alpineComp = Alpine.$data(document.querySelector('[x-data]'));
 				const dist = camera.position.distanceTo(controls.target);
-				const comp = Alpine.$data(document.querySelector('[x-data]'));
-				if (comp) comp.graphZoom = Math.round(G3D.ZOOM_BASE / dist * 10) / 10;
+				if (_alpineComp) _alpineComp.graphZoom = Math.round(G3D.ZOOM_BASE / dist * 10) / 10;
 			} catch(_) {}
 		});
 
@@ -2188,36 +2184,50 @@
 			G3D.discPlanes.push(planeMesh);
 		});
 
-		// b) Category lane ghost axes — one vertical line per L2 subgroup at its X lane, spanning full Z.
-		// Y position is fixed at depth=2 (the L2 level itself) for the spine line.
-		if (_sumoCategories && _sumoCategories.l2_order) {
-			const laneLinePts = [], laneCols = [];
-			// Determine L1 membership of each L2 group from any category in that group
-			const l2ToL1 = {};
-			Object.entries(_sumoCategories.cat_groups || {}).forEach(([cat, g]) => { l2ToL1[g.L2] = g.L1; });
+		// b) Sunburst polar guides — reference disc at tunnel front + topic-column
+		// spines along Z for L2 categories. Angle = ontology slice, radius = depth.
+		if (_sumoCategories && _sumoCategories.cat_layout) {
 			const L1_COLS = { Abstract: new THREE.Color('#2d6a9f'), Physical: new THREE.Color('#7a3d8c'), Unknown: new THREE.Color('#5a4530') };
-			const mid = (_sumoCategories.l2_order.length - 1) / 2;
-			_sumoCategories.l2_order.forEach((l2, i) => {
-				const lx = (i - mid) * LANE_SPACING;
-				const L1 = l2ToL1[l2] || 'Unknown';
+			const guideZ = -80;
+
+			// Depth rings on the front reference plane (one circle per ontology depth)
+			const ringPts = [];
+			for (let depth = 1; depth <= POLAR_MAX_DEPTH; depth++) {
+				const r = POLAR_R_MAX * Math.sqrt(depth / POLAR_MAX_DEPTH);
+				const SEG = 96;
+				for (let i = 0; i < SEG; i++) {
+					const a0 = (i / SEG) * 2 * Math.PI, a1 = ((i + 1) / SEG) * 2 * Math.PI;
+					ringPts.push(r * Math.cos(a0), r * Math.sin(a0), guideZ,
+					             r * Math.cos(a1), r * Math.sin(a1), guideZ);
+				}
+			}
+			const rgeo = new THREE.BufferGeometry();
+			rgeo.setAttribute('position', new THREE.Float32BufferAttribute(ringPts, 3));
+			scene.add(new THREE.LineSegments(rgeo, new THREE.LineBasicMaterial({ color: 0x39424e, transparent: true, opacity: 0.35 })));
+
+			// Topic-column spines + labels at L2-level categories (depth ≤ 2)
+			const spinePts = [], spineCols = [];
+			Object.entries(_sumoCategories.cat_layout).forEach(([cat, slice]) => {
+				const depth = (_sumoCategories.cat_depth || {})[cat] ?? 2;
+				if (depth > 2) return;
+				const { lx, ly } = _catPolarXY(cat);
+				const L1 = ((_sumoCategories.cat_groups || {})[cat] || {}).L1 || 'Unknown';
 				const c  = L1_COLS[L1] || L1_COLS.Unknown;
-				// Vertical spine at this lane X, Y=0 (base of depth axis)
-				laneLinePts.push(lx, 0, -80,  lx, 0, totalZ + 80);
-				laneCols.push(c.r * 0.4, c.g * 0.4, c.b * 0.4,  c.r * 0.4, c.g * 0.4, c.b * 0.4);
-				// Label at front face
+				spinePts.push(lx, ly, guideZ,  lx, ly, totalZ + 80);
+				spineCols.push(c.r * 0.4, c.g * 0.4, c.b * 0.4,  c.r * 0.4, c.g * 0.4, c.b * 0.4);
 				const el = document.createElement('div');
-				el.dataset.lk = '__lane__' + l2;
+				el.dataset.lk = '__lane__' + cat;
 				el.style.cssText = 'position:absolute;font:8px ui-monospace,monospace;pointer-events:none;white-space:nowrap;opacity:0.75;';
 				el.style.color = L1 === 'Abstract' ? '#4a6fa0' : '#7a5090';
-				el.textContent = l2;
+				el.textContent = cat;
 				labelContainer.appendChild(el);
 				G3D.labelEls.push(el);
-				nodePos.set('__lane__' + l2, { x: lx, y: -20, z: -80, r: 0, node: null, colKey: '_label' });
+				nodePos.set('__lane__' + cat, { x: lx, y: ly, z: guideZ, r: 0, node: null, colKey: '_label' });
 			});
-			if (laneLinePts.length) {
+			if (spinePts.length) {
 				const lgeo = new THREE.BufferGeometry();
-				lgeo.setAttribute('position', new THREE.Float32BufferAttribute(laneLinePts, 3));
-				lgeo.setAttribute('color',    new THREE.Float32BufferAttribute(laneCols, 3));
+				lgeo.setAttribute('position', new THREE.Float32BufferAttribute(spinePts, 3));
+				lgeo.setAttribute('color',    new THREE.Float32BufferAttribute(spineCols, 3));
 				scene.add(new THREE.LineSegments(lgeo, new THREE.LineBasicMaterial({ vertexColors: true, transparent: true, opacity: 0.3 })));
 			}
 		}

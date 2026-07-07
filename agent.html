@@ -50,14 +50,18 @@
 	<script>
 		const params = new URLSearchParams(location.search);
 
+		function _esc(s) {
+			return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+		}
+
 		async function refreshJobs() {
 			const res = await fetch('/api/queue/jobs');
 			const data = await res.json();
 			const last10 = data.jobs.slice(-10).reverse();
 			document.getElementById('jobsView').innerHTML = last10.map(j => `
 				<div class="row">
-					<span class="tag ${j.status}">${j.status}</span>
-					${j.data.filename} - ${j.progressMessage || ''} (${j.progress}%)
+					<span class="tag ${_esc(j.status)}">${_esc(j.status)}</span>
+					${_esc(j.data.filename)} - ${_esc(j.progressMessage)} (${_esc(j.progress)}%)
 				</div>
 			`).join('') || '<em>No jobs yet.</em>';
 		}
