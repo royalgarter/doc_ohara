@@ -37,6 +37,7 @@
     "admin:repair-stats": "node --env-file=.env scripts/admin-queries.js repair-stats",
     "admin:missing-temporal": "node --env-file=.env scripts/admin-queries.js missing-temporal",
     "admin:decay-distribution": "node --env-file=.env scripts/admin-queries.js decay-distribution",
+    "admin:layout": "node scripts/build_sunburst_layout.js",
     "enrich:pseudo-queries": "node --env-file=.env scripts/build_pseudo_query_edges.js",
     "enrich:adamic-adar": "node --env-file=.env scripts/build_adamic_adar_edges.js",
     "enrich:knowledge-gaps": "node --env-file=.env scripts/find_knowledge_gaps.js",
