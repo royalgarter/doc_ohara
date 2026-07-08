@@ -103,7 +103,8 @@ flowchart TD
     PRE --> DEDUP
 
     DEDUP{"② Dedup\nSHA-256 hash\nalready ingested?"}
-    DEDUP -- "yes (no --force)" --> SKIP["⏭ Skip"]
+    DEDUP -- "yes, fully ingested\n(no --force)" --> SKIP["⏭ Skip"]
+DEDUP -- "yes, partial\n(no --force)" --> PENDING["♻ Auto-retry\nllm_pending chunks"]
     DEDUP -- "no / --force" --> PARSE
 
     PARSE["③ Parse\nLiteParse → Markdown\n.md files pass through directly"]
@@ -141,9 +142,9 @@ flowchart TD
 ### Stages (`src/ingest/ingest.js`)
 
 1. **Preflight** - validates `GEMINI_API_KEY`, `ARANGO_URL`, and the `lit` CLI (LiteParse).
-2. **Dedup** - SHA-256 hashes the file; skips if already ingested (override with `--force`).
+2. **Dedup** - SHA-256 hashes the file; skips if already fully ingested (override with `--force`). If the document was previously **partially ingested** (some chunks failed), re-running without `--force` automatically retries the `llm_pending` chunks — no flag needed.
 3. **Parsing** - LiteParse converts PDF/EPUB/DOCX to Markdown; plain `.md` files pass through directly.
-4. **LLM structuring** - Gemini (`gemini-2.5-flash-lite`, Flex Inference) maps Markdown chunks to DoCO nodes (`Chapter`, `Section`, `Paragraph`, `Table`, `Figure`, `Authors`, `Bibliography`, …). Responses are cached by content hash. Parallel batches (default 4, `OHARA_INGEST_CONCURRENCY`).
+4. **LLM structuring** - Gemini (`gemini-2.5-flash-lite`) maps Markdown chunks to DoCO nodes (`Chapter`, `Section`, `Paragraph`, `Table`, `Figure`, `Authors`, `Bibliography`, …). Responses are cached by content hash. Parallel batches (default 5, `OHARA_INGEST_CONCURRENCY`). First attempt uses **Flex Inference** tier; on failure retries once on **Standard** tier for higher availability. Failed chunks whose content cannot be structured are stored as raw `llm_pending` Paragraphs preserving original text — no content is lost.
 5. **SUMO tag validation** - resolves `sumo_candidate_tags` against the SUMO ontology index (22,700 entries). Three-stage resolution: exact match → case/separator-insensitive → alias table. Duplicates collapsed. Invalid tags logged and dropped.
 6. **Entity extraction** - validates `candidate_entities` from the LLM. Supported types: `PERSON`, `ORG`, `LOCATION`, `DATE`, `TECH`, `AMOUNT`, `EVENT`, `CONCEPT`. Canonical deduplication within each node.
 7. **Collection transform** - normalizes nodes into `documents`, `sections`, `paragraphs`, `tables`. Artifact filter removes separator lines, TOC noise, and very short nodes. Fragment reattachment merges orphaned short paragraphs.

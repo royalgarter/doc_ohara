@@ -13,9 +13,9 @@ import { processNodeEntities, normalizeEntity } from '../entities.js';
 import { runEntityDedup } from './entity_dedup.js';
 import { PseudoTOCGenerator, GeminiTocLLMClient, GeminiEmbeddingClient } from '../toc.js';
 import { extractHtmlTitle, htmlToMarkdown } from '../helper.js';
-import { callLLM, createGeminiCache, callLLMWithCache, onTokenUsage, clearTokenUsageHandler } from '../llm.js';
+import { callLLM, createGeminiCache, callLLMWithCache, callLLMCFGateway, onTokenUsage, clearTokenUsageHandler } from '../llm.js';
 
-const GEMINI_MODEL = process.env.LLM_MODEL || 'gemini-2.5-flash-lite';
+const GEMINI_MODEL = () => process.env.LLM_MODEL || 'gemini-2.5-flash';
 
 // Global log tracking for the active pipeline run
 let currentLogs = [];
@@ -305,7 +305,7 @@ Document text content:
 ${content}
 `;
 
-	const parsedText = (await callLLM(prompt, { model: GEMINI_MODEL, cache: false, serviceTier: 'flex' })) || '{}';
+	const parsedText = (await callLLM(prompt, { model: GEMINI_MODEL(), cache: false, serviceTier: 'flex' })) || '{}';
 	const cleanJson = parsedText.replace(/^```json/gi, '').replace(/^```/gi, '').replace(/```$/gi, '').trim();
 	return JSON.parse(cleanJson);
 }
@@ -325,7 +325,8 @@ function attemptLiteParse(sourcePath, outMdPath) {
 // Remove \X escape sequences that are invalid in JSON (markdown escapes like \*, \_, \[, \(, etc.).
 // Valid JSON escapes are: \" \\ \/ \b \f \n \r \t \uXXXX - everything else is illegal.
 function sanitizeJsonEscapes(s) {
-	return s.replace(/\\([^"\\\/bfnrtu\n\r])/g, (_, ch) => ch);
+	// Double-escape invalid JSON escapes (e.g. LaTeX \mathbb → \\mathbb) instead of stripping.
+	return s.replace(/\\([^"\\\/bfnrtu0-9\n\r])/g, (_, ch) => `\\\\${ch}`);
 }
 
 // Helper: attempt to extract a JSON object from noisy LLM text outputs.
@@ -370,7 +371,7 @@ async function generateFromMarkdown(ai, mdContent, filename) {
 	try {
 		const promptTemplate = fs.readFileSync(path.join('prompts', 'ingest_document.md'), 'utf-8');
 		const prompt = `${promptTemplate}\n\nDOCUMENT_MARKDOWN:\n\n${mdContent}`;
-		const parsedText = (await callLLM(prompt, { model: GEMINI_MODEL, cache: false, serviceTier: 'flex' })) || '{}';
+		const parsedText = (await callLLM(prompt, { model: GEMINI_MODEL(), cache: false, serviceTier: 'flex' })) || '{}';
 		const cleanJson = parsedText.replace(/^```json/gi, '').replace(/^```/gi, '').replace(/```$/gi, '').trim();
 		return safeParseJsonFromText(cleanJson);
 	} catch (err) {
@@ -585,11 +586,11 @@ async function detectTocWithLLM(ai, firstChunks) {
 		const combinedText = firstChunks.map(c => c.text).join('\n\n');
 		const prompt = `${extractTocPrompt}\n\nDOCUMENT_CHUNK:\n${combinedText}`;
 		const credFp = credFingerprint();
-		const key = cacheKeyFor([extractTocPrompt, combinedText, GEMINI_MODEL, credFp]);
+		const key = cacheKeyFor([extractTocPrompt, combinedText, GEMINI_MODEL(), credFp]);
 
 		let parsed = readCacheSync(key);
 		if (!parsed) {
-			const raw = ((await callLLM(prompt, { model: GEMINI_MODEL, cache: false, serviceTier: 'flex' })) ?? '').trim().replace(/^```json/i, '').replace(/^```/, '').replace(/```$/, '').trim();
+			const raw = ((await callLLM(prompt, { model: GEMINI_MODEL(), cache: false, serviceTier: 'flex' })) ?? '').trim().replace(/^```json/i, '').replace(/^```/, '').replace(/```$/, '').trim();
 			try { parsed = JSON.parse(raw); } catch { return null; }
 			writeCache(key, parsed);
 		}
@@ -619,12 +620,12 @@ async function enrichCrossDocEdge(ai, docA, docB, snippetsA, snippetsB, sharedEn
 			shared_entities: sharedEntities.slice(0, 10),
 		});
 
-		const key = cacheKeyFor([enrichPrompt, inputPayload, GEMINI_MODEL, credFp]);
+		const key = cacheKeyFor([enrichPrompt, inputPayload, GEMINI_MODEL(), credFp]);
 		let parsed = readCacheSync(key);
 
 		if (!parsed) {
 			const prompt = `${enrichPrompt}\n\nINPUT:\n${inputPayload}`;
-			const raw = ((await callLLM(prompt, { model: GEMINI_MODEL, cache: false, serviceTier: 'flex' })) ?? '').trim().replace(/^```json\s*/i, '').replace(/^```/, '').replace(/```$/, '').trim();
+			const raw = ((await callLLM(prompt, { model: GEMINI_MODEL(), cache: false, serviceTier: 'flex' })) ?? '').trim().replace(/^```json\s*/i, '').replace(/^```/, '').replace(/```$/, '').trim();
 			try { parsed = JSON.parse(raw); } catch { return null; }
 			writeCache(key, parsed);
 		}
@@ -659,7 +660,7 @@ async function generateContextualPrefixes(ai, paragraphs, docTitle, sectionTitle
 			content: (p.content || '').slice(0, 600),
 		}));
 
-		const key = cacheKeyFor(['contextual_prefix_v1', GEMINI_MODEL, docTitle, JSON.stringify(items)]);
+		const key = cacheKeyFor(['contextual_prefix_v1', GEMINI_MODEL(), docTitle, JSON.stringify(items)]);
 		const cached = readCacheSync(key);
 		if (cached?.prefixes) {
 			for (const { id, prefix } of cached.prefixes) result.set(id, prefix);
@@ -676,7 +677,7 @@ Passages:
 ${items.map((it, idx) => `${idx + 1}. [Section: ${it.section || 'unknown'}] ${it.content}`).join('\n\n')}`;
 
 		try {
-			const raw = ((await callLLM(prompt, { model: GEMINI_MODEL, cache: false, serviceTier: 'flex' })) || '')
+			const raw = ((await callLLM(prompt, { model: GEMINI_MODEL(), cache: false, serviceTier: 'flex' })) || '')
 				.replace(/^```json\s*/i, '').replace(/```\s*$/, '').trim();
 			const prefixes = JSON.parse(raw);
 			if (!Array.isArray(prefixes)) continue;
@@ -716,11 +717,11 @@ TEXT:
 ${sample}`;
 
 	const credFp = credFingerprint();
-	const key = cacheKeyFor(['doc_metadata_v1', sample, GEMINI_MODEL, credFp]);
+	const key = cacheKeyFor(['doc_metadata_v1', sample, GEMINI_MODEL(), credFp]);
 	const cached = readCacheSync(key);
 	if (cached && cached.authors !== undefined) return cached;
 	try {
-		const raw = ((await callLLM(prompt, { model: GEMINI_MODEL, cache: false, serviceTier: 'flex' })) || '').trim();
+		const raw = ((await callLLM(prompt, { model: GEMINI_MODEL(), cache: false, serviceTier: 'flex' })) || '').trim();
 		const parsed = JSON.parse(raw.replace(/^```json\s*|```$/g, '').trim());
 		if (parsed) writeCache(key, parsed);
 		return parsed;
@@ -736,11 +737,11 @@ async function generateDocContext(ai, firstChunkText) {
 	if (!ai || !firstChunkText) return null;
 	const prompt = 'Summarize this document excerpt in 2-3 sentences. Focus on: what type of document this is, who the key participants are, and what the main subject matter is. Be specific about names and roles.\n\nTEXT:\n' + firstChunkText.slice(0, 3000) + '\n\nSUMMARY:';
 	const credFp = credFingerprint();
-	const key = cacheKeyFor(['doc_context_v1', firstChunkText.slice(0, 3000), GEMINI_MODEL, credFp]);
+	const key = cacheKeyFor(['doc_context_v1', firstChunkText.slice(0, 3000), GEMINI_MODEL(), credFp]);
 	const cached = readCacheSync(key);
 	if (cached && typeof cached.summary === 'string') return cached.summary;
 	try {
-		const summary = ((await callLLM(prompt, { model: GEMINI_MODEL, cache: false, serviceTier: 'flex' })) || '').trim();
+		const summary = ((await callLLM(prompt, { model: GEMINI_MODEL(), cache: false, serviceTier: 'flex' })) || '').trim();
 		if (summary) writeCache(key, { summary });
 		return summary || null;
 	} catch (err) {
@@ -788,7 +789,7 @@ async function structureMarkdownWithRetries(ai, filename, mdContent) {
 					const titlePrompt = fs.readFileSync(path.join('prompts', 'generate_section_title.md'), 'utf-8').trim();
 					const credFp = credFingerprint();
 					const pseudoGen = new PseudoTOCGenerator(
-						new GeminiTocLLMClient(ai, boundaryPrompt, titlePrompt, GEMINI_MODEL, { cacheKeyFor, writeCache, readCacheSync, credFp }),
+						new GeminiTocLLMClient(ai, boundaryPrompt, titlePrompt, GEMINI_MODEL(), { cacheKeyFor, writeCache, readCacheSync, credFp }),
 						new GeminiEmbeddingClient(ai),
 						null,
 					);
@@ -832,7 +833,7 @@ async function structureMarkdownWithRetries(ai, filename, mdContent) {
 	const systemPromptContent = fs.readFileSync(path.join('prompts', 'ingest_document.md'), 'utf-8').trim();
 	let geminiCacheName = null;
 	try {
-		geminiCacheName = await createGeminiCache(systemPromptContent, { model: GEMINI_MODEL, ttlSeconds: 300 });
+		geminiCacheName = await createGeminiCache(systemPromptContent, { model: GEMINI_MODEL(), ttlSeconds: 300 });
 		addPipelineLog('info', `Gemini CachedContent created: ${geminiCacheName}`);
 	} catch (cacheErr) {
 		addPipelineLog('info', `Gemini CachedContent skipped (${cacheErr.message}) - sending full prompt per chunk`);
@@ -860,7 +861,7 @@ async function structureMarkdownWithRetries(ai, filename, mdContent) {
 		chunkDiagnostics.push(diag);
 
 		const promptNorm = systemPromptContent;
-		const modelId = GEMINI_MODEL;
+		const modelId = GEMINI_MODEL();
 		const credFp = credFingerprint();
 		const key = cacheKeyFor([promptNorm, chunk.text, modelId, credFp, docContextSummary || '']);
 
@@ -872,21 +873,22 @@ async function structureMarkdownWithRetries(ai, filename, mdContent) {
 			return cached.parsed_json;
 		}
 
-		// not cached -> call LLM with retries
-		const maxAttempts = 3;
+		// not cached -> call LLM: attempt 1=flex, attempt 2=standard
+		const maxAttempts = 2;
 		let attempt = 0;
 		while (attempt < maxAttempts) {
 			attempt += 1;
 			diag.attempts = attempt;
+			const tier = attempt === 1 ? 'flex' : 'standard';
 			try {
-				addPipelineLog('info', `LLM structuring chunk ${chunk.id} (attempt ${attempt}/${maxAttempts})`);
+				addPipelineLog('info', `LLM structuring chunk ${chunk.id} (attempt ${attempt}/${maxAttempts}, tier=${tier})`);
 				const levelHint = chunk.headingLevel ? `\nHEADING_LEVEL:${chunk.headingLevel}` : '';
 				const pageHint  = chunk.startPage != null ? `\nPAGE_RANGE:${chunk.startPage}-${chunk.endPage}` : '';
 				const docCtxSection = docContextSummary ? `\nDOCUMENT_CONTEXT (applies to entire document, not just this excerpt):\n${docContextSummary}` : '';
 				const chunkBody = `${levelHint}${pageHint}${docCtxSection}\n\nDOCUMENT_CHUNK_HEADING:${chunk.heading || ''}\n\n${chunk.text}`;
 				const parsedText = geminiCacheName
-					? (await callLLMWithCache(geminiCacheName, chunkBody, { model: modelId, cache: false, serviceTier: 'flex' })) || '{}'
-					: (await callLLM(`${promptNorm}${chunkBody}`, { model: modelId, cache: false, serviceTier: 'flex' })) || '{}';
+					? (await callLLMWithCache(geminiCacheName, chunkBody, { model: modelId, cache: false, serviceTier: tier })) || '{}'
+					: (await callLLM(`${promptNorm}${chunkBody}`, { model: modelId, cache: false, serviceTier: tier })) || '{}';
 				diag.raw_llm_output = parsedText;
 				const cleanJson = parsedText.replace(/^```json/gi, '').replace(/^```/gi, '').replace(/```$/gi, '').trim();
 				let parsed;
@@ -901,7 +903,7 @@ async function structureMarkdownWithRetries(ai, filename, mdContent) {
 					diag.repair_attempted = true;
 					try {
 						addPipelineLog('info', `Attempting automated repair for chunk ${chunk.id}`);
-						const repairPrompt = `The text below may contain a JSON object mixed with commentary or markdown fences. Extract and return ONLY the JSON object (no explanation, no markdown fences). If multiple objects exist, return the single top-level object.\n\nNOISY_OUTPUT:\n${parsedText}`;
+						const repairPrompt = `The text below is a failed attempt to produce a JSON object with schema {"nodes":[...],"temporal":{...}}. Extract or reconstruct ONLY that JSON object (no explanation, no markdown fences). The top-level key MUST be "nodes" containing an array. If the output is prose, convert it into Paragraph nodes.\n\nNOISY_OUTPUT:\n${parsedText}`;
 						const repairText = (await callLLM(repairPrompt, { model: modelId, cache: false, serviceTier: 'flex' })) || '';
 						diag.repair_raw_output = repairText;
 						try {
@@ -928,9 +930,7 @@ async function structureMarkdownWithRetries(ai, filename, mdContent) {
 			} catch (err) {
 				addPipelineLog('warn', `LLM error on chunk ${chunk.id} (model=${modelId}): ${err.message}`);
 				if (attempt < maxAttempts) {
-					const retryDelay = 5000 * Math.pow(3, attempt - 1); // 5s, 15s, 45s
-					addPipelineLog('info', `Retrying chunk ${chunk.id} in ${retryDelay / 1000}s...`);
-					await delay(retryDelay);
+					addPipelineLog('info', `Retrying chunk ${chunk.id} with tier=standard...`);
 					continue;
 				}
 				diag.outcome = 'failed';
@@ -974,7 +974,7 @@ async function structureMarkdownWithRetries(ai, filename, mdContent) {
 		const diagFile = path.join(diagDir, `${filename.replace(/[^a-z0-9_.-]/gi, '_')}_${Date.now()}.json`);
 		const summary = {
 			filename,
-			model: GEMINI_MODEL,
+			model: GEMINI_MODEL(),
 			generated_at: new Date().toISOString(),
 			total_chunks: chunks.length,
 			cache_hits: chunkDiagnostics.filter(d => d.cache_hit).length,
@@ -1049,8 +1049,23 @@ async function structureMarkdownWithRetries(ai, filename, mdContent) {
 		} else if (parsed.document && Array.isArray(parsed.document.texts)) {
 			parsed.document.texts.forEach(t => mergedNodes.push({ type: t.label === 'paragraph' ? 'Paragraph' : 'Paragraph', content: t.text, title: t.label && t.label.startsWith('heading') ? t.text : undefined }));
 		} else {
-			addPipelineLog('warn', `Unexpected parsed schema from LLM for chunk ${entry.chunk.id} - skipping`);
-			continue;
+			// LLM returned valid JSON but wrong schema (or prose) — preserve original chunk text as-is
+			addPipelineLog('warn', `Unexpected parsed schema from LLM for chunk ${entry.chunk.id} - storing raw chunk text as Paragraph`);
+			if (entry.chunk.text && entry.chunk.text.trim()) {
+				mergedNodes.push({
+					type: 'Paragraph',
+					part: 'body_matter',
+					content: entry.chunk.text.trim(),
+					llm_pending: true,
+					metadata: { page: entry.chunk.startPage ?? 1 },
+					_chunk_start_page: entry.chunk.startPage,
+					_chunk_end_page: entry.chunk.endPage,
+					_chunk_heading_level: entry.chunk.headingLevel,
+					_page_source: entry.chunk.pageSource,
+					sumo_tags: [],
+					entities: [],
+				});
+			}
 		}
 	}
 
@@ -1122,7 +1137,7 @@ async function structureMarkdownWithRetries(ai, filename, mdContent) {
 	return {
 		nodes: mergedNodes,
 		temporal: bestTemporal,
-		llm_usage: { ...usageTotals, model: GEMINI_MODEL, chunks: chunks.length, cache_hits: chunkDiagnostics.filter(d => d.cache_hit).length },
+		llm_usage: { ...usageTotals, model: GEMINI_MODEL(), chunks: chunks.length, cache_hits: chunkDiagnostics.filter(d => d.cache_hit).length },
 		toc: detectedToc,
 		glossary: detectedGlossary,
 		total_chunks: chunks.length,
@@ -1813,10 +1828,16 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
 			const existing = await arangoClient.findDocumentByHash(fileHash);
 			if (existing) {
 					if (!options.force) {
-						const skippedError = new Error(`Document already ingested (hash ${fileHash.slice(0, 12)}…). Use --force to re-ingest.`);
-						skippedError.code = 'ALREADY_INGESTED';
-						skippedError.existingDoc = existing;
-						throw skippedError;
+						if (existing.ingestion_status === 'partial') {
+							// Auto-retry pending chunks without full re-ingest
+							addPipelineLog('info', `Document partially ingested (${existing.completed_chunks || 0}/${existing.total_chunks || '?'} chunks) — auto-retrying llm_pending chunks`);
+							options.force = true;
+						} else {
+							const skippedError = new Error(`Document already ingested (hash ${fileHash.slice(0, 12)}…). Use --force to re-ingest.`);
+							skippedError.code = 'ALREADY_INGESTED';
+							skippedError.existingDoc = existing;
+							throw skippedError;
+						}
 					}
 					if (existing.ingestion_status === 'partial') {
 						addPipelineLog('warn', `--force: re-ingesting partially-ingested document ${existing._key} (${existing.completed_chunks || 0}/${existing.total_chunks || '?'} chunks completed)`);
@@ -2187,7 +2208,7 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
 							.map(p => p.content.slice(0, 400))
 							.join('\n\n');
 						if (snippets) {
-							const descKey = cacheKeyFor(['doc_description_v1', snippets, GEMINI_MODEL]);
+							const descKey = cacheKeyFor(['doc_description_v1', snippets, GEMINI_MODEL()]);
 							const descCached = readCacheSync(descKey);
 							if (descCached?.description) {
 								docDescription = descCached.description;
@@ -2195,7 +2216,7 @@ export async function ingestSingleFile(filename, aiKey, onProgress = () => {}, o
 								try {
 									const raw = await callLLM(
 										`Summarize what this document is about in one sentence (≤25 words). Focus on topic, domain, and key argument. Output only the sentence.\n\n${snippets}`,
-										{ model: GEMINI_MODEL, cache: false, serviceTier: 'flex' }
+										{ model: GEMINI_MODEL(), cache: false, serviceTier: 'flex' }
 									);
 									docDescription = (raw || '').trim().slice(0, 200) || null;
 									if (docDescription) writeCacheSync(descKey, { description: docDescription });
