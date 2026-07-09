@@ -139,8 +139,9 @@ async function _callCFWorkersAI(prompt, { model, systemPrompt, json } = {}) {
 }
 
 /**
- * Call Gemini via Cloudflare AI Gateway (BYOK). Uses CF as proxy, same model quality.
- * Falls back gracefully — if CF_ACCOUNT_ID/CF_API_TOKEN/GEMINI_API_KEY not set, throws.
+ * Call Gemini via Cloudflare AI Gateway using the GoogleGenAI SDK.
+ * Routes through CF for monitoring while retaining full SDK features (serviceTier, etc).
+ * Requires CF_ACCOUNT_ID, CF_API_TOKEN, GEMINI_API_KEY.
  */
 export async function callLLMCFGateway(prompt, { model, systemPrompt, json, serviceTier } = {}) {
 	const accountId = process.env.CF_ACCOUNT_ID;
@@ -152,29 +153,24 @@ export async function callLLMCFGateway(prompt, { model, systemPrompt, json, serv
 	const resolvedModel = model || DEFAULT_MODEL();
 	console.log(`[llm] cf-gateway→gemini • model=${resolvedModel} • gateway=${gatewayId} • tier=${serviceTier || 'flex'} • json=${!!json}`);
 
-	const url = `https://gateway.ai.cloudflare.com/v1/${accountId}/${gatewayId}/google-ai-studio/v1beta/models/${resolvedModel}:generateContent`;
+	const ai = new GoogleGenAI({
+		apiKey,
+		httpOptions: {
+			baseUrl: `https://gateway.ai.cloudflare.com/v1/${accountId}/${gatewayId}/google-ai-studio`,
+			headers: { 'cf-aig-authorization': `Bearer ${token}` },
+		},
+	});
+
+	const config = { temperature: 0, serviceTier: serviceTier || 'flex' };
+	if (json) config.responseMimeType = 'application/json';
+
 	const contents = systemPrompt
 		? [{ role: 'user', parts: [{ text: `${systemPrompt}\n\n${prompt}` }] }]
-		: [{ role: 'user', parts: [{ text: typeof prompt === 'string' ? prompt : JSON.stringify(prompt) }] }];
-	const generationConfig = { temperature: 0 };
-	if (json) generationConfig.responseMimeType = 'application/json';
-	if (serviceTier) generationConfig.serviceTier = serviceTier;
+		: prompt;
 
-	const resp = await fetch(url, {
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/json',
-			'Authorization': `Bearer ${token}`,
-			'x-goog-api-key': apiKey,
-		},
-		body: JSON.stringify({ contents, generationConfig }),
-	});
-	if (!resp.ok) {
-		const errText = await resp.text();
-		throw new Error(`CF Gateway error ${resp.status}: ${errText}`);
-	}
-	const data = await resp.json();
-	const text = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '';
+	const result = await ai.models.generateContent({ model: resolvedModel, contents, config });
+	_emitUsage(result.usageMetadata, `cf-gateway:${resolvedModel}`);
+	const text = result.text?.trim() || '';
 	if (json) return JSON.parse(text);
 	return text;
 }

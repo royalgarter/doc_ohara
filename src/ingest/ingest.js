@@ -325,8 +325,11 @@ function attemptLiteParse(sourcePath, outMdPath) {
 // Remove \X escape sequences that are invalid in JSON (markdown escapes like \*, \_, \[, \(, etc.).
 // Valid JSON escapes are: \" \\ \/ \b \f \n \r \t \uXXXX - everything else is illegal.
 function sanitizeJsonEscapes(s) {
-	// Double-escape invalid JSON escapes (e.g. LaTeX \mathbb → \\mathbb) instead of stripping.
-	return s.replace(/\\([^"\\\/bfnrtu0-9\n\r])/g, (_, ch) => `\\\\${ch}`);
+	// Match \\ (valid pair, keep) OR \X where X is invalid (double-escape it).
+	// Consuming \\ as a unit prevents the second \ from being re-matched against the next char.
+	const pass1 = s.replace(/\\(\\|[^"\\\/bfnrtu\n\r])/g, (_, ch) => ch === '\\' ? '\\\\' : `\\\\${ch}`);
+	// \u not followed by exactly 4 hex digits is invalid (e.g. \underset, \operatorname).
+	return pass1.replace(/\\u(?![0-9a-fA-F]{4})/g, '\\\\u');
 }
 
 // Helper: attempt to extract a JSON object from noisy LLM text outputs.
@@ -862,6 +865,7 @@ async function structureMarkdownWithRetries(ai, filename, mdContent) {
 
 		const promptNorm = systemPromptContent;
 		const modelId = GEMINI_MODEL();
+		const fallbackModels = (process.env.LLM_MODELS || '').split(',').map(m => m.trim()).filter(m => m && m !== modelId);
 		const credFp = credFingerprint();
 		const key = cacheKeyFor([promptNorm, chunk.text, modelId, credFp, docContextSummary || '']);
 
@@ -934,11 +938,36 @@ async function structureMarkdownWithRetries(ai, filename, mdContent) {
 					continue;
 				}
 				diag.outcome = 'failed';
-				const e = new Error(`LLM structuring failed for chunk ${chunk.id} after ${maxAttempts} attempts: ${err.message}`);
-				e.code = 'LLM_FAILED';
-				throw e;
+				// don't throw yet — fallback model loop below will try next model
+				break;
 			}
 		}
+
+		// Primary model exhausted — retry with fallback models from LLM_MODELS chain
+		for (const fallbackModel of fallbackModels) {
+			addPipelineLog('info', `Retrying chunk ${chunk.id} with fallback model=${fallbackModel}`);
+			try {
+				const levelHint = chunk.headingLevel ? `\nHEADING_LEVEL:${chunk.headingLevel}` : '';
+				const pageHint  = chunk.startPage != null ? `\nPAGE_RANGE:${chunk.startPage}-${chunk.endPage}` : '';
+				const docCtxSection = docContextSummary ? `\nDOCUMENT_CONTEXT (applies to entire document, not just this excerpt):\n${docContextSummary}` : '';
+				const chunkBody = `${levelHint}${pageHint}${docCtxSection}\n\nDOCUMENT_CHUNK_HEADING:${chunk.heading || ''}\n\n${chunk.text}`;
+				const parsedText = (await callLLM(`${promptNorm}${chunkBody}`, { model: fallbackModel, cache: false, serviceTier: 'flex' })) || '{}';
+				diag.raw_llm_output = parsedText;
+				const cleanJson = parsedText.replace(/^```json/gi, '').replace(/^```/gi, '').replace(/```$/gi, '').trim();
+				const parsed = safeParseJsonFromText(cleanJson);
+				const fallbackKey = cacheKeyFor([promptNorm, chunk.text, fallbackModel, credFp, docContextSummary || '']);
+				writeCache(fallbackKey, { parsed_json: parsed, raw: parsedText, meta: { modelId: fallbackModel, cached_at: new Date().toISOString() } });
+				addPipelineLog('info', `Fallback model=${fallbackModel} succeeded for chunk ${chunk.id}`);
+				diag.outcome = 'success';
+				return parsed;
+			} catch (fallbackErr) {
+				addPipelineLog('warn', `Fallback model=${fallbackModel} failed for chunk ${chunk.id}: ${fallbackErr.message}`);
+			}
+		}
+
+		const finalErr = new Error(`LLM structuring failed for chunk ${chunk.id} after all models exhausted`);
+		finalErr.code = 'LLM_FAILED';
+		throw finalErr;
 	}
 
 	// process chunks in batches with fixed concurrency
