@@ -138,8 +138,7 @@
 <body x-data="app()" x-init="init()" x-cloak @patch-doc.window="patchDoc($event.detail.key, $event.detail.patch)"
 	class="cl-bg-0 cl-t1 h-screen flex flex-col overflow-hidden">
 
-	<!-- ── Header ─────────────────────────────────────────────────────────────── -->
-	<header class="flex items-center gap-5 px-4 h-10 cl-bg-1 border-b cl-b0 flex-shrink-0 select-none">
+	<header id="header" class="flex items-center gap-5 px-4 h-10 cl-bg-1 border-b cl-b0 flex-shrink-0 select-none">
 		<div class="flex items-center gap-2">
 			<div class="w-2 h-2 rounded-full cl-bg-acc dot-glow"></div>
 			<span class="text-xs font-bold cl-t2 tracking-widest">DOC OHARA</span>
@@ -172,11 +171,9 @@
 		</div>
 	</header>
 
-	<!-- ── Body ──────────────────────────────────────────────────────────────── -->
-	<div class="flex flex-1 min-h-0">
+	<div id="body" class="flex flex-1 min-h-0">
 
-		<!-- Vertical tab bar -->
-		<nav class="flex flex-col items-center gap-1 py-2 w-9 cl-bg-1 border-r cl-b0 flex-shrink-0">
+		<nav id="vertical-tab-bar" class="flex flex-col items-center gap-1 py-2 w-9 cl-bg-1 border-r cl-b0 flex-shrink-0">
 			<template x-for="t in tabs" :key="t.id">
 				<button @click="tab = t.id; if(t.id==='jobs') loadJobs(); if(t.id==='analytics') loadAnalytics()" :title="t.label"
 					:class="tab === t.id ? 'cl-tab-on' : 'cl-tab-off'"
@@ -188,11 +185,9 @@
 			</template>
 		</nav>
 
-		<!-- Left panel -->
-		<div class="flex flex-col border-r cl-b0 flex-shrink-0 overflow-hidden cl-bg-1 w-64" x-show="docsOpen">
+		<div id="left-panel" class="flex flex-col border-r cl-b0 flex-shrink-0 overflow-hidden cl-bg-1 w-64" x-show="docsOpen">
 
-			<!-- GRAPH tab -->
-			<div x-show="tab === 'graph'" class="flex flex-col h-full overflow-hidden p-3 gap-3">
+			<div id="graph-tab" x-show="tab === 'graph'" class="flex flex-col h-full overflow-hidden p-3 gap-3">
 				<button
 					class="flex items-center justify-between text-sm font-bold cl-t3 uppercase tracking-widest transition select-none">
 					<span>Documents</span>
@@ -238,8 +233,7 @@
 				</div>
 			</div>
 
-			<!-- INGEST tab -->
-			<div x-show="tab === 'ingest'" class="flex flex-col h-full overflow-hidden p-3 gap-3">
+			<div id="ingest-tab" x-show="tab === 'ingest'" class="flex flex-col h-full overflow-hidden p-3 gap-3">
 				<div class="text-sm font-bold cl-t3 uppercase tracking-widest">Pipeline Control</div>
 				<div class="flex flex-col gap-1">
 					<div class="text-sm cl-t4 mb-0.5">Staged input files</div>
@@ -278,8 +272,7 @@
 				</div>
 			</div>
 
-			<!-- QUERY tab -->
-			<div x-show="tab === 'query'" class="flex flex-col h-full overflow-hidden p-3 gap-3">
+			<div id="query-tab" x-show="tab === 'query'" class="flex flex-col h-full overflow-hidden p-3 gap-3">
 				<div class="flex items-center justify-between">
 					<div class="text-sm font-bold cl-t3 uppercase tracking-widest">Hybrid Retrieval</div>
 					<div x-show="sessionHistory.length > 0" class="flex items-center gap-1.5">
@@ -295,8 +288,7 @@
 					<button @click="runQuery()" :disabled="queryLoading"
 						class="cl-btn text-xs px-2.5 py-1.5 rounded transition flex-shrink-0">→</button>
 				</div>
-				<!-- CoR toggle + keyword chips -->
-				<div class="flex items-center justify-between gap-2">
+				<div id="cor-toggle-keyword-chips" class="flex items-center justify-between gap-2">
 					<div class="flex flex-wrap gap-1 flex-1">
 						<template x-for="kw in (queryResults && queryResults.processedQuery && queryResults.processedQuery.keywords || [])" :key="kw">
 							<span class="cl-card text-sm px-1.5 py-0.5 border cl-t2 rounded" x-text="kw"></span>
@@ -320,8 +312,7 @@
 						<span class="text-xs cl-t4">answer</span>
 					</label>
 				</div>
-				<!-- Answer synthesis result -->
-				<div x-show="answerResult" class="rounded border border-green-800 bg-green-950 p-2 text-xs space-y-1 flex-shrink-0">
+				<div id="answer-synthesis-result" x-show="answerResult" class="rounded border border-green-800 bg-green-950 p-2 text-xs space-y-1 flex-shrink-0">
 					<div class="text-green-400 font-medium text-xs uppercase tracking-wide">Answer</div>
 					<div class="cl-t1 leading-relaxed whitespace-pre-wrap" x-text="answerResult && answerResult.answer"></div>
 					<div x-show="answerResult && answerResult.citations && answerResult.citations.length" class="cl-t5 pt-1 space-y-0.5">
@@ -330,8 +321,7 @@
 						</template>
 					</div>
 				</div>
-				<!-- Results tier tabs -->
-				<div x-show="queryResults" class="flex gap-1 flex-shrink-0">
+				<div id="results-tier-tabs" x-show="queryResults" class="flex gap-1 flex-shrink-0">
 					<template x-for="t in ['all','principal','integrity','explorer']" :key="t">
 						<button @click="resultTab = t"
 							:class="resultTab === t ? 'cl-tab-on' : 'cl-tab-off'"
@@ -344,8 +334,7 @@
 					</template>
 				</div>
 				<div class="flex-1 min-h-0 overflow-y-auto scrollbar-thin flex flex-col gap-2">
-					<!-- ALL tab -->
-					<template x-if="!queryResults || resultTab === 'all'">
+					<template id="all-tab" x-if="!queryResults || resultTab === 'all'">
 						<div class="flex flex-col gap-2">
 							<template x-for="(r, i) in (queryResults && queryResults.shallowResults || [])" :key="i">
 								<div @click="highlightResultNode(r.node)"
@@ -377,8 +366,7 @@
 								class="text-xs cl-t5 text-center py-6">No results</div>
 						</div>
 					</template>
-					<!-- PRINCIPAL tab -->
-					<template x-if="queryResults && resultTab === 'principal'">
+					<template id="principal-tab" x-if="queryResults && resultTab === 'principal'">
 						<div class="flex flex-col gap-2">
 							<template x-for="(r, i) in (queryResults.tiers && queryResults.tiers.principal || [])" :key="i">
 								<div @click="highlightResultNode(r.node)"
@@ -415,8 +403,7 @@
 								class="text-xs cl-t5 text-center py-6">No principal results - query may be too broad or corpus too small</div>
 						</div>
 					</template>
-					<!-- INTEGRITY tab -->
-					<template x-if="queryResults && resultTab === 'integrity'">
+					<template id="integrity-tab" x-if="queryResults && resultTab === 'integrity'">
 						<div class="flex flex-col gap-2">
 							<template x-for="(r, i) in (queryResults.tiers && queryResults.tiers.integrity || [])" :key="i">
 								<div @click="highlightResultNode(r.node)"
@@ -442,8 +429,7 @@
 								class="text-xs cl-t5 text-center py-6">No integrity results</div>
 						</div>
 					</template>
-					<!-- EXPLORER tab -->
-					<template x-if="queryResults && resultTab === 'explorer'">
+					<template id="explorer-tab" x-if="queryResults && resultTab === 'explorer'">
 						<div class="flex flex-col gap-2">
 							<div class="text-xs cl-t4 px-1">Frontier candidates - follow-up directions, not final answers</div>
 							<template x-for="(f, i) in (queryResults.tiers && queryResults.tiers.explorer && queryResults.tiers.explorer.frontier || [])" :key="i">
@@ -471,8 +457,7 @@
 				</div>
 			</div>
 
-			<!-- JOBS tab -->
-			<div x-show="tab === 'jobs'" x-init="if(tab==='jobs') loadJobs()" class="flex flex-col h-full overflow-hidden p-3 gap-2">
+			<div id="jobs-tab" x-show="tab === 'jobs'" x-init="if(tab==='jobs') loadJobs()" class="flex flex-col h-full overflow-hidden p-3 gap-2">
 				<div class="text-sm font-bold cl-t3 uppercase tracking-widest">Job Queue</div>
 				<div class="grid grid-cols-4 gap-1 flex-shrink-0">
 					<template x-for="[key, color] in [['failed','text-red-400'],['waiting','text-yellow-400'],['active','cl-t2'],['completed','text-green-400']]" :key="key">
@@ -563,8 +548,7 @@
 				<button @click="loadJobs()" class="cl-btn-gh flex-shrink-0 text-sm py-1 rounded border transition">↺ Refresh</button>
 			</div>
 
-			<!-- WIKI tab -->
-			<div x-show="tab === 'wiki'" class="flex flex-col h-full overflow-hidden p-3 gap-3">
+			<div id="wiki-tab" x-show="tab === 'wiki'" class="flex flex-col h-full overflow-hidden p-3 gap-3">
 				<div class="text-sm font-bold cl-t3 uppercase tracking-widest">Wiki Export</div>
 				<p class="text-base cl-t4 leading-relaxed">
 					Compile graph nodes into Quartz-compatible markdown files for publishing.
@@ -579,11 +563,9 @@
 				<div class="text-sm cl-t5 border-t cl-b0 pt-2">Output: <code class="cl-t4">wiki/*.md</code></div>
 			</div>
 
-			<!-- DOCS tab -->
-			<div x-show="tab === 'docs'" x-init="if(tab==='docs') loadDocs()" class="flex flex-col h-full overflow-hidden p-3 gap-3">
+			<div id="docs-tab" x-show="tab === 'docs'" x-init="if(tab==='docs') loadDocs()" class="flex flex-col h-full overflow-hidden p-3 gap-3">
 				<div class="text-sm font-bold cl-t3 uppercase tracking-widest">Documents - Ingest Health</div>
-				<!-- Health summary banner -->
-				<div x-show="docsHealth" class="rounded border cl-b0 cl-bg-1 px-2 py-1.5 text-xs flex gap-3 flex-wrap cl-t4">
+				<div id="health-summary-banner" x-show="docsHealth" class="rounded border cl-b0 cl-bg-1 px-2 py-1.5 text-xs flex gap-3 flex-wrap cl-t4">
 					<span>docs: <span class="cl-t1 font-medium" x-text="docsHealth && docsHealth.total || 0"></span></span>
 					<span>paragraphs: <span class="cl-t1 font-medium" x-text="docsHealth && docsHealth.total_paragraphs || 0"></span></span>
 					<span>entities: <span class="cl-t1 font-medium" x-text="docsHealth && docsHealth.total_entities || 0"></span></span>
@@ -615,8 +597,7 @@
 								<span>decay: <span class="cl-t2" x-text="d.decay_class || '-'"></span></span>
 								<span>confidence: <span class="cl-t2" x-text="d.temporal_confidence != null ? d.temporal_confidence.toFixed(2) : '-'"></span></span>
 							</div>
-							<!-- published_date inline edit -->
-							<div class="flex items-center gap-2">
+							<div id="published_date-inline-edit" class="flex items-center gap-2">
 								<span class="cl-t4">published:</span>
 								<input x-model="pubVal" type="text"
 									placeholder="YYYY-MM-DD or YYYY"
@@ -624,8 +605,7 @@
 								<button @click="$dispatch('patch-doc', { key: d._key, patch: { published_date: pubVal || null } }); saved = true; setTimeout(() => saved = false, 2000)"
 									class="cl-btn-gh text-xs px-2 py-0.5 rounded border transition">✓</button>
 							</div>
-							<!-- decay class select -->
-							<div class="flex items-center gap-2">
+							<div id="decay-class-select" class="flex items-center gap-2">
 								<span class="cl-t4">effective decay:</span>
 								<select x-model="decayVal"
 									class="cl-input rounded px-1 py-0.5 text-xs border flex-1">
@@ -642,14 +622,12 @@
 				<div x-show="docsAdminList.length === 0" class="cl-t5 text-sm">No documents ingested yet.</div>
 			</div>
 
-			<!-- ── Analytics tab ─────────────────────────────────────────────── -->
-			<div x-show="tab === 'analytics'" x-init="if(tab==='analytics') loadAnalytics()" class="flex flex-col h-full overflow-hidden p-3 gap-3">
+			<div id="analytics-tab" x-show="tab === 'analytics'" x-init="if(tab==='analytics') loadAnalytics()" class="flex flex-col h-full overflow-hidden p-3 gap-3">
 				<div class="text-sm font-bold cl-t3 uppercase tracking-widest">Analytics</div>
 				<div class="flex gap-2">
 					<button @click="loadAnalytics()" class="cl-btn-gh text-xs py-1 px-2 rounded border transition">↺ Refresh</button>
 				</div>
-				<!-- Summary stats -->
-				<div x-show="analyticsData" class="rounded border cl-b0 cl-bg-1 px-2 py-1.5 text-xs flex gap-4 flex-wrap cl-t4">
+				<div id="summary-stats" x-show="analyticsData" class="rounded border cl-b0 cl-bg-1 px-2 py-1.5 text-xs flex gap-4 flex-wrap cl-t4">
 					<span>feedback: <span class="cl-t1 font-medium" x-text="analyticsData && analyticsData.summary && analyticsData.summary.total_feedback || 0"></span></span>
 					<span class="text-green-400">positive: <span x-text="analyticsData && analyticsData.summary && analyticsData.summary.positive || 0"></span></span>
 					<span class="text-red-400">negative: <span x-text="analyticsData && analyticsData.summary && analyticsData.summary.negative || 0"></span></span>
@@ -657,8 +635,7 @@
 					<span>paragraphs: <span class="cl-t1" x-text="analyticsData && analyticsData.summary && analyticsData.summary.total_paragraphs || 0"></span></span>
 					<span>entities: <span class="cl-t1" x-text="analyticsData && analyticsData.summary && analyticsData.summary.total_entities || 0"></span></span>
 				</div>
-				<!-- Feedback accuracy by rank - inline SVG bar chart -->
-				<div x-show="analyticsData && analyticsData.byRank && analyticsData.byRank.length">
+				<div id="feedback-accuracy-by-rank-inline-svg-bar-chart" x-show="analyticsData && analyticsData.byRank && analyticsData.byRank.length">
 					<div class="text-xs cl-t4 font-medium mb-1">Feedback accuracy by rank</div>
 					<div class="space-y-1">
 						<template x-for="r in (analyticsData && analyticsData.byRank || [])" :key="r.rank">
@@ -674,8 +651,7 @@
 						</template>
 					</div>
 				</div>
-				<!-- Top positively-rated nodes -->
-				<div x-show="analyticsData && analyticsData.topEntities && analyticsData.topEntities.length">
+				<div id="top-positively-rated-nodes" x-show="analyticsData && analyticsData.topEntities && analyticsData.topEntities.length">
 					<div class="text-xs cl-t4 font-medium mb-1">Top positively-rated nodes</div>
 					<div class="space-y-0.5">
 						<template x-for="(e, i) in (analyticsData && analyticsData.topEntities || [])" :key="e.node_id">
@@ -692,25 +668,20 @@
 
 		</div>
 
-		<!-- ── Right: graph canvas + inspector ────────────────────────────────── -->
-		<div class="flex flex-col flex-1 min-w-0 overflow-hidden cl-bg-0">
+		<div id="right-graph-canvas-inspector" class="flex flex-col flex-1 min-w-0 overflow-hidden cl-bg-0">
 
-			<!-- Top row: canvas + disc section panel -->
-			<div class="flex flex-row flex-1 min-h-0">
+			<div id="top-row-canvas-disc-section-panel" class="flex flex-row flex-1 min-h-0">
 
-			<!-- 3D Space-Time Graph canvas -->
 			<div class="flex-1 overflow-hidden relative cl-bg-0" id="graph-container" style="min-height:300px;">
 				<canvas id="graph-canvas" style="display:block;width:100%;height:100%;"></canvas>
 				<div id="graph-labels" style="position:absolute;inset:0;pointer-events:none;overflow:hidden;"></div>
 
-				<!-- Clear selection button overlay -->
-				<div x-show="selectedNode" class="absolute top-2 left-2 z-10 select-none">
+				<div id="clear-selection-button-overlay" x-show="selectedNode" class="absolute top-2 left-2 z-10 select-none">
 					<button @click="selectedNode = null; crossEdges = []; crossEdgeDocKey = null; renderCurrentGraph()"
 						class="cl-btn-gh text-xs px-2 py-1 rounded border transition">✕ clear selection</button>
 				</div>
 
-				<!-- Zoom controls overlay -->
-				<div class="absolute top-2 right-2 flex items-center gap-1 z-10 select-none">
+				<div id="zoom-controls-overlay" class="absolute top-2 right-2 flex items-center gap-1 z-10 select-none">
 					<button @click="zoomOut()" title="Zoom out (-)"
 						class="cl-btn-gh w-6 h-6 flex items-center justify-center rounded border transition text-sm leading-none">−</button>
 					<span class="text-sm cl-t4 w-10 text-center" x-text="Math.round(graphZoom * 100) + '%'"></span>
@@ -733,8 +704,7 @@
 				</div>
 			</div>
 
-			<!-- Disc section panel (right) -->
-			<div x-show="discPanelOpen"
+			<div id="disc-section-panel-right" x-show="discPanelOpen"
 				class="flex flex-col border-l cl-b0 cl-bg-1 flex-shrink-0 overflow-hidden"
 				style="width:220px;">
 				<div class="flex items-center justify-between px-3 py-2 border-b cl-b0">
@@ -834,8 +804,7 @@
 						x-show="selectedNode && !selectedNode._id?.startsWith('tags/') && !selectedNode._id?.startsWith('sections/') && !selectedNode._id?.startsWith('entities/') && !selectedNode.content && !selectedNode.title && !(selectedNode._id?.startsWith('paragraphs/') && expandedNodes.has(selectedNode._id))">-</div>
 				</div>
 
-				<!-- SUMO tags -->
-				<div x-show="selectedNode && !selectedNode._id?.startsWith('tags/') && selectedNode.sumo_tags && selectedNode.sumo_tags.length > 0"
+				<div id="sumo-tags" x-show="selectedNode && !selectedNode._id?.startsWith('tags/') && selectedNode.sumo_tags && selectedNode.sumo_tags.length > 0"
 					class="flex-shrink-0 w-44 flex flex-col gap-1.5">
 					<div class="text-sm font-bold cl-t4 uppercase tracking-wider">SUMO Tags</div>
 					<div class="flex flex-wrap gap-1 overflow-y-auto scrollbar-thin" style="max-height: 140px;">
@@ -856,8 +825,7 @@
 		</div>
 	</div>
 
-	<!-- ── Alpine App + SVG Graph Logic ─────────────────────────────────────── -->
-	<script>
+	<script id="alpine-app-svg-graph-logic">
 	function app() {
 		return {
 			tab: 'graph',
