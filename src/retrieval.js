@@ -967,10 +967,12 @@ export class RetrievalEngine {
 		// Layer 2: Principal tier nodes are immune (multi-phase corroboration already proves relevance)
 		if (isPrincipal) return 0;
 
-		// Layer 3: semantically strong nodes (high BM25 score) are immune
+		// Layer 3: semantically strong nodes (high BM25 score) are immune.
+		// Gate compares against the RAW ArangoSearch score (floor default 5.0) -
+		// contribution.score is normalized to [0, weight] and would never trip it.
 		const gateFloor = parseFloat(process.env.OHARA_TEMPORAL_GATE_FLOOR || '5.0');
 		const bm25Contribution = entry.contributions?.find(c => c.phase === 'fulltext');
-		const bm25Score = bm25Contribution ? bm25Contribution.score : 0;
+		const bm25Score = bm25Contribution ? (bm25Contribution.raw_score ?? bm25Contribution.score) : 0;
 		if (bm25Score > gateFloor) return 0;
 
 		// Layer 4+5: apply decay / coverage for weak candidates
@@ -1020,24 +1022,33 @@ export class RetrievalEngine {
 	_fuseResults(bm25, sumo, entity, crossDoc, struct, weights, vector = [], answersSame = [], cluster = []) {
 		const scoreMap = new Map(); // _id → { node, score, sources, contributions, edge_verb }
 
+		// Per-phase max-normalization: raw score scales differ wildly across phases
+		// (ArangoSearch BM25 ≈ 10-25, others ≤ 1), so without normalization the
+		// weighted sum degenerates to BM25-only ranking and no node ever gains
+		// multi-phase corroboration. Disable via OHARA_NORMALIZE_SCORES=false.
+		const normalize = process.env.OHARA_NORMALIZE_SCORES !== 'false';
+
 		const add = (results, weight, phase) => {
+			const maxScore = normalize ? Math.max(...results.map(r => r.score || 0), 0) : 0;
 			for (const r of results) {
 				const id = r.node?._id;
 				if (!id) continue;
+				const normScore = normalize && maxScore > 0 ? r.score / maxScore : r.score;
 				const contribution = {
 					phase,
-					score: weight * r.score,
+					score: weight * normScore,
+					raw_score: r.score,
 					document_id: r.node.document_id,
 					edge_verb: r.edge_verb,
 					hops: r.hops,
 				};
 				const cur = scoreMap.get(id);
 				if (cur) {
-					cur.score += weight * r.score;
+					cur.score += weight * normScore;
 					cur.sources.push(phase);
 					cur.contributions.push(contribution);
 				} else {
-					const entry = { node: r.node, score: weight * r.score, sources: [phase], contributions: [contribution] };
+					const entry = { node: r.node, score: weight * normScore, sources: [phase], contributions: [contribution] };
 					if (r.edge_verb) entry.edge_verb = r.edge_verb;
 					if (r.edge_summary) entry.edge_summary = r.edge_summary;
 					if (r.hops) entry.hops = r.hops;

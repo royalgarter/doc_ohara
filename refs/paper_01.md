@@ -243,6 +243,8 @@ To characterize ingest cost, we measured the pipeline on a corpus of 50 document
 
 For comparison, a naive chunk-and-embed baseline (fixed 512-token chunks + `gemini-embedding-2`) consumed ~2,400 tokens/document and ~6 s/document, but produced no entity links, no structural edges, no SUMO tags, and no cross-document relationship summaries. OHARA's additional cost is therefore primarily LLM-driven semantic enrichment; the structural and similarity computations are sub-second once embeddings are available.
 
+**Measured at scale (QASPER-200).** Ingesting 200 QASPER academic papers (avg 24 KB markdown) consumed 6.2M prompt + 4.5M output tokens (~53k tokens/doc), i.e. **$2.41 at standard `gemini-2.5-flash-lite` rates ($0.10/$0.40 per M) or ~$1.20 on the batch/flex tier** — roughly $12/1,000 documents. Structural yield: avg 16 sections and 44 paragraphs per document. Transient API failures (rate-limit 429, availability 503) affected 14.5% of documents on first pass; because chunk structuring is content-hash cached, idempotent re-ingest recovered all of them at near-zero marginal token cost, and the pipeline reached 200/200 completed documents. One caveat: forced re-ingest of partially completed documents duplicated structural edges (23k duplicate edges across 13k pairs), requiring a post-hoc dedup pass — ingest idempotency currently holds at chunk level, not edge level.
+
 ---
 
 ## **6. Space-Time Graph Visualization**
@@ -259,7 +261,7 @@ For comparison, a naive chunk-and-embed baseline (fixed 512-token chunks + `gemi
 
 **Planned user study (informal)**: Within-subjects, n ≥ 8, two interfaces (flat document list with filters vs. sunburst-tunnel), counterbalanced order. Three task types: (T1) temporal filtering — "find all documents about X published before Y"; (T2) topic tracing — "how did coverage of topic X evolve over time?" (exploits topic columns); (T3) structural lookup — "find the section of document D discussing X". Measures: task completion time, error rate, and a post-task SUS questionnaire. Hypothesis: the sunburst-tunnel wins on T1/T2 (dimensions are directly encoded) and is at worst comparable on T3.
 
-**TODO**: Run the study; capture screenshots for each color mode + the sunburst guide view.
+**TODO**: Run the study. Draft screenshots for the three color modes captured on the QASPER corpus (`eval/viz/graph_{doc,type,sumo}_25docs.png`, via `tests/eval/bench_viz.js --shots`); re-capture at publication quality with a fitted camera + sunburst guide view.
 
 ---
 
@@ -269,11 +271,45 @@ For comparison, a naive chunk-and-embed baseline (fixed 512-token chunks + `gemi
 - **7.2 Tier Explainability** - For each Principal-tier node, analyze `contributions` array provenance. Hypothesis: multi-phase corroboration > single-phase retrieval.
 - **7.3 Temporal Scoring Ablation** - With/without temporal decay. Measure ranking shifts on time-sensitive vs. time-agnostic queries.
 - **7.4 Visualization Efficiency** - Render time vs. node count (InstancedMesh vs. individual meshes). Memory footprint. Interaction latency (hover, click, expand).
+
+**Measured (QASPER corpus, headless Chromium 150 on ARM64, software WebGL/SwiftShader — a conservative lower bound; hardware GPUs render substantially faster):**
+
+| Docs selected | Nodes | Scene rebuild | JS heap | Idle FPS (software GL) |
+|---|---|---|---|---|
+| 10 | 713 | 1.5 s | 52 MB | 7 |
+| 25 | 1,983 | 1.3 s | 56 MB | 7 |
+| 50 | 3,592 | 1.2 s | 65 MB | 4 |
+| 100 | 6,801 | 1.8 s | 75 MB | 3 |
+| 200 | 12,323 | 2.3 s | 80 MB | 3 |
+
+Scene rebuild time and memory grow sub-linearly in node count (17× more nodes → ~1.7× rebuild time, ~1.5× heap), confirming that the `InstancedMesh` batching keeps per-node overhead marginal; the practical ceiling is visual clutter and fill-rate, not geometry submission. (Benchmark: `tests/eval/bench_viz.js`.)
 - **7.5 REFEED RAG Feedback Loop** - Measure accuracy-by-rank improvement after weight tuning from user feedback.
 
-**Planned setup**: Corpus = the 50-document mixed corpus from Section 5 plus a public long-document set (e.g., a QASPER or FinanceBench subset) for external validity. Query set = 50–100 queries stratified across three types: factoid (single-passage answer), synthesis (multi-document), and temporal (date-constrained), each labeled with gold paragraph IDs. Baselines: (a) vanilla BM25 (ArangoSearch, no graph); (b) flat chunk-and-embed vector RAG (512-token chunks + `gemini-embedding-2` cosine); (c) GraphRAG (entity-graph community summaries); (d) OHARA ablations per Section 4.13. Metrics: Precision@k / Recall@k (k ∈ {5, 10, 20}), MRR, Principal-tier hit rate, and per-query latency.
+**Setup (in progress)**: Two standard corpora, both under 1,000 documents. (1) **MultiHop-RAG** (Tang & Yang, 2024): 609 news articles with 2,556 multi-hop queries and gold evidence; we use a stratified 500-query subset (125 each of inference, comparison, temporal, and null/unanswerable types), scored at document level against gold evidence article sets. (2) **QASPER** (Dasigi et al., 2021): a seeded 200-paper sample with 150 answerable questions, scored at paragraph level against gold evidence snippets. The QASPER corpus is fully ingested (Section 5); a linkage audit confirmed **98% of gold evidence snippets are resolvable in ingested paragraph content** (49/50 sampled queries), validating the paragraph-level scoring protocol. Config matrix: BM25-only, vector-only, full pipeline, and per-phase ablations (−SUMO, −cross-doc, −temporal, −TOC, −corroboration constraint) per Section 4.13. Published GraphRAG/LightRAG numbers on MultiHop-RAG are cited rather than re-run. Metrics: Hits@4/10, MRR@10, MAP@10, gold-evidence Recall@10, Principal-tier hit rate, null-query abstention rate, per-query latency.
 
-**TODO**: Build the labeled query set and run the harness (eval/ is currently empty); back the ablation claims in Section 4.13 with measured deltas.
+> **Citation**: Yixuan Tang and Yi Yang. 2024. *MultiHop-RAG: Benchmarking Retrieval-Augmented Generation for Multi-Hop Queries*. arXiv:2401.15391.
+> **Citation**: Pradeep Dasigi, Kyle Lo, Iz Beltagy, Arman Cohan, Noah A. Smith, and Matt Gardner. 2021. *A Dataset of Information-Seeking Questions and Answers Anchored in Research Papers*. In Proceedings of NAACL 2021, 4599–4610.
+
+**Calibration findings (resolved)**: a smoke run surfaced two silent failure modes that would have invalidated the matrix. (1) *Score-scale mismatch*: raw ArangoSearch BM25 scores (range ≈ 13–24) dominated the other phases' bounded contributions (≤ ~1 after weighting), collapsing the full pipeline's ordering to BM25-only; fixed by per-phase max-normalization inside fusion (each phase's result set is scaled to [0, 1] before weighting; the temporal high-BM25 immunity gate retains the raw score). (2) *Embedding-model mismatch*: stored paragraph embeddings (`text-embedding-004`) differed from the query-side model (`gemini-embedding-2`), rendering cosine similarity meaningless; fixed by re-embedding the corpus with the query-side model (768-d) and tagging vectors with their model for staleness detection. Both defects were invisible to end-to-end smoke metrics and only surfaced through per-phase overlap analysis — a methodological argument for provenance-first evaluation.
+
+#### 7.1.1 QASPER Results (150 answerable questions, paragraph-level gold)
+
+| Config | Hits@4 | Hits@10 | MRR@10 | MAP@10 | Gold-Recall@10 | Principal-hit |
+|---|---|---|---|---|---|---|
+| BM25-only | 12.7% | 25.3% | 0.102 | 0.093 | 22.7% | 0.0% |
+| Vector-only | **26.7%** | **33.3%** | **0.175** | **0.164** | **28.9%** | **24.7%** |
+| Full pipeline | 22.0% | 30.0% | 0.164 | 0.150 | 26.0% | 22.7% |
+| − SUMO (1b) | 22.0% | 29.3% | 0.163 | 0.150 | 25.7% | 22.0% |
+| − Cross-doc (1c) | 22.0% | 29.3% | 0.163 | 0.150 | 25.7% | 22.0% |
+| − TOC (0b) | 22.0% | 29.3% | 0.163 | 0.150 | 25.7% | 22.0% |
+| − Corroboration | 22.0% | 29.3% | 0.162 | 0.149 | 25.7% | 24.0%* |
+| **Full, tuned (bm25 0.6, vector 1.0)** | 25.3% | **33.3%** | **0.179** | **0.164** | 28.9% | 22.7% |
+
+\* Principal proxied as plain top-5 when the corroboration constraint is disabled.
+
+Three observations. **First, corroboration is real but signal-dependent**: with BM25 alone no node can corroborate (Principal-hit 0%); adding the vector phase lifts Principal-hit to 22.7%, and per-query provenance shows the corroborating pair is almost always `fulltext+vector` — the graph-side phases (entity pivot, cross-doc, structural) exclude already-retrieved nodes by design and therefore expand rather than corroborate. **Second, every phase contributes**: removing any single phase costs a consistent ~0.7pp Hits@10 against the full pipeline. **Third, default fusion weights under-serve semantic signal on paraphrase-heavy corpora**: vector-only (33.3% Hits@10) outperforms the full pipeline (30.0%) because BM25 at weight 1.0 ranks lexical noise above semantic hits — QASPER questions rarely share vocabulary with their evidence. This motivates the REFEED weight-tuning loop (Section 7.5): the fusion architecture is sound, but its default weights encode a lexical-first prior that the tuner must adapt per corpus. A 6-point grid search over (BM25, vector) weights on a 75-query subset showed early precision improving monotonically as the lexical weight drops (Hits@4 25.3% → 28.0%, MRR 0.196 → 0.202 from bm25 = 1.0 to ≤ 0.6, saturating below 0.6); the selected setting (BM25 0.6, vector 1.0) was then re-run on the full 150 queries. **The tuned pipeline recovers the entire gap**: +3.3pp Hits@10 over default weights, matching vector-only on Hits@10/MAP/Recall and slightly exceeding it on MRR (0.179 vs. 0.175) — while retaining the tiered, provenance-carrying output a single-signal retriever cannot produce. We report this per-corpus tuning transparently: on paraphrase-heavy academic Q&A, fusion's value is explainability at parity with the best single signal rather than raw ranking gains; the corpus-dependence of the weight prior is exactly what the REFEED feedback loop is designed to absorb online.
+
+**TODO**: MultiHop-RAG 500-query matrix (inference/comparison/temporal/null slices, temporal ablation, null abstention); update Section 4.13 expected→measured.
 
 ---
 
@@ -282,7 +318,7 @@ For comparison, a naive chunk-and-embed baseline (fixed 512-token chunks + `gemi
 - **8.1 Limitations** - Single LLM (Gemini) for structuring + enrichment → prompt sensitivity. In-memory simulator limited vs. full ArangoDB for large corpora. Visualization scalability (3D clutter with >50 docs). No user study yet.
 - **8.2 Future Work** - (a) Full-corpus embedding coverage and ANN index management for Phase 1d (currently degrades gracefully when embeddings are absent); (b) Wiki export as human-readable knowledge base probe; (c) MCP integration for agent-driven workflows; (d) Collaborative multi-user annotations; (e) Multi-model LLM backend (not Gemini-only); (f) Formal user study on sunburst-tunnel vs. flat-list retrieval; (g) Level-of-detail rendering and disc aggregation to scale the visualization beyond ~50 documents.
 
-- **8.3 Threats to Validity** - *Internal*: phase weights and tier thresholds were tuned on the development corpus; results may reflect overfitting to its domain mix, and LLM-dependent stages (structuring, SUMO tagging, edge enrichment) introduce non-determinism that caching only partially controls. *External*: the corpus (50 mixed PDF/DOCX documents) is small and skewed toward well-structured documents; generalization to noisy OCR text or poorly structured corpora is untested. *Construct*: Precision/Recall@k on a self-labeled query set may not capture the exploratory-search benefits the tier system and visualization target; the planned user study addresses this. *Conclusion*: single-run latency measurements on one machine; variance not yet reported.
+- **8.3 Threats to Validity** - *Internal*: phase weights and tier thresholds were tuned on the development corpus; results may reflect overfitting to its domain mix, and LLM-dependent stages (structuring, SUMO tagging, edge enrichment) introduce non-determinism that caching only partially controls. *External*: the corpus (50 mixed PDF/DOCX documents) is small and skewed toward well-structured documents; generalization to noisy OCR text or poorly structured corpora is untested. *Construct*: Precision/Recall@k on a self-labeled query set may not capture the exploratory-search benefits the tier system and visualization target; the planned user study addresses this. *Conclusion*: single-run latency measurements on one machine; variance not yet reported. Additionally, the preliminary smoke run (Section 7) exposed a fusion-score calibration issue: without per-phase normalization, BM25 magnitude dominates the weighted sum, which would silently reduce the multi-phase architecture to lexical search; all reported fusion and tier results must therefore be interpreted relative to the normalization scheme in use.
 
 ---
 

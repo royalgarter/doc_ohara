@@ -1,0 +1,22 @@
+{
+  "run_at": "2026-07-10T04:31:05.603Z",
+  "url": "http://127.0.0.1:6454",
+  "results": [
+    {
+      "docs": 10,
+      "nodes": 713,
+      "edges": 0,
+      "render_ms": 662.8,
+      "fps": 4,
+      "heap_mb": 41
+    },
+    {
+      "docs": 25,
+      "nodes": 1983,
+      "edges": 0,
+      "render_ms": 1410,
+      "fps": 6,
+      "heap_mb": 48
+    }
+  ]
+}

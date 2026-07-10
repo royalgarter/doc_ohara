@@ -1,0 +1,375 @@
+{
+  "run_at": "2026-07-10T02:56:13.565Z",
+  "input": "eval/qasper_queries.json",
+  "query_count": 15,
+  "configs": {
+    "bm25_only": {
+      "summary": {
+        "hits_at_4": 0.1333,
+        "hits_at_10": 0.2,
+        "mrr_at_10": 0.0956,
+        "map_at_10": 0.0956,
+        "gold_recall_at_10": 0.2,
+        "principal_hit_rate": 0,
+        "null_abstention_rate": null
+      },
+      "by_type": {
+        "qasper": {
+          "hits_at_4": 0.1333,
+          "hits_at_10": 0.2,
+          "mrr_at_10": 0.0956,
+          "map_at_10": 0.0956,
+          "gold_recall_at_10": 0.2,
+          "principal_hit_rate": 0,
+          "null_abstention_rate": null
+        }
+      },
+      "per_question": [
+        {
+          "id": "qa_0001",
+          "question_type": "qasper",
+          "is_null": false,
+          "gold_count": 1,
+          "first_hit_rank": 9,
+          "hit_ranks": [
+            9
+          ],
+          "principal_hit": false,
+          "principal_count": 0
+        },
+        {
+          "id": "qa_0002",
+          "question_type": "qasper",
+          "is_null": false,
+          "gold_count": 1,
+          "first_hit_rank": 2,
+          "hit_ranks": [
+            2
+          ],
+          "principal_hit": false,
+          "principal_count": 0
+        },
+        {
+          "id": "qa_0003",
+          "question_type": "qasper",
+          "is_null": false,
+          "gold_count": 1,
+          "first_hit_rank": null,
+          "hit_ranks": [],
+          "principal_hit": false,
+          "principal_count": 0
+        },
+        {
+          "id": "qa_0004",
+          "question_type": "qasper",
+          "is_null": false,
+          "gold_count": 1,
+          "first_hit_rank": 12,
+          "hit_ranks": [
+            12
+          ],
+          "principal_hit": false,
+          "principal_count": 0
+        },
+        {
+          "id": "qa_0005",
+          "question_type": "qasper",
+          "is_null": false,
+          "gold_count": 1,
+          "first_hit_rank": null,
+          "hit_ranks": [],
+          "principal_hit": false,
+          "principal_count": 0
+        },
+        {
+          "id": "qa_0006",
+          "question_type": "qasper",
+          "is_null": false,
+          "gold_count": 4,
+          "first_hit_rank": null,
+          "hit_ranks": [],
+          "principal_hit": false,
+          "principal_count": 0
+        },
+        {
+          "id": "qa_0007",
+          "question_type": "qasper",
+          "is_null": false,
+          "gold_count": 2,
+          "first_hit_rank": null,
+          "hit_ranks": [],
+          "principal_hit": false,
+          "principal_count": 0
+        },
+        {
+          "id": "qa_0008",
+          "question_type": "qasper",
+          "is_null": false,
+          "gold_count": 1,
+          "first_hit_rank": null,
+          "hit_ranks": [],
+          "principal_hit": false,
+          "principal_count": 0
+        },
+        {
+          "id": "qa_0009",
+          "question_type": "qasper",
+          "is_null": false,
+          "gold_count": 1,
+          "first_hit_rank": null,
+          "hit_ranks": [],
+          "principal_hit": false,
+          "principal_count": 0
+        },
+        {
+          "id": "qa_0010",
+          "question_type": "qasper",
+          "is_null": false,
+          "gold_count": 1,
+          "first_hit_rank": null,
+          "hit_ranks": [],
+          "principal_hit": false,
+          "principal_count": 0
+        },
+        {
+          "id": "qa_0011",
+          "question_type": "qasper",
+          "is_null": false,
+          "gold_count": 1,
+          "first_hit_rank": 15,
+          "hit_ranks": [
+            15
+          ],
+          "principal_hit": false,
+          "principal_count": 0
+        },
+        {
+          "id": "qa_0012",
+          "question_type": "qasper",
+          "is_null": false,
+          "gold_count": 1,
+          "first_hit_rank": null,
+          "hit_ranks": [],
+          "principal_hit": false,
+          "principal_count": 0
+        },
+        {
+          "id": "qa_0013",
+          "question_type": "qasper",
+          "is_null": false,
+          "gold_count": 6,
+          "first_hit_rank": null,
+          "hit_ranks": [],
+          "principal_hit": false,
+          "principal_count": 0
+        },
+        {
+          "id": "qa_0014",
+          "question_type": "qasper",
+          "is_null": false,
+          "gold_count": 1,
+          "first_hit_rank": null,
+          "hit_ranks": [],
+          "principal_hit": false,
+          "principal_count": 0
+        },
+        {
+          "id": "qa_0015",
+          "question_type": "qasper",
+          "is_null": false,
+          "gold_count": 1,
+          "first_hit_rank": 0,
+          "hit_ranks": [
+            0
+          ],
+          "principal_hit": false,
+          "principal_count": 0
+        }
+      ]
+    },
+    "full": {
+      "summary": {
+        "hits_at_4": 0.1333,
+        "hits_at_10": 0.2,
+        "mrr_at_10": 0.0956,
+        "map_at_10": 0.0956,
+        "gold_recall_at_10": 0.2,
+        "principal_hit_rate": 0,
+        "null_abstention_rate": null
+      },
+      "by_type": {
+        "qasper": {
+          "hits_at_4": 0.1333,
+          "hits_at_10": 0.2,
+          "mrr_at_10": 0.0956,
+          "map_at_10": 0.0956,
+          "gold_recall_at_10": 0.2,
+          "principal_hit_rate": 0,
+          "null_abstention_rate": null
+        }
+      },
+      "per_question": [
+        {
+          "id": "qa_0001",
+          "question_type": "qasper",
+          "is_null": false,
+          "gold_count": 1,
+          "first_hit_rank": 9,
+          "hit_ranks": [
+            9
+          ],
+          "principal_hit": false,
+          "principal_count": 0
+        },
+        {
+          "id": "qa_0002",
+          "question_type": "qasper",
+          "is_null": false,
+          "gold_count": 1,
+          "first_hit_rank": 2,
+          "hit_ranks": [
+            2
+          ],
+          "principal_hit": false,
+          "principal_count": 0
+        },
+        {
+          "id": "qa_0003",
+          "question_type": "qasper",
+          "is_null": false,
+          "gold_count": 1,
+          "first_hit_rank": null,
+          "hit_ranks": [],
+          "principal_hit": false,
+          "principal_count": 0
+        },
+        {
+          "id": "qa_0004",
+          "question_type": "qasper",
+          "is_null": false,
+          "gold_count": 1,
+          "first_hit_rank": 12,
+          "hit_ranks": [
+            12
+          ],
+          "principal_hit": false,
+          "principal_count": 0
+        },
+        {
+          "id": "qa_0005",
+          "question_type": "qasper",
+          "is_null": false,
+          "gold_count": 1,
+          "first_hit_rank": null,
+          "hit_ranks": [],
+          "principal_hit": false,
+          "principal_count": 0
+        },
+        {
+          "id": "qa_0006",
+          "question_type": "qasper",
+          "is_null": false,
+          "gold_count": 4,
+          "first_hit_rank": null,
+          "hit_ranks": [],
+          "principal_hit": false,
+          "principal_count": 0
+        },
+        {
+          "id": "qa_0007",
+          "question_type": "qasper",
+          "is_null": false,
+          "gold_count": 2,
+          "first_hit_rank": null,
+          "hit_ranks": [],
+          "principal_hit": false,
+          "principal_count": 0
+        },
+        {
+          "id": "qa_0008",
+          "question_type": "qasper",
+          "is_null": false,
+          "gold_count": 1,
+          "first_hit_rank": null,
+          "hit_ranks": [],
+          "principal_hit": false,
+          "principal_count": 0
+        },
+        {
+          "id": "qa_0009",
+          "question_type": "qasper",
+          "is_null": false,
+          "gold_count": 1,
+          "first_hit_rank": null,
+          "hit_ranks": [],
+          "principal_hit": false,
+          "principal_count": 0
+        },
+        {
+          "id": "qa_0010",
+          "question_type": "qasper",
+          "is_null": false,
+          "gold_count": 1,
+          "first_hit_rank": null,
+          "hit_ranks": [],
+          "principal_hit": false,
+          "principal_count": 0
+        },
+        {
+          "id": "qa_0011",
+          "question_type": "qasper",
+          "is_null": false,
+          "gold_count": 1,
+          "first_hit_rank": 15,
+          "hit_ranks": [
+            15
+          ],
+          "principal_hit": false,
+          "principal_count": 0
+        },
+        {
+          "id": "qa_0012",
+          "question_type": "qasper",
+          "is_null": false,
+          "gold_count": 1,
+          "first_hit_rank": null,
+          "hit_ranks": [],
+          "principal_hit": false,
+          "principal_count": 0
+        },
+        {
+          "id": "qa_0013",
+          "question_type": "qasper",
+          "is_null": false,
+          "gold_count": 6,
+          "first_hit_rank": null,
+          "hit_ranks": [],
+          "principal_hit": false,
+          "principal_count": 0
+        },
+        {
+          "id": "qa_0014",
+          "question_type": "qasper",
+          "is_null": false,
+          "gold_count": 1,
+          "first_hit_rank": null,
+          "hit_ranks": [],
+          "principal_hit": false,
+          "principal_count": 0
+        },
+        {
+          "id": "qa_0015",
+          "question_type": "qasper",
+          "is_null": false,
+          "gold_count": 1,
+          "first_hit_rank": 0,
+          "hit_ranks": [
+            0
+          ],
+          "principal_hit": false,
+          "principal_count": 0
+        }
+      ]
+    }
+  }
+}

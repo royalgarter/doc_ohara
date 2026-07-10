@@ -1,0 +1,1002 @@
+{
+  "qasper_2004.01853.md": {
+    "paper_id": "2004.01853",
+    "title": "STEP: Sequence-to-Sequence Transformer Pre-training for Document Summarization",
+    "question_count": 2
+  },
+  "qasper_1910.14537.md": {
+    "paper_id": "1910.14537",
+    "title": "Attention Is All You Need for Chinese Word Segmentation",
+    "question_count": 4
+  },
+  "qasper_1908.07245.md": {
+    "paper_id": "1908.07245",
+    "title": "GlossBERT: BERT for Word Sense Disambiguation with Gloss Knowledge",
+    "question_count": 5
+  },
+  "qasper_2001.05865.md": {
+    "paper_id": "2001.05865",
+    "title": "Ensemble based discriminative models for Visual Dialog Challenge 2018",
+    "question_count": 2
+  },
+  "qasper_1912.01772.md": {
+    "paper_id": "1912.01772",
+    "title": "A Resource for Computational Experiments on Mapudungun",
+    "question_count": 2
+  },
+  "qasper_1908.10084.md": {
+    "paper_id": "1908.10084",
+    "title": "Sentence-BERT: Sentence Embeddings using Siamese BERT-Networks",
+    "question_count": 6
+  },
+  "qasper_1802.08636.md": {
+    "paper_id": "1802.08636",
+    "title": "Ranking Sentences for Extractive Summarization with Reinforcement Learning",
+    "question_count": 3
+  },
+  "qasper_1912.13337.md": {
+    "paper_id": "1912.13337",
+    "title": "What Does My QA Model Know? Devising Controlled Probes using Expert Knowledge",
+    "question_count": 5
+  },
+  "qasper_1909.08089.md": {
+    "paper_id": "1909.08089",
+    "title": "Extractive Summarization of Long Documents by Combining Global and Local Context",
+    "question_count": 2
+  },
+  "qasper_1709.05036.md": {
+    "paper_id": "1709.05036",
+    "title": "Query-based Attention CNN for Text Similarity Map",
+    "question_count": 2
+  },
+  "qasper_1911.01371.md": {
+    "paper_id": "1911.01371",
+    "title": "Affective Behaviour Analysis of On-line User Interactions: Are On-line Support Groups more Therapeutic than Twitter?",
+    "question_count": 2
+  },
+  "qasper_1808.10245.md": {
+    "paper_id": "1808.10245",
+    "title": "Comparative Studies of Detecting Abusive Language on Twitter",
+    "question_count": 4
+  },
+  "qasper_1804.05918.md": {
+    "paper_id": "1804.05918",
+    "title": "Improving Implicit Discourse Relation Classification by Modeling Inter-dependencies of Discourse Units in a Paragraph",
+    "question_count": 2
+  },
+  "qasper_1801.06482.md": {
+    "paper_id": "1801.06482",
+    "title": "Deep Learning for Detecting Cyberbullying Across Multiple Social Media Platforms",
+    "question_count": 2
+  },
+  "qasper_1911.06964.md": {
+    "paper_id": "1911.06964",
+    "title": "Learning Autocomplete Systems as a Communication Game",
+    "question_count": 4
+  },
+  "qasper_1901.01010.md": {
+    "paper_id": "1901.01010",
+    "title": "A Joint Model for Multimodal Document Quality Assessment",
+    "question_count": 9
+  },
+  "qasper_2004.02192.md": {
+    "paper_id": "2004.02192",
+    "title": "Arabic Offensive Language on Twitter: Analysis and Experiments",
+    "question_count": 5
+  },
+  "qasper_1908.01294.md": {
+    "paper_id": "1908.01294",
+    "title": "Semi-supervised Thai Sentence Segmentation Using Local and Distant Word Representations",
+    "question_count": 2
+  },
+  "qasper_1906.01040.md": {
+    "paper_id": "1906.01040",
+    "title": "A Surprising Density of Illusionable Natural Speech",
+    "question_count": 2
+  },
+  "qasper_1808.09029.md": {
+    "paper_id": "1808.09029",
+    "title": "Pyramidal Recurrent Unit for Language Modeling",
+    "question_count": 2
+  },
+  "qasper_1806.05504.md": {
+    "paper_id": "1806.05504",
+    "title": "Entity Commonsense Representation for Neural Abstractive Summarization",
+    "question_count": 1
+  },
+  "qasper_1908.09246.md": {
+    "paper_id": "1908.09246",
+    "title": "Open Event Extraction from Online Text using a Generative Adversarial Network",
+    "question_count": 5
+  },
+  "qasper_2001.02885.md": {
+    "paper_id": "2001.02885",
+    "title": "Resolving the Scope of Speculation and Negation using Transformer-Based Architectures",
+    "question_count": 6
+  },
+  "qasper_2001.01269.md": {
+    "paper_id": "2001.01269",
+    "title": "Generating Word and Document Embeddings for Sentiment Analysis",
+    "question_count": 6
+  },
+  "qasper_1712.05999.md": {
+    "paper_id": "1712.05999",
+    "title": "Characterizing Political Fake News in Twitter by its Meta-Data",
+    "question_count": 6
+  },
+  "qasper_1912.08904.md": {
+    "paper_id": "1912.08904",
+    "title": "Macaw: An Extensible Conversational Information Seeking Platform",
+    "question_count": 6
+  },
+  "qasper_1910.10781.md": {
+    "paper_id": "1910.10781",
+    "title": "Hierarchical Transformers for Long Document Classification",
+    "question_count": 2
+  },
+  "qasper_1805.06966.md": {
+    "paper_id": "1805.06966",
+    "title": "Neural User Simulation for Corpus-based Policy Optimisation for Spoken Dialogue Systems",
+    "question_count": 2
+  },
+  "qasper_1708.06185.md": {
+    "paper_id": "1708.06185",
+    "title": "Seernet at EmoInt-2017: Tweet Emotion Intensity Estimator",
+    "question_count": 3
+  },
+  "qasper_1503.00841.md": {
+    "paper_id": "1503.00841",
+    "title": "Robustly Leveraging Prior Knowledge in Text Classification",
+    "question_count": 4
+  },
+  "qasper_1805.03710.md": {
+    "paper_id": "1805.03710",
+    "title": "Incorporating Subword Information into Matrix Factorization Word Embeddings",
+    "question_count": 4
+  },
+  "qasper_2001.07786.md": {
+    "paper_id": "2001.07786",
+    "title": "Shared Task: Lexical Semantic Change Detection in German",
+    "question_count": 3
+  },
+  "qasper_1907.06292.md": {
+    "paper_id": "1907.06292",
+    "title": "TWEETQA: A Social Media Focused Question Answering Dataset",
+    "question_count": 3
+  },
+  "qasper_1612.08205.md": {
+    "paper_id": "1612.08205",
+    "title": "Predicting the Industry of Users on Social Media",
+    "question_count": 5
+  },
+  "qasper_1809.09194.md": {
+    "paper_id": "1809.09194",
+    "title": "Stochastic Answer Networks for SQuAD 2.0",
+    "question_count": 3
+  },
+  "qasper_1802.00396.md": {
+    "paper_id": "1802.00396",
+    "title": "Disunited Nations? A Multiplex Network Approach to Detecting Preference Affinity Blocs using Texts and Votes",
+    "question_count": 3
+  },
+  "qasper_1909.02027.md": {
+    "paper_id": "1909.02027",
+    "title": "An Evaluation Dataset for Intent Classification and Out-of-Scope Prediction",
+    "question_count": 4
+  },
+  "qasper_1909.10012.md": {
+    "paper_id": "1909.10012",
+    "title": "Is change the only constant? Profile change perspective on #LokSabhaElections2019",
+    "question_count": 3
+  },
+  "qasper_1605.03481.md": {
+    "paper_id": "1605.03481",
+    "title": "Tweet2Vec: Character-Based Distributed Representations for Social Media",
+    "question_count": 5
+  },
+  "qasper_2002.04181.md": {
+    "paper_id": "2002.04181",
+    "title": "Performance Comparison of Crowdworkers and NLP Tools onNamed-Entity Recognition and Sentiment Analysis of Political Tweets",
+    "question_count": 5
+  },
+  "qasper_1909.00326.md": {
+    "paper_id": "1909.00326",
+    "title": "Towards Understanding Neural Machine Translation with Word Importance",
+    "question_count": 4
+  },
+  "qasper_1811.12254.md": {
+    "paper_id": "1811.12254",
+    "title": "The Effect of Heterogeneous Data for Alzheimer's Disease Detection from Speech",
+    "question_count": 1
+  },
+  "qasper_1806.04330.md": {
+    "paper_id": "1806.04330",
+    "title": "Neural Network Models for Paraphrase Identification, Semantic Textual Similarity, Natural Language Inference, and Question Answering",
+    "question_count": 1
+  },
+  "qasper_1911.03343.md": {
+    "paper_id": "1911.03343",
+    "title": "Negated LAMA: Birds cannot fly",
+    "question_count": 1
+  },
+  "qasper_1809.03449.md": {
+    "paper_id": "1809.03449",
+    "title": "Explicit Utilization of General Knowledge in Machine Reading Comprehension",
+    "question_count": 4
+  },
+  "qasper_1911.00841.md": {
+    "paper_id": "1911.00841",
+    "title": "Question Answering for Privacy Policies: Combining Computational and Legal Perspectives",
+    "question_count": 5
+  },
+  "qasper_2001.02284.md": {
+    "paper_id": "2001.02284",
+    "title": "Multipurpose Intelligent Process Automation via Conversational Assistant",
+    "question_count": 3
+  },
+  "qasper_1806.03125.md": {
+    "paper_id": "1806.03125",
+    "title": "Text Classification based on Word Subspace with Term-Frequency",
+    "question_count": 2
+  },
+  "qasper_1701.08229.md": {
+    "paper_id": "1701.08229",
+    "title": "Feature Studies to Inform the Classification of Depressive Symptoms from Twitter Data for Population Health",
+    "question_count": 4
+  },
+  "qasper_1908.06264.md": {
+    "paper_id": "1908.06264",
+    "title": "EmotionX-IDEA: Emotion BERT -- an Affectional Model for Conversation",
+    "question_count": 5
+  },
+  "qasper_1811.05711.md": {
+    "paper_id": "1811.05711",
+    "title": "From Free Text to Clusters of Content in Health Records: An Unsupervised Graph Partitioning Approach",
+    "question_count": 1
+  },
+  "qasper_2002.02070.md": {
+    "paper_id": "2002.02070",
+    "title": "Understanding Car-Speak: Replacing Humans in Dealerships",
+    "question_count": 7
+  },
+  "qasper_1909.02304.md": {
+    "paper_id": "1909.02304",
+    "title": "Table-to-Text Generation with Effective Hierarchical Encoder on Three Dimensions (Row, Column and Time)",
+    "question_count": 2
+  },
+  "qasper_1603.01514.md": {
+    "paper_id": "1603.01514",
+    "title": "A Bayesian Model of Multilingual Unsupervised Semantic Role Induction",
+    "question_count": 7
+  },
+  "qasper_1911.10049.md": {
+    "paper_id": "1911.10049",
+    "title": "High Quality ELMo Embeddings for Seven Less-Resourced Languages",
+    "question_count": 2
+  },
+  "qasper_2002.01984.md": {
+    "paper_id": "2002.01984",
+    "title": "UNCC Biomedical Semantic Question Answering Systems. BioASQ: Task-7B, Phase-B",
+    "question_count": 4
+  },
+  "qasper_2002.03407.md": {
+    "paper_id": "2002.03407",
+    "title": "Abstractive Summarization for Low Resource Data using Domain Transfer and Data Synthesis",
+    "question_count": 5
+  },
+  "qasper_1809.02279.md": {
+    "paper_id": "1809.02279",
+    "title": "Cell-aware Stacked LSTMs for Modeling Sentences",
+    "question_count": 4
+  },
+  "qasper_1611.02988.md": {
+    "paper_id": "1611.02988",
+    "title": "Distant supervision for emotion detection using Facebook reactions",
+    "question_count": 3
+  },
+  "qasper_2003.03044.md": {
+    "paper_id": "2003.03044",
+    "title": "A Corpus for Detecting High-Context Medical Conditions in Intensive Care Patient Notes Focusing on Frequently Readmitted Patients",
+    "question_count": 3
+  },
+  "qasper_1909.01362.md": {
+    "paper_id": "1909.01362",
+    "title": "Trouble on the Horizon: Forecasting the Derailment of Online Conversations as they Develop",
+    "question_count": 2
+  },
+  "qasper_1805.10824.md": {
+    "paper_id": "1805.10824",
+    "title": "UG18 at SemEval-2018 Task 1: Generating Additional Training Data for Predicting Emotion Intensity in Spanish",
+    "question_count": 6
+  },
+  "qasper_2003.11562.md": {
+    "paper_id": "2003.11562",
+    "title": "Finnish Language Modeling with Deep Transformer Models",
+    "question_count": 2
+  },
+  "qasper_1603.09631.md": {
+    "paper_id": "1603.09631",
+    "title": "Data Collection for Interactive Learning through the Dialog",
+    "question_count": 2
+  },
+  "qasper_1907.03060.md": {
+    "paper_id": "1907.03060",
+    "title": "Exploiting Out-of-Domain Parallel Data through Multilingual Transfer Learning for Low-Resource Neural Machine Translation",
+    "question_count": 1
+  },
+  "qasper_1909.13714.md": {
+    "paper_id": "1909.13714",
+    "title": "Towards Multimodal Understanding of Passenger-Vehicle Interactions in Autonomous Vehicles: Intent/Slot Recognition Utilizing Audio-Visual Data",
+    "question_count": 2
+  },
+  "qasper_1604.08504.md": {
+    "paper_id": "1604.08504",
+    "title": "Detecting\"Smart\"Spammers On Social Network: A Topic Model Approach",
+    "question_count": 3
+  },
+  "qasper_1909.04002.md": {
+    "paper_id": "1909.04002",
+    "title": "The Trumpiest Trump? Identifying a Subject's Most Characteristic Tweets",
+    "question_count": 1
+  },
+  "qasper_1610.00956.md": {
+    "paper_id": "1610.00956",
+    "title": "Embracing data abundance: BookTest Dataset for Reading Comprehension",
+    "question_count": 3
+  },
+  "qasper_1804.07789.md": {
+    "paper_id": "1804.07789",
+    "title": "Generating Descriptions from Structured Data Using a Bifocal Attention Mechanism and Gated Orthogonalization",
+    "question_count": 4
+  },
+  "qasper_1910.03634.md": {
+    "paper_id": "1910.03634",
+    "title": "Prose for a Painting",
+    "question_count": 6
+  },
+  "qasper_1610.09225.md": {
+    "paper_id": "1610.09225",
+    "title": "Sentiment Analysis of Twitter Data for Predicting Stock Market Movements",
+    "question_count": 3
+  },
+  "qasper_1905.07791.md": {
+    "paper_id": "1905.07791",
+    "title": "Predicting Annotation Difficulty to Improve Task Routing and Model Performance for Biomedical Information Extraction",
+    "question_count": 5
+  },
+  "qasper_2003.11563.md": {
+    "paper_id": "2003.11563",
+    "title": "Cost-Sensitive BERT for Generalisable Sentence Classification with Imbalanced Data",
+    "question_count": 3
+  },
+  "qasper_1612.06685.md": {
+    "paper_id": "1612.06685",
+    "title": "Stateology: State-Level Interactive Charting of Language, Feelings, and Values",
+    "question_count": 3
+  },
+  "qasper_1911.03059.md": {
+    "paper_id": "1911.03059",
+    "title": "A Comprehensive Comparison of Machine Learning Based Methods Used in Bengali Question Classification",
+    "question_count": 2
+  },
+  "qasper_1910.12795.md": {
+    "paper_id": "1910.12795",
+    "title": "Learning Data Manipulation for Augmentation and Weighting",
+    "question_count": 2
+  },
+  "qasper_1807.07279.md": {
+    "paper_id": "1807.07279",
+    "title": "Imparting Interpretability to Word Embeddings while Preserving Semantic Structure",
+    "question_count": 4
+  },
+  "qasper_1810.12091.md": {
+    "paper_id": "1810.12091",
+    "title": "Embedding Geographic Locations for Modelling the Natural Environment using Flickr Tags and Structured Data",
+    "question_count": 2
+  },
+  "qasper_2003.04866.md": {
+    "paper_id": "2003.04866",
+    "title": "Multi-SimLex: A Large-Scale Evaluation of Multilingual and Cross-Lingual Lexical Semantic Similarity",
+    "question_count": 2
+  },
+  "qasper_1909.06200.md": {
+    "paper_id": "1909.06200",
+    "title": "A Neural Approach to Irony Generation",
+    "question_count": 5
+  },
+  "qasper_1906.07701.md": {
+    "paper_id": "1906.07701",
+    "title": "Distilling Translations with Visual Awareness",
+    "question_count": 2
+  },
+  "qasper_2003.08385.md": {
+    "paper_id": "2003.08385",
+    "title": "X-Stance: A Multilingual Multi-Target Dataset for Stance Detection",
+    "question_count": 5
+  },
+  "qasper_1909.05359.md": {
+    "paper_id": "1909.05359",
+    "title": "From Textual Information Sources to Linked Data in the Agatha Project",
+    "question_count": 2
+  },
+  "qasper_1908.05441.md": {
+    "paper_id": "1908.05441",
+    "title": "Multi-class Hierarchical Question Classification for Multiple Choice Science Exams",
+    "question_count": 4
+  },
+  "qasper_1809.01202.md": {
+    "paper_id": "1809.01202",
+    "title": "Causal Explanation Analysis on Social Media",
+    "question_count": 2
+  },
+  "qasper_2001.09215.md": {
+    "paper_id": "2001.09215",
+    "title": "An Iterative Approach for Identifying Complaint Based Tweets in Social Media Platforms",
+    "question_count": 2
+  },
+  "qasper_1809.06537.md": {
+    "paper_id": "1809.06537",
+    "title": "Automatic Judgment Prediction via Legal Reading Comprehension",
+    "question_count": 6
+  },
+  "qasper_1912.01214.md": {
+    "paper_id": "1912.01214",
+    "title": "Cross-lingual Pre-training Based Transfer for Zero-shot Neural Machine Translation",
+    "question_count": 4
+  },
+  "qasper_1910.08293.md": {
+    "paper_id": "1910.08293",
+    "title": "Follow Alice into the Rabbit Hole: Giving Dialogue Agents Understanding of Human Level Attributes.",
+    "question_count": 4
+  },
+  "qasper_1911.02855.md": {
+    "paper_id": "1911.02855",
+    "title": "Dice Loss for Data-imbalanced NLP Tasks",
+    "question_count": 4
+  },
+  "qasper_1806.11432.md": {
+    "paper_id": "1806.11432",
+    "title": "Using General Adversarial Networks for Marketing: A Case Study of Airbnb",
+    "question_count": 4
+  },
+  "qasper_2003.03014.md": {
+    "paper_id": "2003.03014",
+    "title": "A Framework for the Computational Linguistic Analysis of Dehumanization",
+    "question_count": 3
+  },
+  "qasper_1706.00139.md": {
+    "paper_id": "1706.00139",
+    "title": "Natural Language Generation for Spoken Dialogue System using RNN Encoder-Decoder Networks",
+    "question_count": 2
+  },
+  "qasper_1910.05603.md": {
+    "paper_id": "1910.05603",
+    "title": "VAIS ASR: Building a conversational speech recognition system using language model combination",
+    "question_count": 4
+  },
+  "qasper_1810.08699.md": {
+    "paper_id": "1810.08699",
+    "title": "pioNER: Datasets and Baselines for Armenian Named Entity Recognition",
+    "question_count": 3
+  },
+  "qasper_1812.06864.md": {
+    "paper_id": "1812.06864",
+    "title": "Fully Convolutional Speech Recognition",
+    "question_count": 1
+  },
+  "qasper_1708.01464.md": {
+    "paper_id": "1708.01464",
+    "title": "Massively Multilingual Neural Grapheme-to-Phoneme Conversion",
+    "question_count": 4
+  },
+  "qasper_1909.11687.md": {
+    "paper_id": "1909.11687",
+    "title": "Extreme Language Model Compression with Optimal Subwords and Shared Projections",
+    "question_count": 2
+  },
+  "qasper_1704.04452.md": {
+    "paper_id": "1704.04452",
+    "title": "Bringing Structure into Summaries: Crowdsourcing a Benchmark Corpus of Concept Maps",
+    "question_count": 6
+  },
+  "qasper_1909.03135.md": {
+    "paper_id": "1909.03135",
+    "title": "To lemmatize or not to lemmatize: how word normalisation affects ELMo performance in word sense disambiguation",
+    "question_count": 4
+  },
+  "qasper_1804.11346.md": {
+    "paper_id": "1804.11346",
+    "title": "A Portuguese Native Language Identification Dataset",
+    "question_count": 4
+  },
+  "qasper_1903.07406.md": {
+    "paper_id": "1903.07406",
+    "title": "Automatic Classification of Pathology Reports using TF-IDF Features",
+    "question_count": 3
+  },
+  "qasper_1805.07133.md": {
+    "paper_id": "1805.07133",
+    "title": "Combining Advanced Methods in Japanese-Vietnamese Neural Machine Translation",
+    "question_count": 4
+  },
+  "qasper_1910.09982.md": {
+    "paper_id": "1910.09982",
+    "title": "Findings of the NLP4IF-2019 Shared Task on Fine-Grained Propaganda Detection",
+    "question_count": 3
+  },
+  "qasper_1704.06194.md": {
+    "paper_id": "1704.06194",
+    "title": "Improved Neural Relation Detection for Knowledge Base Question Answering",
+    "question_count": 4
+  },
+  "qasper_2003.02249.md": {
+    "paper_id": "2003.02249",
+    "title": "jiant: A Software Toolkit for Research on General-Purpose Text Understanding Models",
+    "question_count": 2
+  },
+  "qasper_1806.05513.md": {
+    "paper_id": "1806.05513",
+    "title": "Humor Detection in English-Hindi Code-Mixed Social Media Content : Corpus and Baseline System",
+    "question_count": 4
+  },
+  "qasper_1906.08593.md": {
+    "paper_id": "1906.08593",
+    "title": "Conflict as an Inverse of Attention in Sequence Relationship",
+    "question_count": 3
+  },
+  "qasper_1703.04001.md": {
+    "paper_id": "1703.04001",
+    "title": "Language Use Matters: Analysis of the Linguistic Structure of Question Texts Can Characterize Answerability in Quora",
+    "question_count": 3
+  },
+  "qasper_1910.12574.md": {
+    "paper_id": "1910.12574",
+    "title": "A BERT-Based Transfer Learning Approach for Hate Speech Detection in Online Social Media",
+    "question_count": 8
+  },
+  "qasper_1903.11437.md": {
+    "paper_id": "1903.11437",
+    "title": "Using Monolingual Data in Neural Machine Translation: a Systematic Study",
+    "question_count": 6
+  },
+  "qasper_1710.03348.md": {
+    "paper_id": "1710.03348",
+    "title": "What does Attention in Neural Machine Translation Pay Attention to?",
+    "question_count": 3
+  },
+  "qasper_1909.01296.md": {
+    "paper_id": "1909.01296",
+    "title": "PolyResponse: A Rank-based Approach to Task-Oriented Dialogue with Application in Restaurant Search and Booking",
+    "question_count": 4
+  },
+  "qasper_1909.09551.md": {
+    "paper_id": "1909.09551",
+    "title": "Natural Language Processing via LDA Topic Model in Recommendation Systems",
+    "question_count": 1
+  },
+  "qasper_1606.02891.md": {
+    "paper_id": "1606.02891",
+    "title": "Edinburgh Neural Machine Translation Systems for WMT 16",
+    "question_count": 1
+  },
+  "qasper_1811.00147.md": {
+    "paper_id": "1811.00147",
+    "title": "DOLORES: Deep Contextualized Knowledge Graph Embeddings",
+    "question_count": 2
+  },
+  "qasper_1909.03405.md": {
+    "paper_id": "1909.03405",
+    "title": "Symmetric Regularization based BERT for Pair-wise Semantic Reasoning",
+    "question_count": 3
+  },
+  "qasper_1609.00425.md": {
+    "paper_id": "1609.00425",
+    "title": "Identifying Dogmatism in Social Media: Signals and Models",
+    "question_count": 2
+  },
+  "qasper_1611.01576.md": {
+    "paper_id": "1611.01576",
+    "title": "Quasi-Recurrent Neural Networks",
+    "question_count": 3
+  },
+  "qasper_1803.05223.md": {
+    "paper_id": "1803.05223",
+    "title": "MCScript: A Novel Dataset for Assessing Machine Comprehension Using Script Knowledge",
+    "question_count": 4
+  },
+  "qasper_1908.11047.md": {
+    "paper_id": "1908.11047",
+    "title": "Shallow Syntax in Deep Water",
+    "question_count": 5
+  },
+  "qasper_1701.04056.md": {
+    "paper_id": "1701.04056",
+    "title": "Dialog Context Language Modeling with Recurrent Neural Networks",
+    "question_count": 1
+  },
+  "qasper_1903.09722.md": {
+    "paper_id": "1903.09722",
+    "title": "Pre-trained Language Model Representations for Language Generation",
+    "question_count": 4
+  },
+  "qasper_1611.04798.md": {
+    "paper_id": "1611.04798",
+    "title": "Toward Multilingual Neural Machine Translation with Universal Encoder and Decoder",
+    "question_count": 4
+  },
+  "qasper_1801.07887.md": {
+    "paper_id": "1801.07887",
+    "title": "Impact of Batch Size on Stopping Active Learning for Text Classification",
+    "question_count": 2
+  },
+  "qasper_1712.05608.md": {
+    "paper_id": "1712.05608",
+    "title": "A Novel Approach for Effective Learning in Low Resourced Scenarios",
+    "question_count": 4
+  },
+  "qasper_2002.07306.md": {
+    "paper_id": "2002.07306",
+    "title": "From English To Foreign Languages: Transferring Pre-trained Language Models",
+    "question_count": 6
+  },
+  "qasper_1709.07814.md": {
+    "paper_id": "1709.07814",
+    "title": "Attention-based Wav2Text with Feature Transfer Learning",
+    "question_count": 3
+  },
+  "qasper_1703.07090.md": {
+    "paper_id": "1703.07090",
+    "title": "Deep LSTM for Large Vocabulary Continuous Speech Recognition",
+    "question_count": 3
+  },
+  "qasper_1907.01468.md": {
+    "paper_id": "1907.01468",
+    "title": "How we do things with words: Analyzing text as social and cultural data",
+    "question_count": 5
+  },
+  "qasper_1703.10344.md": {
+    "paper_id": "1703.10344",
+    "title": "Automated News Suggestions for Populating Wikipedia Entity Pages",
+    "question_count": 6
+  },
+  "qasper_1706.01875.md": {
+    "paper_id": "1706.01875",
+    "title": "Measuring Offensive Speech in Online Political Discourse",
+    "question_count": 4
+  },
+  "qasper_1805.08241.md": {
+    "paper_id": "1805.08241",
+    "title": "Sparse and Constrained Attention for Neural Machine Translation",
+    "question_count": 1
+  },
+  "qasper_1706.09673.md": {
+    "paper_id": "1706.09673",
+    "title": "Improving Distributed Representations of Tweets - Present and Future",
+    "question_count": 4
+  },
+  "qasper_2002.12612.md": {
+    "paper_id": "2002.12612",
+    "title": "A multi-layer approach to disinformation detection on Twitter",
+    "question_count": 4
+  },
+  "qasper_1909.00512.md": {
+    "paper_id": "1909.00512",
+    "title": "How Contextual are Contextualized Word Representations? Comparing the Geometry of BERT, ELMo, and GPT-2 Embeddings",
+    "question_count": 2
+  },
+  "qasper_1905.10851.md": {
+    "paper_id": "1905.10851",
+    "title": "When to reply? Context Sensitive Models to Predict Instructor Interventions in MOOC Forums",
+    "question_count": 4
+  },
+  "qasper_1802.06024.md": {
+    "paper_id": "1802.06024",
+    "title": "Towards a Continuous Knowledge Learning Engine for Chatbots",
+    "question_count": 6
+  },
+  "qasper_1904.03288.md": {
+    "paper_id": "1904.03288",
+    "title": "Jasper: An End-to-End Convolutional Neural Acoustic Model",
+    "question_count": 2
+  },
+  "qasper_1909.00015.md": {
+    "paper_id": "1909.00015",
+    "title": "Adaptively Sparse Transformers",
+    "question_count": 3
+  },
+  "qasper_1907.04433.md": {
+    "paper_id": "1907.04433",
+    "title": "GluonCV and GluonNLP: Deep Learning in Computer Vision and Natural Language Processing",
+    "question_count": 1
+  },
+  "qasper_1803.09123.md": {
+    "paper_id": "1803.09123",
+    "title": "Equation Embeddings",
+    "question_count": 2
+  },
+  "qasper_1904.07904.md": {
+    "paper_id": "1904.07904",
+    "title": "Mitigating the Impact of Speech Recognition Errors on Spoken Question Answering by Adversarial Domain Adaptation",
+    "question_count": 4
+  },
+  "qasper_1911.07555.md": {
+    "paper_id": "1911.07555",
+    "title": "Short Text Language Identification for Under Resourced Languages",
+    "question_count": 9
+  },
+  "qasper_1603.08594.md": {
+    "paper_id": "1603.08594",
+    "title": "Prepositional Attachment Disambiguation Using Bilingual Parsing and Alignments",
+    "question_count": 2
+  },
+  "qasper_1705.04153.md": {
+    "paper_id": "1705.04153",
+    "title": "Dynamic Compositional Neural Networks over Tree Structure",
+    "question_count": 2
+  },
+  "qasper_1702.03856.md": {
+    "paper_id": "1702.03856",
+    "title": "Towards speech-to-text translation without speech recognition",
+    "question_count": 3
+  },
+  "qasper_2001.08868.md": {
+    "paper_id": "2001.08868",
+    "title": "Exploration Based Language Learning for Text-Based Games",
+    "question_count": 4
+  },
+  "qasper_1906.00346.md": {
+    "paper_id": "1906.00346",
+    "title": "Pre-training of Graph Augmented Transformers for Medication Recommendation",
+    "question_count": 2
+  },
+  "qasper_2004.04721.md": {
+    "paper_id": "2004.04721",
+    "title": "Translation Artifacts in Cross-lingual Transfer Learning",
+    "question_count": 7
+  },
+  "qasper_1604.00727.md": {
+    "paper_id": "1604.00727",
+    "title": "Character-Level Question Answering with Attention",
+    "question_count": 2
+  },
+  "qasper_1908.07195.md": {
+    "paper_id": "1908.07195",
+    "title": "ARAML: A Stable Adversarial Training Framework for Text Generation",
+    "question_count": 3
+  },
+  "qasper_2003.11645.md": {
+    "paper_id": "2003.11645",
+    "title": "Word2Vec: Optimal Hyper-Parameters and Their Impact on NLP Downstream Tasks",
+    "question_count": 4
+  },
+  "qasper_1806.00738.md": {
+    "paper_id": "1806.00738",
+    "title": "Contextualize, Show and Tell: A Neural Visual Storyteller",
+    "question_count": 4
+  },
+  "qasper_1612.03226.md": {
+    "paper_id": "1612.03226",
+    "title": "Active Learning for Speech Recognition: the Power of Gradients",
+    "question_count": 4
+  },
+  "qasper_1904.04358.md": {
+    "paper_id": "1904.04358",
+    "title": "Deep Learning the EEG Manifold for Phonological Categorization from Active Thoughts",
+    "question_count": 6
+  },
+  "qasper_1903.11283.md": {
+    "paper_id": "1903.11283",
+    "title": "Grammatical Error Correction and Style Transfer via Zero-shot Monolingual Translation",
+    "question_count": 4
+  },
+  "qasper_1808.03738.md": {
+    "paper_id": "1808.03738",
+    "title": "Ancient-Modern Chinese Translation with a Large Training Dataset",
+    "question_count": 2
+  },
+  "qasper_1810.05241.md": {
+    "paper_id": "1810.05241",
+    "title": "Generating Diverse Numbers of Diverse Keyphrases",
+    "question_count": 6
+  },
+  "qasper_2002.11910.md": {
+    "paper_id": "2002.11910",
+    "title": "Integrating Boundary Assembling into a DNN Framework for Named Entity Recognition in Chinese Social Media Text",
+    "question_count": 3
+  },
+  "qasper_1912.08960.md": {
+    "paper_id": "1912.08960",
+    "title": "Going Beneath the Surface: Evaluating Image Captioning for Grammaticality, Truthfulness and Diversity",
+    "question_count": 4
+  },
+  "qasper_1904.01548.md": {
+    "paper_id": "1904.01548",
+    "title": "Understanding language-elicited EEG data by predicting it from a fine-tuned language model",
+    "question_count": 2
+  },
+  "qasper_1609.00559.md": {
+    "paper_id": "1609.00559",
+    "title": "Improving Correlation with Human Judgments by Integrating Semantic Similarity with Second--Order Vectors",
+    "question_count": 3
+  },
+  "qasper_1909.08970.md": {
+    "paper_id": "1909.08970",
+    "title": "RUN through the Streets: A New Dataset and Baseline Models for Realistic Urban Navigation",
+    "question_count": 2
+  },
+  "qasper_1901.08079.md": {
+    "paper_id": "1901.08079",
+    "title": "A Question-Entailment Approach to Question Answering",
+    "question_count": 2
+  },
+  "qasper_1706.06894.md": {
+    "paper_id": "1706.06894",
+    "title": "Stance Detection in Turkish Tweets",
+    "question_count": 5
+  },
+  "qasper_1909.00105.md": {
+    "paper_id": "1909.00105",
+    "title": "Generating Personalized Recipes from Historical User Preferences",
+    "question_count": 6
+  },
+  "qasper_1809.00540.md": {
+    "paper_id": "1809.00540",
+    "title": "Multilingual Clustering of Streaming News",
+    "question_count": 3
+  },
+  "qasper_1701.02962.md": {
+    "paper_id": "1701.02962",
+    "title": "Distinguishing Antonyms and Synonyms in a Pattern-based Neural Network",
+    "question_count": 1
+  },
+  "qasper_1707.03569.md": {
+    "paper_id": "1707.03569",
+    "title": "Multitask Learning for Fine-Grained Twitter Sentiment Analysis",
+    "question_count": 3
+  },
+  "qasper_1809.04267.md": {
+    "paper_id": "1809.04267",
+    "title": "Knowledge Based Machine Reading Comprehension",
+    "question_count": 1
+  },
+  "qasper_1611.03599.md": {
+    "paper_id": "1611.03599",
+    "title": "UTCNN: a Deep Learning Model of Stance Classificationon on Social Media Text",
+    "question_count": 6
+  },
+  "qasper_1801.02073.md": {
+    "paper_id": "1801.02073",
+    "title": "Analysis of Wikipedia-based Corpora for Question Answering",
+    "question_count": 4
+  },
+  "qasper_1702.03342.md": {
+    "paper_id": "1702.03342",
+    "title": "Learning Concept Embeddings for Efficient Bag-of-Concepts Densification",
+    "question_count": 4
+  },
+  "qasper_2002.08795.md": {
+    "paper_id": "2002.08795",
+    "title": "How To Avoid Being Eaten By a Grue: Exploration Strategies for Text-Adventure Agents",
+    "question_count": 3
+  },
+  "qasper_2004.03354.md": {
+    "paper_id": "2004.03354",
+    "title": "Inexpensive Domain Adaptation of Pretrained Language Models: A Case Study on Biomedical Named Entity Recognition",
+    "question_count": 2
+  },
+  "qasper_1612.02482.md": {
+    "paper_id": "1612.02482",
+    "title": "Improving the Performance of Neural Machine Translation Involving Morphologically Rich Languages",
+    "question_count": 2
+  },
+  "qasper_1908.08345.md": {
+    "paper_id": "1908.08345",
+    "title": "Text Summarization with Pretrained Encoders",
+    "question_count": 3
+  },
+  "qasper_1610.07809.md": {
+    "paper_id": "1610.07809",
+    "title": "How Document Pre-processing affects Keyphrase Extraction Performance",
+    "question_count": 3
+  },
+  "qasper_1905.11268.md": {
+    "paper_id": "1905.11268",
+    "title": "Combating Adversarial Misspellings with Robust Word Recognition",
+    "question_count": 7
+  },
+  "qasper_1805.01445.md": {
+    "paper_id": "1805.01445",
+    "title": "The Fine Line between Linguistic Generalization and Failure in Seq2Seq-Attention Models",
+    "question_count": 2
+  },
+  "qasper_1912.00667.md": {
+    "paper_id": "1912.00667",
+    "title": "A Human-AI Loop Approach for Joint Keyword Discovery and Expectation Estimation in Micropost Event Detection",
+    "question_count": 6
+  },
+  "qasper_1908.04042.md": {
+    "paper_id": "1908.04042",
+    "title": "Evaluating Tag Recommendations for E-Book Annotation Using a Semantic Similarity Metric",
+    "question_count": 6
+  },
+  "qasper_2003.13032.md": {
+    "paper_id": "2003.13032",
+    "title": "Named Entities in Medical Case Reports: Corpus and Experiments",
+    "question_count": 6
+  },
+  "qasper_1909.07575.md": {
+    "paper_id": "1909.07575",
+    "title": "Bridging the Gap between Pre-Training and Fine-Tuning for End-to-End Speech Translation",
+    "question_count": 2
+  },
+  "qasper_1901.05287.md": {
+    "paper_id": "1901.05287",
+    "title": "Assessing BERT's Syntactic Abilities",
+    "question_count": 1
+  },
+  "qasper_1608.06757.md": {
+    "paper_id": "1608.06757",
+    "title": "Robust Named Entity Recognition in Idiosyncratic Domains",
+    "question_count": 2
+  },
+  "qasper_1706.08198.md": {
+    "paper_id": "1706.08198",
+    "title": "English-Japanese Neural Machine Translation with Encoder-Decoder-Reconstructor",
+    "question_count": 2
+  },
+  "qasper_1808.09111.md": {
+    "paper_id": "1808.09111",
+    "title": "Unsupervised Learning of Syntactic Structure with Invertible Neural Projections",
+    "question_count": 3
+  },
+  "qasper_2003.03106.md": {
+    "paper_id": "2003.03106",
+    "title": "Sensitive Data Detection and Classification in Spanish Clinical Text: Experiments with BERT",
+    "question_count": 4
+  },
+  "qasper_1910.01863.md": {
+    "paper_id": "1910.01863",
+    "title": "Template-free Data-to-Text Generation of Finnish Sports News",
+    "question_count": 1
+  },
+  "qasper_1909.03582.md": {
+    "paper_id": "1909.03582",
+    "title": "Clickbait? Sensational Headline Generation with Auto-tuned Reinforcement Learning",
+    "question_count": 5
+  },
+  "qasper_2002.01207.md": {
+    "paper_id": "2002.01207",
+    "title": "Arabic Diacritic Recovery Using a Feature-Rich biLSTM Model",
+    "question_count": 4
+  },
+  "qasper_1907.09369.md": {
+    "paper_id": "1907.09369",
+    "title": "Emotion Detection in Text: Focusing on Latent Representation",
+    "question_count": 5
+  },
+  "qasper_1912.03627.md": {
+    "paper_id": "1912.03627",
+    "title": "A Multi Purpose and Large Scale Speech Corpus in Persian and English for Speaker and Speech Recognition: The Deepmine Database",
+    "question_count": 6
+  },
+  "qasper_1910.06592.md": {
+    "paper_id": "1910.06592",
+    "title": "FacTweet: Profiling Fake News Twitter Accounts",
+    "question_count": 11
+  },
+  "qasper_1912.10011.md": {
+    "paper_id": "1912.10011",
+    "title": "A Hierarchical Model for Data-to-Text Generation",
+    "question_count": 3
+  },
+  "qasper_1709.10367.md": {
+    "paper_id": "1709.10367",
+    "title": "Structured Embedding Models for Grouped Data",
+    "question_count": 5
+  },
+  "qasper_1912.01852.md": {
+    "paper_id": "1912.01852",
+    "title": "PitchNet: Unsupervised Singing Voice Conversion with Pitch Adversarial Network",
+    "question_count": 2
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "run_at": "2026-07-10T04:31:58.376Z",
+  "url": "http://127.0.0.1:6454",
+  "results": [
+    {
+      "docs": 10,
+      "nodes": 713,
+      "edges": 0,
+      "render_ms": 878.4,
+      "fps": 9,
+      "heap_mb": 53
+    },
+    {
+      "docs": 25,
+      "nodes": 1983,
+      "edges": 0,
+      "render_ms": 1137.3,
+      "fps": 8,
+      "heap_mb": 42
+    },
+    {
+      "docs": 50,
+      "nodes": 3592,
+      "edges": 0,
+      "render_ms": 1562.9,
+      "fps": 4,
+      "heap_mb": 48
+    },
+    {
+      "docs": 100,
+      "nodes": 3592,
+      "edges": 0,
+      "render_ms": 1224.7,
+      "fps": 4,
+      "heap_mb": 59
+    },
+    {
+      "docs": 200,
+      "nodes": 3592,
+      "edges": 0,
+      "render_ms": 1350,
+      "fps": 6,
+      "heap_mb": 68
+    }
+  ]
+}
