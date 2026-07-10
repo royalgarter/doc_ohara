@@ -3,12 +3,14 @@
 ## **1. Introduction**
 
 - **1.1 Problem Statement** - Traditional RAG systems use flat chunk lists; users "get lost in the middle" when retrieving from large corpora. No spatial or temporal mental model of where knowledge resides.
-- **1.2 Contributions** - (a) Space-Time Graph data model combining structural hierarchy + temporal decay + cross-document entity pivots; (b) Multi-phase hybrid retrieval engine with tiered result classification; (c) Efficient 3D sunburst-tunnel visualization mapping time → Z-axis, ontology → sunburst polar plane (XY), document structure → radial discs, decay class → temporal-reach aura; (d) SUMO ontology-grounded semantic layer enabling tag-expansion retrieval.
+- **1.2 Contributions** - (a) Efficient 3D sunburst-tunnel visualization mapping time → Z-axis, ontology → sunburst polar plane (XY), document structure → radial discs, decay class → temporal-reach aura — the primary contribution; (b) Space-Time Graph data model combining structural hierarchy + temporal decay + cross-document entity pivots, serving as both the retrieval substrate and the visualization's coordinate system; (c) Multi-phase hybrid retrieval engine whose value proposition is **tiered, provenance-carrying results at parity with the best single-signal retriever** (Section 7) — explainability, not ranking gains; (d) SUMO ontology-grounded semantic layer, which grounds the visualization's spatial coordinates and enables tag-expansion retrieval.
 - **1.3 Paper Organization** - Brief roadmap of sections 2–8.
 
 The "lost in the middle" phenomenon, demonstrated by Liu et al. (2024), shows that language-model performance degrades when relevant information is located in the middle of a long input context rather than at its beginning or end. In retrieval-augmented generation (RAG), this positional bias is compounded by the fact that most pipelines represent corpora as flat, ordered chunks: the retriever returns a linear list of passages, and the generator must synthesize them without an explicit model of where each passage sits in the original document structure or timeline. Users are therefore left without a spatial or temporal mental model of the corpus.
 
 OHARA targets document corpora that already carry, or can be made to carry, structural metadata: sections, subsections, paragraphs, tables, figures, and publication dates. Examples include regulatory filings, academic papers, technical manuals, parliamentary records, and long-form journalism. We do not assume that every document is perfectly structured; rather, we assume that a parser or LLM can recover a DoCO-like hierarchy (Ciccarese et al., 2017) and that publication dates are available or extractable.
+
+We state our positioning explicitly. OHARA is not a claim that graph-augmented retrieval outranks dense retrieval — our own evaluation (Section 7) shows the tuned hybrid *matches* the best single signal rather than beating it. OHARA's thesis is that a knowledge base should be **seeable and auditable**: the same Space-Time Graph that answers a query also (i) renders as a navigable spatial-temporal map in which users hold a mental model of *where* knowledge lives, and (ii) attaches per-result provenance explaining *why* each passage was retrieved and how strongly it is corroborated. Retrieval quality at parity is the entry ticket; the visualization and the audit trail are the contribution.
 
 > **Citation**: Nelson F. Liu, Kevin Lin, John Hewitt, Ashwin Paranjape, Michele Bevilacqua, Fabio Petroni, and Percy Liang. 2024. *Lost in the Middle: How Language Models Use Long Contexts*. Transactions of the Association for Computational Linguistics, 12:157–173. https://doi.org/10.1162/tacl_a_00638
 
@@ -70,7 +72,7 @@ These edges distinguish between **structural** (tree-based), **semantic** (cross
 
 ### 3.5 Complexity Analysis: $O(docs)$ Pre-Filtering
 
-A critical engineering contribution of OHARA is the **Document Rollup** strategy implemented during the ingest pipeline. This strategy addresses the scalability limits of naive RAG where retrieval must often scan every paragraph across the entire corpus.
+The **Document Rollup** strategy in the ingest pipeline addresses a scalability limit of naive RAG, where retrieval must often scan every paragraph across the corpus. We present it here as a design analysis; the wall-clock speedup has not yet been benchmarked in isolation.
 
 #### 3.5.1 The Mechanism
 During the ingest process, once all content nodes ($V_{para}$) are processed, the system performs a union of all `entity_slugs` and `sumo_tags` present in the paragraphs and persists them onto the parent document record ($V_{docs}$). 
@@ -82,7 +84,7 @@ In a traditional flat-chunk RAG system, semantic filtering or keyword matching o
 *   **Pre-filtering Complexity:** $O(n)$, where $n = |V_{docs}|$ is the number of documents in the corpus.
 *   **Search Efficiency:** This provides a constant-factor speedup by allowing the engine to skip structural traversal for any document whose top-level rollup does not intersect with the query's SUMO hints or entity fingerprints. 
 
-This $O(n)$ complexity is significantly more efficient than $O(n \times \text{chunks\_per\_doc})$, especially as the corpus grows, because it leverages the inherent hierarchy of the data rather than treating it as an undifferentiated "graph soup". This structural grounding is what allows the system to mitigate the "lost in the middle" phenomenon—retrieval begins at the document "spine" and descends into relevant nodes rather than scanning a flat, disconnected list.
+This $O(n)$ pre-filter is asymptotically cheaper than $O(n \times \text{chunks\_per\_doc})$ scanning because it leverages the inherent hierarchy of the data rather than treating it as an undifferentiated "graph soup". The intended consequence for the "lost in the middle" problem is architectural: retrieval begins at the document "spine" and descends into relevant nodes rather than scanning a flat list. Whether this descent succeeds is an empirical question — our evaluation (Section 7.1.1) finds document location and descent to be exactly where corpus-scale retrieval loses most of its accuracy, making this the component with the largest measured headroom.
 
 ---
 
@@ -101,7 +103,7 @@ This $O(n)$ complexity is significantly more efficient than $O(n \times \text{ch
 - **4.11 Tier Classification** - Principal (≥2 phases, cross-doc, score ≥ 75th pctl), Integrity (Principal + verified neighbours with provenance), Explorer (frontier beyond Integrity, metadata-only). Grounded in Bates' Berrypicking + Pirolli's Information Foraging Theory.
 - **4.12 Advanced Modes** - Chain-of-Retrieval (iterative), Agentic RAG (Gemini-driven tool dispatch), Reasoning RAG (sub-query gap fill), Speculative RAG (pre-warm frontier), Self-RAG (responsiveness verification), REFEED RAG (human feedback → weight tuning).
 
-This section presents the formal algorithmic framework for the **OHARA Score Fusion and Tier Classification** mechanism. The architecture is designed to address the "lost in the middle" structural decay of flat-chunk RAG by replacing naive ranking with multi-dimensional corroboration logic.
+This section presents the formal algorithmic framework for the **OHARA Score Fusion and Tier Classification** mechanism. The design goal is to replace naive ranking with corroboration logic that carries provenance; as Section 7 shows, the measured benefit on the corpora tested is explainability at ranking parity, with corroboration operating over two signal families in practice.
 
 ### 4.10.1. Algorithmic Pseudocode: Fusion and Tiering
 
@@ -195,27 +197,28 @@ function classifyTiers(fusedResults) {
 
 ### 4.13. Ablation Analysis: Phase Contributions to Principal-Tier Quality
 
-The Principal tier is not merely a "top-k" cut; it is a corroboration filter. Our analysis indicates that the interaction between specific phases is what prevents the "lost in the middle" decay.
+The Principal tier is not merely a "top-k" cut; it is a corroboration filter. This section states the design intent behind each phase pairing; Section 7 reports the measured effects, which are more modest than the design intent on the corpora tested so far — we keep both so the gap between intent and measurement stays visible.
 
 #### 4.13.1 Phase 1 (BM25) + Phase 1b (SUMO Expansion): The Hybrid Core
 Without SUMO expansion, retrieval relies purely on lexical overlap, which fails in long documents due to the **vocabulary gap**.
-*   **Contribution**: High recall. SUMO tags provide a semantic grounding that mitigates relational blindness.
-*   **Expected Ablation Effect**: Removing Phase 1b should substantially reduce retrieval of semantically related but lexically distinct paragraphs (to be quantified in Section 7).
+*   **Contribution (design intent)**: High recall. SUMO tags provide a semantic grounding that mitigates relational blindness.
+*   **Measured (QASPER)**: removing Phase 1b costs 0.7pp Hits@10 — within noise. On this corpus the vocabulary gap is bridged almost entirely by the dense vector phase (1d), not by tag expansion; SUMO's measurable role is as the visualization's coordinate system (Section 6.2) and as query-time filter vocabulary, not as a ranking signal. Domain corpora with sparser embedding coverage may differ.
 
 #### 4.13.2 Phase 0b (TOC-Guided) + Phase 3 (Structural Traversal)
 This pairing is our PageIndex-inspired remedy for the "lost in the middle" problem.
 *   **Contribution**: In long documents (e.g., 100-page SEC filings), BM25 hits often land on disconnected leaf nodes. Phase 0b asks the LLM to identify relevant sections via the Table of Contents *before* text is scanned.
-*   **Expected Ablation Effect**: Without TOC guidance, Phase 3 structural traversal often expands into noise areas (bibliographies, headers). Phase 0b ensures descent into the correct structural hierarchy, increasing the **Integrity** of the result context.
+*   **Measured (QASPER)**: removing Phase 0b costs 0.7pp Hits@10 on top-k ranking — small, but the oracle-document decomposition (Section 7.1.1) shows why this pairing still matters: ~42% of corpus-wide failures occur at document location and descent, which is precisely the step these phases target. Their effect concentrates in the Integrity tier's context quality rather than top-k hit rate; long, deeply structured documents (100-page filings) remain the expected stress case.
 
 #### 4.13.3 Phase 1c (Cross-Document Edge Expansion)
 This phase enables **multi-hop reasoning** without O(n²) entity hairballs.
 *   **Contribution**: By following `SIMILAR_TO` edges enriched with LLM-generated verbs (e.g., "extends the argument of"), the system recovers context that a flat vector search would miss.
-*   **Expected Ablation Effect**: Removing Phase 1c collapses the Space-Time Graph back into a per-document search engine, losing the ability to trace historical or logical influence chains across the corpus.
+*   **Measured (QASPER)**: removing Phase 1c costs 0.7pp Hits@10. The influence-chain capability it provides is qualitative on this corpus (academic papers with sparse SIMILAR_TO connectivity); the MultiHop-RAG evaluation, whose queries explicitly require cross-document evidence, is the quantitative test (Section 7, pending).
 
 #### 4.13.4 The Corroboration Constraint (contributions.length $\geq$ 2)
-This constraint is the most consequential logic in the Principal tier.
-*   **Insight**: A node that only surfaces in BM25 is often a lexical coincidence. A node that surfaces in both BM25 and **Entity Pivot** (Phase 2) has a much higher probability of being relevant to the query's core entities.
+This constraint is the distinctive logic of the Principal tier.
+*   **Insight**: A node that only surfaces in BM25 is often a lexical coincidence. A node that surfaces in two independent signal families has a much higher probability of being genuinely relevant.
 *   **Interpretation**: Requiring $\geq 2$ signals acts as a de facto **Corrective RAG** step, filtering structural noise before generation. This ensures the LLM generator receives only high-scent nodes, mitigating the attention degradation observed in long-context prompts.
+*   **Measured (QASPER)**: the mechanism functions (Principal-hit 0% with one signal → 22.7% with two) but the corroborating pair is in practice `bm25∩vector` only: the graph-side phases (entity pivot, cross-document, structural) *exclude already-seen nodes by design*, so they expand the frontier rather than corroborate the core. Corroboration in the current architecture is therefore two-signal, not many-angle; widening it (e.g., letting graph phases re-score seen nodes) is future work.
 
 ---
 
@@ -307,7 +310,21 @@ Scene rebuild time and memory grow sub-linearly in node count (17× more nodes �
 
 \* Principal proxied as plain top-5 when the corroboration constraint is disabled.
 
+Companion decomposition (document routing vs. within-document discrimination; oracle = ranking among gold-paper results only, conditioned on the paper being retrieved):
+
+| Config | Corpus Hits@10 | Doc-level Hits@10 | Oracle Hits@4 | Oracle Hits@10 |
+|---|---|---|---|---|
+| BM25-only | 25.3% | 53.3% | 41.3% | 53.8% |
+| Vector-only | 33.3% | 58.0% | 56.3% | 64.4% |
+| Full (tuned) | 33.3% | 58.0% | 54.0% | 64.4% |
+
+The vector signal dominates at both stages — document routing (+4.7pp over BM25) and within-document discrimination (+10.6pp) — rather than the two signals splitting responsibilities; see the comparability note below.
+
 Three observations. **First, corroboration is real but signal-dependent**: with BM25 alone no node can corroborate (Principal-hit 0%); adding the vector phase lifts Principal-hit to 22.7%, and per-query provenance shows the corroborating pair is almost always `fulltext+vector` — the graph-side phases (entity pivot, cross-doc, structural) exclude already-retrieved nodes by design and therefore expand rather than corroborate. **Second, every phase contributes**: removing any single phase costs a consistent ~0.7pp Hits@10 against the full pipeline. **Third, default fusion weights under-serve semantic signal on paraphrase-heavy corpora**: vector-only (33.3% Hits@10) outperforms the full pipeline (30.0%) because BM25 at weight 1.0 ranks lexical noise above semantic hits — QASPER questions rarely share vocabulary with their evidence. This motivates the REFEED weight-tuning loop (Section 7.5): the fusion architecture is sound, but its default weights encode a lexical-first prior that the tuner must adapt per corpus. A 6-point grid search over (BM25, vector) weights on a 75-query subset showed early precision improving monotonically as the lexical weight drops (Hits@4 25.3% → 28.0%, MRR 0.196 → 0.202 from bm25 = 1.0 to ≤ 0.6, saturating below 0.6); the selected setting (BM25 0.6, vector 1.0) was then re-run on the full 150 queries. **The tuned pipeline recovers the entire gap**: +3.3pp Hits@10 over default weights, matching vector-only on Hits@10/MAP/Recall and slightly exceeding it on MRR (0.179 vs. 0.175) — while retaining the tiered, provenance-carrying output a single-signal retriever cannot produce. We report this per-corpus tuning transparently: on paraphrase-heavy academic Q&A, fusion's value is explainability at parity with the best single signal rather than raw ranking gains; the corpus-dependence of the weight prior is exactly what the REFEED feedback loop is designed to absorb online.
+
+**Comparability with published QASPER results.** Published QASPER evaluations retrieve evidence *within the question's own paper* (50–80 candidate paragraphs): the original LED baseline reports 39.4 evidence-selection F1 (Dasigi et al., 2021), and RAG-method comparisons report within-document retrieval nDCG@10 in the 38–59 range. Our protocol is deliberately harder: retrieval runs over the **entire 229-document corpus (~11.6k paragraphs) with no document filter**, so the retriever must locate the correct paper before the correct paragraph — absolute numbers are therefore not directly comparable across protocols. To bridge the two regimes we additionally report, for the tuned full pipeline: (a) **document-level Hits@10 = 58.0%** (the gold paper appears in the top-10), and (b) an **oracle-document condition** — paragraph ranking among results from the gold paper only, conditioning on correct-document retrieval — of **Hits@4 = 54.0% and Hits@10 = 64.4%**, which sits in the same band as published within-document evaluations. The decomposition localizes the corpus-wide loss: roughly 42% of queries fail at document location, and given the correct document, paragraph discrimination succeeds for about two-thirds of queries — evidence that the descend-into-structure step, not paragraph scoring, is the binding constraint at corpus scale, and the step the TOC-guided and structural phases target. A protocol note: corpus-wide, the lexical/semantic ordering *inverts* relative to published within-document results — BM25 is the strongest single signal inside one paper (lexical overlap suffices among 60 paragraphs) but the weakest across 229 papers (25.3% vs. vector 33.3% Hits@10), where common NLP phrasing collides across documents; retrieval granularity changes which signal family wins.
+
+> **Citation**: (see Dasigi et al., 2021 above; within-document nDCG figures from recent RAG evaluation literature on QASPER, e.g. AbstRAG, arXiv:2606.09459.)
 
 **TODO**: MultiHop-RAG 500-query matrix (inference/comparison/temporal/null slices, temporal ablation, null abstention); update Section 4.13 expected→measured.
 
@@ -324,6 +341,6 @@ Three observations. **First, corroboration is real but signal-dependent**: with 
 
 ## **9. Conclusion**
 
-- Summarize: Space-Time Graph = structural hierarchy × temporal decay × cross-document ontology, visualized as a navigable 3D sunburst-tunnel in which time flows along the axis, ontology positions documents in the cross-sectional plane, and each document unfolds its structure as a disc. Multi-phase retrieval with tiered provenance = explainable results. Efficient rendering via InstancedMesh + lazy loading.
+- Summarize around the thesis "a knowledge base you can see and audit": the Space-Time Graph (structural hierarchy × temporal decay × cross-document ontology) renders as a navigable 3D sunburst-tunnel — time along the axis, ontology in the cross-sectional plane, each document unfolding its structure as a disc — giving users a spatial-temporal mental model no flat-chunk pipeline provides. The multi-phase retriever feeds this map with tiered, provenance-carrying results at parity with the best single-signal retriever (measured, Section 7): the ranking is competitive, and every answer explains itself. Ingest builds the full semantic graph at ~$12 per 1,000 documents; rendering scales sub-linearly via InstancedMesh + lazy loading. Position the honest trade explicitly: OHARA exchanges marginal ranking gains for visibility and auditability — the two properties flat RAG cannot retrofit.
 
 ---

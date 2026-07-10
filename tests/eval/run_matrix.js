@@ -82,7 +82,15 @@ function nullAbstention(perQ) {
 
 function summarize(perQ) {
 	const r4 = (x) => Math.round(x * 10000) / 10000;
+	const withDoc = perQ.filter(q => q.doc_hit_at_10 !== null && q.doc_hit_at_10 !== undefined);
+	const withOracle = perQ.filter(q => q.doc_hit_at_10 === true);
+	const oracleHits = (k) => withOracle.length
+		? r4(withOracle.filter(q => q.oracle_rank !== null && q.oracle_rank < k).length / withOracle.length)
+		: null;
 	return {
+		doc_hits_at_10: withDoc.length ? r4(withDoc.filter(q => q.doc_hit_at_10).length / withDoc.length) : null,
+		oracle_hits_at_4: oracleHits(4),
+		oracle_hits_at_10: oracleHits(10),
 		hits_at_4: r4(hitsAtK(perQ, 4)),
 		hits_at_10: r4(hitsAtK(perQ, 10)),
 		mrr_at_10: r4(mrrAt10(perQ)),
@@ -147,6 +155,22 @@ async function runConfig(name, cfg, engine, questions, docByKey, isQasper) {
 			if (m && !matchedGold.has(m)) { matchedGold.add(m); hitRanks.push(rank); }
 		});
 
+		// QASPER extras: (a) doc-level hit — did top-10 contain the gold paper at all;
+		// (b) oracle-doc — rank of gold paragraphs among results from the gold paper only
+		// (conditions paragraph discrimination on correct-document retrieval, making the
+		// number comparable to published within-document QASPER evals).
+		let docHit10 = null, oracleRank = null;
+		if (isQasper && q.source_file) {
+			const isGoldDoc = (n) => {
+				const dk = (n.document_id || n._key || '').split('/').pop();
+				return docByKey.get(dk)?.source_file === q.source_file;
+			};
+			docHit10 = nodes.slice(0, 10).some(isGoldDoc);
+			const inDoc = nodes.filter(isGoldDoc);
+			const r = inDoc.findIndex(n => matcher(n));
+			oracleRank = r >= 0 ? r : null;
+		}
+
 		const principal = cfg.principalMode === 'topk'
 			? (result.results || []).slice(0, 5)
 			: (result.tiers?.principal || []);
@@ -161,6 +185,8 @@ async function runConfig(name, cfg, engine, questions, docByKey, isQasper) {
 			hit_ranks: hitRanks,
 			principal_hit: principalHit,
 			principal_count: principal.length,
+			doc_hit_at_10: docHit10,
+			oracle_rank: oracleRank,
 		});
 
 		if ((i + 1) % 25 === 0) console.log(`  [${name}] ${i + 1}/${questions.length} — Hits@10 so far: ${(hitsAtK(perQ, 10) * 100).toFixed(1)}%`);

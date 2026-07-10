@@ -73,6 +73,25 @@ Constraint: standard datasets, < 1000 documents, LLM budget **< $25 total** (gem
 10. [ ] Optional generation eval (100 queries, flash-lite judge).
 11. [ ] Write results into paper §7; update §4.13 expected→measured; user study + publication-quality screenshots remain.
 
+## The two open bets (decide the paper's ceiling)
+
+Measured so far: retrieval = parity + explainability; viz = novel + verified rendering. What's still unproven is whether OHARA has any *differentiated quantitative win*. Two bets, in order of leverage:
+
+### Bet 1 — MultiHop temporal + null-abstention slices
+- **Claim at stake**: temporal decay scoring (§3.3 five-layer scheme) and corroboration-based abstention are features no baseline (BM25/vector/GraphRAG) has. If measurable, OHARA gets a quantitative claim nobody else makes; if not, the viz/explainability story is the whole paper.
+- **Test**: ingest MultiHop-RAG (609 docs, ~$2–3) → `set_published_dates.js` → 500-query matrix. Win conditions:
+  (a) temporal slice (125 queries): `full` beats `no_temporal` on Hits@10/MRR, AND no regression on non-temporal slices (validates five-layer protection);
+  (b) null slice (125 unanswerable): Principal-tier abstention rate meaningfully above plain top-k proxy (corroboration as Corrective RAG, §4.13.4).
+- **Risk**: MultiHop temporal queries are event-ordering ("before/after"), not recency-weighting — decay may not help; coverage-overlap layer (L5) is the more likely winner. Analyze layers separately in the report.
+- **Also run**: tuned vs default weights on MultiHop — tests whether QASPER tuning generalizes across corpora (news vs papers). Either outcome is publishable.
+
+### Bet 2 — User study (sunburst-tunnel vs flat list)
+- **Claim at stake**: the actual thesis — "a spatial-temporal mental model helps humans navigate a corpus." Everything else is substrate. Untested.
+- **Protocol**: already drafted in paper §6 (within-subjects, n≥8, T1 temporal filtering / T2 topic tracing / T3 structural lookup, time + error + SUS). Needs: a working comparison UI (flat list with filters — mostly exists in docs tab), task sheets, ~30 min per participant.
+- **Win condition**: T1/T2 faster or fewer errors on tunnel; T3 no worse. Even n=8 informal with honest reporting beats zero.
+- **Risk**: 3D navigation learning curve may sink T1 for novices — mitigate with 3-min warmup task; report per-participant learning effect.
+- **Blocked on**: publication-quality screenshots + fitted camera first (same session as study prep); human participants (user's call).
+
 ## References
 
 - MultiHop-RAG: https://arxiv.org/abs/2401.15391
