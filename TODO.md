@@ -92,6 +92,19 @@ Measured so far: retrieval = parity + explainability; viz = novel + verified ren
 - **Risk**: 3D navigation learning curve may sink T1 for novices — mitigate with 3-min warmup task; report per-participant learning effect.
 - **Blocked on**: publication-quality screenshots + fitted camera first (same session as study prep); human participants (user's call).
 
+## Paper 00 update (architecture/positioning paper, reuse paper_01 results)
+
+Reposition paper_00 as the architecture paper: scale critique (§2), RAG-pattern orthography (§4.10 + App A), formal model — citing paper_01's measurements instead of duplicating its evaluation. Inherit paper_01's honesty posture so the two papers never contradict.
+
+1. [x] §6 sync with actual platform: sunburst plane (XY = ontology, not structure), ellipsoid decay auras (not fins), centroid entity placement (not comet shell), three irreducible dimensions (time × ontology × structure); fix "constant frame rate" overclaim → sub-linear rebuild/heap with measured FPS caveat.
+2. [x] §1/§3: three-dimension thesis; fix contributions list (aura fins → auras; add abstention as measured differentiator); temporal model reframed as guard-railed recency prior (§3.4) with measured-negative note.
+3. [x] §4: add Phase 1d vector (strongest single signal — kills §8.3 "not benchmarked" limitation), Phases 1e/1f; corroboration honestly two-signal; tier section gets abstention win (45.6% vs 0%); multi-hop SIMILAR_TO claim → provenance not recall (measured ranking-neutral).
+4. [x] §5: import measured ingest costs (QASPER $2.41/200, MultiHop ~$4.50/609, ~$12/1k, cache recovery, edge-dedup caveat).
+5. [x] §7: replace planned eval with summary of paper_01 measured results (both matrices, generation, viz bench, calibration findings) + cross-reference; keep only corpus-size-sweep (10/100/1000) as future hypothesis; drop unmeasured GraphRAG-degradation claims to hypothesis status.
+6. [x] §8: refresh limitations (vector phase now benchmarked; user study protocol + materials exist); align threats with paper_01 §8.3; add not-yet agenda pointer (H1/H2/H3).
+7. [x] §9 conclusion: align with "seeable and auditable" thesis + parity/abstention/explainability trade.
+8. [x] Consistency pass: no claim in paper_00 stronger than paper_01's measured version; commit.
+
 ## References
 
 - MultiHop-RAG: https://arxiv.org/abs/2401.15391
