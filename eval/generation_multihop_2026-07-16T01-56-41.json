@@ -1,0 +1,1627 @@
+{
+ "run_at": "2026-07-16T01:27:30.192Z",
+ "model": "gemini-2.5-flash-lite",
+ "query_count": 100,
+ "configs": {
+  "vector_only": {
+   "summary": {
+    "accuracy": 0.57,
+    "inference_query": 0.8823529411764706,
+    "comparison_query": 0.4411764705882353,
+    "temporal_query": 0.375
+   },
+   "per_question": [
+    {
+     "id": "mh_0001",
+     "question_type": "inference_query",
+     "gold": "Google",
+     "generated": "Google",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0002",
+     "question_type": "inference_query",
+     "gold": "Sam Bankman-Fried",
+     "generated": "Sam Bankman-Fried",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0003",
+     "question_type": "inference_query",
+     "gold": "Amazon",
+     "generated": "Amazon",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0004",
+     "question_type": "inference_query",
+     "gold": "Sam Bankman-Fried",
+     "generated": "Sam Bankman-Fried",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0005",
+     "question_type": "inference_query",
+     "gold": "OpenAI",
+     "generated": "OpenAI",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0006",
+     "question_type": "inference_query",
+     "gold": "Caesars Sportsbook",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0007",
+     "question_type": "inference_query",
+     "gold": "Sam Bankman-Fried",
+     "generated": "Sam Bankman-Fried",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0008",
+     "question_type": "inference_query",
+     "gold": "Bettors",
+     "generated": "New customers",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0009",
+     "question_type": "inference_query",
+     "gold": "Taylor Swift",
+     "generated": "Taylor Swift",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0010",
+     "question_type": "inference_query",
+     "gold": "Google",
+     "generated": "Google",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0011",
+     "question_type": "inference_query",
+     "gold": "Sam Bankman-Fried",
+     "generated": "Sam Bankman-Fried",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0012",
+     "question_type": "inference_query",
+     "gold": "Google",
+     "generated": "Google",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0013",
+     "question_type": "inference_query",
+     "gold": "Tyreek Hill",
+     "generated": "Tyreek Hill",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0014",
+     "question_type": "inference_query",
+     "gold": "Google",
+     "generated": "Google",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0015",
+     "question_type": "inference_query",
+     "gold": "Sam Bankman-Fried",
+     "generated": "Sam Bankman-Fried",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0016",
+     "question_type": "inference_query",
+     "gold": "Sam Bankman-Fried",
+     "generated": "Sam Bankman-Fried",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0017",
+     "question_type": "inference_query",
+     "gold": "Sam Bankman-Fried",
+     "generated": "Insufficient information",
+     "correct": true,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0018",
+     "question_type": "inference_query",
+     "gold": "Sportsbooks",
+     "generated": "Sportsbooks",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0019",
+     "question_type": "inference_query",
+     "gold": "Sam Bankman-Fried",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0020",
+     "question_type": "inference_query",
+     "gold": "ChatGPT",
+     "generated": "ChatGPT",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0021",
+     "question_type": "inference_query",
+     "gold": "Sam Bankman-Fried",
+     "generated": "Sam Bankman-Fried",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0022",
+     "question_type": "inference_query",
+     "gold": "Uber",
+     "generated": "Uber",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0023",
+     "question_type": "inference_query",
+     "gold": "Sam Altman",
+     "generated": "Sam Altman",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0024",
+     "question_type": "inference_query",
+     "gold": "Tyreek Hill",
+     "generated": "Tyreek Hill",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0025",
+     "question_type": "inference_query",
+     "gold": "Sam Bankman-Fried",
+     "generated": "Sam Bankman-Fried",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0026",
+     "question_type": "inference_query",
+     "gold": "Sam Bankman-Fried",
+     "generated": "Insufficient information",
+     "correct": true,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0027",
+     "question_type": "inference_query",
+     "gold": "Sam Bankman-Fried",
+     "generated": "Sam Bankman-Fried",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0028",
+     "question_type": "inference_query",
+     "gold": "Tyreek Hill",
+     "generated": "Tyreek Hill",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0029",
+     "question_type": "inference_query",
+     "gold": "Sam Bankman-Fried",
+     "generated": "Sam Bankman-Fried",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0030",
+     "question_type": "inference_query",
+     "gold": "Sportsbooks",
+     "generated": "Insufficient information",
+     "correct": true,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0031",
+     "question_type": "inference_query",
+     "gold": "Amazon",
+     "generated": "Amazon",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0032",
+     "question_type": "inference_query",
+     "gold": "Gaza",
+     "generated": "Israel",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0033",
+     "question_type": "inference_query",
+     "gold": "Google",
+     "generated": "Google",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0034",
+     "question_type": "inference_query",
+     "gold": "Sam Bankman-Fried",
+     "generated": "Sam Bankman-Fried",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0126",
+     "question_type": "comparison_query",
+     "gold": "Yes",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0127",
+     "question_type": "comparison_query",
+     "gold": "no",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0128",
+     "question_type": "comparison_query",
+     "gold": "Yes",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0129",
+     "question_type": "comparison_query",
+     "gold": "Yes",
+     "generated": "Yes",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0130",
+     "question_type": "comparison_query",
+     "gold": "Yes",
+     "generated": "No",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0131",
+     "question_type": "comparison_query",
+     "gold": "no",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0132",
+     "question_type": "comparison_query",
+     "gold": "Yes",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0133",
+     "question_type": "comparison_query",
+     "gold": "Contradictory",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0134",
+     "question_type": "comparison_query",
+     "gold": "no",
+     "generated": "No",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0135",
+     "question_type": "comparison_query",
+     "gold": "Yes",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0136",
+     "question_type": "comparison_query",
+     "gold": "Yes",
+     "generated": "Yes",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0137",
+     "question_type": "comparison_query",
+     "gold": "no",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0138",
+     "question_type": "comparison_query",
+     "gold": "Yes",
+     "generated": "Yes",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0139",
+     "question_type": "comparison_query",
+     "gold": "no",
+     "generated": "No",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0140",
+     "question_type": "comparison_query",
+     "gold": "Yes",
+     "generated": "Yes",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0141",
+     "question_type": "comparison_query",
+     "gold": "Yes",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0142",
+     "question_type": "comparison_query",
+     "gold": "no",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0143",
+     "question_type": "comparison_query",
+     "gold": "Yes",
+     "generated": "Yes",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0144",
+     "question_type": "comparison_query",
+     "gold": "Yes",
+     "generated": "Yes",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0145",
+     "question_type": "comparison_query",
+     "gold": "Yes",
+     "generated": "Yes",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0146",
+     "question_type": "comparison_query",
+     "gold": "Yes",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0147",
+     "question_type": "comparison_query",
+     "gold": "Yes",
+     "generated": "Yes",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0148",
+     "question_type": "comparison_query",
+     "gold": "Yes",
+     "generated": "Yes",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0149",
+     "question_type": "comparison_query",
+     "gold": "no",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0150",
+     "question_type": "comparison_query",
+     "gold": "Yes",
+     "generated": "Yes",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0151",
+     "question_type": "comparison_query",
+     "gold": "no",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0152",
+     "question_type": "comparison_query",
+     "gold": "no",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0153",
+     "question_type": "comparison_query",
+     "gold": "no",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0154",
+     "question_type": "comparison_query",
+     "gold": "no",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0155",
+     "question_type": "comparison_query",
+     "gold": "no",
+     "generated": "No",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0156",
+     "question_type": "comparison_query",
+     "gold": "True",
+     "generated": "Yes",
+     "correct": true,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0157",
+     "question_type": "comparison_query",
+     "gold": "no",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0158",
+     "question_type": "comparison_query",
+     "gold": "Yes",
+     "generated": "Yes",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0159",
+     "question_type": "comparison_query",
+     "gold": "no",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0376",
+     "question_type": "temporal_query",
+     "gold": "Yes",
+     "generated": "Yes",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0377",
+     "question_type": "temporal_query",
+     "gold": "no",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0378",
+     "question_type": "temporal_query",
+     "gold": "Yes",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0379",
+     "question_type": "temporal_query",
+     "gold": "Yes",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0380",
+     "question_type": "temporal_query",
+     "gold": "Agreement",
+     "generated": "Agreement",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0381",
+     "question_type": "temporal_query",
+     "gold": "Yes",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0382",
+     "question_type": "temporal_query",
+     "gold": "no",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0383",
+     "question_type": "temporal_query",
+     "gold": "Yes",
+     "generated": "Yes",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0384",
+     "question_type": "temporal_query",
+     "gold": "no",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0385",
+     "question_type": "temporal_query",
+     "gold": "Yes",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0386",
+     "question_type": "temporal_query",
+     "gold": "Yes",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0387",
+     "question_type": "temporal_query",
+     "gold": "no",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0388",
+     "question_type": "temporal_query",
+     "gold": "Agree",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0389",
+     "question_type": "temporal_query",
+     "gold": "Yes",
+     "generated": "Yes",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0390",
+     "question_type": "temporal_query",
+     "gold": "no",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0391",
+     "question_type": "temporal_query",
+     "gold": "Yes",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0392",
+     "question_type": "temporal_query",
+     "gold": "no",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0393",
+     "question_type": "temporal_query",
+     "gold": "no",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0394",
+     "question_type": "temporal_query",
+     "gold": "Yes",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0395",
+     "question_type": "temporal_query",
+     "gold": "no",
+     "generated": "No",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0396",
+     "question_type": "temporal_query",
+     "gold": "Yes",
+     "generated": "Yes",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0397",
+     "question_type": "temporal_query",
+     "gold": "Yes",
+     "generated": "Yes",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0398",
+     "question_type": "temporal_query",
+     "gold": "Yes",
+     "generated": "Yes",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0399",
+     "question_type": "temporal_query",
+     "gold": "no",
+     "generated": "Yes",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0400",
+     "question_type": "temporal_query",
+     "gold": "Johnny Cardoso",
+     "generated": "Johnny Cardoso",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0401",
+     "question_type": "temporal_query",
+     "gold": "no",
+     "generated": "Yes",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0402",
+     "question_type": "temporal_query",
+     "gold": "Yes",
+     "generated": "Yes",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0403",
+     "question_type": "temporal_query",
+     "gold": "Yes",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0404",
+     "question_type": "temporal_query",
+     "gold": "Yes",
+     "generated": "Yes",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0405",
+     "question_type": "temporal_query",
+     "gold": "no",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0406",
+     "question_type": "temporal_query",
+     "gold": "no",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0407",
+     "question_type": "temporal_query",
+     "gold": "no",
+     "generated": "No",
+     "correct": true,
+     "judge": "string"
+    }
+   ]
+  },
+  "full_tuned": {
+   "summary": {
+    "accuracy": 0.54,
+    "inference_query": 0.8823529411764706,
+    "comparison_query": 0.4117647058823529,
+    "temporal_query": 0.3125
+   },
+   "per_question": [
+    {
+     "id": "mh_0001",
+     "question_type": "inference_query",
+     "gold": "Google",
+     "generated": "Google",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0002",
+     "question_type": "inference_query",
+     "gold": "Sam Bankman-Fried",
+     "generated": "Sam Bankman-Fried",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0003",
+     "question_type": "inference_query",
+     "gold": "Amazon",
+     "generated": "Amazon",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0004",
+     "question_type": "inference_query",
+     "gold": "Sam Bankman-Fried",
+     "generated": "Sam Bankman-Fried",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0005",
+     "question_type": "inference_query",
+     "gold": "OpenAI",
+     "generated": "OpenAI",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0006",
+     "question_type": "inference_query",
+     "gold": "Caesars Sportsbook",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0007",
+     "question_type": "inference_query",
+     "gold": "Sam Bankman-Fried",
+     "generated": "Sam Bankman-Fried",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0008",
+     "question_type": "inference_query",
+     "gold": "Bettors",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0009",
+     "question_type": "inference_query",
+     "gold": "Taylor Swift",
+     "generated": "Taylor Swift",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0010",
+     "question_type": "inference_query",
+     "gold": "Google",
+     "generated": "Google",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0011",
+     "question_type": "inference_query",
+     "gold": "Sam Bankman-Fried",
+     "generated": "Sam Bankman-Fried",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0012",
+     "question_type": "inference_query",
+     "gold": "Google",
+     "generated": "Google",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0013",
+     "question_type": "inference_query",
+     "gold": "Tyreek Hill",
+     "generated": "Tyreek Hill",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0014",
+     "question_type": "inference_query",
+     "gold": "Google",
+     "generated": "Google",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0015",
+     "question_type": "inference_query",
+     "gold": "Sam Bankman-Fried",
+     "generated": "Sam Bankman-Fried",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0016",
+     "question_type": "inference_query",
+     "gold": "Sam Bankman-Fried",
+     "generated": "Sam Bankman-Fried",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0017",
+     "question_type": "inference_query",
+     "gold": "Sam Bankman-Fried",
+     "generated": "Insufficient information",
+     "correct": true,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0018",
+     "question_type": "inference_query",
+     "gold": "Sportsbooks",
+     "generated": "Sportsbooks",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0019",
+     "question_type": "inference_query",
+     "gold": "Sam Bankman-Fried",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0020",
+     "question_type": "inference_query",
+     "gold": "ChatGPT",
+     "generated": "ChatGPT",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0021",
+     "question_type": "inference_query",
+     "gold": "Sam Bankman-Fried",
+     "generated": "Sam Bankman-Fried",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0022",
+     "question_type": "inference_query",
+     "gold": "Uber",
+     "generated": "Uber",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0023",
+     "question_type": "inference_query",
+     "gold": "Sam Altman",
+     "generated": "Sam Altman",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0024",
+     "question_type": "inference_query",
+     "gold": "Tyreek Hill",
+     "generated": "Tyreek Hill",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0025",
+     "question_type": "inference_query",
+     "gold": "Sam Bankman-Fried",
+     "generated": "Sam Bankman-Fried",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0026",
+     "question_type": "inference_query",
+     "gold": "Sam Bankman-Fried",
+     "generated": "Sam Bankman-Fried",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0027",
+     "question_type": "inference_query",
+     "gold": "Sam Bankman-Fried",
+     "generated": "Sam Bankman-Fried",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0028",
+     "question_type": "inference_query",
+     "gold": "Tyreek Hill",
+     "generated": "Tyreek Hill",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0029",
+     "question_type": "inference_query",
+     "gold": "Sam Bankman-Fried",
+     "generated": "Sam Bankman-Fried",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0030",
+     "question_type": "inference_query",
+     "gold": "Sportsbooks",
+     "generated": "Insufficient information",
+     "correct": true,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0031",
+     "question_type": "inference_query",
+     "gold": "Amazon",
+     "generated": "Amazon",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0032",
+     "question_type": "inference_query",
+     "gold": "Gaza",
+     "generated": "Israel",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0033",
+     "question_type": "inference_query",
+     "gold": "Google",
+     "generated": "Google",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0034",
+     "question_type": "inference_query",
+     "gold": "Sam Bankman-Fried",
+     "generated": "Sam Bankman-Fried",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0126",
+     "question_type": "comparison_query",
+     "gold": "Yes",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0127",
+     "question_type": "comparison_query",
+     "gold": "no",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0128",
+     "question_type": "comparison_query",
+     "gold": "Yes",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0129",
+     "question_type": "comparison_query",
+     "gold": "Yes",
+     "generated": "Yes",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0130",
+     "question_type": "comparison_query",
+     "gold": "Yes",
+     "generated": "No",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0131",
+     "question_type": "comparison_query",
+     "gold": "no",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0132",
+     "question_type": "comparison_query",
+     "gold": "Yes",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0133",
+     "question_type": "comparison_query",
+     "gold": "Contradictory",
+     "generated": "Yes",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0134",
+     "question_type": "comparison_query",
+     "gold": "no",
+     "generated": "No",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0135",
+     "question_type": "comparison_query",
+     "gold": "Yes",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0136",
+     "question_type": "comparison_query",
+     "gold": "Yes",
+     "generated": "Yes",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0137",
+     "question_type": "comparison_query",
+     "gold": "no",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0138",
+     "question_type": "comparison_query",
+     "gold": "Yes",
+     "generated": "Yes",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0139",
+     "question_type": "comparison_query",
+     "gold": "no",
+     "generated": "No",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0140",
+     "question_type": "comparison_query",
+     "gold": "Yes",
+     "generated": "Yes",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0141",
+     "question_type": "comparison_query",
+     "gold": "Yes",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0142",
+     "question_type": "comparison_query",
+     "gold": "no",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0143",
+     "question_type": "comparison_query",
+     "gold": "Yes",
+     "generated": "Yes",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0144",
+     "question_type": "comparison_query",
+     "gold": "Yes",
+     "generated": "Yes",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0145",
+     "question_type": "comparison_query",
+     "gold": "Yes",
+     "generated": "Yes",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0146",
+     "question_type": "comparison_query",
+     "gold": "Yes",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0147",
+     "question_type": "comparison_query",
+     "gold": "Yes",
+     "generated": "Yes",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0148",
+     "question_type": "comparison_query",
+     "gold": "Yes",
+     "generated": "Yes",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0149",
+     "question_type": "comparison_query",
+     "gold": "no",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0150",
+     "question_type": "comparison_query",
+     "gold": "Yes",
+     "generated": "Yes",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0151",
+     "question_type": "comparison_query",
+     "gold": "no",
+     "generated": "Yes",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0152",
+     "question_type": "comparison_query",
+     "gold": "no",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0153",
+     "question_type": "comparison_query",
+     "gold": "no",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0154",
+     "question_type": "comparison_query",
+     "gold": "no",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0155",
+     "question_type": "comparison_query",
+     "gold": "no",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0156",
+     "question_type": "comparison_query",
+     "gold": "True",
+     "generated": "Yes",
+     "correct": true,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0157",
+     "question_type": "comparison_query",
+     "gold": "no",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0158",
+     "question_type": "comparison_query",
+     "gold": "Yes",
+     "generated": "Yes",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0159",
+     "question_type": "comparison_query",
+     "gold": "no",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0376",
+     "question_type": "temporal_query",
+     "gold": "Yes",
+     "generated": "Yes",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0377",
+     "question_type": "temporal_query",
+     "gold": "no",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0378",
+     "question_type": "temporal_query",
+     "gold": "Yes",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0379",
+     "question_type": "temporal_query",
+     "gold": "Yes",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0380",
+     "question_type": "temporal_query",
+     "gold": "Agreement",
+     "generated": "Agreement",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0381",
+     "question_type": "temporal_query",
+     "gold": "Yes",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0382",
+     "question_type": "temporal_query",
+     "gold": "no",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0383",
+     "question_type": "temporal_query",
+     "gold": "Yes",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0384",
+     "question_type": "temporal_query",
+     "gold": "no",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0385",
+     "question_type": "temporal_query",
+     "gold": "Yes",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0386",
+     "question_type": "temporal_query",
+     "gold": "Yes",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0387",
+     "question_type": "temporal_query",
+     "gold": "no",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0388",
+     "question_type": "temporal_query",
+     "gold": "Agree",
+     "generated": "Yes",
+     "correct": true,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0389",
+     "question_type": "temporal_query",
+     "gold": "Yes",
+     "generated": "Yes",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0390",
+     "question_type": "temporal_query",
+     "gold": "no",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0391",
+     "question_type": "temporal_query",
+     "gold": "Yes",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0392",
+     "question_type": "temporal_query",
+     "gold": "no",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0393",
+     "question_type": "temporal_query",
+     "gold": "no",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0394",
+     "question_type": "temporal_query",
+     "gold": "Yes",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0395",
+     "question_type": "temporal_query",
+     "gold": "no",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0396",
+     "question_type": "temporal_query",
+     "gold": "Yes",
+     "generated": "Yes",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0397",
+     "question_type": "temporal_query",
+     "gold": "Yes",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0398",
+     "question_type": "temporal_query",
+     "gold": "Yes",
+     "generated": "Yes",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0399",
+     "question_type": "temporal_query",
+     "gold": "no",
+     "generated": "Yes",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0400",
+     "question_type": "temporal_query",
+     "gold": "Johnny Cardoso",
+     "generated": "De'Von Achane",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0401",
+     "question_type": "temporal_query",
+     "gold": "no",
+     "generated": "Yes",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0402",
+     "question_type": "temporal_query",
+     "gold": "Yes",
+     "generated": "Yes",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0403",
+     "question_type": "temporal_query",
+     "gold": "Yes",
+     "generated": "Yes",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0404",
+     "question_type": "temporal_query",
+     "gold": "Yes",
+     "generated": "Yes",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0405",
+     "question_type": "temporal_query",
+     "gold": "no",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0406",
+     "question_type": "temporal_query",
+     "gold": "no",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0407",
+     "question_type": "temporal_query",
+     "gold": "no",
+     "generated": "No",
+     "correct": true,
+     "judge": "string"
+    }
+   ]
+  }
+ }
+}
