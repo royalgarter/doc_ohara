@@ -270,7 +270,9 @@ For comparison, a naive chunk-and-embed baseline (fixed 512-token chunks + `gemi
 
 **Planned user study (informal)**: Within-subjects, n ≥ 8, two interfaces (flat document list with filters vs. sunburst-tunnel), counterbalanced order. Three task types: (T1) temporal filtering — "find all documents about X published before Y"; (T2) topic tracing — "how did coverage of topic X evolve over time?" (exploits topic columns); (T3) structural lookup — "find the section of document D discussing X". Measures: task completion time, error rate, and a post-task SUS questionnaire. Hypothesis: the sunburst-tunnel wins on T1/T2 (dimensions are directly encoded) and is at worst comparable on T3.
 
-**TODO**: Run the study. Draft screenshots for the three color modes captured on the QASPER corpus (`eval/viz/graph_{doc,type,sumo}_25docs.png`, via `tests/eval/bench_viz.js --shots`); re-capture at publication quality with a fitted camera + sunburst guide view.
+**Figures**: publication-quality captures (3840×2160, fitted camera, MultiHop-RAG corpus, 25 documents spread across four monthly buckets at month resolution) in `eval/viz/pub_{doc,type,sumo}_25docs.png` (three color modes, whole-scene fitted view with sunburst guide rings, category labels, timeline ticks, and decay auras) and `eval/viz/pub_tunnel_oblique_25docs.png` (oblique tunnel-axis view). Capture script: `tests/eval/shoot_pub.js`. Implementation note: the in-app fitted camera (`_g3dResetCamera`) computes its bounding box via `Box3.expandByObject`, which ignores `InstancedMesh` instance matrices; the capture script fits from instance positions instead — TODO: fix in-app.
+
+**TODO**: Run the study.
 
 ---
 
