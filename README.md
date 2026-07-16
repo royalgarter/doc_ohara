@@ -676,6 +676,10 @@ Then create the ArangoDB vector index (ArangoDB 3.12 Enterprise required) and re
 
 ---
 
+## User Study (paper §6)
+
+`study.html` (served statically at `/study.html`) is the **flat-list comparison interface** for the within-subjects user study: a plain document list with text search, date-range and tag filters, and a click-through section/paragraph reader — no 3D, no graph. It reads only existing endpoints (`GET /api/documents` paged, `GET /api/graph?docKeys=`) and adds a built-in task timer whose log (task label, interface, elapsed ms, answer) is exportable as JSON for analysis. Task sheets, counterbalancing plan, gold answers, and the SUS questionnaire live in `tests/eval/user_study/TASK_SHEETS.md`. No schema, route, or palette changes.
+
 ## Repository Structure
 
 ```

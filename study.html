@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OHARA User Study — Flat List Interface</title>
+<style>
+	* { box-sizing: border-box; margin: 0; padding: 0; }
+	body { font-family: system-ui, sans-serif; background: #fdf6e3; color: #073642; height: 100vh; display: flex; flex-direction: column; }
+	header { background: #eee8d5; padding: 8px 14px; display: flex; gap: 12px; align-items: center; border-bottom: 1px solid #93a1a1; flex-wrap: wrap; }
+	header h1 { font-size: 15px; margin-right: auto; }
+	main { flex: 1; display: flex; overflow: hidden; }
+	#listPane { width: 46%; overflow-y: auto; border-right: 1px solid #93a1a1; }
+	#readPane { flex: 1; overflow-y: auto; padding: 14px; }
+	.filters { display: flex; gap: 6px; padding: 8px; flex-wrap: wrap; background: #eee8d5; position: sticky; top: 0; border-bottom: 1px solid #93a1a1; }
+	.filters input, .filters select { padding: 4px 6px; border: 1px solid #93a1a1; border-radius: 3px; background: #fdf6e3; font-size: 12px; }
+	#qSearch { flex: 1; min-width: 140px; }
+	.doc { padding: 8px 12px; border-bottom: 1px solid #eee8d5; cursor: pointer; }
+	.doc:hover { background: #eee8d5; }
+	.doc.sel { background: #b58900; color: #fdf6e3; }
+	.doc .t { font-size: 13px; font-weight: 600; }
+	.doc .m { font-size: 11px; color: #657b83; margin-top: 2px; }
+	.doc.sel .m { color: #eee8d5; }
+	#count { font-size: 11px; color: #657b83; padding: 4px 12px; }
+	.sec { margin: 10px 0 4px; font-weight: 700; font-size: 13px; color: #268bd2; cursor: pointer; }
+	.sec.l2 { margin-left: 14px; } .sec.l3 { margin-left: 28px; } .sec.l4 { margin-left: 42px; }
+	.para { font-size: 12px; line-height: 1.45; margin: 4px 0 4px 14px; color: #073642; white-space: pre-wrap; }
+	.para.hidden { display: none; }
+	.timer { display: flex; gap: 6px; align-items: center; font-size: 12px; }
+	.timer input { padding: 3px 5px; border: 1px solid #93a1a1; border-radius: 3px; width: 90px; font-size: 12px; }
+	.timer button { padding: 4px 8px; border: 1px solid #93a1a1; border-radius: 3px; background: #268bd2; color: #fdf6e3; cursor: pointer; font-size: 12px; }
+	.timer button.stop { background: #dc322f; }
+	#elapsed { font-variant-numeric: tabular-nums; min-width: 52px; font-weight: 700; }
+	#readTitle { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+	#readMeta { font-size: 11px; color: #657b83; margin-bottom: 10px; }
+</style>
+</head>
+<body>
+<header>
+	<h1>Document Browser (flat list)</h1>
+	<div class="timer">
+		<input id="taskLabel" placeholder="task id (e.g. A-T1)">
+		<button id="btnTimer">Start task</button>
+		<span id="elapsed">0.0s</span>
+		<button id="btnExport">Export log</button>
+	</div>
+</header>
+<main>
+	<div id="listPane">
+		<div class="filters">
+			<input id="qSearch" placeholder="search title / description / entities…">
+			<input id="qFrom" type="date" title="published from">
+			<input id="qTo" type="date" title="published to">
+			<select id="qSort">
+				<option value="date_asc">date ↑</option>
+				<option value="date_desc">date ↓</option>
+				<option value="title">title</option>
+			</select>
+		</div>
+		<div id="count"></div>
+		<div id="docList"></div>
+	</div>
+	<div id="readPane">
+		<div id="readTitle">Select a document</div>
+		<div id="readMeta"></div>
+		<div id="readBody"></div>
+	</div>
+</main>
+<script>
+	const DOCS = [];
+	const LOG = [];
+	let selKey = null;
+	let timerStart = null, timerTick = null;
+
+	const $ = (id) => document.getElementById(id);
+
+	async function loadDocs() {
+		let offset = 0, total = Infinity;
+		while (offset < total) {
+			const r = await fetch(`/api/documents?limit=200&offset=${offset}`).then(x => x.json());
+			DOCS.push(...(r.documents || []));
+			total = r.total || 0;
+			offset += 200;
+		}
+		render();
+	}
+
+	function docDate(d) { return (d.published_date || '').slice(0, 10); }
+	function docTitle(d) { return (d.title || d._key).replace(/^mhrag_\d+_|^qasper_\d+_/, '').replace(/\.md$/, '').replace(/-/g, ' '); }
+
+	function render() {
+		const q = $('qSearch').value.toLowerCase();
+		const from = $('qFrom').value, to = $('qTo').value;
+		const sort = $('qSort').value;
+		let rows = DOCS.filter(d => {
+			const hay = `${docTitle(d)} ${d.description || ''} ${(d.entity_slugs || []).join(' ')} ${(d.sumo_tags || []).join(' ')}`.toLowerCase();
+			if (q && !q.split(/\s+/).every(w => hay.includes(w))) return false;
+			const dt = docDate(d);
+			if (from && (!dt || dt < from)) return false;
+			if (to && (!dt || dt > to)) return false;
+			return true;
+		});
+		rows.sort((a, b) => sort === 'title' ? docTitle(a).localeCompare(docTitle(b))
+			: sort === 'date_desc' ? docDate(b).localeCompare(docDate(a))
+			: docDate(a).localeCompare(docDate(b)));
+		$('count').textContent = `${rows.length} / ${DOCS.length} documents`;
+		$('docList').innerHTML = rows.map(d =>
+			`<div class="doc${d._key === selKey ? ' sel' : ''}" data-k="${d._key}">
+				<div class="t">${docTitle(d)}</div>
+				<div class="m">${docDate(d) || 'no date'} · ${(d.sumo_tags || []).slice(0, 4).join(', ')}</div>
+			</div>`).join('');
+	}
+
+	const esc = (s) => (s || '').replace(/</g, '&lt;');
+
+	async function openDoc(key) {
+		selKey = key;
+		render();
+		const d = DOCS.find(x => x._key === key);
+		$('readTitle').textContent = docTitle(d);
+		$('readMeta').textContent = `${docDate(d) || 'no date'} · ${d.description || ''}`;
+		$('readBody').textContent = 'Loading…';
+		const g = await fetch(`/api/graph/node/documents/${key}/neighbors`).then(x => x.json());
+		const secs = (g.sections || []).sort((a, b) => (a.doc_position ?? 0) - (b.doc_position ?? 0));
+		const rootParas = (g.paragraphs || []).map(p =>
+			`<div class="para">${esc((p.content || '').slice(0, 2000))}</div>`).join('');
+		const html = secs.map(s =>
+			`<div class="sec l${Math.min(s.level || 1, 4)}" data-sec="${s._key}" data-loaded="0">▸ ${esc(s.title || '(untitled section)')}</div><div id="kids-${s._key}"></div>`
+		).join('');
+		$('readBody').innerHTML = (html + rootParas) || '<i>No sections.</i>';
+	}
+
+	async function toggleSection(el) {
+		const key = el.dataset.sec;
+		const box = $(`kids-${key}`);
+		if (el.dataset.loaded === '0') {
+			el.dataset.loaded = '1';
+			box.innerHTML = '<div class="para">Loading…</div>';
+			const g = await fetch(`/api/graph/node/sections/${key}/neighbors`).then(x => x.json());
+			const parts = [...(g.paragraphs || []), ...(g.tables || [])];
+			box.innerHTML = parts.map(p =>
+				`<div class="para">${esc((p.content || p.markdown_representation || '').slice(0, 2000))}</div>`).join('') || '<div class="para"><i>(empty)</i></div>';
+		} else {
+			box.style.display = box.style.display === 'none' ? '' : 'none';
+		}
+		el.textContent = (el.textContent.startsWith('▸') ? '▾' : '▸') + el.textContent.slice(1);
+	}
+
+	$('docList').addEventListener('click', e => {
+		const el = e.target.closest('.doc');
+		if (el) openDoc(el.dataset.k);
+	});
+	$('readBody').addEventListener('click', e => {
+		const el = e.target.closest('.sec');
+		if (el) toggleSection(el);
+	});
+	for (const id of ['qSearch', 'qFrom', 'qTo', 'qSort']) $(id).addEventListener('input', render);
+
+	$('btnTimer').addEventListener('click', () => {
+		if (timerStart === null) {
+			timerStart = performance.now();
+			$('btnTimer').textContent = 'Stop task';
+			$('btnTimer').classList.add('stop');
+			timerTick = setInterval(() => { $('elapsed').textContent = ((performance.now() - timerStart) / 1000).toFixed(1) + 's'; }, 100);
+		} else {
+			const ms = performance.now() - timerStart;
+			clearInterval(timerTick);
+			timerStart = null;
+			$('btnTimer').textContent = 'Start task';
+			$('btnTimer').classList.remove('stop');
+			const answer = prompt('Participant answer (doc titles / section name / count):') || '';
+			LOG.push({ task: $('taskLabel').value, interface: 'flat_list', elapsed_ms: Math.round(ms), answer, ts: new Date().toISOString() });
+		}
+	});
+	$('btnExport').addEventListener('click', () => {
+		const blob = new Blob([JSON.stringify(LOG, null, 1)], { type: 'application/json' });
+		const a = document.createElement('a');
+		a.href = URL.createObjectURL(blob);
+		a.download = `study_log_flat_${Date.now()}.json`;
+		a.click();
+	});
+
+	loadDocs();
+</script>
+</body>
+</html>
