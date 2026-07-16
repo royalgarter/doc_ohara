@@ -203,22 +203,26 @@ The Principal tier is not merely a "top-k" cut; it is a corroboration filter. Th
 Without SUMO expansion, retrieval relies purely on lexical overlap, which fails in long documents due to the **vocabulary gap**.
 *   **Contribution (design intent)**: High recall. SUMO tags provide a semantic grounding that mitigates relational blindness.
 *   **Measured (QASPER)**: removing Phase 1b costs 0.7pp Hits@10 — within noise. On this corpus the vocabulary gap is bridged almost entirely by the dense vector phase (1d), not by tag expansion; SUMO's measurable role is as the visualization's coordinate system (Section 6.2) and as query-time filter vocabulary, not as a ranking signal. Domain corpora with sparser embedding coverage may differ.
+*   **Measured (MultiHop-RAG)**: replicated — removing Phase 1b shifts Hits@10 by +0.3pp and MRR by +0.003 (within noise, slightly positive). Across both corpora SUMO expansion is ranking-neutral; its value is organizational, not retrieval-quality.
 
 #### 4.13.2 Phase 0b (TOC-Guided) + Phase 3 (Structural Traversal)
 This pairing is our PageIndex-inspired remedy for the "lost in the middle" problem.
 *   **Contribution**: In long documents (e.g., 100-page SEC filings), BM25 hits often land on disconnected leaf nodes. Phase 0b asks the LLM to identify relevant sections via the Table of Contents *before* text is scanned.
 *   **Measured (QASPER)**: removing Phase 0b costs 0.7pp Hits@10 on top-k ranking — small, but the oracle-document decomposition (Section 7.1.1) shows why this pairing still matters: ~42% of corpus-wide failures occur at document location and descent, which is precisely the step these phases target. Their effect concentrates in the Integrity tier's context quality rather than top-k hit rate; long, deeply structured documents (100-page filings) remain the expected stress case.
+*   **Measured (MultiHop-RAG)**: removing Phase 0b shifts Hits@10 by +0.8pp (within noise) — expected, since short news articles have trivial TOC structure; this ablation is only diagnostic on deeply structured corpora like QASPER.
 
 #### 4.13.3 Phase 1c (Cross-Document Edge Expansion)
 This phase enables **multi-hop reasoning** without O(n²) entity hairballs.
 *   **Contribution**: By following `SIMILAR_TO` edges enriched with LLM-generated verbs (e.g., "extends the argument of"), the system recovers context that a flat vector search would miss.
-*   **Measured (QASPER)**: removing Phase 1c costs 0.7pp Hits@10. The influence-chain capability it provides is qualitative on this corpus (academic papers with sparse SIMILAR_TO connectivity); the MultiHop-RAG evaluation, whose queries explicitly require cross-document evidence, is the quantitative test (Section 7, pending).
+*   **Measured (QASPER)**: removing Phase 1c costs 0.7pp Hits@10. The influence-chain capability it provides is qualitative on this corpus (academic papers with sparse SIMILAR_TO connectivity); the MultiHop-RAG evaluation, whose queries explicitly require cross-document evidence, is the quantitative test.
+*   **Measured (MultiHop-RAG)**: removing Phase 1c is ranking-neutral even here (Hits@10 96.5% in both directions, MRR −0.001) — on queries built to require multi-document evidence, the dense and lexical phases already surface all gold documents independently, so cross-document edges add provenance paths rather than recall. The design intent (recovering context flat search misses) is not supported as a *ranking* claim on either corpus.
 
 #### 4.13.4 The Corroboration Constraint (contributions.length $\geq$ 2)
 This constraint is the distinctive logic of the Principal tier.
 *   **Insight**: A node that only surfaces in BM25 is often a lexical coincidence. A node that surfaces in two independent signal families has a much higher probability of being genuinely relevant.
 *   **Interpretation**: Requiring $\geq 2$ signals acts as a de facto **Corrective RAG** step, filtering structural noise before generation. This ensures the LLM generator receives only high-scent nodes, mitigating the attention degradation observed in long-context prompts.
 *   **Measured (QASPER)**: the mechanism functions (Principal-hit 0% with one signal → 22.7% with two) but the corroborating pair is in practice `bm25∩vector` only: the graph-side phases (entity pivot, cross-document, structural) *exclude already-seen nodes by design*, so they expand the frontier rather than corroborate the core. Corroboration in the current architecture is therefore two-signal, not many-angle; widening it (e.g., letting graph phases re-score seen nodes) is future work.
+*   **Measured (MultiHop-RAG)**: the constraint's Corrective-RAG interpretation is quantitatively confirmed on the abstention axis — with identical retrieval, the corroboration gate abstains on **45.6% of unanswerable queries versus 0.0% for a plain top-k tier**, at 91.5% Principal-hit on answerable queries (Section 7.1.2). A top-k cut cannot abstain by construction; requiring ≥2 independent signals is what gives the Principal tier a meaningful empty state. This is the constraint's measurable payoff; its ranking effect remains within noise (±0.5pp) on both corpora.
 
 ---
 
@@ -272,7 +276,7 @@ For comparison, a naive chunk-and-embed baseline (fixed 512-token chunks + `gemi
 
 - **7.1 Retrieval Quality** - Precision@k / Recall@k on labeled query set. Compare: BM25-only, BM25+SUMO, full pipeline, full+Corrective RAG, full+Agentic. Measure Principal tier hit rate.
 - **7.2 Tier Explainability** - For each Principal-tier node, analyze `contributions` array provenance. Hypothesis: multi-phase corroboration > single-phase retrieval.
-- **7.3 Temporal Scoring Ablation** - With/without temporal decay. Measure ranking shifts on time-sensitive vs. time-agnostic queries.
+- **7.3 Temporal Scoring Ablation** - With/without temporal decay. Measure ranking shifts on time-sensitive vs. time-agnostic queries. **Measured (MultiHop-RAG)**: decay yields a small negative on event-ordering temporal queries (MRR 0.736 vs. 0.749 without) and no effect elsewhere — see Section 7.1.2, finding three.
 - **7.4 Visualization Efficiency** - Render time vs. node count (InstancedMesh vs. individual meshes). Memory footprint. Interaction latency (hover, click, expand).
 
 **Measured (QASPER corpus, headless Chromium 150 on ARM64, software WebGL/SwiftShader — a conservative lower bound; hardware GPUs render substantially faster):**
@@ -288,7 +292,7 @@ For comparison, a naive chunk-and-embed baseline (fixed 512-token chunks + `gemi
 Scene rebuild time and memory grow sub-linearly in node count (17× more nodes → ~1.7× rebuild time, ~1.5× heap), confirming that the `InstancedMesh` batching keeps per-node overhead marginal; the practical ceiling is visual clutter and fill-rate, not geometry submission. (Benchmark: `tests/eval/bench_viz.js`.)
 - **7.5 REFEED RAG Feedback Loop** - Measure accuracy-by-rank improvement after weight tuning from user feedback.
 
-**Setup (in progress)**: Two standard corpora, both under 1,000 documents. (1) **MultiHop-RAG** (Tang & Yang, 2024): 609 news articles with 2,556 multi-hop queries and gold evidence; we use a stratified 500-query subset (125 each of inference, comparison, temporal, and null/unanswerable types), scored at document level against gold evidence article sets. (2) **QASPER** (Dasigi et al., 2021): a seeded 200-paper sample with 150 answerable questions, scored at paragraph level against gold evidence snippets. The QASPER corpus is fully ingested (Section 5); a linkage audit confirmed **98% of gold evidence snippets are resolvable in ingested paragraph content** (49/50 sampled queries), validating the paragraph-level scoring protocol. Config matrix: BM25-only, vector-only, full pipeline, and per-phase ablations (−SUMO, −cross-doc, −temporal, −TOC, −corroboration constraint) per Section 4.13. Published GraphRAG/LightRAG numbers on MultiHop-RAG are cited rather than re-run. Metrics: Hits@4/10, MRR@10, MAP@10, gold-evidence Recall@10, Principal-tier hit rate, null-query abstention rate, per-query latency.
+**Setup**: Two standard corpora, both under 1,000 documents. (1) **MultiHop-RAG** (Tang & Yang, 2024): 609 news articles with 2,556 multi-hop queries and gold evidence; we use a stratified 500-query subset (125 each of inference, comparison, temporal, and null/unanswerable types), scored at document level against gold evidence article sets. (2) **QASPER** (Dasigi et al., 2021): a seeded 200-paper sample with 150 answerable questions, scored at paragraph level against gold evidence snippets. The QASPER corpus is fully ingested (Section 5); a linkage audit confirmed **98% of gold evidence snippets are resolvable in ingested paragraph content** (49/50 sampled queries), validating the paragraph-level scoring protocol. Config matrix: BM25-only, vector-only, full pipeline, and per-phase ablations (−SUMO, −cross-doc, −temporal, −TOC, −corroboration constraint) per Section 4.13. Published GraphRAG/LightRAG numbers on MultiHop-RAG are cited rather than re-run. Metrics: Hits@4/10, MRR@10, MAP@10, gold-evidence Recall@10, Principal-tier hit rate, null-query abstention rate, per-query latency.
 
 > **Citation**: Yixuan Tang and Yi Yang. 2024. *MultiHop-RAG: Benchmarking Retrieval-Augmented Generation for Multi-Hop Queries*. arXiv:2401.15391.
 > **Citation**: Pradeep Dasigi, Kyle Lo, Iz Beltagy, Arman Cohan, Noah A. Smith, and Matt Gardner. 2021. *A Dataset of Information-Seeking Questions and Answers Anchored in Research Papers*. In Proceedings of NAACL 2021, 4599–4610.
@@ -326,7 +330,38 @@ Three observations. **First, corroboration is real but signal-dependent**: with 
 
 > **Citation**: (see Dasigi et al., 2021 above; within-document nDCG figures from recent RAG evaluation literature on QASPER, e.g. AbstRAG, arXiv:2606.09459.)
 
-**TODO**: MultiHop-RAG 500-query matrix (inference/comparison/temporal/null slices, temporal ablation, null abstention); update Section 4.13 expected→measured.
+#### 7.1.2 MultiHop-RAG Results (500 stratified queries, document-level gold)
+
+The full 609-article corpus was ingested (≈19.5M LLM tokens, ≈ $4.50 standard tier; one article remained partial after repeated upstream 503 failures), re-embedded with the query-side model, and assigned gold publish dates from the dataset manifest. Scoring is document-level: a retrieved node counts as a hit if its parent document is in the query's gold evidence set. Null-type queries (125) are excluded from ranking metrics and scored solely on abstention (Principal tier empty).
+
+| Config | Hits@4 | Hits@10 | MRR@10 | MAP@10 | Gold-Recall@10 | Principal-hit | Null abstention |
+|---|---|---|---|---|---|---|---|
+| BM25-only | 83.2% | 94.4% | 0.727 | 0.479 | 68.8% | 4.3% | 96.8%* |
+| Vector-only | **93.6%** | **98.4%** | 0.811 | 0.538 | 76.0% | **92.5%** | 13.6% |
+| Full pipeline (default) | 89.6% | 96.5% | 0.791 | 0.547 | 75.3% | 91.5% | **45.6%** |
+| − SUMO (1b) | 89.6% | 96.8% | 0.794 | 0.549 | 75.2% | 90.9% | 47.2% |
+| − Cross-doc (1c) | 89.1% | 96.5% | 0.792 | 0.546 | 75.2% | 90.9% | 47.2% |
+| − Temporal decay | 89.9% | 97.1% | 0.796 | 0.550 | 75.5% | 91.7% | 47.2% |
+| − TOC (0b) | 90.1% | 97.3% | 0.795 | 0.552 | 75.7% | 90.9% | 47.2% |
+| − Corroboration | 89.9% | 96.8% | 0.795 | 0.548 | 75.1% | 92.0%† | 0.0% |
+| **Full, tuned (bm25 0.6, vector 1.0)** | 91.7% | **98.4%** | **0.812** | **0.556** | **76.1%** | 92.0% | 31.2% |
+
+\* Degenerate: BM25-only almost never populates the Principal tier at all (4.3% Principal-hit on answerable queries), so its high abstention reflects a near-empty tier, not discrimination.
+† Principal proxied as plain top-5 when the corroboration constraint is disabled.
+
+Four findings, two of which decide claims made earlier in the paper.
+
+**First, the QASPER-tuned weights generalize across corpora.** The (bm25 0.6, vector 1.0) setting tuned on academic Q&A (Section 7.1.1) transfers unchanged to news: MRR improves from 0.791 to 0.812 and Hits@4 from 89.6% to 91.7%, reaching parity with vector-only on Hits@10/MRR and exceeding it on MAP (0.556 vs. 0.538) — while retaining tiered, provenance-carrying output. The lexical-first default prior, not the fusion architecture, was the gap on both corpora.
+
+**Second, corroboration-gated abstention is the pipeline's one differentiated quantitative win.** The controlled comparison is full vs. −corroboration, which share identical retrieval and differ only in the Principal-tier rule: the corroboration constraint abstains on **45.6% of unanswerable queries versus 0.0% for a plain top-k tier**, while holding 91.5% Principal-hit on answerable queries. A top-k cut structurally cannot abstain — it always emits k results; requiring ≥2 independent phase signals gives the tier a natural empty state. Vector-only reaches just 13.6% abstention. Tuning trades some abstention away (31.2%): down-weighting BM25 weakens one of the two corroborating signals, an explicit precision/abstention trade-off.
+
+**Third, temporal decay scoring does not help on this benchmark — an honest negative result.** On the 125-query temporal slice, removing decay *improves* MRR (0.749 vs. 0.736) and leaves every other slice unregressed. The mechanism mismatch is instructive: MultiHop-RAG temporal queries test event *ordering* ("which report came first"), whereas decay encodes *recency* preference — down-weighting older documents actively penalizes queries whose answer lies in the older document. The five-layer protection scheme (Section 3.3) bounds the damage to ~1pp, but the recency prior itself finds no support here; corpora with genuine freshness semantics (news monitoring, documentation versioning) remain the intended target, and we defer that claim to future work rather than assert it from this data.
+
+**Fourth, per-phase ablations replicate the QASPER pattern**: every ablation lands within ±0.5pp of the full pipeline — individual graph phases neither make nor break document-level ranking on this corpus. Combined with the QASPER decomposition (Section 7.1.1), the two-corpus picture is consistent: fusion buys explainability and abstention at ranking parity with the best single signal, not ranking superiority over it.
+
+**Comparability.** As with QASPER, absolute numbers are not comparable to the MultiHop-RAG paper's published baselines: Tang & Yang (2024) score retrieval at evidence-chunk level against gold evidence text, while we score at document level (any node from a gold article), a coarser and easier target — hence Hits@10 in the mid-90s here versus published chunk-level figures substantially lower. The within-matrix comparisons (config vs. config, identical protocol) carry the analytical weight.
+
+**TODO**: optional generation eval; user study (Section 6).
 
 ---
 

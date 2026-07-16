@@ -1,0 +1,1446 @@
+[
+ {
+  "id": "mh_0001",
+  "question": "Which company is at the center of antitrust allegations involving monopolistic behavior in the search engine, app distribution, and news publishing markets, as reported by both The Verge and TechCrunch?",
+  "question_type": "inference_query",
+  "answer": "Google",
+  "gold_doc_titles": [
+   "Apple defends Google Search deal in court: ‘There wasn’t a valid alternative’",
+   "What to know about Fortnite maker Epic Games’ antitrust battle with Google, starting today",
+   "News publisher files class action antitrust suit against Google, citing AI’s harms to their bottom line"
+  ],
+  "gold_evidence": [
+   {
+    "title": "Apple defends Google Search deal in court: ‘There wasn’t a valid alternative’",
+    "source": "The Verge",
+    "published_at": "2023-09-26T17:01:22+00:00",
+    "fact": "“Certainly there wasn’t a valid alternative to Google at the time,” Cue said."
+   },
+   {
+    "title": "What to know about Fortnite maker Epic Games’ antitrust battle with Google, starting today",
+    "source": "TechCrunch",
+    "published_at": "2023-11-06T16:47:11+00:00",
+    "fact": "It will attempt to argue that Google restrains competition within two separate markets, including the distribution of apps to Android users and the market for payment processing solutions for content inside Android apps."
+   },
+   {
+    "title": "News publisher files class action antitrust suit against Google, citing AI’s harms to their bottom line",
+    "source": "TechCrunch",
+    "published_at": "2023-12-15T17:56:02+00:00",
+    "fact": "The case, filed by Arkansas-based publisher Helena World Chronicle, argues that Google “siphons off” news publishers’ content, their readers and ad revenue through anticompetitive means."
+   }
+  ]
+ },
+ {
+  "id": "mh_0002",
+  "question": "Who is the individual that, according to reports from The Verge and TechCrunch, faced challenges managing the growth of FTX and Alameda Research, allegedly used FTX customer funds to buy out Binance, was informed about a financial discrepancy after a judge's intervention, and is accused by the prosecution of committing fraud for personal gain?",
+  "question_type": "inference_query",
+  "answer": "Sam Bankman-Fried",
+  "gold_doc_titles": [
+   "The jury finally hears from Sam Bankman-Fried",
+   "Sam Bankman-Fried was a terrible boyfriend",
+   "Sam Bankman-Fried didn’t ask where the $8 billion went",
+   "Sam Altman backs teens’ startup, Google unveils the Pixel 8 and TikTok tests an ad-free tier"
+  ],
+  "gold_evidence": [
+   {
+    "title": "The jury finally hears from Sam Bankman-Fried",
+    "source": "The Verge",
+    "published_at": "2023-10-28T00:12:41+00:00",
+    "fact": "Because FTX had grown so much, he could no longer run both companies, he said."
+   },
+   {
+    "title": "Sam Bankman-Fried was a terrible boyfriend",
+    "source": "The Verge",
+    "published_at": "2023-10-10T23:50:21+00:00",
+    "fact": "It was Bankman-Fried’s decision, she said, as he was the CEO of FTX."
+   },
+   {
+    "title": "Sam Bankman-Fried didn’t ask where the $8 billion went",
+    "source": "The Verge",
+    "published_at": "2023-10-31T19:52:07+00:00",
+    "fact": "It was not until Judge Lewis Kaplan intervened to ask if Bankman-Fried had ever been told by Yedidia about that money, in words or in substance, that Bankman-Fried admitted he’d been told."
+   },
+   {
+    "title": "Sam Altman backs teens’ startup, Google unveils the Pixel 8 and TikTok tests an ad-free tier",
+    "source": "TechCrunch",
+    "published_at": "2023-10-07T20:15:26+00:00",
+    "fact": "The prosecution painted Bankman-Fried as someone who knowingly committed fraud to achieve great wealth, power and influence, while the defense countered that the FTX founder acted in good faith, never meant to commit fraud or steal and basically got in over his head."
+   }
+  ]
+ },
+ {
+  "id": "mh_0004",
+  "question": "Who is the individual that Fortune claims used a colleague as a front for improper financial access, whom TechCrunch did not compare to Warren Buffet, and who has faced allegations by the prosecution of committing fraud for personal gain, as reported by TechCrunch?",
+  "question_type": "inference_query",
+  "answer": "Sam Bankman-Fried",
+  "gold_doc_titles": [
+   "Is Sam Bankman-Fried a bad ‘man’ or a good ‘boy’? Lawyers swap opening statements before first witnesses take the stand",
+   "SBF’s trial starts soon, but how did he — and FTX — get here?",
+   "SBF, riding high on FTX, reportedly offered $5B to Trump to cancel President re-run",
+   "Sam Altman backs teens’ startup, Google unveils the Pixel 8 and TikTok tests an ad-free tier"
+  ],
+  "gold_evidence": [
+   {
+    "title": "Is Sam Bankman-Fried a bad ‘man’ or a good ‘boy’? Lawyers swap opening statements before first witnesses take the stand",
+    "source": "Fortune",
+    "published_at": "2023-10-04T23:32:53+00:00",
+    "fact": "Using Caroline Ellison, his on-again off-again girlfriend and the CEO of Alameda, as a front, Bankman-Fried had “secret access” to customer money—both cash and crypto—the government claimed."
+   },
+   {
+    "title": "SBF’s trial starts soon, but how did he — and FTX — get here?",
+    "source": "TechCrunch",
+    "published_at": "2023-10-01T14:00:29+00:00",
+    "fact": "Bankman-Fried was even compared to Warren Buffet and many called him the white horse of crypto (TechCrunch never did, for what it’s worth)."
+   },
+   {
+    "title": "SBF, riding high on FTX, reportedly offered $5B to Trump to cancel President re-run",
+    "source": "TechCrunch",
+    "published_at": "2023-10-02T13:11:07+00:00",
+    "fact": "SBF, as he’s known, has pleaded not-guilty to some seven charges of fraud and conspiracy."
+   },
+   {
+    "title": "Sam Altman backs teens’ startup, Google unveils the Pixel 8 and TikTok tests an ad-free tier",
+    "source": "TechCrunch",
+    "published_at": "2023-10-07T20:15:26+00:00",
+    "fact": "The prosecution painted Bankman-Fried as someone who knowingly committed fraud to achieve great wealth, power and influence, while the defense countered that the FTX founder acted in good faith, never meant to commit fraud or steal and basically got in over his head."
+   }
+  ]
+ },
+ {
+  "id": "mh_0011",
+  "question": "Who is the individual that, despite once being compared to Warren Buffet and hailed as the white horse of crypto (but not by TechCrunch), is accused by the prosecution of committing fraud for wealth, power, and influence, and is also alleged to have directed the misappropriation of $14 billion from a thriving crypto exchange's customers to cover debts, according to reports by Fortune and TechCrunch?",
+  "question_type": "inference_query",
+  "answer": "Sam Bankman-Fried",
+  "gold_doc_titles": [
+   "Is Sam Bankman-Fried a bad ‘man’ or a good ‘boy’? Lawyers swap opening statements before first witnesses take the stand",
+   "SBF’s trial starts soon, but how did he — and FTX — get here?",
+   "SBF Trial: The latest updates from the FTX collapse’s courtroom drama",
+   "Sam Altman backs teens’ startup, Google unveils the Pixel 8 and TikTok tests an ad-free tier"
+  ],
+  "gold_evidence": [
+   {
+    "title": "Is Sam Bankman-Fried a bad ‘man’ or a good ‘boy’? Lawyers swap opening statements before first witnesses take the stand",
+    "source": "Fortune",
+    "published_at": "2023-10-04T23:32:53+00:00",
+    "fact": "But “all of that, all of it, was built on lies,” Rehn declared to the jury."
+   },
+   {
+    "title": "SBF’s trial starts soon, but how did he — and FTX — get here?",
+    "source": "TechCrunch",
+    "published_at": "2023-10-01T14:00:29+00:00",
+    "fact": "Bankman-Fried was even compared to Warren Buffet and many called him the white horse of crypto (TechCrunch never did, for what it’s worth)."
+   },
+   {
+    "title": "SBF Trial: The latest updates from the FTX collapse’s courtroom drama",
+    "source": "TechCrunch",
+    "published_at": "2023-10-06T17:22:02+00:00",
+    "fact": "The second week of the trial’s standout testimony came from Alameda Research’s former CEO Caroline Ellison, who claimed she took $14 billion from customers to repay debts to lenders, using them as a line of credit under the instruction of SBF."
+   },
+   {
+    "title": "Sam Altman backs teens’ startup, Google unveils the Pixel 8 and TikTok tests an ad-free tier",
+    "source": "TechCrunch",
+    "published_at": "2023-10-07T20:15:26+00:00",
+    "fact": "The prosecution painted Bankman-Fried as someone who knowingly committed fraud to achieve great wealth, power and influence, while the defense countered that the FTX founder acted in good faith, never meant to commit fraud or steal and basically got in over his head."
+   }
+  ]
+ },
+ {
+  "id": "mh_0015",
+  "question": "Who is the individual reported by TechCrunch as having instructed Caroline Ellison to use $14 billion of customer funds to repay debts, is facing a criminal trial to determine guilt on fraud and conspiracy charges, and has entered a plea of not guilty to these allegations?",
+  "question_type": "inference_query",
+  "answer": "Sam Bankman-Fried",
+  "gold_doc_titles": [
+   "SBF’s trial starts soon, but how did he — and FTX — get here?",
+   "SBF, riding high on FTX, reportedly offered $5B to Trump to cancel President re-run",
+   "SBF Trial: The latest updates from the FTX collapse’s courtroom drama",
+   "Sam Altman backs teens’ startup, Google unveils the Pixel 8 and TikTok tests an ad-free tier"
+  ],
+  "gold_evidence": [
+   {
+    "title": "SBF’s trial starts soon, but how did he — and FTX — get here?",
+    "source": "TechCrunch",
+    "published_at": "2023-10-01T14:00:29+00:00",
+    "fact": "The highly anticipated criminal trial for Sam Bankman-Fried, former CEO of bankrupt crypto exchange FTX, started Tuesday to determine whether he’s guilty of seven counts of fraud and conspiracy."
+   },
+   {
+    "title": "SBF, riding high on FTX, reportedly offered $5B to Trump to cancel President re-run",
+    "source": "TechCrunch",
+    "published_at": "2023-10-02T13:11:07+00:00",
+    "fact": "SBF, as he’s known, has pleaded not-guilty to some seven charges of fraud and conspiracy."
+   },
+   {
+    "title": "SBF Trial: The latest updates from the FTX collapse’s courtroom drama",
+    "source": "TechCrunch",
+    "published_at": "2023-10-06T17:22:02+00:00",
+    "fact": "The second week of the trial’s standout testimony came from Alameda Research’s former CEO Caroline Ellison, who claimed she took $14 billion from customers to repay debts to lenders, using them as a line of credit under the instruction of SBF."
+   },
+   {
+    "title": "Sam Altman backs teens’ startup, Google unveils the Pixel 8 and TikTok tests an ad-free tier",
+    "source": "TechCrunch",
+    "published_at": "2023-10-07T20:15:26+00:00",
+    "fact": "The prosecution painted Bankman-Fried as someone who knowingly committed fraud to achieve great wealth, power and influence, while the defense countered that the FTX founder acted in good faith, never meant to commit fraud or steal and basically got in over his head."
+   }
+  ]
+ },
+ {
+  "id": "mh_0016",
+  "question": "Who is the individual that, despite not being portrayed as the white horse of crypto by TechCrunch, managed to recruit a former colleague from Jane Street to join him in ventures that faced legal scrutiny for alleged fraud, and who also admitted to being aware of financial discrepancies post the intervention of Judge Lewis Kaplan?",
+  "question_type": "inference_query",
+  "answer": "Sam Bankman-Fried",
+  "gold_doc_titles": [
+   "SBF’s trial starts soon, but how did he — and FTX — get here?",
+   "Is Sam Bankman-Fried a bad ‘man’ or a good ‘boy’? Lawyers swap opening statements before first witnesses take the stand",
+   "Sam Bankman-Fried didn’t ask where the $8 billion went",
+   "Sam Altman backs teens’ startup, Google unveils the Pixel 8 and TikTok tests an ad-free tier"
+  ],
+  "gold_evidence": [
+   {
+    "title": "SBF’s trial starts soon, but how did he — and FTX — get here?",
+    "source": "TechCrunch",
+    "published_at": "2023-10-01T14:00:29+00:00",
+    "fact": "Bankman-Fried was even compared to Warren Buffet and many called him the white horse of crypto (TechCrunch never did, for what it’s worth)."
+   },
+   {
+    "title": "Is Sam Bankman-Fried a bad ‘man’ or a good ‘boy’? Lawyers swap opening statements before first witnesses take the stand",
+    "source": "Fortune",
+    "published_at": "2023-10-04T23:32:53+00:00",
+    "fact": "And after Bankman-Fried left Jane Street, the high-frequency trading firm where the former billionaire got his start in finance after MIT, he persuaded Yedidia to join him as a trader at Alameda and then as a developer at FTX."
+   },
+   {
+    "title": "Sam Bankman-Fried didn’t ask where the $8 billion went",
+    "source": "The Verge",
+    "published_at": "2023-10-31T19:52:07+00:00",
+    "fact": "It was not until Judge Lewis Kaplan intervened to ask if Bankman-Fried had ever been told by Yedidia about that money, in words or in substance, that Bankman-Fried admitted he’d been told."
+   },
+   {
+    "title": "Sam Altman backs teens’ startup, Google unveils the Pixel 8 and TikTok tests an ad-free tier",
+    "source": "TechCrunch",
+    "published_at": "2023-10-07T20:15:26+00:00",
+    "fact": "The prosecution painted Bankman-Fried as someone who knowingly committed fraud to achieve great wealth, power and influence, while the defense countered that the FTX founder acted in good faith, never meant to commit fraud or steal and basically got in over his head."
+   }
+  ]
+ },
+ {
+  "id": "mh_0019",
+  "question": "Who is the individual under 30, previously associated with FTX and Alameda Research, who faced allegations of fraud and is reported by both TechCrunch and The Verge to have had significant influence and wealth, yet struggled with the management of his rapidly growing companies?",
+  "question_type": "inference_query",
+  "answer": "Sam Bankman-Fried",
+  "gold_doc_titles": [
+   "SBF, riding high on FTX, reportedly offered $5B to Trump to cancel President re-run",
+   "The jury finally hears from Sam Bankman-Fried",
+   "Sam Altman backs teens’ startup, Google unveils the Pixel 8 and TikTok tests an ad-free tier"
+  ],
+  "gold_evidence": [
+   {
+    "title": "SBF, riding high on FTX, reportedly offered $5B to Trump to cancel President re-run",
+    "source": "TechCrunch",
+    "published_at": "2023-10-02T13:11:07+00:00",
+    "fact": "He was the richest person in the world under 30 [and] he was going to spend it to save humanity from extinction,” he said."
+   },
+   {
+    "title": "The jury finally hears from Sam Bankman-Fried",
+    "source": "The Verge",
+    "published_at": "2023-10-28T00:12:41+00:00",
+    "fact": "Because FTX had grown so much, he could no longer run both companies, he said."
+   },
+   {
+    "title": "Sam Altman backs teens’ startup, Google unveils the Pixel 8 and TikTok tests an ad-free tier",
+    "source": "TechCrunch",
+    "published_at": "2023-10-07T20:15:26+00:00",
+    "fact": "The prosecution painted Bankman-Fried as someone who knowingly committed fraud to achieve great wealth, power and influence, while the defense countered that the FTX founder acted in good faith, never meant to commit fraud or steal and basically got in over his head."
+   }
+  ]
+ },
+ {
+  "id": "mh_0020",
+  "question": "What is the name of the AI developed by OpenAI that Engadget reported as having a significant rise in usage during December 2022 and that TechCrunch identified as having the ability to perform a diverse range of tasks including coding, composing music, and writing poetry?",
+  "question_type": "inference_query",
+  "answer": "ChatGPT",
+  "gold_doc_titles": [
+   "How OpenAI's ChatGPT has changed the world in just a year",
+   "One year later, ChatGPT is still alive and kicking"
+  ],
+  "gold_evidence": [
+   {
+    "title": "How OpenAI's ChatGPT has changed the world in just a year",
+    "source": "Engadget",
+    "published_at": "2023-11-30T14:00:50+00:00",
+    "fact": "Throughout December 2022, ChatGPT’s usage numbers rose meteorically as more and more people logged on to try it for themselves."
+   },
+   {
+    "title": "One year later, ChatGPT is still alive and kicking",
+    "source": "TechCrunch",
+    "published_at": "2023-11-30T14:10:43+00:00",
+    "fact": "ChatGPT can complete and debug code, compose music and essays, answer test questions, generate business ideas, write poetry and song lyrics, translate and summarize text and even emulate a computer running Linux."
+   }
+  ]
+ },
+ {
+  "id": "mh_0021",
+  "question": "Who is the individual that persuaded Adam Yedidia to change careers, was once compared to Warren Buffet but not by TechCrunch, and is alleged by the prosecution to have committed fraud for personal gain?",
+  "question_type": "inference_query",
+  "answer": "Sam Bankman-Fried",
+  "gold_doc_titles": [
+   "Is Sam Bankman-Fried a bad ‘man’ or a good ‘boy’? Lawyers swap opening statements before first witnesses take the stand",
+   "SBF’s trial starts soon, but how did he — and FTX — get here?",
+   "Sam Altman backs teens’ startup, Google unveils the Pixel 8 and TikTok tests an ad-free tier"
+  ],
+  "gold_evidence": [
+   {
+    "title": "Is Sam Bankman-Fried a bad ‘man’ or a good ‘boy’? Lawyers swap opening statements before first witnesses take the stand",
+    "source": "Fortune",
+    "published_at": "2023-10-04T23:32:53+00:00",
+    "fact": "And after Bankman-Fried left Jane Street, the high-frequency trading firm where the former billionaire got his start in finance after MIT, he persuaded Yedidia to join him as a trader at Alameda and then as a developer at FTX."
+   },
+   {
+    "title": "SBF’s trial starts soon, but how did he — and FTX — get here?",
+    "source": "TechCrunch",
+    "published_at": "2023-10-01T14:00:29+00:00",
+    "fact": "Bankman-Fried was even compared to Warren Buffet and many called him the white horse of crypto (TechCrunch never did, for what it’s worth)."
+   },
+   {
+    "title": "Sam Altman backs teens’ startup, Google unveils the Pixel 8 and TikTok tests an ad-free tier",
+    "source": "TechCrunch",
+    "published_at": "2023-10-07T20:15:26+00:00",
+    "fact": "The prosecution painted Bankman-Fried as someone who knowingly committed fraud to achieve great wealth, power and influence, while the defense countered that the FTX founder acted in good faith, never meant to commit fraud or steal and basically got in over his head."
+   }
+  ]
+ },
+ {
+  "id": "mh_0027",
+  "question": "Who is the individual implicated by allegations in articles from Fortune, The Verge, and TechCrunch, involving the use of a front person for secret access to customer funds, the inability to manage two major crypto entities due to their growth, and the instruction to take billions from customers to repay debts, all while being accused of committing fraud for personal gain?",
+  "question_type": "inference_query",
+  "answer": "Sam Bankman-Fried",
+  "gold_doc_titles": [
+   "Is Sam Bankman-Fried a bad ‘man’ or a good ‘boy’? Lawyers swap opening statements before first witnesses take the stand",
+   "The jury finally hears from Sam Bankman-Fried",
+   "SBF Trial: The latest updates from the FTX collapse’s courtroom drama",
+   "Sam Altman backs teens’ startup, Google unveils the Pixel 8 and TikTok tests an ad-free tier"
+  ],
+  "gold_evidence": [
+   {
+    "title": "Is Sam Bankman-Fried a bad ‘man’ or a good ‘boy’? Lawyers swap opening statements before first witnesses take the stand",
+    "source": "Fortune",
+    "published_at": "2023-10-04T23:32:53+00:00",
+    "fact": "Using Caroline Ellison, his on-again off-again girlfriend and the CEO of Alameda, as a front, Bankman-Fried had “secret access” to customer money—both cash and crypto—the government claimed."
+   },
+   {
+    "title": "The jury finally hears from Sam Bankman-Fried",
+    "source": "The Verge",
+    "published_at": "2023-10-28T00:12:41+00:00",
+    "fact": "Because FTX had grown so much, he could no longer run both companies, he said."
+   },
+   {
+    "title": "SBF Trial: The latest updates from the FTX collapse’s courtroom drama",
+    "source": "TechCrunch",
+    "published_at": "2023-10-06T17:22:02+00:00",
+    "fact": "The second week of the trial’s standout testimony came from Alameda Research’s former CEO Caroline Ellison, who claimed she took $14 billion from customers to repay debts to lenders, using them as a line of credit under the instruction of SBF."
+   },
+   {
+    "title": "Sam Altman backs teens’ startup, Google unveils the Pixel 8 and TikTok tests an ad-free tier",
+    "source": "TechCrunch",
+    "published_at": "2023-10-07T20:15:26+00:00",
+    "fact": "The prosecution painted Bankman-Fried as someone who knowingly committed fraud to achieve great wealth, power and influence, while the defense countered that the FTX founder acted in good faith, never meant to commit fraud or steal and basically got in over his head."
+   }
+  ]
+ },
+ {
+  "id": "mh_0034",
+  "question": "Who is the individual that, despite being likened to a prominent investor and once hailed as a savior in the cryptocurrency world by some, not TechCrunch, is accused of using a colleague as a cover for illicit access to customer funds and faced challenges in overseeing the rapid expansion of a crypto exchange and a research firm, leading to allegations of intentional fraud for personal gain?",
+  "question_type": "inference_query",
+  "answer": "Sam Bankman-Fried",
+  "gold_doc_titles": [
+   "Is Sam Bankman-Fried a bad ‘man’ or a good ‘boy’? Lawyers swap opening statements before first witnesses take the stand",
+   "SBF’s trial starts soon, but how did he — and FTX — get here?",
+   "The jury finally hears from Sam Bankman-Fried",
+   "Sam Altman backs teens’ startup, Google unveils the Pixel 8 and TikTok tests an ad-free tier"
+  ],
+  "gold_evidence": [
+   {
+    "title": "Is Sam Bankman-Fried a bad ‘man’ or a good ‘boy’? Lawyers swap opening statements before first witnesses take the stand",
+    "source": "Fortune",
+    "published_at": "2023-10-04T23:32:53+00:00",
+    "fact": "Using Caroline Ellison, his on-again off-again girlfriend and the CEO of Alameda, as a front, Bankman-Fried had “secret access” to customer money—both cash and crypto—the government claimed."
+   },
+   {
+    "title": "SBF’s trial starts soon, but how did he — and FTX — get here?",
+    "source": "TechCrunch",
+    "published_at": "2023-10-01T14:00:29+00:00",
+    "fact": "Bankman-Fried was even compared to Warren Buffet and many called him the white horse of crypto (TechCrunch never did, for what it’s worth)."
+   },
+   {
+    "title": "The jury finally hears from Sam Bankman-Fried",
+    "source": "The Verge",
+    "published_at": "2023-10-28T00:12:41+00:00",
+    "fact": "Because FTX had grown so much, he could no longer run both companies, he said."
+   },
+   {
+    "title": "Sam Altman backs teens’ startup, Google unveils the Pixel 8 and TikTok tests an ad-free tier",
+    "source": "TechCrunch",
+    "published_at": "2023-10-07T20:15:26+00:00",
+    "fact": "The prosecution painted Bankman-Fried as someone who knowingly committed fraud to achieve great wealth, power and influence, while the defense countered that the FTX founder acted in good faith, never meant to commit fraud or steal and basically got in over his head."
+   }
+  ]
+ },
+ {
+  "id": "mh_0036",
+  "question": "Who is the individual that persuaded Adam Yedidia to join him in financial ventures, admitted to challenges in managing two major financial entities due to significant growth, was informed about a financial discrepancy after a judge's intervention, and is accused by the prosecution of committing fraud for personal gain, as reported by Fortune, The Verge, and TechCrunch?",
+  "question_type": "inference_query",
+  "answer": "Sam Bankman-Fried",
+  "gold_doc_titles": [
+   "Is Sam Bankman-Fried a bad ‘man’ or a good ‘boy’? Lawyers swap opening statements before first witnesses take the stand",
+   "The jury finally hears from Sam Bankman-Fried",
+   "Sam Bankman-Fried didn’t ask where the $8 billion went",
+   "Sam Altman backs teens’ startup, Google unveils the Pixel 8 and TikTok tests an ad-free tier"
+  ],
+  "gold_evidence": [
+   {
+    "title": "Is Sam Bankman-Fried a bad ‘man’ or a good ‘boy’? Lawyers swap opening statements before first witnesses take the stand",
+    "source": "Fortune",
+    "published_at": "2023-10-04T23:32:53+00:00",
+    "fact": "And after Bankman-Fried left Jane Street, the high-frequency trading firm where the former billionaire got his start in finance after MIT, he persuaded Yedidia to join him as a trader at Alameda and then as a developer at FTX."
+   },
+   {
+    "title": "The jury finally hears from Sam Bankman-Fried",
+    "source": "The Verge",
+    "published_at": "2023-10-28T00:12:41+00:00",
+    "fact": "Because FTX had grown so much, he could no longer run both companies, he said."
+   },
+   {
+    "title": "Sam Bankman-Fried didn’t ask where the $8 billion went",
+    "source": "The Verge",
+    "published_at": "2023-10-31T19:52:07+00:00",
+    "fact": "It was not until Judge Lewis Kaplan intervened to ask if Bankman-Fried had ever been told by Yedidia about that money, in words or in substance, that Bankman-Fried admitted he’d been told."
+   },
+   {
+    "title": "Sam Altman backs teens’ startup, Google unveils the Pixel 8 and TikTok tests an ad-free tier",
+    "source": "TechCrunch",
+    "published_at": "2023-10-07T20:15:26+00:00",
+    "fact": "The prosecution painted Bankman-Fried as someone who knowingly committed fraud to achieve great wealth, power and influence, while the defense countered that the FTX founder acted in good faith, never meant to commit fraud or steal and basically got in over his head."
+   }
+  ]
+ },
+ {
+  "id": "mh_0039",
+  "question": "Who is the individual under 30, previously reported by TechCrunch as the richest in the world with intentions to use his wealth for humanity's salvation, now facing a criminal trial as per TechCrunch, accused by Fortune of using a front for secret access to customer funds, and alleged by TechCrunch to have committed fraud for personal gain?",
+  "question_type": "inference_query",
+  "answer": "Sam Bankman-Fried",
+  "gold_doc_titles": [
+   "SBF’s trial starts soon, but how did he — and FTX — get here?",
+   "Is Sam Bankman-Fried a bad ‘man’ or a good ‘boy’? Lawyers swap opening statements before first witnesses take the stand",
+   "SBF, riding high on FTX, reportedly offered $5B to Trump to cancel President re-run",
+   "Sam Altman backs teens’ startup, Google unveils the Pixel 8 and TikTok tests an ad-free tier"
+  ],
+  "gold_evidence": [
+   {
+    "title": "SBF’s trial starts soon, but how did he — and FTX — get here?",
+    "source": "TechCrunch",
+    "published_at": "2023-10-01T14:00:29+00:00",
+    "fact": "The highly anticipated criminal trial for Sam Bankman-Fried, former CEO of bankrupt crypto exchange FTX, started Tuesday to determine whether he’s guilty of seven counts of fraud and conspiracy."
+   },
+   {
+    "title": "Is Sam Bankman-Fried a bad ‘man’ or a good ‘boy’? Lawyers swap opening statements before first witnesses take the stand",
+    "source": "Fortune",
+    "published_at": "2023-10-04T23:32:53+00:00",
+    "fact": "Using Caroline Ellison, his on-again off-again girlfriend and the CEO of Alameda, as a front, Bankman-Fried had “secret access” to customer money—both cash and crypto—the government claimed."
+   },
+   {
+    "title": "SBF, riding high on FTX, reportedly offered $5B to Trump to cancel President re-run",
+    "source": "TechCrunch",
+    "published_at": "2023-10-02T13:11:07+00:00",
+    "fact": "He was the richest person in the world under 30 [and] he was going to spend it to save humanity from extinction,” he said."
+   },
+   {
+    "title": "Sam Altman backs teens’ startup, Google unveils the Pixel 8 and TikTok tests an ad-free tier",
+    "source": "TechCrunch",
+    "published_at": "2023-10-07T20:15:26+00:00",
+    "fact": "The prosecution painted Bankman-Fried as someone who knowingly committed fraud to achieve great wealth, power and influence, while the defense countered that the FTX founder acted in good faith, never meant to commit fraud or steal and basically got in over his head."
+   }
+  ]
+ },
+ {
+  "id": "mh_0045",
+  "question": "Which individual, associated with both the beginning of a criminal trial reported by TechCrunch and the persuasion of a former Jane Street colleague as detailed by Fortune, is the same person who has entered a not-guilty plea to charges as covered by TechCrunch and is alleged by the prosecution in another TechCrunch article to have sought wealth, power, and influence through fraud?",
+  "question_type": "inference_query",
+  "answer": "Sam Bankman-Fried",
+  "gold_doc_titles": [
+   "SBF’s trial starts soon, but how did he — and FTX — get here?",
+   "Is Sam Bankman-Fried a bad ‘man’ or a good ‘boy’? Lawyers swap opening statements before first witnesses take the stand",
+   "SBF, riding high on FTX, reportedly offered $5B to Trump to cancel President re-run",
+   "Sam Altman backs teens’ startup, Google unveils the Pixel 8 and TikTok tests an ad-free tier"
+  ],
+  "gold_evidence": [
+   {
+    "title": "SBF’s trial starts soon, but how did he — and FTX — get here?",
+    "source": "TechCrunch",
+    "published_at": "2023-10-01T14:00:29+00:00",
+    "fact": "The highly anticipated criminal trial for Sam Bankman-Fried, former CEO of bankrupt crypto exchange FTX, started Tuesday to determine whether he’s guilty of seven counts of fraud and conspiracy."
+   },
+   {
+    "title": "Is Sam Bankman-Fried a bad ‘man’ or a good ‘boy’? Lawyers swap opening statements before first witnesses take the stand",
+    "source": "Fortune",
+    "published_at": "2023-10-04T23:32:53+00:00",
+    "fact": "And after Bankman-Fried left Jane Street, the high-frequency trading firm where the former billionaire got his start in finance after MIT, he persuaded Yedidia to join him as a trader at Alameda and then as a developer at FTX."
+   },
+   {
+    "title": "SBF, riding high on FTX, reportedly offered $5B to Trump to cancel President re-run",
+    "source": "TechCrunch",
+    "published_at": "2023-10-02T13:11:07+00:00",
+    "fact": "SBF, as he’s known, has pleaded not-guilty to some seven charges of fraud and conspiracy."
+   },
+   {
+    "title": "Sam Altman backs teens’ startup, Google unveils the Pixel 8 and TikTok tests an ad-free tier",
+    "source": "TechCrunch",
+    "published_at": "2023-10-07T20:15:26+00:00",
+    "fact": "The prosecution painted Bankman-Fried as someone who knowingly committed fraud to achieve great wealth, power and influence, while the defense countered that the FTX founder acted in good faith, never meant to commit fraud or steal and basically got in over his head."
+   }
+  ]
+ },
+ {
+  "id": "mh_0046",
+  "question": "Which company is the subject of criticism in articles from both 'The Age' and 'TechCrunch' for practices that involve manipulating search results to maximize ad revenue and siphoning off content and revenue from news publishers?",
+  "question_type": "inference_query",
+  "answer": "Google",
+  "gold_doc_titles": [
+   "Is Google Search better than the rest? And is that fair?",
+   "News publisher files class action antitrust suit against Google, citing AI’s harms to their bottom line"
+  ],
+  "gold_evidence": [
+   {
+    "title": "Is Google Search better than the rest? And is that fair?",
+    "source": "The Age",
+    "published_at": "2023-10-22T18:00:00+00:00",
+    "fact": "She admits that she may have misinterpreted the evidence, but maintains that Google manipulates Search to maximise ad revenue."
+   },
+   {
+    "title": "News publisher files class action antitrust suit against Google, citing AI’s harms to their bottom line",
+    "source": "TechCrunch",
+    "published_at": "2023-12-15T17:56:02+00:00",
+    "fact": "The case, filed by Arkansas-based publisher Helena World Chronicle, argues that Google “siphons off” news publishers’ content, their readers and ad revenue through anticompetitive means."
+   }
+  ]
+ },
+ {
+  "id": "mh_0126",
+  "question": "Does the article from 'The Independent - Life and Style' on \"Britney Spears and Justin Timberlake's breakup\" suggest infidelity as a factor, while the article from 'The Independent - Life and Style' on \"Will Smith and Jada Pinkett Smith's marriage\" indicate the absence of infidelity?",
+  "question_type": "comparison_query",
+  "answer": "Yes",
+  "gold_doc_titles": [
+   "From Justin Timberlake to Sam Asghari: A timeline of Britney Spears’ relationships",
+   "A timeline of Will Smith and Jada Pinkett Smith’s relationship amid separation"
+  ],
+  "gold_evidence": [
+   {
+    "title": "From Justin Timberlake to Sam Asghari: A timeline of Britney Spears’ relationships",
+    "source": "The Independent - Life and Style",
+    "published_at": "2023-10-18T03:46:39+00:00",
+    "fact": "At the time, the music video for the song – which featured a woman with blonde hair - sparked rumours that he and Spears broke up because she allegedly cheated on him."
+   },
+   {
+    "title": "A timeline of Will Smith and Jada Pinkett Smith’s relationship amid separation",
+    "source": "The Independent - Life and Style",
+    "published_at": "2023-10-12T18:10:45+00:00",
+    "fact": "During an interview on CBS Sunday Morning earlier this month, Will said he and Jada had never accused each other of cheating."
+   }
+  ]
+ },
+ {
+  "id": "mh_0128",
+  "question": "Does the article from 'The Age' suggest that 'The individual's dating intentions' were focused on starting a family, while 'The Independent - Life and Style' article's claim about 'Taylor Swift and Travis Kelce' centers on speculation about their dating status without indicating a similar intention?",
+  "question_type": "comparison_query",
+  "answer": "Yes",
+  "gold_doc_titles": [
+   "At 37, Alexandra found herself broke, heartbroken and living with her parents",
+   "Fans spot Travis Kelce wearing Taylor Swift-themed friendship bracelet before she attended his game"
+  ],
+  "gold_evidence": [
+   {
+    "title": "At 37, Alexandra found herself broke, heartbroken and living with her parents",
+    "source": "The Age",
+    "published_at": "2023-11-25T18:00:00+00:00",
+    "fact": "Then I launched myself into dating to try to find a man to have a family with."
+   },
+   {
+    "title": "Fans spot Travis Kelce wearing Taylor Swift-themed friendship bracelet before she attended his game",
+    "source": "The Independent - Life and Style",
+    "published_at": "2023-09-26T22:05:34+00:00",
+    "fact": "The post came after Swift was seen enthusiastically cheering him on in the box seats at Arrowhead Stadium, fuelling speculation that she and the athlete are dating."
+   }
+  ]
+ },
+ {
+  "id": "mh_0131",
+  "question": "Did the Fortune article claim that Alameda Research's business practices with FTX were illegal, in contrast to the TechCrunch article which claims that Alameda Research misused FTX customer funds?",
+  "question_type": "comparison_query",
+  "answer": "no",
+  "gold_doc_titles": [
+   "Is Sam Bankman-Fried a bad ‘man’ or a good ‘boy’? Lawyers swap opening statements before first witnesses take the stand",
+   "SBF Trial: The latest updates from the FTX collapse’s courtroom drama"
+  ],
+  "gold_evidence": [
+   {
+    "title": "Is Sam Bankman-Fried a bad ‘man’ or a good ‘boy’? Lawyers swap opening statements before first witnesses take the stand",
+    "source": "Fortune",
+    "published_at": "2023-10-04T23:32:53+00:00",
+    "fact": "It was a “very innovative, successful company.” And the business practices between the two were reasonable, he argued, claiming that Alameda acted legally as an FTX customer, payment processor, and market maker, or financial entity that acts as a trading partner for customers looking to buy and sell cryptocurrencies."
+   },
+   {
+    "title": "SBF Trial: The latest updates from the FTX collapse’s courtroom drama",
+    "source": "TechCrunch",
+    "published_at": "2023-10-06T17:22:02+00:00",
+    "fact": "The crypto trading firm, according to Wang, pulled funding directly from FTX customers, whose transactions would be funneled toward Alameda and then directed elsewhere."
+   }
+  ]
+ },
+ {
+  "id": "mh_0135",
+  "question": "Does the article from The Verge claim that Sam Bankman-Fried used FTX customer funds for a specific transaction, while the TechCrunch articles focus on his plea to charges and the prosecution's allegations without mentioning the use of customer funds?",
+  "question_type": "comparison_query",
+  "answer": "Yes",
+  "gold_doc_titles": [
+   "Sam Bankman-Fried was a terrible boyfriend",
+   "SBF, riding high on FTX, reportedly offered $5B to Trump to cancel President re-run",
+   "Sam Altman backs teens’ startup, Google unveils the Pixel 8 and TikTok tests an ad-free tier"
+  ],
+  "gold_evidence": [
+   {
+    "title": "Sam Bankman-Fried was a terrible boyfriend",
+    "source": "The Verge",
+    "published_at": "2023-10-10T23:50:21+00:00",
+    "fact": "It was Bankman-Fried’s decision, she said, as he was the CEO of FTX."
+   },
+   {
+    "title": "SBF, riding high on FTX, reportedly offered $5B to Trump to cancel President re-run",
+    "source": "TechCrunch",
+    "published_at": "2023-10-02T13:11:07+00:00",
+    "fact": "SBF, as he’s known, has pleaded not-guilty to some seven charges of fraud and conspiracy."
+   },
+   {
+    "title": "Sam Altman backs teens’ startup, Google unveils the Pixel 8 and TikTok tests an ad-free tier",
+    "source": "TechCrunch",
+    "published_at": "2023-10-07T20:15:26+00:00",
+    "fact": "The prosecution painted Bankman-Fried as someone who knowingly committed fraud to achieve great wealth, power and influence, while the defense countered that the FTX founder acted in good faith, never meant to commit fraud or steal and basically got in over his head."
+   }
+  ]
+ },
+ {
+  "id": "mh_0139",
+  "question": "Does the TechCrunch article reporting on the EU's investigation into X over alleged disinformation disagree with the TechCrunch article warning Elon Musk's X (formerly Twitter) about illegal content and disinformation in terms of the type of content being circulated, with both mentioning the circulation of false information and manipulated content?",
+  "question_type": "comparison_query",
+  "answer": "no",
+  "gold_doc_titles": [
+   "After warning, the EU opens investigation into X over alleged disinformation",
+   "EU fires urgent warning at Elon Musk’s X over illegal content and disinformation following Hamas attacks"
+  ],
+  "gold_evidence": [
+   {
+    "title": "After warning, the EU opens investigation into X over alleged disinformation",
+    "source": "TechCrunch",
+    "published_at": "2023-10-13T00:38:56+00:00",
+    "fact": "Since Saturday’s attacks in Israel, posts identified as false have been spotted circulating on X — including, in one example, a clip that purported to show Hamas missile attacks on Israel but was actually footage from a video game."
+   },
+   {
+    "title": "EU fires urgent warning at Elon Musk’s X over illegal content and disinformation following Hamas attacks",
+    "source": "TechCrunch",
+    "published_at": "2023-10-10T23:47:38+00:00",
+    "fact": "“Public media and civil society organisations widely report instances of fake and manipulated images and facts circulating on your platform in the EU, such as repurposed old images of unrelated armed conflicts or military footage that actually originated from video games."
+   }
+  ]
+ },
+ {
+  "id": "mh_0149",
+  "question": "Does the Mashable article suggest that Amazon's Cyber Monday includes only old deals, while The Sydney Morning Herald article focuses on the impact of an antitrust lawsuit on Amazon's stock price, and the Cnbc | World Business News Leader article discusses the opportunity of selling on Amazon, without mentioning any legal or promotional events?",
+  "question_type": "comparison_query",
+  "answer": "no",
+  "gold_doc_titles": [
+   "200+ of the best deals from Amazon's Cyber Monday sale",
+   "ASX set to drop as Wall Street’s September slump deepens",
+   "Amazon sellers sound off on the FTC's 'long-overdue' antitrust case"
+  ],
+  "gold_evidence": [
+   {
+    "title": "200+ of the best deals from Amazon's Cyber Monday sale",
+    "source": "Mashable",
+    "published_at": "2023-11-27T08:45:59+00:00",
+    "fact": "Official Cyber Monday mode, which is currently on through Monday, Nov. 27, includes both a ton of deals carried over from Black Friday plus some new ones."
+   },
+   {
+    "title": "ASX set to drop as Wall Street’s September slump deepens",
+    "source": "The Sydney Morning Herald",
+    "published_at": "2023-09-26T19:11:30+00:00",
+    "fact": "Amazon tumbled 4 per cent after the Federal Trade Commission and 17 state attorneys general filed an antitrust lawsuit against it."
+   },
+   {
+    "title": "Amazon sellers sound off on the FTC's 'long-overdue' antitrust case",
+    "source": "Cnbc | World Business News Leader",
+    "published_at": "2023-10-06T21:31:00+00:00",
+    "fact": "“Selling on Amazon is a life-changing opportunity and the amount of sellers that throw stones at the platform is astounding,” one user wrote."
+   }
+  ]
+ },
+ {
+  "id": "mh_0150",
+  "question": "Does 'The Guardian' describe Shai Hope's performance against legspin bowling in the first T20 international differently from how 'The Guardian' describes his role in the fifth T20 international?",
+  "question_type": "comparison_query",
+  "answer": "Yes",
+  "gold_doc_titles": [
+   "West Indies v England: first T20 international – live",
+   "West Indies v England: fifth and deciding men’s T20 cricket international – live"
+  ],
+  "gold_evidence": [
+   {
+    "title": "West Indies v England: first T20 international – live",
+    "source": "The Guardian",
+    "published_at": "2023-12-12T21:49:56+00:00",
+    "fact": "13 Dec 2023 00.58 GMT 12th over: West Indies 102-4 (Hope 26, Hetmyer 1) Just a single and the wicket off the over, Shai Hope can’t break the legspin shackles."
+   },
+   {
+    "title": "West Indies v England: fifth and deciding men’s T20 cricket international – live",
+    "source": "The Guardian",
+    "published_at": "2023-12-21T19:39:01+00:00",
+    "fact": "Instead it’s Shai Hope, who is happily playing the anchor role, who faces five of the six deliveries."
+   }
+  ]
+ },
+ {
+  "id": "mh_0154",
+  "question": "Did the article from The Verge suggest that Sam Bankman-Fried did not use FTX customer funds for a specific transaction, while the TechCrunch articles imply that his overall wealth and alleged fraudulent activities were not directed towards different goals, such as influencing politics and achieving personal gain?",
+  "question_type": "comparison_query",
+  "answer": "no",
+  "gold_doc_titles": [
+   "Sam Bankman-Fried was a terrible boyfriend",
+   "SBF, riding high on FTX, reportedly offered $5B to Trump to cancel President re-run",
+   "Sam Altman backs teens’ startup, Google unveils the Pixel 8 and TikTok tests an ad-free tier"
+  ],
+  "gold_evidence": [
+   {
+    "title": "Sam Bankman-Fried was a terrible boyfriend",
+    "source": "The Verge",
+    "published_at": "2023-10-10T23:50:21+00:00",
+    "fact": "It was Bankman-Fried’s decision, she said, as he was the CEO of FTX."
+   },
+   {
+    "title": "SBF, riding high on FTX, reportedly offered $5B to Trump to cancel President re-run",
+    "source": "TechCrunch",
+    "published_at": "2023-10-02T13:11:07+00:00",
+    "fact": "He was the richest person in the world under 30 [and] he was going to spend it to save humanity from extinction,” he said."
+   },
+   {
+    "title": "Sam Altman backs teens’ startup, Google unveils the Pixel 8 and TikTok tests an ad-free tier",
+    "source": "TechCrunch",
+    "published_at": "2023-10-07T20:15:26+00:00",
+    "fact": "The prosecution painted Bankman-Fried as someone who knowingly committed fraud to achieve great wealth, power and influence, while the defense countered that the FTX founder acted in good faith, never meant to commit fraud or steal and basically got in over his head."
+   }
+  ]
+ },
+ {
+  "id": "mh_0155",
+  "question": "Does the CBSSports.com article claim that Caesars Sportsbook offers a different new customer bonus bet amount than the Sporting News article claims Caesars Sportsbook is expected to offer to new sign-ups in Vermont?",
+  "question_type": "comparison_query",
+  "answer": "no",
+  "gold_doc_titles": [
+   "2023 Kentucky online sports betting sites: Best legal sportsbooks, promos, bonuses, mobile apps, how to bet",
+   "Vermont Sportsbook Promos and Sports Betting Launch News"
+  ],
+  "gold_evidence": [
+   {
+    "title": "2023 Kentucky online sports betting sites: Best legal sportsbooks, promos, bonuses, mobile apps, how to bet",
+    "source": "CBSSports.com",
+    "published_at": "2023-10-13T21:17:17+00:00",
+    "fact": "New customers can get up to $1000 in bonus bets if they lose their first bet."
+   },
+   {
+    "title": "Vermont Sportsbook Promos and Sports Betting Launch News",
+    "source": "Sporting News",
+    "published_at": "2023-09-26T22:53:28+00:00",
+    "fact": "We expect Caesars to offer the same offer in VT is has elsewhere, with new sign-ups eligible to receive up to a $1,000 Bonus Bet if their first bet loses."
+   }
+  ]
+ },
+ {
+  "id": "mh_0157",
+  "question": "Does the article from Polygon discussing the Barbie film describe Mattel's portrayal in the same light as how The Independent - Life and Style article describes Mattel's handling of the Wilma Mankiller Barbie doll?",
+  "question_type": "comparison_query",
+  "answer": "no",
+  "gold_doc_titles": [
+   "The best movies of 2023 so far",
+   "Mattel slammed for ‘inaccurate’ Cherokee Barbie"
+  ],
+  "gold_evidence": [
+   {
+    "title": "The best movies of 2023 so far",
+    "source": "Polygon",
+    "published_at": "2023-10-07T12:38:36+00:00",
+    "fact": "They package these ideas into a giddy satire full of bright and winning performances, pointed jokes aimed at Mattel and the corporate world, terrific casting (Issa Rae as President Barbie, Simu Liu as one of many Kens, and Kate McKinnon as Weird Barbie are standouts), and endless cultural gags."
+   },
+   {
+    "title": "Mattel slammed for ‘inaccurate’ Cherokee Barbie",
+    "source": "The Independent - Life and Style",
+    "published_at": "2023-12-06T18:25:33+00:00",
+    "fact": "However, Mattel has now faced some criticism over the doll, with people calling the toy company out for inaccuracies."
+   }
+  ]
+ },
+ {
+  "id": "mh_0159",
+  "question": "Did the 'Sporting News' article about A.J. Dillon's reception for the Chiefs vs. Packers game report a dissimilar successful first down completion compared to the 'Sporting News' article about Samaje Perine's reception in the Vikings vs. Broncos game?",
+  "question_type": "comparison_query",
+  "answer": "no",
+  "gold_doc_titles": [
+   "Chiefs vs. Packers live score, updates, highlights from NFL 'Sunday Night Football' game",
+   "Vikings vs. Broncos live score, updates, highlights from NFL 'Sunday Night Football' game"
+  ],
+  "gold_evidence": [
+   {
+    "title": "Chiefs vs. Packers live score, updates, highlights from NFL 'Sunday Night Football' game",
+    "source": "Sporting News",
+    "published_at": "2023-12-03T23:00:04+00:00",
+    "fact": "10:03 p.m.: Love hits Dillon out in the front, who makes his defender miss before racing beyond the marker for a first down."
+   },
+   {
+    "title": "Vikings vs. Broncos live score, updates, highlights from NFL 'Sunday Night Football' game",
+    "source": "Sporting News",
+    "published_at": "2023-11-19T23:00:04+00:00",
+    "fact": "11:09 p.m.: Samaje Perine picks up 10 yards and a first down on a pass from Russell Wilson to take us into the two-minute warning."
+   }
+  ]
+ },
+ {
+  "id": "mh_0162",
+  "question": "Does the Sporting News article suggest that a single victory for Michigan's football team could have a similar impact on their season as the loss to the Browns had on the Chicago Bears' playoff hopes, with both teams facing important upcoming games?",
+  "question_type": "comparison_query",
+  "answer": "no",
+  "gold_doc_titles": [
+   "Michigan sign-stealing scandal winners and losers, from Jim Harbaugh to Tony Petitti",
+   "Browns survive Bears Hail Mary on wild, near-catch by Darnell Mooney: 'Damn near s— myself'"
+  ],
+  "gold_evidence": [
+   {
+    "title": "Michigan sign-stealing scandal winners and losers, from Jim Harbaugh to Tony Petitti",
+    "source": "Sporting News",
+    "published_at": "2023-11-11T22:50:13+00:00",
+    "fact": "One loss, and all this could unravel, and the Terps and Buckeyes still remain on the schedule."
+   },
+   {
+    "title": "Browns survive Bears Hail Mary on wild, near-catch by Darnell Mooney: 'Damn near s— myself'",
+    "source": "Sporting News",
+    "published_at": "2023-12-17T23:06:30+00:00",
+    "fact": "The loss was also particularly crushing for a team that had won back-to-back games, with a pair of wild-card contenders in the Vikings and Packers losing this weekend."
+   }
+  ]
+ },
+ {
+  "id": "mh_0163",
+  "question": "Did the TechCrunch article suggest that Sam Bankman-Fried offered a financial incentive to influence political decisions, while the Fortune article alleges he used a proxy for authorized access to funds, and does the second TechCrunch piece claim that his motivation for alleged fraud was personal gain, thus presenting different aspects of his actions?",
+  "question_type": "comparison_query",
+  "answer": "no",
+  "gold_doc_titles": [
+   "SBF, riding high on FTX, reportedly offered $5B to Trump to cancel President re-run",
+   "Is Sam Bankman-Fried a bad ‘man’ or a good ‘boy’? Lawyers swap opening statements before first witnesses take the stand",
+   "Sam Altman backs teens’ startup, Google unveils the Pixel 8 and TikTok tests an ad-free tier"
+  ],
+  "gold_evidence": [
+   {
+    "title": "SBF, riding high on FTX, reportedly offered $5B to Trump to cancel President re-run",
+    "source": "TechCrunch",
+    "published_at": "2023-10-02T13:11:07+00:00",
+    "fact": "SBF, as he’s known, has pleaded not-guilty to some seven charges of fraud and conspiracy."
+   },
+   {
+    "title": "Is Sam Bankman-Fried a bad ‘man’ or a good ‘boy’? Lawyers swap opening statements before first witnesses take the stand",
+    "source": "Fortune",
+    "published_at": "2023-10-04T23:32:53+00:00",
+    "fact": "Using Caroline Ellison, his on-again off-again girlfriend and the CEO of Alameda, as a front, Bankman-Fried had “secret access” to customer money—both cash and crypto—the government claimed."
+   },
+   {
+    "title": "Sam Altman backs teens’ startup, Google unveils the Pixel 8 and TikTok tests an ad-free tier",
+    "source": "TechCrunch",
+    "published_at": "2023-10-07T20:15:26+00:00",
+    "fact": "The prosecution painted Bankman-Fried as someone who knowingly committed fraud to achieve great wealth, power and influence, while the defense countered that the FTX founder acted in good faith, never meant to commit fraud or steal and basically got in over his head."
+   }
+  ]
+ },
+ {
+  "id": "mh_0165",
+  "question": "Does the TechCrunch article claim that \"Microsoft's investment in OpenAI\" is a specific amount, while The Age article focuses on the \"founding of OpenAI\" without specifying financial figures?",
+  "question_type": "comparison_query",
+  "answer": "Yes",
+  "gold_doc_titles": [
+   "ChatGPT: Everything you need to know about the AI-powered chatbot",
+   "How ego and fear fuelled the rise of artificial intelligence"
+  ],
+  "gold_evidence": [
+   {
+    "title": "ChatGPT: Everything you need to know about the AI-powered chatbot",
+    "source": "TechCrunch",
+    "published_at": "2023-09-28T20:03:39+00:00",
+    "fact": "The size of Microsoft’s investment is believed to be around $10 billion, a figure we confirmed with our source."
+   },
+   {
+    "title": "How ego and fear fuelled the rise of artificial intelligence",
+    "source": "The Age",
+    "published_at": "2023-12-09T18:30:00+00:00",
+    "fact": "OpenAI was founded in late 2015, just a few months after he met with Altman at the Rosewood hotel in Silicon Valley."
+   }
+  ]
+ },
+ {
+  "id": "mh_0171",
+  "question": "Does the TechCrunch article suggest that Sam Bankman-Fried's intentions for his wealth were different from the portrayal of his actions in the Fortune article, and do both these characterizations align with the allegations of fraud mentioned in another TechCrunch article?",
+  "question_type": "comparison_query",
+  "answer": "Yes",
+  "gold_doc_titles": [
+   "SBF, riding high on FTX, reportedly offered $5B to Trump to cancel President re-run",
+   "Is Sam Bankman-Fried a bad ‘man’ or a good ‘boy’? Lawyers swap opening statements before first witnesses take the stand",
+   "Sam Altman backs teens’ startup, Google unveils the Pixel 8 and TikTok tests an ad-free tier"
+  ],
+  "gold_evidence": [
+   {
+    "title": "SBF, riding high on FTX, reportedly offered $5B to Trump to cancel President re-run",
+    "source": "TechCrunch",
+    "published_at": "2023-10-02T13:11:07+00:00",
+    "fact": "He was the richest person in the world under 30 [and] he was going to spend it to save humanity from extinction,” he said."
+   },
+   {
+    "title": "Is Sam Bankman-Fried a bad ‘man’ or a good ‘boy’? Lawyers swap opening statements before first witnesses take the stand",
+    "source": "Fortune",
+    "published_at": "2023-10-04T23:32:53+00:00",
+    "fact": "But “all of that, all of it, was built on lies,” Rehn declared to the jury."
+   },
+   {
+    "title": "Sam Altman backs teens’ startup, Google unveils the Pixel 8 and TikTok tests an ad-free tier",
+    "source": "TechCrunch",
+    "published_at": "2023-10-07T20:15:26+00:00",
+    "fact": "The prosecution painted Bankman-Fried as someone who knowingly committed fraud to achieve great wealth, power and influence, while the defense countered that the FTX founder acted in good faith, never meant to commit fraud or steal and basically got in over his head."
+   }
+  ]
+ },
+ {
+  "id": "mh_0251",
+  "question": "Considering the economic analysis from Bloomberg and the agricultural developments reported by Reuters, which minister, responsible for the finance portfolio in Zimbabwe, also announced a partnership with an international firm to boost crop production in the country?",
+  "question_type": "null_query",
+  "answer": "Insufficient information.",
+  "gold_doc_titles": [],
+  "gold_evidence": []
+ },
+ {
+  "id": "mh_0252",
+  "question": "Considering the information from an article by The Verge on the expansion of Fixed Wireless Access in rural areas and another by CNET discussing the technological advancements in Fixed Wireless Access equipment, which company, starting with the letter 'A', was mentioned as both expanding its rural Fixed Wireless Access network and introducing new equipment to enhance connectivity speeds?",
+  "question_type": "null_query",
+  "answer": "Insufficient information.",
+  "gold_doc_titles": [],
+  "gold_evidence": []
+ },
+ {
+  "id": "mh_0253",
+  "question": "Based on the information from a Bloomberg article discussing Microsoft's latest strategic business move and a Wall Street Journal report on the company's financial performance in the last quarter, which division within Microsoft, represented by a single letter, is both central to the new strategy and was the top-performing revenue segment?",
+  "question_type": "null_query",
+  "answer": "Insufficient information.",
+  "gold_doc_titles": [],
+  "gold_evidence": []
+ },
+ {
+  "id": "mh_0254",
+  "question": "Considering the information from an article by The New York Times and another by The Guardian on the film \"Dance The Night,\" which character, portrayed by an actor who has previously won an Academy Award, is central to the plot twist revealed in the third act of the movie as per The New York Times, and is also noted for their exceptional dance performance in a pivotal scene highlighted by The Guardian?",
+  "question_type": "null_query",
+  "answer": "Insufficient information.",
+  "gold_doc_titles": [],
+  "gold_evidence": []
+ },
+ {
+  "id": "mh_0255",
+  "question": "Considering the information from an article by The Times of India about Agastya's recent scientific discovery and another article by The Hindu discussing Agastya's involvement in a major environmental project, which element on the periodic table, symbolized by a single character, is both central to Agastya's discovery and a critical component of the environmental initiative?",
+  "question_type": "null_query",
+  "answer": "Insufficient information.",
+  "gold_doc_titles": [],
+  "gold_evidence": []
+ },
+ {
+  "id": "mh_0256",
+  "question": "Considering the information from a Bloomberg article discussing Visa Inc.'s financial performance in the last quarter and a Reuters report on Visa Inc.'s strategic partnerships formed within the same period, which single letter represents the credit card network's stock symbol on the New York Stock Exchange?",
+  "question_type": "null_query",
+  "answer": "Insufficient information.",
+  "gold_doc_titles": [],
+  "gold_evidence": []
+ },
+ {
+  "id": "mh_0257",
+  "question": "Considering the information from an article by Forbes about the growth strategies of Pets Best Insurance Services and a report by The Wall Street Journal on the company's recent partnership with a major pet retailer, which letter of the alphabet starts the name of the CEO who has overseen these developments at Pets Best Insurance Services?",
+  "question_type": "null_query",
+  "answer": "Insufficient information.",
+  "gold_doc_titles": [],
+  "gold_evidence": []
+ },
+ {
+  "id": "mh_0258",
+  "question": "Considering the information from an article in The New York Times about Jay Brown's recent promotion and another from The Wall Street Journal discussing his strategic partnership initiatives, which company's board, now chaired by Jay Brown, has both expanded its market share in Asia and launched a new sustainability program?",
+  "question_type": "null_query",
+  "answer": "Insufficient information.",
+  "gold_doc_titles": [],
+  "gold_evidence": []
+ },
+ {
+  "id": "mh_0259",
+  "question": "Considering the information from an article in The New York Times about the decline in bee populations affecting pollination and a separate article from The Guardian discussing the impact of climate change on the blooming periods of flowers, which letter represents the first initial of the scientist who has conducted extensive research on both phenomena and has proposed a widely-recognized theory linking these issues?",
+  "question_type": "null_query",
+  "answer": "Insufficient information.",
+  "gold_doc_titles": [],
+  "gold_evidence": []
+ },
+ {
+  "id": "mh_0260",
+  "question": "Considering the information from an article in The Guardian and another in The Independent about Bobby Brazier, which character did he portray in a television series that marked his acting debut, as mentioned in The Guardian, and is also related to a character discussed in The Independent's coverage of the same topic?",
+  "question_type": "null_query",
+  "answer": "Insufficient information.",
+  "gold_doc_titles": [],
+  "gold_evidence": []
+ },
+ {
+  "id": "mh_0261",
+  "question": "Considering the information from an article by The Verge and another by Wired on Mike Schoofs, which company's product, known for its innovative technology in one article, did Schoofs join as the managing editor according to the other article, and is represented by the first letter of its name?",
+  "question_type": "null_query",
+  "answer": "Insufficient information.",
+  "gold_doc_titles": [],
+  "gold_evidence": []
+ },
+ {
+  "id": "mh_0262",
+  "question": "Considering the information from a Times of India article detailing the infrastructure projects planned for the city and a Hindustan Times report on the environmental challenges faced by Greater Mumbai, which single letter represents both the initial of a key official overseeing the new metro project and the first letter of a rare species mentioned as being at risk due to urban expansion?",
+  "question_type": "null_query",
+  "answer": "Insufficient information.",
+  "gold_doc_titles": [],
+  "gold_evidence": []
+ },
+ {
+  "id": "mh_0263",
+  "question": "Based on the information from a New York Times article and a Wall Street Journal report on Synchrony Financial, which letter represents the first initial of the CEO who discussed the company's strategic partnerships in the former and was mentioned in relation to the company's quarterly earnings growth in the latter?",
+  "question_type": "null_query",
+  "answer": "Insufficient information.",
+  "gold_doc_titles": [],
+  "gold_evidence": []
+ },
+ {
+  "id": "mh_0264",
+  "question": "Considering the information from a New York Times article and a Wall Street Journal report on Ryan McInerney, what is the first letter of the city where the company he leads is headquartered, which also announced a significant financial technology investment as per the New York Times, and is facing regulatory scrutiny as mentioned in the Wall Street Journal?",
+  "question_type": "null_query",
+  "answer": "Insufficient information.",
+  "gold_doc_titles": [],
+  "gold_evidence": []
+ },
+ {
+  "id": "mh_0265",
+  "question": "Considering the information from an article in The New York Times and another from The Wall Street Journal about Beto Casellas, what is the first letter of the company that Casellas is currently leading as CEO, which has also recently launched a new financial product aimed at improving customer experience?",
+  "question_type": "null_query",
+  "answer": "Insufficient information.",
+  "gold_doc_titles": [],
+  "gold_evidence": []
+ },
+ {
+  "id": "mh_0379",
+  "question": "After TechCrunch reported on November 6, 2023, that Google provided extensive evidence to counter Epic Games' claims in their antitrust battle, did the consistency of Google's stance on antitrust issues remain unchanged according to a later report by TechCrunch on December 15, 2023, regarding a class action lawsuit filed by a news publisher against Google?",
+  "question_type": "temporal_query",
+  "answer": "Yes",
+  "gold_doc_titles": [
+   "What to know about Fortnite maker Epic Games’ antitrust battle with Google, starting today",
+   "Apple defends Google Search deal in court: ‘There wasn’t a valid alternative’",
+   "News publisher files class action antitrust suit against Google, citing AI’s harms to their bottom line"
+  ],
+  "gold_evidence": [
+   {
+    "title": "What to know about Fortnite maker Epic Games’ antitrust battle with Google, starting today",
+    "source": "TechCrunch",
+    "published_at": "2023-11-06T16:47:11+00:00",
+    "fact": "Epic will also suggest that Google hid items from discovery by allowing execs and employees to have “off the record” chats, but Google will counter this as well, saying it has provided the court with thousands of chat logs and millions of documents."
+   },
+   {
+    "title": "Apple defends Google Search deal in court: ‘There wasn’t a valid alternative’",
+    "source": "The Verge",
+    "published_at": "2023-09-26T17:01:22+00:00",
+    "fact": "“Certainly there wasn’t a valid alternative to Google at the time,” Cue said."
+   },
+   {
+    "title": "News publisher files class action antitrust suit against Google, citing AI’s harms to their bottom line",
+    "source": "TechCrunch",
+    "published_at": "2023-12-15T17:56:02+00:00",
+    "fact": "The case, filed by Arkansas-based publisher Helena World Chronicle, argues that Google “siphons off” news publishers’ content, their readers and ad revenue through anticompetitive means."
+   }
+  ]
+ },
+ {
+  "id": "mh_0389",
+  "question": "Between the TechCrunch report on Sam Bankman-Fried's trial published on October 6, 2023, and the TechCrunch report on the allegations against Sam Bankman-Fried published on October 7, 2023, was there consistency in the portrayal of Sam Bankman-Fried's involvement in the FTX collapse?",
+  "question_type": "temporal_query",
+  "answer": "Yes",
+  "gold_doc_titles": [
+   "Sam Bankman-Fried didn’t ask where the $8 billion went",
+   "SBF Trial: The latest updates from the FTX collapse’s courtroom drama",
+   "Sam Altman backs teens’ startup, Google unveils the Pixel 8 and TikTok tests an ad-free tier"
+  ],
+  "gold_evidence": [
+   {
+    "title": "Sam Bankman-Fried didn’t ask where the $8 billion went",
+    "source": "The Verge",
+    "published_at": "2023-10-31T19:52:07+00:00",
+    "fact": "It was not until Judge Lewis Kaplan intervened to ask if Bankman-Fried had ever been told by Yedidia about that money, in words or in substance, that Bankman-Fried admitted he’d been told."
+   },
+   {
+    "title": "SBF Trial: The latest updates from the FTX collapse’s courtroom drama",
+    "source": "TechCrunch",
+    "published_at": "2023-10-06T17:22:02+00:00",
+    "fact": "The second week of the trial’s standout testimony came from Alameda Research’s former CEO Caroline Ellison, who claimed she took $14 billion from customers to repay debts to lenders, using them as a line of credit under the instruction of SBF."
+   },
+   {
+    "title": "Sam Altman backs teens’ startup, Google unveils the Pixel 8 and TikTok tests an ad-free tier",
+    "source": "TechCrunch",
+    "published_at": "2023-10-07T20:15:26+00:00",
+    "fact": "The prosecution painted Bankman-Fried as someone who knowingly committed fraud to achieve great wealth, power and influence, while the defense countered that the FTX founder acted in good faith, never meant to commit fraud or steal and basically got in over his head."
+   }
+  ]
+ },
+ {
+  "id": "mh_0390",
+  "question": "Between the TechCrunch report on Sam Bankman-Fried's intentions with his wealth published on October 2, 2023, and the TechCrunch report on the allegations against Sam Bankman-Fried published on October 7, 2023, was there no change in the portrayal of Sam Bankman-Fried's actions and intentions?",
+  "question_type": "temporal_query",
+  "answer": "no",
+  "gold_doc_titles": [
+   "Is Sam Bankman-Fried a bad ‘man’ or a good ‘boy’? Lawyers swap opening statements before first witnesses take the stand",
+   "SBF, riding high on FTX, reportedly offered $5B to Trump to cancel President re-run",
+   "Sam Altman backs teens’ startup, Google unveils the Pixel 8 and TikTok tests an ad-free tier"
+  ],
+  "gold_evidence": [
+   {
+    "title": "Is Sam Bankman-Fried a bad ‘man’ or a good ‘boy’? Lawyers swap opening statements before first witnesses take the stand",
+    "source": "Fortune",
+    "published_at": "2023-10-04T23:32:53+00:00",
+    "fact": "That answer ultimately lies with the jury, which was selected on Wednesday morning before lawyers for the government and then Bankman-Fried swapped two very different stories of the former crypto mogul’s sudden rise and almost instantaneous fall."
+   },
+   {
+    "title": "SBF, riding high on FTX, reportedly offered $5B to Trump to cancel President re-run",
+    "source": "TechCrunch",
+    "published_at": "2023-10-02T13:11:07+00:00",
+    "fact": "He was the richest person in the world under 30 [and] he was going to spend it to save humanity from extinction,” he said."
+   },
+   {
+    "title": "Sam Altman backs teens’ startup, Google unveils the Pixel 8 and TikTok tests an ad-free tier",
+    "source": "TechCrunch",
+    "published_at": "2023-10-07T20:15:26+00:00",
+    "fact": "The prosecution painted Bankman-Fried as someone who knowingly committed fraud to achieve great wealth, power and influence, while the defense countered that the FTX founder acted in good faith, never meant to commit fraud or steal and basically got in over his head."
+   }
+  ]
+ },
+ {
+  "id": "mh_0396",
+  "question": "Between the TechCrunch report on Google's hardware developments published on October 7, 2023, and the TechCrunch report on the antitrust suit against Google published on December 15, 2023, was there a change in the nature of the issues reported concerning Google?",
+  "question_type": "temporal_query",
+  "answer": "Yes",
+  "gold_doc_titles": [
+   "News publisher files class action antitrust suit against Google, citing AI’s harms to their bottom line",
+   "Sam Altman backs teens’ startup, Google unveils the Pixel 8 and TikTok tests an ad-free tier"
+  ],
+  "gold_evidence": [
+   {
+    "title": "News publisher files class action antitrust suit against Google, citing AI’s harms to their bottom line",
+    "source": "TechCrunch",
+    "published_at": "2023-12-15T17:56:02+00:00",
+    "fact": "The case, filed by Arkansas-based publisher Helena World Chronicle, argues that Google “siphons off” news publishers’ content, their readers and ad revenue through anticompetitive means."
+   },
+   {
+    "title": "Sam Altman backs teens’ startup, Google unveils the Pixel 8 and TikTok tests an ad-free tier",
+    "source": "TechCrunch",
+    "published_at": "2023-10-07T20:15:26+00:00",
+    "fact": "Google unveils new hardware: This week was Google’s annual hardware event, where the search and consumer tech giant showed off what it’s been working on."
+   }
+  ]
+ },
+ {
+  "id": "mh_0408",
+  "question": "Before the report from CBSSports.com on October 12, 2023, suggesting an expression of interest from Travis Kelce to Taylor Swift, and the article from The Independent - Life and Style on December 6, 2023, revealing Taylor Swift's openness about her relationship with Travis Kelce, has the narrative regarding the rumored romance between the pop star and the Chiefs TE remained consistent?",
+  "question_type": "temporal_query",
+  "answer": "no",
+  "gold_doc_titles": [
+   "Taylor Swift-Travis Kelce timeline: Everything to know about rumored romance between pop star, Chiefs TE",
+   "Taylor Swift is Time’s Person of the Year"
+  ],
+  "gold_evidence": [
+   {
+    "title": "Taylor Swift-Travis Kelce timeline: Everything to know about rumored romance between pop star, Chiefs TE",
+    "source": "CBSSports.com",
+    "published_at": "2023-10-12T23:21:52+00:00",
+    "fact": "He revealed that he made a friendship bracelet, a fan tradition at her concerts, with his number on it to give to her, seemingly expressing his interest in Swift."
+   },
+   {
+    "title": "Taylor Swift is Time’s Person of the Year",
+    "source": "The Independent - Life and Style",
+    "published_at": "2023-12-06T13:55:17+00:00",
+    "fact": "Now, Swift has shared that she has nothing to hide in her new relationship with Kelce."
+   }
+  ]
+ },
+ {
+  "id": "mh_0415",
+  "question": "Was there inconsistency in the portrayal of Sam Bankman-Fried's legal situation according to the 'Fortune' article on October 4, 2023, discussing his actions and the state of FTX, or the 'TechCrunch' article mentioning the prosecution's allegations against him?",
+  "question_type": "temporal_query",
+  "answer": "no",
+  "gold_doc_titles": [
+   "Is Sam Bankman-Fried a bad ‘man’ or a good ‘boy’? Lawyers swap opening statements before first witnesses take the stand",
+   "Sam Altman backs teens’ startup, Google unveils the Pixel 8 and TikTok tests an ad-free tier"
+  ],
+  "gold_evidence": [
+   {
+    "title": "Is Sam Bankman-Fried a bad ‘man’ or a good ‘boy’? Lawyers swap opening statements before first witnesses take the stand",
+    "source": "Fortune",
+    "published_at": "2023-10-04T23:32:53+00:00",
+    "fact": "But “all of that, all of it, was built on lies,” Rehn declared to the jury."
+   },
+   {
+    "title": "Is Sam Bankman-Fried a bad ‘man’ or a good ‘boy’? Lawyers swap opening statements before first witnesses take the stand",
+    "source": "Fortune",
+    "published_at": "2023-10-04T23:32:53+00:00",
+    "fact": "And after Bankman-Fried left Jane Street, the high-frequency trading firm where the former billionaire got his start in finance after MIT, he persuaded Yedidia to join him as a trader at Alameda and then as a developer at FTX."
+   },
+   {
+    "title": "Sam Altman backs teens’ startup, Google unveils the Pixel 8 and TikTok tests an ad-free tier",
+    "source": "TechCrunch",
+    "published_at": "2023-10-07T20:15:26+00:00",
+    "fact": "The prosecution painted Bankman-Fried as someone who knowingly committed fraud to achieve great wealth, power and influence, while the defense countered that the FTX founder acted in good faith, never meant to commit fraud or steal and basically got in over his head."
+   }
+  ]
+ },
+ {
+  "id": "mh_0422",
+  "question": "Was there inconsistency in the portrayal of Sam Bankman-Fried's involvement in the FTX collapse between the TechCrunch report published on October 6, 2023, and the TechCrunch report published on October 7, 2023?",
+  "question_type": "temporal_query",
+  "answer": "no",
+  "gold_doc_titles": [
+   "Sam Bankman-Fried didn’t ask where the $8 billion went",
+   "SBF Trial: The latest updates from the FTX collapse’s courtroom drama",
+   "Sam Altman backs teens’ startup, Google unveils the Pixel 8 and TikTok tests an ad-free tier"
+  ],
+  "gold_evidence": [
+   {
+    "title": "Sam Bankman-Fried didn’t ask where the $8 billion went",
+    "source": "The Verge",
+    "published_at": "2023-10-31T19:52:07+00:00",
+    "fact": "It was not until Judge Lewis Kaplan intervened to ask if Bankman-Fried had ever been told by Yedidia about that money, in words or in substance, that Bankman-Fried admitted he’d been told."
+   },
+   {
+    "title": "SBF Trial: The latest updates from the FTX collapse’s courtroom drama",
+    "source": "TechCrunch",
+    "published_at": "2023-10-06T17:22:02+00:00",
+    "fact": "The second week of the trial’s standout testimony came from Alameda Research’s former CEO Caroline Ellison, who claimed she took $14 billion from customers to repay debts to lenders, using them as a line of credit under the instruction of SBF."
+   },
+   {
+    "title": "Sam Altman backs teens’ startup, Google unveils the Pixel 8 and TikTok tests an ad-free tier",
+    "source": "TechCrunch",
+    "published_at": "2023-10-07T20:15:26+00:00",
+    "fact": "The prosecution painted Bankman-Fried as someone who knowingly committed fraud to achieve great wealth, power and influence, while the defense countered that the FTX founder acted in good faith, never meant to commit fraud or steal and basically got in over his head."
+   }
+  ]
+ },
+ {
+  "id": "mh_0424",
+  "question": "After The Age reported on Travis Kelce's Super Bowl victories on September 26, 2023, did Yardbarker's coverage on December 24, 2023, maintain consistency regarding Travis Kelce's performance expectations?",
+  "question_type": "temporal_query",
+  "answer": "Yes",
+  "gold_doc_titles": [
+   "Christmas Day preview: 49ers, Ravens square off in potential Super Bowl sneak peek",
+   "When pop culture and sport collide: A timeline of Taylor Swift’s NFL takeover"
+  ],
+  "gold_evidence": [
+   {
+    "title": "Christmas Day preview: 49ers, Ravens square off in potential Super Bowl sneak peek",
+    "source": "Yardbarker",
+    "published_at": "2023-12-24T23:34:39+00:00",
+    "fact": "Even so, Kelce's 81.3 average receiving yards per game against the Raiders since 2019 suggests the All-Pro tight end is in line for a productive outing and could potentially snap his four-game scoring drought."
+   },
+   {
+    "title": "When pop culture and sport collide: A timeline of Taylor Swift’s NFL takeover",
+    "source": "The Age",
+    "published_at": "2023-09-26T05:26:05+00:00",
+    "fact": "The first link between Swift and Kelce was established in 2016, when Kelce – who helped bring his team to Super Bowl victory in both 2020 and 2023 – played the classic game “Kiss, Marry, Kill”."
+   }
+  ]
+ },
+ {
+  "id": "mh_0430",
+  "question": "Between the TechCrunch report on Sam Bankman-Fried published on October 7, 2023, and The Verge report on Sam Bankman-Fried published on October 28, 2023, was there a change in the narrative regarding Sam Bankman-Fried's management of his business ventures?",
+  "question_type": "temporal_query",
+  "answer": "Yes",
+  "gold_doc_titles": [
+   "Sam Altman backs teens’ startup, Google unveils the Pixel 8 and TikTok tests an ad-free tier",
+   "The jury finally hears from Sam Bankman-Fried"
+  ],
+  "gold_evidence": [
+   {
+    "title": "Sam Altman backs teens’ startup, Google unveils the Pixel 8 and TikTok tests an ad-free tier",
+    "source": "TechCrunch",
+    "published_at": "2023-10-07T20:15:26+00:00",
+    "fact": "The prosecution painted Bankman-Fried as someone who knowingly committed fraud to achieve great wealth, power and influence, while the defense countered that the FTX founder acted in good faith, never meant to commit fraud or steal and basically got in over his head."
+   },
+   {
+    "title": "The jury finally hears from Sam Bankman-Fried",
+    "source": "The Verge",
+    "published_at": "2023-10-28T00:12:41+00:00",
+    "fact": "Because FTX had grown so much, he could no longer run both companies, he said."
+   }
+  ]
+ },
+ {
+  "id": "mh_0433",
+  "question": "Did 'The Independent - Life and Style' contradict their report later that same day regarding the nature of the relationship between Taylor Swift and Travis Kelce after 'The Age' reported on September 26, 2023, about Taylor Swift and Travis Kelce leaving the stadium separately?",
+  "question_type": "temporal_query",
+  "answer": "no",
+  "gold_doc_titles": [
+   "Fans spot Travis Kelce wearing Taylor Swift-themed friendship bracelet before she attended his game",
+   "When pop culture and sport collide: A timeline of Taylor Swift’s NFL takeover"
+  ],
+  "gold_evidence": [
+   {
+    "title": "Fans spot Travis Kelce wearing Taylor Swift-themed friendship bracelet before she attended his game",
+    "source": "The Independent - Life and Style",
+    "published_at": "2023-09-26T22:05:34+00:00",
+    "fact": "The post came after Swift was seen enthusiastically cheering him on in the box seats at Arrowhead Stadium, fuelling speculation that she and the athlete are dating."
+   },
+   {
+    "title": "When pop culture and sport collide: A timeline of Taylor Swift’s NFL takeover",
+    "source": "The Age",
+    "published_at": "2023-09-26T05:26:05+00:00",
+    "fact": "Swifties were immediately on high alert, with some capturing Swift and Kelce leaving the stadium together."
+   }
+  ]
+ },
+ {
+  "id": "mh_0437",
+  "question": "After TechCrunch reported on Google's annual hardware event on October 7, 2023, and then on Google's expenditure to be the default search engine on various platforms on November 13, 2023, did TechCrunch's subsequent report on December 15, 2023, regarding a class action antitrust suit against Google indicate a consistent or inconsistent portrayal of Google's business practices?",
+  "question_type": "temporal_query",
+  "answer": "Consistent",
+  "gold_doc_titles": [
+   "Sam Altman backs teens’ startup, Google unveils the Pixel 8 and TikTok tests an ad-free tier",
+   "More from the US v Google trial: vertical search, pre-installs and the case of Firefox/Yahoo",
+   "News publisher files class action antitrust suit against Google, citing AI’s harms to their bottom line"
+  ],
+  "gold_evidence": [
+   {
+    "title": "Sam Altman backs teens’ startup, Google unveils the Pixel 8 and TikTok tests an ad-free tier",
+    "source": "TechCrunch",
+    "published_at": "2023-10-07T20:15:26+00:00",
+    "fact": "Google unveils new hardware: This week was Google’s annual hardware event, where the search and consumer tech giant showed off what it’s been working on."
+   },
+   {
+    "title": "More from the US v Google trial: vertical search, pre-installs and the case of Firefox/Yahoo",
+    "source": "TechCrunch",
+    "published_at": "2023-11-13T14:37:44+00:00",
+    "fact": "In our last roundup, we learned how Google spent $26.3 billion in 2021 making itself the default search engine across platforms and how Google tried to have Chrome preinstalled on iPhones."
+   },
+   {
+    "title": "News publisher files class action antitrust suit against Google, citing AI’s harms to their bottom line",
+    "source": "TechCrunch",
+    "published_at": "2023-12-15T17:56:02+00:00",
+    "fact": "The case, filed by Arkansas-based publisher Helena World Chronicle, argues that Google “siphons off” news publishers’ content, their readers and ad revenue through anticompetitive means."
+   }
+  ]
+ },
+ {
+  "id": "mh_0439",
+  "question": "Between the report from The Age before September 26, 2023, mentioning Travis Kelce's activities and the Yardbarker report before December 24, 2023, discussing Travis Kelce's performance expectations, was there a change in the focus of Travis Kelce's professional commitments?",
+  "question_type": "temporal_query",
+  "answer": "Yes",
+  "gold_doc_titles": [
+   "Christmas Day preview: 49ers, Ravens square off in potential Super Bowl sneak peek",
+   "When pop culture and sport collide: A timeline of Taylor Swift’s NFL takeover"
+  ],
+  "gold_evidence": [
+   {
+    "title": "Christmas Day preview: 49ers, Ravens square off in potential Super Bowl sneak peek",
+    "source": "Yardbarker",
+    "published_at": "2023-12-24T23:34:39+00:00",
+    "fact": "Even so, Kelce's 81.3 average receiving yards per game against the Raiders since 2019 suggests the All-Pro tight end is in line for a productive outing and could potentially snap his four-game scoring drought."
+   },
+   {
+    "title": "When pop culture and sport collide: A timeline of Taylor Swift’s NFL takeover",
+    "source": "The Age",
+    "published_at": "2023-09-26T05:26:05+00:00",
+    "fact": "Shortly after that remark, Kelce took a week off training to visit New York City, according to Vulture."
+   }
+  ]
+ },
+ {
+  "id": "mh_0444",
+  "question": "Was the news about Taylor Swift's relationship with Travis Kelce inconsistent with the later report from The Independent - Life and Style on December 6, 2023?",
+  "question_type": "temporal_query",
+  "answer": "no",
+  "gold_doc_titles": [
+   "Travis Kelce says he tried to delete his ‘nonsense’ tweets before they went viral",
+   "Taylor Swift-Travis Kelce timeline: Everything to know about rumored romance between pop star, Chiefs TE",
+   "Taylor Swift is Time’s Person of the Year"
+  ],
+  "gold_evidence": [
+   {
+    "title": "Travis Kelce says he tried to delete his ‘nonsense’ tweets before they went viral",
+    "source": "The Independent - Life and Style",
+    "published_at": "2023-11-25T14:50:53+00:00",
+    "fact": "On his podcast, he later invited the “Anti-Hero” singer to one of his games at Arrowhead Stadium - an invitation she famously accepted on 24 September."
+   },
+   {
+    "title": "Taylor Swift-Travis Kelce timeline: Everything to know about rumored romance between pop star, Chiefs TE",
+    "source": "CBSSports.com",
+    "published_at": "2023-10-12T23:21:52+00:00",
+    "fact": "The game is taking place at Arrowhead Stadium, where Swift has performed herself and attended a game before."
+   },
+   {
+    "title": "Taylor Swift is Time’s Person of the Year",
+    "source": "The Independent - Life and Style",
+    "published_at": "2023-12-06T13:55:17+00:00",
+    "fact": "Now, Swift has shared that she has nothing to hide in her new relationship with Kelce."
+   }
+  ]
+ },
+ {
+  "id": "mh_0446",
+  "question": "After The Verge reported on September 26, 2023, that Apple defended its Google Search deal by stating there wasn't a valid alternative, and TechCrunch later reported on November 13, 2023, that Google spent $26.3 billion in 2021 to secure its position as the default search engine on various platforms, does the rationale provided by Apple for its Google Search deal remain consistent with Google's aggressive spending to maintain default search engine status across platforms? (The Verge/TechCrunch)",
+  "question_type": "temporal_query",
+  "answer": "Yes",
+  "gold_doc_titles": [
+   "Apple defends Google Search deal in court: ‘There wasn’t a valid alternative’",
+   "More from the US v Google trial: vertical search, pre-installs and the case of Firefox/Yahoo"
+  ],
+  "gold_evidence": [
+   {
+    "title": "Apple defends Google Search deal in court: ‘There wasn’t a valid alternative’",
+    "source": "The Verge",
+    "published_at": "2023-09-26T17:01:22+00:00",
+    "fact": "The Justice Department is focused on the deals Google makes — with Apple but also with Samsung and Mozilla and many others — to ensure it is the default search engine on practically every platform."
+   },
+   {
+    "title": "More from the US v Google trial: vertical search, pre-installs and the case of Firefox/Yahoo",
+    "source": "TechCrunch",
+    "published_at": "2023-11-13T14:37:44+00:00",
+    "fact": "In our last roundup, we learned how Google spent $26.3 billion in 2021 making itself the default search engine across platforms and how Google tried to have Chrome preinstalled on iPhones."
+   }
+  ]
+ },
+ {
+  "id": "mh_0450",
+  "question": "Has the portrayal of Sam Bankman-Fried's legal situation in TechCrunch articles changed between the report published on October 2, 2023, and the one published on October 7, 2023?",
+  "question_type": "temporal_query",
+  "answer": "no",
+  "gold_doc_titles": [
+   "Sam Altman backs teens’ startup, Google unveils the Pixel 8 and TikTok tests an ad-free tier",
+   "SBF, riding high on FTX, reportedly offered $5B to Trump to cancel President re-run"
+  ],
+  "gold_evidence": [
+   {
+    "title": "Sam Altman backs teens’ startup, Google unveils the Pixel 8 and TikTok tests an ad-free tier",
+    "source": "TechCrunch",
+    "published_at": "2023-10-07T20:15:26+00:00",
+    "fact": "The prosecution painted Bankman-Fried as someone who knowingly committed fraud to achieve great wealth, power and influence, while the defense countered that the FTX founder acted in good faith, never meant to commit fraud or steal and basically got in over his head."
+   },
+   {
+    "title": "SBF, riding high on FTX, reportedly offered $5B to Trump to cancel President re-run",
+    "source": "TechCrunch",
+    "published_at": "2023-10-02T13:11:07+00:00",
+    "fact": "SBF, as he’s known, has pleaded not-guilty to some seven charges of fraud and conspiracy."
+   }
+  ]
+ }
+]

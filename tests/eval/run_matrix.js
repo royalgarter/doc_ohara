@@ -107,13 +107,17 @@ function normText(s) {
 	return (s || '').toLowerCase().replace(/\s+/g, ' ').trim();
 }
 
-// MultiHop-RAG: node hit if its parent document's title matches a gold article title
+// MultiHop-RAG: node hit if its parent document's source_file maps to a gold article title
+// (DB doc.title stores the filename, so match through the manifest title→file map)
+const MHRAG_MANIFEST = JSON.parse(fs.readFileSync(path.resolve(ROOT, 'tests/eval/data/multihop/doc_manifest.json'), 'utf8'));
+const TITLE_TO_FILE = new Map(Object.entries(MHRAG_MANIFEST).map(([f, m]) => [normText(m.title), f]));
+
 function makeDocMatcher(q, docByKey) {
-	const goldTitles = new Set((q.gold_doc_titles || []).map(normText));
+	const goldFiles = new Set((q.gold_doc_titles || []).map(t => TITLE_TO_FILE.get(normText(t))).filter(Boolean));
 	return (node) => {
 		const dk = (node.document_id || node._key || '').split('/').pop();
 		const doc = docByKey.get(dk);
-		return doc ? goldTitles.has(normText(doc.title)) && normText(doc.title) : false;
+		return doc && goldFiles.has(doc.source_file) ? doc.source_file : false;
 	};
 }
 
