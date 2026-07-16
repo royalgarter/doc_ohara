@@ -363,7 +363,9 @@ Four findings, two of which decide claims made earlier in the paper.
 
 **Comparability.** As with QASPER, absolute numbers are not comparable to the MultiHop-RAG paper's published baselines: Tang & Yang (2024) score retrieval at evidence-chunk level against gold evidence text, while we score at document level (any node from a gold article), a coarser and easier target — hence Hits@10 in the mid-90s here versus published chunk-level figures substantially lower. The within-matrix comparisons (config vs. config, identical protocol) carry the analytical weight.
 
-**TODO**: optional generation eval; user study (Section 6).
+**End-to-end generation check.** On a 100-query answerable subsample (34/33/33 inference/comparison/temporal), `gemini-2.5-flash-lite` answered from each config's top-10 retrieved paragraphs; correctness was judged by normalized string match with an LLM-judge fallback. Tuned full pipeline: **54% accuracy**; vector-only: **57%** — generation parity mirrors retrieval parity, and both sit in the band reported for retrieved-context generation in the MultiHop-RAG paper (0.44–0.56 across embedding models, vs. 0.89 with gold evidence). The per-type gradient is steep (inference 88%, comparison ~43%, temporal ~34%) and the dominant failure is context insufficiency, not hallucination: 41% of answers were "insufficient information," almost all wrong — document-level retrieval succeeds (Hits@10 ≈ 98%) while the specific *paragraphs* carrying both compared facts often miss the top-10. The retrieval→generation gap is a paragraph-selection problem, consistent with the QASPER oracle decomposition (Section 7.1.1). (Harness: `tests/eval/run_generation.js`.)
+
+**TODO**: user study (Section 6).
 
 ---
 

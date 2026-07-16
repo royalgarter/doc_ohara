@@ -1,0 +1,65 @@
+{
+ "run_at": "2026-07-16T01:26:08.849Z",
+ "model": "gemini-2.5-flash-lite",
+ "query_count": 6,
+ "configs": {
+  "full_tuned": {
+   "summary": {
+    "accuracy": 0.5,
+    "inference_query": 1,
+    "comparison_query": 0,
+    "temporal_query": 0.5
+   },
+   "per_question": [
+    {
+     "id": "mh_0001",
+     "question_type": "inference_query",
+     "gold": "Google",
+     "generated": "Google",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0002",
+     "question_type": "inference_query",
+     "gold": "Sam Bankman-Fried",
+     "generated": "Sam Bankman-Fried",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0126",
+     "question_type": "comparison_query",
+     "gold": "Yes",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0127",
+     "question_type": "comparison_query",
+     "gold": "no",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    },
+    {
+     "id": "mh_0376",
+     "question_type": "temporal_query",
+     "gold": "Yes",
+     "generated": "Yes",
+     "correct": true,
+     "judge": "string"
+    },
+    {
+     "id": "mh_0377",
+     "question_type": "temporal_query",
+     "gold": "no",
+     "generated": "Insufficient information",
+     "correct": false,
+     "judge": "llm"
+    }
+   ]
+  }
+ }
+}
