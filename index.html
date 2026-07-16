@@ -1659,8 +1659,21 @@
 	function _g3dFitScene() {
 		if ((!G3D.nodeMeshes || !G3D.nodeMeshes.length) && !G3D.nodeMesh) return;
 		if (!G3D.camera || !G3D.controls) return;
+		// Box3.expandByObject ignores InstancedMesh instance matrices (it only sees the
+		// unit geometry at the origin), so fit from per-instance positions instead.
 		const box = new THREE.Box3();
-		(G3D.nodeMeshes && G3D.nodeMeshes.length ? G3D.nodeMeshes : [G3D.nodeMesh]).forEach(m => box.expandByObject(m));
+		const mat = new THREE.Matrix4();
+		const pos = new THREE.Vector3();
+		(G3D.nodeMeshes && G3D.nodeMeshes.length ? G3D.nodeMeshes : [G3D.nodeMesh]).forEach(m => {
+			if (m.isInstancedMesh) {
+				for (let i = 0; i < m.count; i++) {
+					m.getMatrixAt(i, mat);
+					box.expandByPoint(pos.setFromMatrixPosition(mat));
+				}
+			} else {
+				box.expandByObject(m);
+			}
+		});
 		if (box.isEmpty()) return;
 		const center = new THREE.Vector3();
 		const size   = new THREE.Vector3();
