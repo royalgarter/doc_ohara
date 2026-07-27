@@ -14,6 +14,7 @@
     "build": "echo 'No build step required'",
     "start": "node --env-file=.env server.js",
     "lint": "echo 'No lint required'",
+    "paper:build": "cd refs && pdflatex -interaction=nonstopmode paper_rivf2026.tex && pdflatex -interaction=nonstopmode paper_rivf2026.tex && rm -f paper_rivf2026.aux paper_rivf2026.log",
     "ohara": "node --env-file=.env bin/ohara.js",
     "capture": "node --env-file=.env bin/capture.js",
     "crawl": "node --env-file=.env bin/crawl.js",
