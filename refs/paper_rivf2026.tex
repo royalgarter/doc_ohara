@@ -28,7 +28,7 @@ retrieval-augmented generation, knowledge graph, information visualization, onto
 
 \section{Introduction}
 
-Flat-chunk RAG pipelines return a linear list of passages; users lose the spatial or temporal context of where each passage sits in the corpus, compounding the ``lost in the middle'' effect of long contexts \cite{liu2024lost}. OHARA targets corpora that carry, or can be given, structural metadata (sections, paragraphs, tables) and publication dates -- regulatory filings, academic papers, technical manuals, long-form journalism.
+Flat-chunk RAG pipelines return a linear list of passages; users lose the spatial or temporal context of where each passage sits in the corpus, compounding the ``lost in the middle'' effect of long contexts \cite{liu2024lost}. Retrieval-augmented generation has matured into a broad architectural space \cite{gao2023ragsurvey}, with graph-structured variants now surveyed as their own subfield \cite{peng2024graphrag_survey}. OHARA targets corpora that carry, or can be given, structural metadata (sections, paragraphs, tables) and publication dates -- regulatory filings, academic papers, technical manuals, long-form journalism.
 
 \textbf{Contributions.} (a) An efficient 3D sunburst-tunnel visualization mapping time to the Z-axis, ontology to a sunburst polar plane, document structure to radial discs, and decay class to a temporal-reach aura. (b) A Space-Time Graph data model combining structural hierarchy, temporal decay, and cross-document entity pivots, serving as both retrieval substrate and visualization coordinate system. (c) A multi-phase hybrid retrieval engine whose measured value is tiered, provenance-carrying results at parity with the best single-signal retriever, not ranking gains. (d) A corroboration-gated Principal tier that abstains on unanswerable queries where a top-$k$ cut structurally cannot -- at identical retrieval, the $\geq$2-signal gate abstains on 45.6\% of MultiHop-RAG null queries versus 0.0\% for plain top-$k$, holding 91.5\% Principal-hit on answerable queries. (e) A SUMO ontology-grounded semantic layer that anchors the visualization's coordinates and enables tag-expansion retrieval.
 
@@ -36,7 +36,7 @@ We state our positioning explicitly: OHARA does not claim graph-augmented retrie
 
 \section{Related Work}
 
-Graph-based RAG systems (GraphRAG, LightRAG, HippoRAG) build entity/relation subgraphs but discard document structural hierarchy and couple retrieval to no temporal or spatial model. Explainable-retrieval work (Self-RAG, Corrective RAG) targets provenance but not 3D navigation. Prior 3D and temporal graph visualizations (Time-arc, Storyline, VR graph tools) do not combine an ontology sunburst cross-section with a temporal tunnel axis; OHARA's layout builds on the 2D radial space-filling hierarchy tradition \cite{stasko2000focus} extended into a temporal third dimension so topic columns remain traceable through time. Table~\ref{tab:related} summarizes the gap: no compared system combines structural hierarchy, SUMO ontology grounding, temporal decay, and tiered explainability.
+Graph-based RAG systems (GraphRAG \cite{edge2024graphrag}, LightRAG \cite{guo2024lightrag}, HippoRAG \cite{gutierrez2024hipporag}) build entity/relation subgraphs but discard document structural hierarchy and couple retrieval to no temporal or spatial model. Explainable-retrieval work (Self-RAG \cite{asai2023selfrag}, Corrective RAG \cite{yan2024crag}) targets provenance but not 3D navigation. Prior 3D and temporal graph visualizations (Time-arc, Storyline, VR graph tools) do not combine an ontology sunburst cross-section with a temporal tunnel axis; OHARA's layout builds on the 2D radial space-filling hierarchy tradition \cite{stasko2000focus} extended into a temporal third dimension so topic columns remain traceable through time. Table~\ref{tab:related} summarizes the gap: no compared system combines structural hierarchy, SUMO ontology grounding, temporal decay, and tiered explainability.
 
 \begin{table}[t]
 \centering
@@ -187,6 +187,27 @@ Y.~Tang and Y.~Yang, ``MultiHop-RAG: Benchmarking retrieval-augmented generation
 
 \bibitem{dasigi2021qasper}
 P.~Dasigi, K.~Lo, I.~Beltagy, A.~Cohan, N.~A. Smith, and M.~Gardner, ``A dataset of information-seeking questions and answers anchored in research papers,'' in \emph{Proc. NAACL}, 2021, pp.~4599--4610.
+
+\bibitem{gao2023ragsurvey}
+Y.~Gao, Y.~Xiong, X.~Gao, K.~Jia, J.~Pan, Y.~Bi, Y.~Dai, J.~Sun, Q.~Guo, M.~Wang, and H.~Wang, ``Retrieval-augmented generation for large language models: A survey,'' arXiv:2312.10997, 2023.
+
+\bibitem{peng2024graphrag_survey}
+B.~Peng, Y.~Zhu, Y.~Liu, X.~Bo, H.~Shi, C.~Hong, Y.~Zhang, and S.~Tang, ``Graph retrieval-augmented generation: A survey,'' arXiv:2408.08921, 2024.
+
+\bibitem{edge2024graphrag}
+D.~Edge, H.~Trinh, N.~Cheng, J.~Bradley, A.~Chao, A.~Mody, S.~Truitt, and J.~Larson, ``From local to global: A graph RAG approach to query-focused summarization,'' arXiv:2404.16130, 2024.
+
+\bibitem{guo2024lightrag}
+Z.~Guo, L.~Xia, Y.~Yu, T.~Ao, and C.~Huang, ``LightRAG: Simple and fast retrieval-augmented generation,'' arXiv:2410.05779, 2024.
+
+\bibitem{gutierrez2024hipporag}
+B.~J. Gutierrez, Y.~Shu, Y.~Gu, M.~Yasunaga, and Y.~Su, ``HippoRAG: Neurobiologically inspired long-term memory for large language models,'' in \emph{Proc. NeurIPS}, 2024.
+
+\bibitem{asai2023selfrag}
+A.~Asai, Z.~Wu, Y.~Wang, A.~Sil, and H.~Hajishirzi, ``Self-RAG: Learning to retrieve, generate, and critique through self-reflection,'' in \emph{Proc. ICLR}, 2024.
+
+\bibitem{yan2024crag}
+S.-Q. Yan, J.-C. Gu, Y.~Zhu, and Z.-H. Ling, ``Corrective retrieval augmented generation,'' arXiv:2401.15884, 2024.
 
 \end{thebibliography}
 
