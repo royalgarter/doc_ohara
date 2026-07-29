@@ -2,7 +2,9 @@
 
 ## 1. OHARA đã đạt được gì
 
-OHARA (bài nộp RIVF 2026) là framework Space-Time Graph cho truy xuất và trực quan hóa cơ sở tri thức, đánh giá trên QASPER (200 bài báo học thuật) và MultiHop-RAG (609 bài báo tin tức). Kết quả chính:
+OHARA là framework Space-Time Graph cho truy xuất và trực quan hóa cơ sở tri thức, đánh giá trên QASPER (200 bài báo học thuật) và MultiHop-RAG (609 bài báo tin tức). Code và tài liệu đầy đủ: https://github.com/royalgarter/doc_ohara
+
+Kết quả chính:
 
 - Nền tảng Space-Time Graph: bộ 5 $G=(V,E,\tau,\delta,\sigma)$ hợp nhất cấu trúc phân cấp tài liệu, suy giảm thời gian, liên kết thực thể xuyên tài liệu. 7 loại quan hệ (`has_child`, `next_sibling`, `belongs_to`, `mentions`, `related_to`, `similar_to`, `toc_ref`).
 - Chấm điểm suy giảm thời gian: 4 lớp suy giảm (evergreen, scholarly, current, ephemeral) theo hàm mũ $w \cdot e^{-\lambda \Delta t}$, có cơ chế bảo vệ 5 lớp chống phạt quá mức nội dung cũ nhưng vẫn liên quan.
