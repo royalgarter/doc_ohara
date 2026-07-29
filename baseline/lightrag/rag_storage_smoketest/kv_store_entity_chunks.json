@@ -1,0 +1,4419 @@
+{
+  "KL Divergence": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-002",
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001",
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-000",
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 4,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "KL Divergence"
+  },
+  "Maximum Entropy Principle": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-002",
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001"
+    ],
+    "count": 2,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Maximum Entropy Principle"
+  },
+  "GE-FL": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-002",
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001",
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-000",
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-004",
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 5,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "GE-FL"
+  },
+  "Information Gain": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-002",
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 2,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Information Gain"
+  },
+  "LDA": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-002",
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-004",
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 3,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "LDA"
+  },
+  "Movie Dataset": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-002",
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 2,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Movie Dataset"
+  },
+  "Sentiment": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Sentiment"
+  },
+  "Web-page": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Web-page"
+  },
+  "Science": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Science"
+  },
+  "Medical and Healthcare": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Medical and Healthcare"
+  },
+  "Bag-of-words": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Bag-of-words"
+  },
+  "Stopwords": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Stopwords"
+  },
+  "Neutral features": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-002",
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-004"
+    ],
+    "count": 2,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Neutral features"
+  },
+  "Cross-validation": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Cross-validation"
+  },
+  "Objective Function": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-002",
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001",
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003",
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-000"
+    ],
+    "count": 4,
+    "update_time": 1785212123,
+    "_id": "Objective Function"
+  },
+  "KL Divergence Term": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "KL Divergence Term"
+  },
+  "Reference Class Distribution": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Reference Class Distribution"
+  },
+  "Text Classification": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-002",
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-000"
+    ],
+    "count": 2,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Text Classification"
+  },
+  "Labeled Features": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-002",
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001",
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-000",
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 4,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Labeled Features"
+  },
+  "Unbalanced Labeled Features": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Unbalanced Labeled Features"
+  },
+  "Unbalanced Datasets": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Unbalanced Datasets"
+  },
+  "Feature Pool": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Feature Pool"
+  },
+  "Topics": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Topics"
+  },
+  "Positive Class": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-002",
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 2,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Positive Class"
+  },
+  "Negative Class": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-002",
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 2,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Negative Class"
+  },
+  "Maximum Entropy": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-002",
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 2,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Maximum Entropy"
+  },
+  "Accuracy": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Accuracy"
+  },
+  "Class Distribution": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-002",
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001",
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-000",
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 4,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Class Distribution"
+  },
+  "Generalization Expectation Criteria": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Generalization Expectation Criteria"
+  },
+  "Labeled Features for each class": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Labeled Features for each class"
+  },
+  "Labeled Features of the documents": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Labeled Features of the documents"
+  },
+  "Generalized Expectation Criteria": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001",
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-000",
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 3,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Generalized Expectation Criteria"
+  },
+  "Reference Distribution": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001",
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-000"
+    ],
+    "count": 2,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Reference Distribution"
+  },
+  "Model Predicted Distribution": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Model Predicted Distribution"
+  },
+  "Model Parameter": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Model Parameter"
+  },
+  "Softmax": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Softmax"
+  },
+  "L-BFGS": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "L-BFGS"
+  },
+  "Constraint Function": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Constraint Function"
+  },
+  "Indicator Vector": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Indicator Vector"
+  },
+  "Instance Annotation": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001",
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 2,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Instance Annotation"
+  },
+  "Prior Knowledge": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001",
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-000",
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 3,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Prior Knowledge"
+  },
+  "Baseball-Hockey Classification Task": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Baseball-Hockey Classification Task"
+  },
+  "Neutral Features": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001",
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 2,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Neutral Features"
+  },
+  "Uniform Distribution": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001",
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 2,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Uniform Distribution"
+  },
+  "Predicted Class Distribution": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Predicted Class Distribution"
+  },
+  "Empirical Distribution": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001",
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-000"
+    ],
+    "count": 2,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Empirical Distribution"
+  },
+  "Corpus": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Corpus"
+  },
+  "Preference Class Distribution": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Preference Class Distribution"
+  },
+  "Equation 6": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Equation 6"
+  },
+  "Equation 9": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Equation 9"
+  },
+  "Equation 11": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Equation 11"
+  },
+  "Class": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Class"
+  },
+  "Word": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Word"
+  },
+  "Instance": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Instance"
+  },
+  "Distribution": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Distribution"
+  },
+  "Optimization Problem": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Optimization Problem"
+  },
+  "Feature": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Feature"
+  },
+  "Natural Language Processing": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-000",
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 2,
+    "update_time": 1785212169,
+    "_id": "Natural Language Processing"
+  },
+  "Regularization Terms": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-000",
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 2,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Regularization Terms"
+  },
+  "Sports Category": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Sports Category"
+  },
+  "Sentiment Classification": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Sentiment Classification"
+  },
+  "Bayesian Approaches": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Bayesian Approaches"
+  },
+  "Latent Output Variables": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Latent Output Variables"
+  },
+  "Neutral Words": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Neutral Words"
+  },
+  "Druck et al.": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-000",
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-004",
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 3,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Druck et al."
+  },
+  "Input Samples": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Input Samples"
+  },
+  "Constraint Functions": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Constraint Functions"
+  },
+  "Conditional Model Distribution": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Conditional Model Distribution"
+  },
+  "Score Function": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Score Function"
+  },
+  "Parameter Estimation Objective Function": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Parameter Estimation Objective Function"
+  },
+  "Input": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Input"
+  },
+  "Output Variables": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Output Variables"
+  },
+  "GE": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "GE"
+  },
+  "Andrzejewski et al.": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-004",
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 2,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Andrzejewski et al."
+  },
+  "Altendorf et al.": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-004",
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 2,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Altendorf et al."
+  },
+  "Chen et al.": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Chen et al."
+  },
+  "Mann and McCallum": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Mann and McCallum"
+  },
+  "Raghavan et al.": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Raghavan et al."
+  },
+  "This paper": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "This paper"
+  },
+  "Regularization terms": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Regularization terms"
+  },
+  "Maximum entropy regularization": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Maximum entropy regularization"
+  },
+  "KL divergence": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "KL divergence"
+  },
+  "True class distribution": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "True class distribution"
+  },
+  "Reference class distribution": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Reference class distribution"
+  },
+  "Figure 2": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Figure 2"
+  },
+  "Figure 3": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Figure 3"
+  },
+  "Figure 4": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Figure 4"
+  },
+  "Table 1": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Table 1"
+  },
+  "Liu et al.": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Liu et al."
+  },
+  "Chang et al.": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Chang et al."
+  },
+  "Daumé": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Daumé"
+  },
+  "MaCallum et al.": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "MaCallum et al."
+  },
+  "Graça et al.": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Graça et al."
+  },
+  "Unlabeled Instances": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Unlabeled Instances"
+  },
+  "Constraint-Driven Learning": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Constraint-Driven Learning"
+  },
+  "Self-Training Method": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Self-Training Method"
+  },
+  "Posterior Regularization": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Posterior Regularization"
+  },
+  "Monotonicity Constraints": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Monotonicity Constraints"
+  },
+  "Positive Documents": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Positive Documents"
+  },
+  "Negative Documents": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Negative Documents"
+  },
+  "True Class Distribution": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "True Class Distribution"
+  },
+  "Control Group": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Control Group"
+  },
+  "Auxiliary Constraints": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Auxiliary Constraints"
+  },
+  "Cross Task Knowledge Constraints": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Cross Task Knowledge Constraints"
+  },
+  "General Domain Knowledge": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "General Domain Knowledge"
+  },
+  "Sparse Data": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Sparse Data"
+  },
+  "Posterior": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Posterior"
+  },
+  "Features": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Features"
+  },
+  "Features of each topic": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Features of each topic"
+  },
+  "Labeled features": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Labeled features"
+  },
+  "Reference distribution": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Reference distribution"
+  },
+  "Reference distributions": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Reference distributions"
+  },
+  "learns from": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "learns from"
+  },
+  "Top 10 frequent words": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Top 10 frequent words"
+  },
+  "indicates": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "indicates"
+  },
+  "expressed as": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "expressed as"
+  },
+  "used for": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "used for"
+  },
+  "introduces": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "introduces"
+  },
+  "obtained by setting": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "obtained by setting"
+  },
+  "prevent bias by setting to": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "prevent bias by setting to"
+  },
+  "reduces": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "reduces"
+  },
+  "includes": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "includes"
+  },
+  "constrain": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "constrain"
+  },
+  "prevent": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "prevent"
+  },
+  "performs well with": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "performs well with"
+  },
+  "modified by": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "modified by"
+  },
+  "used in": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "used in"
+  },
+  "represents": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "represents"
+  },
+  "can be": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "can be"
+  },
+  "can be expressed as": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "can be expressed as"
+  },
+  "defined by": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "defined by"
+  },
+  "used to solve": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "used to solve"
+  },
+  "set to": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "set to"
+  },
+  "used to constrain": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "used to constrain"
+  },
+  "used in modification of": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "used in modification of"
+  },
+  "between": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "between"
+  },
+  "can be estimated without": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "can be estimated without"
+  },
+  "can be taken as": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "can be taken as"
+  },
+  "reduces load of": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "reduces load of"
+  },
+  "Organization": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Organization"
+  },
+  "Generalized Expectation": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Generalized Expectation"
+  },
+  "sparse data": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "sparse data"
+  },
+  "multi-domain knowledge": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "multi-domain knowledge"
+  },
+  "features": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "features"
+  },
+  "semi-supervised perspective": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "semi-supervised perspective"
+  },
+  "labels on features": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "labels on features"
+  },
+  "prior knowledge": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "prior knowledge"
+  },
+  "generalized expectation criteria": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "generalized expectation criteria"
+  },
+  "model": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "model"
+  },
+  "unbalance": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "unbalance"
+  },
+  "unbalanced corpora": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "unbalanced corpora"
+  },
+  "extremely unbalanced labeled features": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "extremely unbalanced labeled features"
+  },
+  "corpus": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "corpus"
+  },
+  "reference class distribution": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "reference class distribution"
+  },
+  "category distribution": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "category distribution"
+  },
+  "Figure 2 (a)": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Figure 2 (a)"
+  },
+  "true class distribution": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "true class distribution"
+  },
+  "Figure 2 (b)": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Figure 2 (b)"
+  },
+  "true distribution": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "true distribution"
+  },
+  "Our methods": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Our methods"
+  },
+  "Figure 3 (a)": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Figure 3 (a)"
+  },
+  "Figure 3 (b)": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Figure 3 (b)"
+  },
+  "Class Balance": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Class Balance"
+  },
+  "Bias Problem": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Bias Problem"
+  },
+  "Self Training Method": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Self Training Method"
+  },
+  "Learning": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Learning"
+  },
+  "Model": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003",
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 2,
+    "update_time": 1785212169,
+    "_id": "Model"
+  },
+  "Europarl": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Europarl"
+  },
+  "CoNLL": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "CoNLL"
+  },
+  "garg2012unsupervised": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003",
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004",
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002",
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 4,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "garg2012unsupervised"
+  },
+  "TABREF27": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003",
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004"
+    ],
+    "count": 2,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "TABREF27"
+  },
+  "German": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003",
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004",
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000",
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 4,
+    "update_time": 1785212169,
+    "_id": "German"
+  },
+  "Baseline": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003",
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 2,
+    "update_time": 1785212169,
+    "_id": "Baseline"
+  },
+  "English": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003",
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004",
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 3,
+    "update_time": 1785212169,
+    "_id": "English"
+  },
+  "titovcrosslingual": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003",
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004",
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 3,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "titovcrosslingual"
+  },
+  "SECREF25": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "SECREF25"
+  },
+  "EP": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "EP"
+  },
+  "TABREF28": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "TABREF28"
+  },
+  "CLVs": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003",
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 2,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "CLVs"
+  },
+  "SECREF29": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003",
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 2,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "SECREF29"
+  },
+  "FIGREF33": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003",
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004"
+    ],
+    "count": 2,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "FIGREF33"
+  },
+  "CoNLL annotations": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003",
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 2,
+    "update_time": 1785212169,
+    "_id": "CoNLL annotations"
+  },
+  "PRs": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003",
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002",
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 3,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "PRs"
+  },
+  "SRs": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003",
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001",
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002",
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 4,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "SRs"
+  },
+  "INLINEFORM0": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003",
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001",
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004",
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 4,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "INLINEFORM0"
+  },
+  "INLINEFORM1": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003",
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001",
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 3,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "INLINEFORM1"
+  },
+  "INLINEFORM2": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003",
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001",
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 3,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "INLINEFORM2"
+  },
+  "F1 score": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "F1 score"
+  },
+  "PU": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "PU"
+  },
+  "CO": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "CO"
+  },
+  "argument identification": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003",
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 2,
+    "update_time": 1785212169,
+    "_id": "argument identification"
+  },
+  "syntactic parsers": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "syntactic parsers"
+  },
+  "multilingual model": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003",
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004"
+    ],
+    "count": 2,
+    "update_time": 1785212169,
+    "_id": "multilingual model"
+  },
+  "cross-lingual patterns": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "cross-lingual patterns"
+  },
+  "external penalty term": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "external penalty term"
+  },
+  "parallel data": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "parallel data"
+  },
+  "alignment model": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "alignment model"
+  },
+  "multilingual SRI": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "multilingual SRI"
+  },
+  "SRI": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003",
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004"
+    ],
+    "count": 2,
+    "update_time": 1785212169,
+    "_id": "SRI"
+  },
+  "resource rich language": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "resource rich language"
+  },
+  "resource poor language": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "resource poor language"
+  },
+  "annotation transfer scenario": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "annotation transfer scenario"
+  },
+  "parameter estimates": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "parameter estimates"
+  },
+  "role annotations": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "role annotations"
+  },
+  "predefined mapping": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "predefined mapping"
+  },
+  "semi-supervised setting": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "semi-supervised setting"
+  },
+  "supervised sentences": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003",
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004"
+    ],
+    "count": 2,
+    "update_time": 1785212169,
+    "_id": "supervised sentences"
+  },
+  "unsupervised sentences": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "unsupervised sentences"
+  },
+  "clustering performance": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "clustering performance"
+  },
+  "supervised baseline": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003",
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004"
+    ],
+    "count": 2,
+    "update_time": 1785212169,
+    "_id": "supervised baseline"
+  },
+  "MAP estimate": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "MAP estimate"
+  },
+  "unseen predicates": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "unseen predicates"
+  },
+  "standard baseline": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "standard baseline"
+  },
+  "performance variation": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "performance variation"
+  },
+  "manually labeling": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "manually labeling"
+  },
+  "Multilingual Model": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001",
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 2,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Multilingual Model"
+  },
+  "Monolingual Model": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001",
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 2,
+    "update_time": 1785212169,
+    "_id": "Monolingual Model"
+  },
+  "Crosslingual Latent Variables (CLVs)": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Crosslingual Latent Variables (CLVs)"
+  },
+  "Predicate-tuple": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Predicate-tuple"
+  },
+  "Chinese Restaurant Process (CRP)": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Chinese Restaurant Process (CRP)"
+  },
+  "Dirichlet-multinomial conjugacy": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Dirichlet-multinomial conjugacy"
+  },
+  "Bayesian SRL model": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Bayesian SRL model"
+  },
+  "Annotation Projection": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001",
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 2,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Annotation Projection"
+  },
+  "Gibbs Sampling": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Gibbs Sampling"
+  },
+  "MAP Estimate": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "MAP Estimate"
+  },
+  "Titovcrosslingual": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Titovcrosslingual"
+  },
+  "Lang2011unsupervised": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001",
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 2,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Lang2011unsupervised"
+  },
+  "Parallel Corpus": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Parallel Corpus"
+  },
+  "CLV": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "CLV"
+  },
+  "Equation UID11": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Equation UID11"
+  },
+  "Figure FIGREF7": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Figure FIGREF7"
+  },
+  "Figure FIGREF16": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Figure FIGREF16"
+  },
+  "BIBREF3": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001",
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002",
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 3,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "BIBREF3"
+  },
+  "BIBREF8": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001",
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 2,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "BIBREF8"
+  },
+  "BIBREF9": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001",
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 2,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "BIBREF9"
+  },
+  "BIBREF10": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001",
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 2,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "BIBREF10"
+  },
+  "BIBREF11": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "BIBREF11"
+  },
+  "BIBREF12": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "BIBREF12"
+  },
+  "Source Language": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Source Language"
+  },
+  "Target Language": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Target Language"
+  },
+  "Predicate": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001",
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002",
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 3,
+    "update_time": 1785212169,
+    "_id": "Predicate"
+  },
+  "Voice": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Voice"
+  },
+  "Syntactic Features": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Syntactic Features"
+  },
+  "Hidden Variables": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Hidden Variables"
+  },
+  "Visible Variables": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Visible Variables"
+  },
+  "Model Parameters": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Model Parameters"
+  },
+  "Role Labels": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Role Labels"
+  },
+  "DISPLAYFORM0": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "DISPLAYFORM0"
+  },
+  "INLINEFORM3": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001",
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 2,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "INLINEFORM3"
+  },
+  "INLINEFORM4": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001",
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 2,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "INLINEFORM4"
+  },
+  "INLINEFORM5": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001",
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 2,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "INLINEFORM5"
+  },
+  "INLINEFORM6": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001",
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 2,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "INLINEFORM6"
+  },
+  "INLINEFORM7": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001",
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 2,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "INLINEFORM7"
+  },
+  "INLINEFORM8": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001",
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 2,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "INLINEFORM8"
+  },
+  "INLINEFORM9": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001",
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 2,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "INLINEFORM9"
+  },
+  "INLINEFORM10": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001",
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 2,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "INLINEFORM10"
+  },
+  "INLINEFORM11": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001",
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 2,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "INLINEFORM11"
+  },
+  "INLINEFORM12": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001",
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 2,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "INLINEFORM12"
+  },
+  "INLINEFORM13": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001",
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 2,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "INLINEFORM13"
+  },
+  "INLINEFORM14": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001",
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 2,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "INLINEFORM14"
+  },
+  "INLINEFORM15": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001",
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 2,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "INLINEFORM15"
+  },
+  "Monolingual SRL": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Monolingual SRL"
+  },
+  "CoNLL test set": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "CoNLL test set"
+  },
+  "naseem2009multilingual": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "naseem2009multilingual"
+  },
+  "SRL": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004",
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 2,
+    "update_time": 1785212169,
+    "_id": "SRL"
+  },
+  "pado2009cross": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "pado2009cross"
+  },
+  "furstenau2009graph": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "furstenau2009graph"
+  },
+  "swier2004unsupervised": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "swier2004unsupervised"
+  },
+  "British National Corpus": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "British National Corpus"
+  },
+  "VerbNet": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "VerbNet"
+  },
+  "titov2012bayesian": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "titov2012bayesian"
+  },
+  "grenager2006unsupervised": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "grenager2006unsupervised"
+  },
+  "BIBREF18": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "BIBREF18"
+  },
+  "BIBREF1": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004",
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 2,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "BIBREF1"
+  },
+  "marquez2008semantic": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "marquez2008semantic"
+  },
+  "Bayesian model": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Bayesian model"
+  },
+  "semantic role induction (SRI)": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "semantic role induction (SRI)"
+  },
+  "crosslingual latent variables": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "crosslingual latent variables"
+  },
+  "Swiss NSF grant 200021_125137": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Swiss NSF grant 200021_125137"
+  },
+  "EC FP7 grant PARLANCE": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "EC FP7 grant PARLANCE"
+  },
+  "parallel corpora": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "parallel corpora"
+  },
+  "Cross-lingual Variational Learning": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Cross-lingual Variational Learning"
+  },
+  "Purity": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Purity"
+  },
+  "Collocation": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Collocation"
+  },
+  "F1": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "F1"
+  },
+  "Syntactic Function": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Syntactic Function"
+  },
+  "Global Role Ordering Probability": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Global Role Ordering Probability"
+  },
+  "Argument-Keys": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Argument-Keys"
+  },
+  "CoNLL 2009 corpus": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "CoNLL 2009 corpus"
+  },
+  "Europarl corpus": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Europarl corpus"
+  },
+  "MaltParser": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "MaltParser"
+  },
+  "LTH parser": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "LTH parser"
+  },
+  "GIZA++": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "GIZA++"
+  },
+  "lang2011unsupervised": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "lang2011unsupervised"
+  },
+  "BIBREF6": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002",
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 2,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "BIBREF6"
+  },
+  "BIBREF13": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "BIBREF13"
+  },
+  "BIBREF14": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "BIBREF14"
+  },
+  "BIBREF15": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "BIBREF15"
+  },
+  "BIBREF16": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "BIBREF16"
+  },
+  "BIBREF17": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "BIBREF17"
+  },
+  "Cross-lingual parameters": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Cross-lingual parameters"
+  },
+  "Monolingual model": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Monolingual model"
+  },
+  "TITOVcrosslingual": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "TITOVcrosslingual"
+  },
+  "Argument instance": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Argument instance"
+  },
+  "Induced cluster": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Induced cluster"
+  },
+  "Gold role": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Gold role"
+  },
+  "Gold annotation": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Gold annotation"
+  },
+  "Syntactic function": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Syntactic function"
+  },
+  "Dependency relation": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Dependency relation"
+  },
+  "Head": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Head"
+  },
+  "Cross-lingual unsupervised SRL": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Cross-lingual unsupervised SRL"
+  },
+  "Penalty term": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Penalty term"
+  },
+  "Annotation projection": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Annotation projection"
+  },
+  "Latent variables": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Latent variables"
+  },
+  "Bayesian learning": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Bayesian learning"
+  },
+  "Sampling": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002",
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003"
+    ],
+    "count": 2,
+    "update_time": 1785212169,
+    "_id": "Sampling"
+  },
+  "Hard clustering": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Hard clustering"
+  },
+  "Context": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Context"
+  },
+  "CoNLL 2009 training set": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "CoNLL 2009 training set"
+  },
+  "Parallel EN-DE sentences": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Parallel EN-DE sentences"
+  },
+  "Automatic parses": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Automatic parses"
+  },
+  "Non-auxiliary verbs": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Non-auxiliary verbs"
+  },
+  "Predicate instances": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Predicate instances"
+  },
+  "Heuristics": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Heuristics"
+  },
+  "Word alignments": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Word alignments"
+  },
+  "Head-words": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Head-words"
+  },
+  "Semantic arguments": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Semantic arguments"
+  },
+  "Garg2012unsupervised": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Garg2012unsupervised"
+  },
+  "Bayesian Model": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Bayesian Model"
+  },
+  "Unsupervised Semantic Role Induction": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Unsupervised Semantic Role Induction"
+  },
+  "Parallel Corpora": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Parallel Corpora"
+  },
+  "Latent Variables": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Latent Variables"
+  },
+  "Inference Procedure": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Inference Procedure"
+  },
+  "Monolingual Data": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Monolingual Data"
+  },
+  "Semantic Role Labeling": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Semantic Role Labeling"
+  },
+  "Information Extraction": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Information Extraction"
+  },
+  "Question Answering": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Question Answering"
+  },
+  "Predicate-Argument Structure": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Predicate-Argument Structure"
+  },
+  "PropBank": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "PropBank"
+  },
+  "Supervised Systems": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Supervised Systems"
+  },
+  "Unsupervised SRL": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Unsupervised SRL"
+  },
+  "Word Alignment": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Word Alignment"
+  },
+  "Joint Bayesian Model": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Joint Bayesian Model"
+  },
+  "Crosslingual Latent Variables": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Crosslingual Latent Variables"
+  },
+  "Part-of-Speech Tagging": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Part-of-Speech Tagging"
+  },
+  "HMMs": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "HMMs"
+  },
+  "Labeled Data": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Labeled Data"
+  },
+  "Unlabeled Data": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Unlabeled Data"
+  },
+  "Annotation Effort": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Annotation Effort"
+  },
+  "Monolingual Semantic Role Induction Model": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Monolingual Semantic Role Induction Model"
+  },
+  "Word Alignments": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Word Alignments"
+  },
+  "Role Correspondences": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Role Correspondences"
+  },
+  "Primary Roles": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Primary Roles"
+  },
+  "Secondary Roles": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Secondary Roles"
+  },
+  "Intervals": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Intervals"
+  },
+  "Core Role": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Core Role"
+  },
+  "Modifier Role": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Modifier Role"
+  },
+  "Generative Process": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Generative Process"
+  },
+  "Multinomial Distributions": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Multinomial Distributions"
+  },
+  "Binomial Distributions": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Binomial Distributions"
+  },
+  "Dirichlet Priors": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Dirichlet Priors"
+  },
+  "Beta Priors": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Beta Priors"
+  },
+  "Probability Equations": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Probability Equations"
+  },
+  "Role Ordering": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Role Ordering"
+  },
+  "Role Repetition": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Role Repetition"
+  },
+  "Supervised SRL": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Supervised SRL"
+  },
+  "Manually Annotated Corpora": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Manually Annotated Corpora"
+  },
+  "INLINEFORM16": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "INLINEFORM16"
+  },
+  "INLINEFORM17": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "INLINEFORM17"
+  },
+  "INLINEFORM18": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "INLINEFORM18"
+  },
+  "INLINEFORM19": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "INLINEFORM19"
+  },
+  "INLINEFORM20": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "INLINEFORM20"
+  },
+  "INLINEFORM21": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "INLINEFORM21"
+  },
+  "INLINEFORM22": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "INLINEFORM22"
+  },
+  "INLINEFORM23": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "INLINEFORM23"
+  },
+  "INLINEFORM24": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "INLINEFORM24"
+  },
+  "INLINEFORM25": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "INLINEFORM25"
+  },
+  "BIBREF0": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "BIBREF0"
+  },
+  "BIBREF2": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "BIBREF2"
+  },
+  "BIBREF4": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "BIBREF4"
+  },
+  "BIBREF5": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "BIBREF5"
+  },
+  "BIBREF7": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "BIBREF7"
+  },
+  "FIGREF16": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "FIGREF16"
+  },
+  "FIGREF7": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "FIGREF7"
+  },
+  "Mike": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Mike"
+  },
+  "A0": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "A0"
+  },
+  "A1": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "A1"
+  },
+  "written": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "written"
+  },
+  "a book": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "a book"
+  },
+  "German translation": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "German translation"
+  },
+  "sentence INLINEFORM0": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "sentence INLINEFORM0"
+  },
+  "sentence INLINEFORM1": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "sentence INLINEFORM1"
+  },
+  "Mike-Mike": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Mike-Mike"
+  },
+  "written-geschrieben": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "written-geschrieben"
+  },
+  "book-Buch": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "book-Buch"
+  },
+  "Buch": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Buch"
+  },
+  "INLINEFORM10 INLINEFORM11": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "INLINEFORM10 INLINEFORM11"
+  },
+  "PR": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "PR"
+  },
+  "SR": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "SR"
+  },
+  "monolingual model": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "monolingual model"
+  },
+  "multilingual Bayesian model": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "multilingual Bayesian model"
+  },
+  "multilingual": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "multilingual"
+  },
+  "labeled data": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "labeled data"
+  },
+  "target language": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "target language"
+  },
+  "source language": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "source language"
+  },
+  "target languages": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "target languages"
+  },
+  "cross-lingual information": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "cross-lingual information"
+  },
+  "unsupervised setting": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "unsupervised setting"
+  },
+  "semi-supervised model": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003",
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004"
+    ],
+    "count": 2,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "semi-supervised model"
+  },
+  "role labels": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "role labels"
+  },
+  "sentences": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "sentences"
+  },
+  "Other": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Other"
+  },
+  "Inference": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Inference"
+  },
+  "semi-supervised learning": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "semi-supervised learning"
+  },
+  "languages": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "languages"
+  },
+  "semi-supervised learning settings": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "semi-supervised learning settings"
+  },
+  "Arguments": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001",
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 2,
+    "update_time": 1785212169,
+    "_id": "Arguments"
+  },
+  "Parameters": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Parameters"
+  },
+  "seen predicates": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "seen predicates"
+  },
+  "Training Instances": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Training Instances"
+  },
+  "alignments": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "alignments"
+  },
+  "crosslingual unsupervised SRL": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "crosslingual unsupervised SRL"
+  },
+  "superlingual latent variables": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "superlingual latent variables"
+  },
+  "domain-general corpus": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "domain-general corpus"
+  },
+  "semantic role annotations": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "semantic role annotations"
+  },
+  "graph alignment method": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "graph alignment method"
+  },
+  "verbs": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "verbs"
+  },
+  "generative model": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "generative model"
+  },
+  "performance": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "performance"
+  },
+  "iterative split-merge algorithm": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "iterative split-merge algorithm"
+  },
+  "graph-partitioning based approach": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "graph-partitioning based approach"
+  },
+  "supervised SRL systems": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "supervised SRL systems"
+  },
+  "unsupervised learning": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "unsupervised learning"
+  },
+  "parallel sentences": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "parallel sentences"
+  },
+  "annotating data": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "annotating data"
+  },
+  "unlabeled data": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "unlabeled data"
+  },
+  "word alignments": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "word alignments"
+  },
+  "performance gains": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "performance gains"
+  },
+  "training scenarios": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "training scenarios"
+  },
+  "monolingual models": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "monolingual models"
+  },
+  "This work": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "This work"
+  },
+  "Monolingual models": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Monolingual models"
+  },
+  "Purity, Collocation": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Purity, Collocation"
+  },
+  "Global role ordering probability": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Global role ordering probability"
+  },
+  "Role": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Role"
+  },
+  "English sentences": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "English sentences"
+  },
+  "German sentences": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "German sentences"
+  },
+  "English-German parallel Europarl corpus": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "English-German parallel Europarl corpus"
+  },
+  "LTH system": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "LTH system"
+  },
+  "Argument identification": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Argument identification"
+  },
+  "EN-DE parallel Europarl corpus": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "EN-DE parallel Europarl corpus"
+  },
+  "intersecting alignments": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "intersecting alignments"
+  },
+  "CoNLL 2009 EN data": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "CoNLL 2009 EN data"
+  },
+  "semantic roles": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "semantic roles"
+  },
+  "CoNLL 2009 DE data": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "CoNLL 2009 DE data"
+  },
+  "Our model": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Our model"
+  },
+  "Monolingual model (BIBREF3)": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Monolingual model (BIBREF3)"
+  },
+  "Monolingual inference": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Monolingual inference"
+  },
+  "English-German section": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "English-German section"
+  },
+  "Predicates": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Predicates"
+  },
+  "CoNLL data": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "CoNLL data"
+  },
+  "Alignments": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Alignments"
+  },
+  "two directions": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "two directions"
+  },
+  "Aligned": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Aligned"
+  },
+  "Parallel Text": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Parallel Text"
+  },
+  "Languages": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Languages"
+  },
+  "Unsupervised SRL Pipeline": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Unsupervised SRL Pipeline"
+  },
+  "geschrieben": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "geschrieben"
+  },
+  "book": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "book"
+  },
+  "Multilingual Unsupervised Part-of-Speech Tagging Model": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Multilingual Unsupervised Part-of-Speech Tagging Model"
+  },
+  "ordering": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "ordering"
+  },
+  "Role Agreement": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Role Agreement"
+  },
+  "step 4": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "step 4"
+  },
+  "Performance": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Performance"
+  },
+  "Generative process": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Generative process"
+  },
+  "Multinomial distributions": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Multinomial distributions"
+  },
+  "Ordering": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Ordering"
+  },
+  "Dirichlet priors": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Dirichlet priors"
+  },
+  "Binomial distributions": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Binomial distributions"
+  },
+  "Repetition": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Repetition"
+  },
+  "Beta priors": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Beta priors"
+  }
+}

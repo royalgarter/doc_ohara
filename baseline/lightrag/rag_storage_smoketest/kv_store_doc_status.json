@@ -1,0 +1,62 @@
+{
+  "doc-8883a5d4e790630b007c233701f21e64": {
+    "status": "processed",
+    "content_summary": "# Robustly Leveraging Prior Knowledge in Text Classification\n\n## Abstract\n\nPrior knowledge has been shown very useful to address many natural language processing tasks. Many approaches have been proposed to formalise a variety of knowledge, however, ...",
+    "content_length": 23739,
+    "created_at": "2026-07-28T04:14:59.470510+00:00",
+    "updated_at": "2026-07-28T04:15:23.772943+00:00",
+    "file_path": "qasper_1503.00841.md",
+    "track_id": "insert_20260728_041459_47ddd329",
+    "content_hash": "457aad4e6ed088cdfcb399ae1e704ccc",
+    "metadata": {
+      "parse_start_time": 1785212099,
+      "parse_stage_skipped": true,
+      "parse_format": "raw",
+      "parse_engine": "legacy",
+      "analyzing_start_time": 1785212099,
+      "analyzing_stage_skipped": true,
+      "process_start_time": 1785212099,
+      "process_end_time": 1785212123,
+      "chunk_method": "legacy_chunking_func",
+      "chunk_opts": "size=1200, split_only=False, overlap=100"
+    },
+    "chunks_count": 5,
+    "chunks_list": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-000",
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001",
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-002",
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003",
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-004"
+    ]
+  },
+  "doc-8be4503c1206a1d3f8a4068a05c69328": {
+    "status": "processed",
+    "content_summary": "# A Bayesian Model of Multilingual Unsupervised Semantic Role Induction\n\n## Abstract\n\nWe propose a Bayesian model of unsupervised semantic role induction in multiple languages, and use it to explore the usefulness of parallel corpora for this task. O...",
+    "content_length": 25133,
+    "created_at": "2026-07-28T04:15:28.531740+00:00",
+    "updated_at": "2026-07-28T04:16:09.989448+00:00",
+    "file_path": "qasper_1603.01514.md",
+    "track_id": "insert_20260728_041528_b2435c85",
+    "content_hash": "3bcb198c3ac959e485401c819ffa064e",
+    "metadata": {
+      "parse_start_time": 1785212128,
+      "parse_stage_skipped": true,
+      "parse_format": "raw",
+      "parse_engine": "legacy",
+      "analyzing_start_time": 1785212128,
+      "analyzing_stage_skipped": true,
+      "process_start_time": 1785212128,
+      "process_end_time": 1785212169,
+      "chunk_method": "legacy_chunking_func",
+      "chunk_opts": "size=1200, split_only=False, overlap=100"
+    },
+    "chunks_count": 5,
+    "chunks_list": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000",
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001",
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002",
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003",
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004"
+    ]
+  }
+}

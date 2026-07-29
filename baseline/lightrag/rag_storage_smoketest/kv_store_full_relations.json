@@ -1,0 +1,1750 @@
+{
+  "doc-8883a5d4e790630b007c233701f21e64": {
+    "relation_pairs": [
+      [
+        "Mann and McCallum",
+        "semi-supervised perspective"
+      ],
+      [
+        "Figure 4",
+        "GE-FL"
+      ],
+      [
+        "Conditional Model Distribution",
+        "Generalized Expectation Criteria"
+      ],
+      [
+        "GE-FL",
+        "introduces"
+      ],
+      [
+        "Instance Annotation",
+        "LDA"
+      ],
+      [
+        "Objective Function",
+        "includes"
+      ],
+      [
+        "GE-FL",
+        "reduces"
+      ],
+      [
+        "GE-FL",
+        "KL Divergence"
+      ],
+      [
+        "Empirical Distribution",
+        "Input"
+      ],
+      [
+        "Constraint Functions",
+        "Generalized Expectation"
+      ],
+      [
+        "Model Predicted Distribution",
+        "can be expressed as"
+      ],
+      [
+        "Figure 2 (b)",
+        "GE-FL"
+      ],
+      [
+        "Conditional Model Distribution",
+        "Constraint Functions"
+      ],
+      [
+        "Altendorf et al.",
+        "sparse data"
+      ],
+      [
+        "KL Divergence",
+        "True Class Distribution"
+      ],
+      [
+        "Neutral Features",
+        "can be taken as"
+      ],
+      [
+        "Movie Dataset",
+        "Positive Class"
+      ],
+      [
+        "Preference Class Distribution",
+        "used in"
+      ],
+      [
+        "Conditional Model Distribution",
+        "Reference Distribution"
+      ],
+      [
+        "GE-FL",
+        "defined by"
+      ],
+      [
+        "Objective Function",
+        "Reference Distribution"
+      ],
+      [
+        "Model Predicted Distribution",
+        "expressed as"
+      ],
+      [
+        "KL Divergence",
+        "between"
+      ],
+      [
+        "Natural Language Processing",
+        "Prior Knowledge"
+      ],
+      [
+        "LDA",
+        "Movie Dataset"
+      ],
+      [
+        "Labeled features",
+        "Reference distribution"
+      ],
+      [
+        "Negative Class",
+        "Positive Class"
+      ],
+      [
+        "KL divergence",
+        "true class distribution"
+      ],
+      [
+        "Maximum Entropy Principle",
+        "Movie Dataset"
+      ],
+      [
+        "Neutral features",
+        "Reference distributions"
+      ],
+      [
+        "GE-FL",
+        "Generalization Expectation Criteria"
+      ],
+      [
+        "LDA",
+        "Our methods"
+      ],
+      [
+        "Cross-validation",
+        "Movie Dataset"
+      ],
+      [
+        "Auxiliary Constraints",
+        "Posterior Regularization"
+      ],
+      [
+        "Sentiment Classification",
+        "Text Classification"
+      ],
+      [
+        "LDA",
+        "Labeled Features"
+      ],
+      [
+        "Constraint Functions",
+        "Generalized Expectation Criteria"
+      ],
+      [
+        "Altendorf et al.",
+        "Monotonicity Constraints"
+      ],
+      [
+        "Maximum Entropy Principle",
+        "constrain"
+      ],
+      [
+        "Class Distribution",
+        "Positive Class"
+      ],
+      [
+        "Bag-of-words",
+        "Movie Dataset"
+      ],
+      [
+        "Information Gain",
+        "Movie Dataset"
+      ],
+      [
+        "L-BFGS",
+        "used for"
+      ],
+      [
+        "GE-FL",
+        "Movie Dataset"
+      ],
+      [
+        "Class Balance",
+        "LDA"
+      ],
+      [
+        "Movie Dataset",
+        "Neutral features"
+      ],
+      [
+        "Class Distribution",
+        "can be estimated without"
+      ],
+      [
+        "KL Divergence",
+        "Unbalanced Labeled Features"
+      ],
+      [
+        "Movie Dataset",
+        "Text Classification"
+      ],
+      [
+        "Raghavan et al.",
+        "features"
+      ],
+      [
+        "Model Parameter",
+        "indicates"
+      ],
+      [
+        "Information Gain",
+        "Labeled Features"
+      ],
+      [
+        "Preference Class Distribution",
+        "used in modification of"
+      ],
+      [
+        "GE-FL",
+        "Labeled Features"
+      ],
+      [
+        "Figure 2 (b)",
+        "KL Divergence"
+      ],
+      [
+        "Class Distribution",
+        "Generalized Expectation Criteria"
+      ],
+      [
+        "Chang et al.",
+        "Constraint-Driven Learning"
+      ],
+      [
+        "L-BFGS",
+        "used to solve"
+      ],
+      [
+        "Objective Function",
+        "Prior Knowledge"
+      ],
+      [
+        "Neutral Features",
+        "Table 1"
+      ],
+      [
+        "Latent Output Variables",
+        "Prior Knowledge"
+      ],
+      [
+        "This paper",
+        "prior knowledge"
+      ],
+      [
+        "KL divergence",
+        "true distribution"
+      ],
+      [
+        "Druck et al.",
+        "GE"
+      ],
+      [
+        "Figure 3 (a)",
+        "GE-FL"
+      ],
+      [
+        "Conditional Model Distribution",
+        "Objective Function"
+      ],
+      [
+        "Maximum Entropy",
+        "Uniform Distribution"
+      ],
+      [
+        "Druck et al.",
+        "GE-FL"
+      ],
+      [
+        "GE-FL",
+        "performs well with"
+      ],
+      [
+        "KL divergence",
+        "True class distribution"
+      ],
+      [
+        "Prior Knowledge",
+        "Text Classification"
+      ],
+      [
+        "Neutral Features",
+        "prevent"
+      ],
+      [
+        "Empirical Distribution",
+        "Generalized Expectation Criteria"
+      ],
+      [
+        "Figure 4",
+        "Our methods"
+      ],
+      [
+        "Regularization terms",
+        "generalized expectation criteria"
+      ],
+      [
+        "Raghavan et al.",
+        "model"
+      ],
+      [
+        "Bayesian Approaches",
+        "Generalized Expectation Criteria"
+      ],
+      [
+        "KL Divergence Term",
+        "Reference Class Distribution"
+      ],
+      [
+        "Neutral features",
+        "Top 10 frequent words"
+      ],
+      [
+        "Movie Dataset",
+        "Negative Class"
+      ],
+      [
+        "KL divergence",
+        "unbalanced corpora"
+      ],
+      [
+        "Druck et al.",
+        "Generalized Expectation Criteria"
+      ],
+      [
+        "GE-FL",
+        "reduces load of"
+      ],
+      [
+        "Class Distribution",
+        "KL Divergence"
+      ],
+      [
+        "Maximum Entropy",
+        "Table 1"
+      ],
+      [
+        "Figure 3 (b)",
+        "KL Divergence"
+      ],
+      [
+        "GE-FL",
+        "Objective Function"
+      ],
+      [
+        "Movie Dataset",
+        "Neutral Features"
+      ],
+      [
+        "KL Divergence Term",
+        "Objective Function"
+      ],
+      [
+        "Learning",
+        "Prior Knowledge"
+      ],
+      [
+        "Movie Dataset",
+        "Unbalanced Datasets"
+      ],
+      [
+        "KL Divergence",
+        "Table 1"
+      ],
+      [
+        "This paper",
+        "generalized expectation criteria"
+      ],
+      [
+        "Figure 3 (a)",
+        "Neutral Features"
+      ],
+      [
+        "Model Parameter",
+        "represents"
+      ],
+      [
+        "KL divergence",
+        "Reference class distribution"
+      ],
+      [
+        "GE-FL",
+        "modified by"
+      ],
+      [
+        "Conditional Model Distribution",
+        "Input"
+      ],
+      [
+        "Objective Function",
+        "Reference Class Distribution"
+      ],
+      [
+        "KL Divergence",
+        "Regularization Terms"
+      ],
+      [
+        "Class Distribution",
+        "Negative Class"
+      ],
+      [
+        "Maximum entropy regularization",
+        "corpus"
+      ],
+      [
+        "Features of each topic",
+        "LDA"
+      ],
+      [
+        "Generalized Expectation Criteria",
+        "Parameter Estimation Objective Function"
+      ],
+      [
+        "Maximum Entropy",
+        "Neutral features"
+      ],
+      [
+        "Chen et al.",
+        "multi-domain knowledge"
+      ],
+      [
+        "Figure 3 (a)",
+        "KL Divergence"
+      ],
+      [
+        "Bias Problem",
+        "Our methods"
+      ],
+      [
+        "Graça et al.",
+        "Posterior Regularization"
+      ],
+      [
+        "Maximum Entropy Principle",
+        "used to constrain"
+      ],
+      [
+        "GE-FL",
+        "Mann and McCallum"
+      ],
+      [
+        "Generalized Expectation Criteria",
+        "MaCallum et al."
+      ],
+      [
+        "Neutral Features",
+        "set to"
+      ],
+      [
+        "Movie Dataset",
+        "Negative Documents"
+      ],
+      [
+        "KL Divergence",
+        "Maximum Entropy Principle"
+      ],
+      [
+        "General Domain Knowledge",
+        "LDA"
+      ],
+      [
+        "KL Divergence",
+        "Unbalanced Datasets"
+      ],
+      [
+        "Class Distribution",
+        "Neutral Features"
+      ],
+      [
+        "Maximum entropy regularization",
+        "unbalance"
+      ],
+      [
+        "Neutral features",
+        "extremely unbalanced labeled features"
+      ],
+      [
+        "KL Divergence",
+        "Movie Dataset"
+      ],
+      [
+        "Generalized Expectation Criteria",
+        "Score Function"
+      ],
+      [
+        "Objective Function",
+        "modified by"
+      ],
+      [
+        "GE-FL",
+        "learns from"
+      ],
+      [
+        "Labeled Features",
+        "Reference Distribution"
+      ],
+      [
+        "Figure 2 (a)",
+        "GE-FL"
+      ],
+      [
+        "Figure 3 (a)",
+        "Maximum Entropy"
+      ],
+      [
+        "Neutral Words",
+        "Prior Knowledge"
+      ],
+      [
+        "Labeled Features",
+        "Text Classification"
+      ],
+      [
+        "Figure 3 (b)",
+        "Our methods"
+      ],
+      [
+        "Labeled Features",
+        "Model"
+      ],
+      [
+        "Conditional Model Distribution",
+        "Empirical Distribution"
+      ],
+      [
+        "Daumé",
+        "Self Training Method"
+      ],
+      [
+        "Neutral Features",
+        "prevent bias by setting to"
+      ],
+      [
+        "Control Group",
+        "Our methods"
+      ],
+      [
+        "KL divergence",
+        "reference class distribution"
+      ],
+      [
+        "Druck et al.",
+        "labels on features"
+      ],
+      [
+        "Movie Dataset",
+        "Positive Documents"
+      ],
+      [
+        "Liu et al.",
+        "Prior Knowledge"
+      ],
+      [
+        "Labeled Features",
+        "Organization"
+      ],
+      [
+        "LDA",
+        "Topics"
+      ],
+      [
+        "Neutral Features",
+        "can be"
+      ],
+      [
+        "Andrzejewski et al.",
+        "LDA"
+      ],
+      [
+        "Generalized Expectation Criteria",
+        "obtained by setting"
+      ],
+      [
+        "GE-FL",
+        "Table 1"
+      ],
+      [
+        "Information Gain",
+        "Labeled Features for each class"
+      ],
+      [
+        "Maximum Entropy Principle",
+        "Neutral features"
+      ],
+      [
+        "Movie Dataset",
+        "Our methods"
+      ],
+      [
+        "Movie Dataset",
+        "Stopwords"
+      ],
+      [
+        "GE-FL",
+        "Generalized Expectation Criteria"
+      ],
+      [
+        "Features",
+        "LDA"
+      ],
+      [
+        "Empirical Distribution",
+        "Input Samples"
+      ],
+      [
+        "KL Divergence",
+        "Maximum Entropy"
+      ],
+      [
+        "Generalized Expectation Criteria",
+        "Regularization Terms"
+      ],
+      [
+        "Figure 3 (a)",
+        "Our methods"
+      ],
+      [
+        "Movie Dataset",
+        "Unbalanced Labeled Features"
+      ],
+      [
+        "Class Balance",
+        "GE-FL"
+      ],
+      [
+        "Maximum entropy regularization",
+        "category distribution"
+      ],
+      [
+        "Druck et al.",
+        "Labeled Features"
+      ],
+      [
+        "Maximum Entropy",
+        "Movie Dataset"
+      ],
+      [
+        "Altendorf et al.",
+        "Sparse Data"
+      ],
+      [
+        "Input",
+        "Output Variables"
+      ],
+      [
+        "Information Gain",
+        "Neutral features"
+      ],
+      [
+        "GE-FL",
+        "Neutral features"
+      ],
+      [
+        "KL Divergence",
+        "Objective Function"
+      ]
+    ],
+    "count": 165,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "doc-8883a5d4e790630b007c233701f21e64"
+  },
+  "doc-8be4503c1206a1d3f8a4068a05c69328": {
+    "relation_pairs": [
+      [
+        "CoNLL annotations",
+        "SRs"
+      ],
+      [
+        "Multilingual Model",
+        "Target Language"
+      ],
+      [
+        "English",
+        "TABREF27"
+      ],
+      [
+        "CoNLL",
+        "German"
+      ],
+      [
+        "Chinese Restaurant Process (CRP)",
+        "Multilingual Model"
+      ],
+      [
+        "CoNLL 2009 corpus",
+        "German"
+      ],
+      [
+        "Sampling",
+        "unsupervised sentences"
+      ],
+      [
+        "INLINEFORM0",
+        "supervised sentences"
+      ],
+      [
+        "Bayesian Model",
+        "Joint Bayesian Model"
+      ],
+      [
+        "English sentences",
+        "MaltParser"
+      ],
+      [
+        "Lang2011unsupervised",
+        "Other"
+      ],
+      [
+        "PRs",
+        "ordering"
+      ],
+      [
+        "Modifier Role",
+        "Secondary Roles"
+      ],
+      [
+        "Arguments",
+        "English"
+      ],
+      [
+        "Multilingual Model",
+        "SRL"
+      ],
+      [
+        "BIBREF8",
+        "Unsupervised SRL Pipeline"
+      ],
+      [
+        "Inference",
+        "Multilingual Model"
+      ],
+      [
+        "English",
+        "Europarl corpus"
+      ],
+      [
+        "SRs",
+        "garg2012unsupervised"
+      ],
+      [
+        "CLV",
+        "Predicate-tuple"
+      ],
+      [
+        "Monolingual Model",
+        "Multilingual Model"
+      ],
+      [
+        "Annotation projection",
+        "TITOVcrosslingual"
+      ],
+      [
+        "Multilingual Model",
+        "semi-supervised learning settings"
+      ],
+      [
+        "Intervals",
+        "SRs"
+      ],
+      [
+        "German",
+        "multilingual Bayesian model"
+      ],
+      [
+        "Baseline",
+        "semantic roles"
+      ],
+      [
+        "Inference",
+        "Voice"
+      ],
+      [
+        "A0",
+        "Mike"
+      ],
+      [
+        "CoNLL annotations",
+        "semantic roles"
+      ],
+      [
+        "Monolingual SRL",
+        "Multilingual Model"
+      ],
+      [
+        "Monolingual model",
+        "titovcrosslingual"
+      ],
+      [
+        "German",
+        "Predicate instances"
+      ],
+      [
+        "F1",
+        "Purity, Collocation"
+      ],
+      [
+        "Multilingual Model",
+        "Part-of-Speech Tagging"
+      ],
+      [
+        "marquez2008semantic",
+        "supervised SRL systems"
+      ],
+      [
+        "MAP Estimate",
+        "Multilingual Model"
+      ],
+      [
+        "BIBREF0",
+        "Predicate-Argument Structure"
+      ],
+      [
+        "Bayesian model",
+        "titov2012bayesian"
+      ],
+      [
+        "German sentences",
+        "LTH parser"
+      ],
+      [
+        "CoNLL annotations",
+        "PRs"
+      ],
+      [
+        "Multilingual Model",
+        "Source Language"
+      ],
+      [
+        "Multilingual Model",
+        "Unlabeled Data"
+      ],
+      [
+        "Role Ordering",
+        "Supervised SRL"
+      ],
+      [
+        "CLV",
+        "INLINEFORM0"
+      ],
+      [
+        "Beta priors",
+        "Binomial distributions"
+      ],
+      [
+        "Beta Priors",
+        "Binomial Distributions"
+      ],
+      [
+        "Argument identification",
+        "CoNLL 2009 EN data"
+      ],
+      [
+        "Penalty term",
+        "TITOVcrosslingual"
+      ],
+      [
+        "Labeled Data",
+        "Multilingual Model"
+      ],
+      [
+        "BIBREF18",
+        "iterative split-merge algorithm"
+      ],
+      [
+        "Latent variables",
+        "Our model"
+      ],
+      [
+        "English",
+        "supervised sentences"
+      ],
+      [
+        "naseem2009multilingual",
+        "superlingual latent variables"
+      ],
+      [
+        "grenager2006unsupervised",
+        "unsupervised learning"
+      ],
+      [
+        "Core Role",
+        "Primary Roles"
+      ],
+      [
+        "BIBREF9",
+        "Monolingual Model"
+      ],
+      [
+        "performance",
+        "supervised sentences"
+      ],
+      [
+        "CLV",
+        "INLINEFORM5"
+      ],
+      [
+        "crosslingual latent variables",
+        "parallel corpora"
+      ],
+      [
+        "Chinese Restaurant Process (CRP)",
+        "Crosslingual Latent Variables (CLVs)"
+      ],
+      [
+        "Swiss NSF grant 200021_125137",
+        "This work"
+      ],
+      [
+        "CoNLL",
+        "English"
+      ],
+      [
+        "Information Extraction",
+        "Semantic Role Labeling"
+      ],
+      [
+        "labeled data",
+        "resource poor language"
+      ],
+      [
+        "INLINEFORM2",
+        "Multilingual Model"
+      ],
+      [
+        "Global role ordering probability",
+        "Monolingual model"
+      ],
+      [
+        "CoNLL 2009 corpus",
+        "English"
+      ],
+      [
+        "role labels",
+        "supervised sentences"
+      ],
+      [
+        "German",
+        "titovcrosslingual"
+      ],
+      [
+        "Crosslingual Latent Variables (CLVs)",
+        "Predicate-tuple"
+      ],
+      [
+        "German",
+        "monolingual model"
+      ],
+      [
+        "Inference",
+        "Syntactic Features"
+      ],
+      [
+        "MAP Estimate",
+        "Monolingual Model"
+      ],
+      [
+        "Inference Procedure",
+        "Joint Bayesian Model"
+      ],
+      [
+        "BIBREF7",
+        "Unsupervised SRL Pipeline"
+      ],
+      [
+        "Non-auxiliary verbs",
+        "Predicates"
+      ],
+      [
+        "Multilingual Model",
+        "Performance"
+      ],
+      [
+        "Head-words",
+        "Semantic arguments"
+      ],
+      [
+        "English-German parallel Europarl corpus",
+        "GIZA++"
+      ],
+      [
+        "Bayesian model",
+        "garg2012unsupervised"
+      ],
+      [
+        "CLV",
+        "INLINEFORM15"
+      ],
+      [
+        "Ordering",
+        "Supervised SRL"
+      ],
+      [
+        "swier2004unsupervised",
+        "verbs"
+      ],
+      [
+        "PRs",
+        "garg2012unsupervised"
+      ],
+      [
+        "seen predicates",
+        "supervised sentences"
+      ],
+      [
+        "EN-DE parallel Europarl corpus",
+        "intersecting alignments"
+      ],
+      [
+        "BIBREF3",
+        "Multilingual Model"
+      ],
+      [
+        "Alignments",
+        "two directions"
+      ],
+      [
+        "Model Parameters",
+        "Monolingual Model"
+      ],
+      [
+        "Monolingual model (BIBREF3)",
+        "TITOVcrosslingual"
+      ],
+      [
+        "Dirichlet-multinomial conjugacy",
+        "Multilingual Model"
+      ],
+      [
+        "Monolingual Model",
+        "Training Instances"
+      ],
+      [
+        "Bayesian SRL model",
+        "Multilingual Model"
+      ],
+      [
+        "alignment model",
+        "multilingual SRI"
+      ],
+      [
+        "role annotations",
+        "source language"
+      ],
+      [
+        "Multilingual Model",
+        "Parallel Corpus"
+      ],
+      [
+        "furstenau2009graph",
+        "graph alignment method"
+      ],
+      [
+        "Natural Language Processing",
+        "Semantic Role Labeling"
+      ],
+      [
+        "Manually Annotated Corpora",
+        "Supervised Systems"
+      ],
+      [
+        "BIBREF5",
+        "Unsupervised SRL"
+      ],
+      [
+        "Aligned",
+        "Semantic arguments"
+      ],
+      [
+        "CoNLL data",
+        "Predicates"
+      ],
+      [
+        "Multilingual Model",
+        "Role Labels"
+      ],
+      [
+        "CLV",
+        "INLINEFORM7"
+      ],
+      [
+        "manually labeling",
+        "sentences"
+      ],
+      [
+        "Bayesian model",
+        "semantic role induction (SRI)"
+      ],
+      [
+        "EN-DE parallel Europarl corpus",
+        "Word alignments"
+      ],
+      [
+        "PropBank",
+        "Semantic Role Labeling"
+      ],
+      [
+        "Multilingual Model",
+        "Unsupervised SRL"
+      ],
+      [
+        "BIBREF8",
+        "Monolingual Model"
+      ],
+      [
+        "Binomial Distributions",
+        "Generative Process"
+      ],
+      [
+        "English",
+        "multilingual model"
+      ],
+      [
+        "Unsupervised SRL",
+        "Word Alignment"
+      ],
+      [
+        "pado2009cross",
+        "semantic role annotations"
+      ],
+      [
+        "Unsupervised SRL Pipeline",
+        "Unsupervised Semantic Role Induction"
+      ],
+      [
+        "BIBREF11",
+        "CLV"
+      ],
+      [
+        "Intervals",
+        "Secondary Roles"
+      ],
+      [
+        "Europarl",
+        "target language"
+      ],
+      [
+        "Dirichlet priors",
+        "Multinomial distributions"
+      ],
+      [
+        "Equation UID11",
+        "Multilingual Model"
+      ],
+      [
+        "Bayesian model",
+        "training scenarios"
+      ],
+      [
+        "Monolingual Model",
+        "Role Labels"
+      ],
+      [
+        "BIBREF3",
+        "Monolingual Model"
+      ],
+      [
+        "Monolingual Model",
+        "Role Ordering"
+      ],
+      [
+        "Monolingual Model",
+        "Role Repetition"
+      ],
+      [
+        "Multilingual Model",
+        "Role Correspondences"
+      ],
+      [
+        "Annotation Effort",
+        "Multilingual Model"
+      ],
+      [
+        "CoNLL",
+        "supervised sentences"
+      ],
+      [
+        "Crosslingual Latent Variables",
+        "Part-of-Speech Tagging"
+      ],
+      [
+        "Other",
+        "Titovcrosslingual"
+      ],
+      [
+        "Inference",
+        "Predicate"
+      ],
+      [
+        "BIBREF3",
+        "Unsupervised SRL"
+      ],
+      [
+        "Monolingual Model",
+        "Secondary Roles"
+      ],
+      [
+        "cross-lingual information",
+        "unsupervised setting"
+      ],
+      [
+        "Joint Bayesian Model",
+        "Role Correspondences"
+      ],
+      [
+        "CLV",
+        "INLINEFORM8"
+      ],
+      [
+        "TABREF28",
+        "target languages"
+      ],
+      [
+        "English",
+        "argument identification"
+      ],
+      [
+        "geschrieben",
+        "written"
+      ],
+      [
+        "German",
+        "LTH parser"
+      ],
+      [
+        "A1",
+        "Buch"
+      ],
+      [
+        "Europarl corpus",
+        "German"
+      ],
+      [
+        "SECREF25",
+        "argument identification"
+      ],
+      [
+        "Global role ordering probability",
+        "Monolingual model (BIBREF3)"
+      ],
+      [
+        "Monolingual Model",
+        "Primary Roles"
+      ],
+      [
+        "CLV",
+        "INLINEFORM1"
+      ],
+      [
+        "CLV",
+        "INLINEFORM6"
+      ],
+      [
+        "Argument identification",
+        "titovcrosslingual"
+      ],
+      [
+        "English",
+        "MaltParser"
+      ],
+      [
+        "Binomial distributions",
+        "Generative process"
+      ],
+      [
+        "Multilingual Model",
+        "Word Alignments"
+      ],
+      [
+        "German",
+        "supervised sentences"
+      ],
+      [
+        "Figure FIGREF16",
+        "Multilingual Model"
+      ],
+      [
+        "Primary Roles",
+        "Secondary Roles"
+      ],
+      [
+        "Monolingual Model",
+        "Parameters"
+      ],
+      [
+        "BIBREF2",
+        "Unsupervised SRL"
+      ],
+      [
+        "Joint Bayesian Model",
+        "Word Alignments"
+      ],
+      [
+        "domain-general corpus",
+        "swier2004unsupervised"
+      ],
+      [
+        "Repetition",
+        "Supervised SRL"
+      ],
+      [
+        "Equation UID11",
+        "Monolingual Model"
+      ],
+      [
+        "Role Repetition",
+        "Supervised SRL"
+      ],
+      [
+        "parallel sentences",
+        "word alignments"
+      ],
+      [
+        "Arguments",
+        "Lang2011unsupervised"
+      ],
+      [
+        "Crosslingual Latent Variables",
+        "Multilingual Model"
+      ],
+      [
+        "EC FP7 grant PARLANCE",
+        "This work"
+      ],
+      [
+        "Cross-lingual Variational Learning",
+        "Monolingual models"
+      ],
+      [
+        "LTH system",
+        "argument identification"
+      ],
+      [
+        "CLV",
+        "INLINEFORM11"
+      ],
+      [
+        "generative model",
+        "grenager2006unsupervised"
+      ],
+      [
+        "German",
+        "TABREF27"
+      ],
+      [
+        "CLV",
+        "INLINEFORM4"
+      ],
+      [
+        "Monolingual SRL",
+        "SRs"
+      ],
+      [
+        "Question Answering",
+        "Semantic Role Labeling"
+      ],
+      [
+        "Buch",
+        "book"
+      ],
+      [
+        "BIBREF3",
+        "Joint Bayesian Model"
+      ],
+      [
+        "CLV",
+        "Multilingual Model"
+      ],
+      [
+        "Multilingual Model",
+        "languages"
+      ],
+      [
+        "SRs",
+        "Secondary Roles"
+      ],
+      [
+        "Gibbs Sampling",
+        "Multilingual Model"
+      ],
+      [
+        "Multilingual Model",
+        "Predicate"
+      ],
+      [
+        "Generative Process",
+        "Multinomial Distributions"
+      ],
+      [
+        "Predicate-Argument Structure",
+        "PropBank"
+      ],
+      [
+        "Monolingual Model",
+        "Titovcrosslingual"
+      ],
+      [
+        "Argument identification",
+        "TITOVcrosslingual"
+      ],
+      [
+        "SRI",
+        "unlabeled data"
+      ],
+      [
+        "BIBREF6",
+        "Unsupervised SRL"
+      ],
+      [
+        "crosslingual unsupervised SRL",
+        "titovcrosslingual"
+      ],
+      [
+        "crosslingual latent variables",
+        "monolingual models"
+      ],
+      [
+        "Multilingual Model",
+        "Role Agreement"
+      ],
+      [
+        "SRL",
+        "naseem2009multilingual"
+      ],
+      [
+        "Lang2011unsupervised",
+        "Monolingual Model"
+      ],
+      [
+        "Annotation Projection",
+        "Target Language"
+      ],
+      [
+        "BIBREF1",
+        "graph-partitioning based approach"
+      ],
+      [
+        "CoNLL",
+        "unsupervised sentences"
+      ],
+      [
+        "Generative process",
+        "Multinomial distributions"
+      ],
+      [
+        "Intervals",
+        "Primary Roles"
+      ],
+      [
+        "Crosslingual Latent Variables (CLVs)",
+        "Monolingual Model"
+      ],
+      [
+        "Monolingual inference",
+        "Penalty term"
+      ],
+      [
+        "Joint Bayesian Model",
+        "Latent Variables"
+      ],
+      [
+        "Source Language",
+        "Target Language"
+      ],
+      [
+        "English",
+        "Predicate instances"
+      ],
+      [
+        "DISPLAYFORM0",
+        "Multilingual Model"
+      ],
+      [
+        "BIBREF4",
+        "Unsupervised SRL"
+      ],
+      [
+        "Modifier Role",
+        "Monolingual Model"
+      ],
+      [
+        "CLV",
+        "INLINEFORM3"
+      ],
+      [
+        "Monolingual Model",
+        "Predicate"
+      ],
+      [
+        "Induced cluster",
+        "Purity"
+      ],
+      [
+        "Europarl",
+        "German"
+      ],
+      [
+        "German",
+        "multilingual model"
+      ],
+      [
+        "Arguments",
+        "German"
+      ],
+      [
+        "CLV",
+        "Role Labels"
+      ],
+      [
+        "Joint Bayesian Model",
+        "Monolingual Semantic Role Induction Model"
+      ],
+      [
+        "Cross-lingual unsupervised SRL",
+        "TITOVcrosslingual"
+      ],
+      [
+        "English",
+        "syntactic parsers"
+      ],
+      [
+        "semi-supervised model",
+        "supervised baseline"
+      ],
+      [
+        "Primary Roles",
+        "Role Ordering"
+      ],
+      [
+        "BIBREF0",
+        "PropBank"
+      ],
+      [
+        "Latent Variables",
+        "Multilingual Model"
+      ],
+      [
+        "Gibbs Sampling",
+        "Monolingual Model"
+      ],
+      [
+        "Unsupervised SRL Pipeline",
+        "step 4"
+      ],
+      [
+        "CLV",
+        "INLINEFORM2"
+      ],
+      [
+        "Collocation",
+        "Gold role"
+      ],
+      [
+        "SRI",
+        "multilingual"
+      ],
+      [
+        "A1",
+        "a book"
+      ],
+      [
+        "Predicate-Argument Structure",
+        "Semantic Role Labeling"
+      ],
+      [
+        "Monolingual Model",
+        "garg2012unsupervised"
+      ],
+      [
+        "English-German section",
+        "Europarl corpus"
+      ],
+      [
+        "MAP Estimate",
+        "Model Parameters"
+      ],
+      [
+        "Crosslingual Latent Variables (CLVs)",
+        "Multilingual Model"
+      ],
+      [
+        "Hard clustering",
+        "TITOVcrosslingual"
+      ],
+      [
+        "Manually Annotated Corpora",
+        "Unsupervised SRL"
+      ],
+      [
+        "Parallel Text",
+        "Unsupervised SRL"
+      ],
+      [
+        "DISPLAYFORM0",
+        "Monolingual Model"
+      ],
+      [
+        "Core Role",
+        "Monolingual Model"
+      ],
+      [
+        "Argument-Keys",
+        "Role"
+      ],
+      [
+        "English",
+        "titovcrosslingual"
+      ],
+      [
+        "Baseline",
+        "CoNLL"
+      ],
+      [
+        "English",
+        "monolingual model"
+      ],
+      [
+        "Model",
+        "semantic roles"
+      ],
+      [
+        "Cross-lingual parameters",
+        "Monolingual models"
+      ],
+      [
+        "CoNLL",
+        "source language"
+      ],
+      [
+        "Annotation Projection",
+        "titovcrosslingual"
+      ],
+      [
+        "parameter estimates",
+        "target language"
+      ],
+      [
+        "Primary Roles",
+        "ordering"
+      ],
+      [
+        "annotating data",
+        "performance gains"
+      ],
+      [
+        "Languages",
+        "Parallel Text"
+      ],
+      [
+        "monolingual model",
+        "semi-supervised setting"
+      ],
+      [
+        "alignments",
+        "multilingual model"
+      ],
+      [
+        "German",
+        "Joint Bayesian Model"
+      ],
+      [
+        "Crosslingual Latent Variables",
+        "Joint Bayesian Model"
+      ],
+      [
+        "Gibbs Sampling",
+        "Hidden Variables"
+      ],
+      [
+        "German translation",
+        "sentence INLINEFORM0"
+      ],
+      [
+        "Arguments",
+        "Titovcrosslingual"
+      ],
+      [
+        "Argument identification",
+        "CoNLL 2009 DE data"
+      ],
+      [
+        "Figure FIGREF7",
+        "Multilingual Model"
+      ],
+      [
+        "BIBREF1",
+        "Unsupervised SRL"
+      ],
+      [
+        "BIBREF10",
+        "Monolingual Model"
+      ],
+      [
+        "Multilingual Model",
+        "semi-supervised learning"
+      ],
+      [
+        "CLVs",
+        "Monolingual models"
+      ],
+      [
+        "INLINEFORM12",
+        "Monolingual Model"
+      ],
+      [
+        "Bayesian Model",
+        "Unsupervised Semantic Role Induction"
+      ],
+      [
+        "Baseline",
+        "Syntactic function"
+      ],
+      [
+        "English",
+        "Europarl"
+      ],
+      [
+        "Annotation Projection",
+        "Multilingual Model"
+      ],
+      [
+        "Dirichlet Priors",
+        "Multinomial Distributions"
+      ],
+      [
+        "BIBREF4",
+        "Multilingual Unsupervised Part-of-Speech Tagging Model"
+      ],
+      [
+        "PRs",
+        "Primary Roles"
+      ],
+      [
+        "Bayesian Model",
+        "Parallel Corpora"
+      ]
+    ],
+    "count": 268,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "doc-8be4503c1206a1d3f8a4068a05c69328"
+  }
+}

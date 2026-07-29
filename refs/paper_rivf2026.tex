@@ -164,6 +164,8 @@ Table~\ref{tab:qasper} outlines retrieval configurations. Lexical-only BM25 unde
 
 Decomposing failures against an within-document oracle demonstrates that $\sim$42\% of corpus-wide errors occur during initial macro document location rather than micro paragraph selection. Once the target document is correctly located, paragraph selection succeeds for roughly two-thirds of queries (oracle Hits@10 64.4\%).
 
+To address the lack of a head-to-head baseline against cited graph-RAG systems, we ran LightRAG \cite{guo2024lightrag} reconfigured to use OHARA's exact Gemini models on the identical corpus. Scored via gold-evidence-snippet overlap, it reaches a 34.7\% hit rate -- comparable in magnitude to OHARA's Hits@10, but under an unranked, uncapped-context protocol (no top-$k$ cutoff, no rank order), so the comparison is directional rather than a controlled ranking test, and likely understates OHARA's context-efficiency advantage rather than overstating it.
+
 \begin{table}[t]
 \centering
 \caption{QASPER retrieval quality (150 questions, corpus-wide over 229 docs).}
@@ -178,8 +180,11 @@ BM25-only & 12.7\% & 25.3\% & 0.102 & 0.0\% \\
 Vector-only & \textbf{26.7\%} & \textbf{33.3\%} & 0.175 & \textbf{24.7\%} \\
 Full (default) & 22.0\% & 30.0\% & 0.164 & 22.7\% \\
 Full (tuned) & 25.3\% & \textbf{33.3\%} & \textbf{0.179} & 22.7\% \\
+LightRAG (Gemini)$^\dagger$ & -- & 34.7\%$^\ddagger$ & -- & -- \\
 \bottomrule
 \end{tabular}
+\vspace{2pt}
+\footnotesize{$^\dagger$Reconfigured to OHARA's Gemini models, same 200-doc corpus. $^\ddagger$Unranked context-blob overlap, not top-$k$; MRR/P-hit undefined.}
 \end{table}
 
 \subsection{MultiHop-RAG Retrieval Quality and Abstention}

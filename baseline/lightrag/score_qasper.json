@@ -1,0 +1,759 @@
+{
+  "dataset": "qasper",
+  "system": "lightrag+gemini",
+  "n_queries": 150,
+  "hits": 52,
+  "hit_rate": 0.3467,
+  "per_query": [
+    {
+      "id": "qa_0001",
+      "hit": false,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0002",
+      "hit": true,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0003",
+      "hit": false,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0004",
+      "hit": true,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0005",
+      "hit": false,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0006",
+      "hit": false,
+      "gold_count": 4
+    },
+    {
+      "id": "qa_0007",
+      "hit": false,
+      "gold_count": 2
+    },
+    {
+      "id": "qa_0008",
+      "hit": false,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0009",
+      "hit": true,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0010",
+      "hit": false,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0011",
+      "hit": true,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0012",
+      "hit": false,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0013",
+      "hit": false,
+      "gold_count": 6
+    },
+    {
+      "id": "qa_0014",
+      "hit": false,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0015",
+      "hit": false,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0016",
+      "hit": true,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0017",
+      "hit": true,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0018",
+      "hit": false,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0019",
+      "hit": false,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0020",
+      "hit": true,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0021",
+      "hit": false,
+      "gold_count": 2
+    },
+    {
+      "id": "qa_0022",
+      "hit": false,
+      "gold_count": 2
+    },
+    {
+      "id": "qa_0023",
+      "hit": false,
+      "gold_count": 3
+    },
+    {
+      "id": "qa_0024",
+      "hit": false,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0025",
+      "hit": true,
+      "gold_count": 3
+    },
+    {
+      "id": "qa_0026",
+      "hit": false,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0027",
+      "hit": false,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0028",
+      "hit": false,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0029",
+      "hit": false,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0030",
+      "hit": false,
+      "gold_count": 2
+    },
+    {
+      "id": "qa_0031",
+      "hit": true,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0032",
+      "hit": false,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0033",
+      "hit": true,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0034",
+      "hit": true,
+      "gold_count": 4
+    },
+    {
+      "id": "qa_0035",
+      "hit": false,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0036",
+      "hit": false,
+      "gold_count": 3
+    },
+    {
+      "id": "qa_0037",
+      "hit": false,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0038",
+      "hit": true,
+      "gold_count": 3
+    },
+    {
+      "id": "qa_0039",
+      "hit": false,
+      "gold_count": 2
+    },
+    {
+      "id": "qa_0040",
+      "hit": false,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0041",
+      "hit": false,
+      "gold_count": 4
+    },
+    {
+      "id": "qa_0042",
+      "hit": false,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0043",
+      "hit": true,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0044",
+      "hit": true,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0045",
+      "hit": true,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0046",
+      "hit": false,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0047",
+      "hit": false,
+      "gold_count": 2
+    },
+    {
+      "id": "qa_0048",
+      "hit": false,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0049",
+      "hit": true,
+      "gold_count": 7
+    },
+    {
+      "id": "qa_0050",
+      "hit": true,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0051",
+      "hit": true,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0052",
+      "hit": false,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0053",
+      "hit": true,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0054",
+      "hit": true,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0055",
+      "hit": false,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0056",
+      "hit": true,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0057",
+      "hit": false,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0058",
+      "hit": false,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0059",
+      "hit": false,
+      "gold_count": 3
+    },
+    {
+      "id": "qa_0060",
+      "hit": false,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0061",
+      "hit": true,
+      "gold_count": 2
+    },
+    {
+      "id": "qa_0062",
+      "hit": false,
+      "gold_count": 2
+    },
+    {
+      "id": "qa_0063",
+      "hit": false,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0064",
+      "hit": true,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0065",
+      "hit": false,
+      "gold_count": 8
+    },
+    {
+      "id": "qa_0066",
+      "hit": false,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0067",
+      "hit": false,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0068",
+      "hit": true,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0069",
+      "hit": true,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0070",
+      "hit": true,
+      "gold_count": 2
+    },
+    {
+      "id": "qa_0071",
+      "hit": true,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0072",
+      "hit": false,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0073",
+      "hit": false,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0074",
+      "hit": false,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0075",
+      "hit": false,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0076",
+      "hit": false,
+      "gold_count": 2
+    },
+    {
+      "id": "qa_0077",
+      "hit": false,
+      "gold_count": 2
+    },
+    {
+      "id": "qa_0078",
+      "hit": false,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0079",
+      "hit": false,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0080",
+      "hit": false,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0081",
+      "hit": true,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0082",
+      "hit": false,
+      "gold_count": 2
+    },
+    {
+      "id": "qa_0083",
+      "hit": false,
+      "gold_count": 2
+    },
+    {
+      "id": "qa_0084",
+      "hit": true,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0085",
+      "hit": false,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0086",
+      "hit": true,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0087",
+      "hit": false,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0088",
+      "hit": true,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0089",
+      "hit": false,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0090",
+      "hit": false,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0091",
+      "hit": true,
+      "gold_count": 7
+    },
+    {
+      "id": "qa_0092",
+      "hit": false,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0093",
+      "hit": false,
+      "gold_count": 8
+    },
+    {
+      "id": "qa_0094",
+      "hit": false,
+      "gold_count": 5
+    },
+    {
+      "id": "qa_0095",
+      "hit": false,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0096",
+      "hit": true,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0097",
+      "hit": false,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0098",
+      "hit": false,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0099",
+      "hit": false,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0100",
+      "hit": false,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0101",
+      "hit": false,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0102",
+      "hit": false,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0103",
+      "hit": false,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0104",
+      "hit": true,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0105",
+      "hit": false,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0106",
+      "hit": true,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0107",
+      "hit": false,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0108",
+      "hit": false,
+      "gold_count": 2
+    },
+    {
+      "id": "qa_0109",
+      "hit": false,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0110",
+      "hit": false,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0111",
+      "hit": true,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0112",
+      "hit": false,
+      "gold_count": 2
+    },
+    {
+      "id": "qa_0113",
+      "hit": true,
+      "gold_count": 2
+    },
+    {
+      "id": "qa_0114",
+      "hit": false,
+      "gold_count": 2
+    },
+    {
+      "id": "qa_0115",
+      "hit": false,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0116",
+      "hit": false,
+      "gold_count": 2
+    },
+    {
+      "id": "qa_0117",
+      "hit": true,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0118",
+      "hit": true,
+      "gold_count": 4
+    },
+    {
+      "id": "qa_0119",
+      "hit": true,
+      "gold_count": 2
+    },
+    {
+      "id": "qa_0120",
+      "hit": true,
+      "gold_count": 3
+    },
+    {
+      "id": "qa_0121",
+      "hit": true,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0122",
+      "hit": true,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0123",
+      "hit": true,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0124",
+      "hit": true,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0125",
+      "hit": false,
+      "gold_count": 3
+    },
+    {
+      "id": "qa_0126",
+      "hit": false,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0127",
+      "hit": false,
+      "gold_count": 2
+    },
+    {
+      "id": "qa_0128",
+      "hit": false,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0129",
+      "hit": false,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0130",
+      "hit": false,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0131",
+      "hit": false,
+      "gold_count": 2
+    },
+    {
+      "id": "qa_0132",
+      "hit": true,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0133",
+      "hit": false,
+      "gold_count": 2
+    },
+    {
+      "id": "qa_0134",
+      "hit": true,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0135",
+      "hit": false,
+      "gold_count": 2
+    },
+    {
+      "id": "qa_0136",
+      "hit": false,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0137",
+      "hit": false,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0138",
+      "hit": false,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0139",
+      "hit": false,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0140",
+      "hit": false,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0141",
+      "hit": true,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0142",
+      "hit": false,
+      "gold_count": 6
+    },
+    {
+      "id": "qa_0143",
+      "hit": true,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0144",
+      "hit": false,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0145",
+      "hit": false,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0146",
+      "hit": false,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0147",
+      "hit": true,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0148",
+      "hit": false,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0149",
+      "hit": true,
+      "gold_count": 1
+    },
+    {
+      "id": "qa_0150",
+      "hit": true,
+      "gold_count": 2
+    }
+  ]
+}

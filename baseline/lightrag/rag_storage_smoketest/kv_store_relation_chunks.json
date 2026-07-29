@@ -1,0 +1,3912 @@
+{
+  "KL Divergence<SEP>Movie Dataset": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-002",
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 2,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "KL Divergence<SEP>Movie Dataset"
+  },
+  "GE-FL<SEP>Movie Dataset": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-002",
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 2,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "GE-FL<SEP>Movie Dataset"
+  },
+  "Information Gain<SEP>Movie Dataset": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Information Gain<SEP>Movie Dataset"
+  },
+  "GE-FL<SEP>KL Divergence": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-002",
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 2,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "GE-FL<SEP>KL Divergence"
+  },
+  "LDA<SEP>Movie Dataset": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "LDA<SEP>Movie Dataset"
+  },
+  "Information Gain<SEP>Neutral features": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Information Gain<SEP>Neutral features"
+  },
+  "Bag-of-words<SEP>Movie Dataset": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Bag-of-words<SEP>Movie Dataset"
+  },
+  "KL Divergence Term<SEP>Objective Function": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "KL Divergence Term<SEP>Objective Function"
+  },
+  "Movie Dataset<SEP>Stopwords": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Movie Dataset<SEP>Stopwords"
+  },
+  "KL Divergence Term<SEP>Reference Class Distribution": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "KL Divergence Term<SEP>Reference Class Distribution"
+  },
+  "Movie Dataset<SEP>Neutral features": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Movie Dataset<SEP>Neutral features"
+  },
+  "Objective Function<SEP>Reference Class Distribution": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Objective Function<SEP>Reference Class Distribution"
+  },
+  "GE-FL<SEP>Generalization Expectation Criteria": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "GE-FL<SEP>Generalization Expectation Criteria"
+  },
+  "Cross-validation<SEP>Movie Dataset": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Cross-validation<SEP>Movie Dataset"
+  },
+  "Labeled Features<SEP>Text Classification": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Labeled Features<SEP>Text Classification"
+  },
+  "Maximum Entropy Principle<SEP>Movie Dataset": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Maximum Entropy Principle<SEP>Movie Dataset"
+  },
+  "Information Gain<SEP>Labeled Features": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-002",
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 2,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Information Gain<SEP>Labeled Features"
+  },
+  "Movie Dataset<SEP>Text Classification": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Movie Dataset<SEP>Text Classification"
+  },
+  "Maximum Entropy Principle<SEP>Neutral features": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Maximum Entropy Principle<SEP>Neutral features"
+  },
+  "LDA<SEP>Topics": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "LDA<SEP>Topics"
+  },
+  "Movie Dataset<SEP>Unbalanced Labeled Features": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Movie Dataset<SEP>Unbalanced Labeled Features"
+  },
+  "KL Divergence<SEP>Maximum Entropy Principle": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "KL Divergence<SEP>Maximum Entropy Principle"
+  },
+  "Negative Class<SEP>Positive Class": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Negative Class<SEP>Positive Class"
+  },
+  "Features<SEP>LDA": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Features<SEP>LDA"
+  },
+  "Movie Dataset<SEP>Unbalanced Datasets": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Movie Dataset<SEP>Unbalanced Datasets"
+  },
+  "KL Divergence<SEP>Objective Function": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "KL Divergence<SEP>Objective Function"
+  },
+  "Movie Dataset<SEP>Positive Class": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Movie Dataset<SEP>Positive Class"
+  },
+  "Information Gain<SEP>Labeled Features for each class": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Information Gain<SEP>Labeled Features for each class"
+  },
+  "KL Divergence<SEP>Unbalanced Datasets": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "KL Divergence<SEP>Unbalanced Datasets"
+  },
+  "Features of each topic<SEP>LDA": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Features of each topic<SEP>LDA"
+  },
+  "Movie Dataset<SEP>Negative Class": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Movie Dataset<SEP>Negative Class"
+  },
+  "Labeled features<SEP>Reference distribution": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Labeled features<SEP>Reference distribution"
+  },
+  "KL Divergence<SEP>Unbalanced Labeled Features": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "KL Divergence<SEP>Unbalanced Labeled Features"
+  },
+  "Neutral features<SEP>Reference distributions": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Neutral features<SEP>Reference distributions"
+  },
+  "Maximum Entropy<SEP>Movie Dataset": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-002",
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 2,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Maximum Entropy<SEP>Movie Dataset"
+  },
+  "GE-FL<SEP>learns from": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "GE-FL<SEP>learns from"
+  },
+  "Neutral features<SEP>Top 10 frequent words": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Neutral features<SEP>Top 10 frequent words"
+  },
+  "Model Parameter<SEP>indicates": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Model Parameter<SEP>indicates"
+  },
+  "Model Predicted Distribution<SEP>expressed as": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Model Predicted Distribution<SEP>expressed as"
+  },
+  "L-BFGS<SEP>used for": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "L-BFGS<SEP>used for"
+  },
+  "GE-FL<SEP>introduces": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "GE-FL<SEP>introduces"
+  },
+  "Generalized Expectation Criteria<SEP>obtained by setting": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Generalized Expectation Criteria<SEP>obtained by setting"
+  },
+  "Maximum Entropy<SEP>Neutral features": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Maximum Entropy<SEP>Neutral features"
+  },
+  "Neutral Features<SEP>prevent bias by setting to": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Neutral Features<SEP>prevent bias by setting to"
+  },
+  "GE-FL<SEP>reduces": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "GE-FL<SEP>reduces"
+  },
+  "Objective Function<SEP>includes": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Objective Function<SEP>includes"
+  },
+  "KL Divergence<SEP>Maximum Entropy": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "KL Divergence<SEP>Maximum Entropy"
+  },
+  "Maximum Entropy Principle<SEP>constrain": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Maximum Entropy Principle<SEP>constrain"
+  },
+  "Neutral Features<SEP>prevent": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Neutral Features<SEP>prevent"
+  },
+  "GE-FL<SEP>performs well with": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "GE-FL<SEP>performs well with"
+  },
+  "Objective Function<SEP>modified by": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Objective Function<SEP>modified by"
+  },
+  "Preference Class Distribution<SEP>used in": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Preference Class Distribution<SEP>used in"
+  },
+  "Model Parameter<SEP>represents": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Model Parameter<SEP>represents"
+  },
+  "Neutral Features<SEP>can be": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Neutral Features<SEP>can be"
+  },
+  "Model Predicted Distribution<SEP>can be expressed as": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Model Predicted Distribution<SEP>can be expressed as"
+  },
+  "GE-FL<SEP>defined by": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "GE-FL<SEP>defined by"
+  },
+  "L-BFGS<SEP>used to solve": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "L-BFGS<SEP>used to solve"
+  },
+  "Neutral Features<SEP>set to": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Neutral Features<SEP>set to"
+  },
+  "Maximum Entropy Principle<SEP>used to constrain": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Maximum Entropy Principle<SEP>used to constrain"
+  },
+  "GE-FL<SEP>modified by": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "GE-FL<SEP>modified by"
+  },
+  "Preference Class Distribution<SEP>used in modification of": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Preference Class Distribution<SEP>used in modification of"
+  },
+  "KL Divergence<SEP>between": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "KL Divergence<SEP>between"
+  },
+  "Class Distribution<SEP>can be estimated without": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Class Distribution<SEP>can be estimated without"
+  },
+  "Neutral Features<SEP>can be taken as": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Neutral Features<SEP>can be taken as"
+  },
+  "Prior Knowledge<SEP>Text Classification": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Prior Knowledge<SEP>Text Classification"
+  },
+  "GE-FL<SEP>reduces load of": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "GE-FL<SEP>reduces load of"
+  },
+  "Generalized Expectation Criteria<SEP>Regularization Terms": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Generalized Expectation Criteria<SEP>Regularization Terms"
+  },
+  "Sentiment Classification<SEP>Text Classification": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Sentiment Classification<SEP>Text Classification"
+  },
+  "Natural Language Processing<SEP>Prior Knowledge": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Natural Language Processing<SEP>Prior Knowledge"
+  },
+  "Bayesian Approaches<SEP>Generalized Expectation Criteria": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Bayesian Approaches<SEP>Generalized Expectation Criteria"
+  },
+  "KL Divergence<SEP>Regularization Terms": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "KL Divergence<SEP>Regularization Terms"
+  },
+  "GE-FL<SEP>Labeled Features": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "GE-FL<SEP>Labeled Features"
+  },
+  "Latent Output Variables<SEP>Prior Knowledge": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Latent Output Variables<SEP>Prior Knowledge"
+  },
+  "Class Distribution<SEP>Generalized Expectation Criteria": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Class Distribution<SEP>Generalized Expectation Criteria"
+  },
+  "Labeled Features<SEP>Organization": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Labeled Features<SEP>Organization"
+  },
+  "Constraint Functions<SEP>Generalized Expectation": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Constraint Functions<SEP>Generalized Expectation"
+  },
+  "Neutral Words<SEP>Prior Knowledge": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Neutral Words<SEP>Prior Knowledge"
+  },
+  "Empirical Distribution<SEP>Input Samples": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Empirical Distribution<SEP>Input Samples"
+  },
+  "GE-FL<SEP>Generalized Expectation Criteria": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "GE-FL<SEP>Generalized Expectation Criteria"
+  },
+  "Conditional Model Distribution<SEP>Constraint Functions": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Conditional Model Distribution<SEP>Constraint Functions"
+  },
+  "Labeled Features<SEP>Reference Distribution": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Labeled Features<SEP>Reference Distribution"
+  },
+  "Generalized Expectation Criteria<SEP>Parameter Estimation Objective Function": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Generalized Expectation Criteria<SEP>Parameter Estimation Objective Function"
+  },
+  "Druck et al.<SEP>GE-FL": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-000",
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-004",
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 3,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Druck et al.<SEP>GE-FL"
+  },
+  "Conditional Model Distribution<SEP>Empirical Distribution": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Conditional Model Distribution<SEP>Empirical Distribution"
+  },
+  "Constraint Functions<SEP>Generalized Expectation Criteria": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Constraint Functions<SEP>Generalized Expectation Criteria"
+  },
+  "Input<SEP>Output Variables": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Input<SEP>Output Variables"
+  },
+  "Conditional Model Distribution<SEP>Reference Distribution": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Conditional Model Distribution<SEP>Reference Distribution"
+  },
+  "Generalized Expectation Criteria<SEP>Score Function": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Generalized Expectation Criteria<SEP>Score Function"
+  },
+  "GE-FL<SEP>Objective Function": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "GE-FL<SEP>Objective Function"
+  },
+  "Empirical Distribution<SEP>Generalized Expectation Criteria": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Empirical Distribution<SEP>Generalized Expectation Criteria"
+  },
+  "Objective Function<SEP>Reference Distribution": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Objective Function<SEP>Reference Distribution"
+  },
+  "Druck et al.<SEP>Generalized Expectation Criteria": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Druck et al.<SEP>Generalized Expectation Criteria"
+  },
+  "Empirical Distribution<SEP>Input": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Empirical Distribution<SEP>Input"
+  },
+  "Andrzejewski et al.<SEP>LDA": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-004",
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 2,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Andrzejewski et al.<SEP>LDA"
+  },
+  "Altendorf et al.<SEP>sparse data": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Altendorf et al.<SEP>sparse data"
+  },
+  "Conditional Model Distribution<SEP>Generalized Expectation Criteria": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Conditional Model Distribution<SEP>Generalized Expectation Criteria"
+  },
+  "Druck et al.<SEP>GE": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Druck et al.<SEP>GE"
+  },
+  "Chen et al.<SEP>multi-domain knowledge": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Chen et al.<SEP>multi-domain knowledge"
+  },
+  "GE-FL<SEP>Mann and McCallum": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "GE-FL<SEP>Mann and McCallum"
+  },
+  "Conditional Model Distribution<SEP>Input": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Conditional Model Distribution<SEP>Input"
+  },
+  "Raghavan et al.<SEP>features": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Raghavan et al.<SEP>features"
+  },
+  "Mann and McCallum<SEP>semi-supervised perspective": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Mann and McCallum<SEP>semi-supervised perspective"
+  },
+  "Druck et al.<SEP>labels on features": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Druck et al.<SEP>labels on features"
+  },
+  "This paper<SEP>prior knowledge": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "This paper<SEP>prior knowledge"
+  },
+  "Conditional Model Distribution<SEP>Objective Function": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Conditional Model Distribution<SEP>Objective Function"
+  },
+  "Regularization terms<SEP>generalized expectation criteria": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Regularization terms<SEP>generalized expectation criteria"
+  },
+  "Raghavan et al.<SEP>model": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Raghavan et al.<SEP>model"
+  },
+  "GE-FL<SEP>Neutral features": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "GE-FL<SEP>Neutral features"
+  },
+  "Maximum entropy regularization<SEP>unbalance": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Maximum entropy regularization<SEP>unbalance"
+  },
+  "This paper<SEP>generalized expectation criteria": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "This paper<SEP>generalized expectation criteria"
+  },
+  "KL divergence<SEP>unbalanced corpora": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "KL divergence<SEP>unbalanced corpora"
+  },
+  "Neutral features<SEP>extremely unbalanced labeled features": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Neutral features<SEP>extremely unbalanced labeled features"
+  },
+  "Maximum entropy regularization<SEP>corpus": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Maximum entropy regularization<SEP>corpus"
+  },
+  "KL divergence<SEP>reference class distribution": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "KL divergence<SEP>reference class distribution"
+  },
+  "Movie Dataset<SEP>Neutral Features": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Movie Dataset<SEP>Neutral Features"
+  },
+  "Maximum entropy regularization<SEP>category distribution": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Maximum entropy regularization<SEP>category distribution"
+  },
+  "Class Distribution<SEP>KL Divergence": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Class Distribution<SEP>KL Divergence"
+  },
+  "KL divergence<SEP>true class distribution": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "KL divergence<SEP>true class distribution"
+  },
+  "Figure 2 (a)<SEP>GE-FL": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Figure 2 (a)<SEP>GE-FL"
+  },
+  "Class Distribution<SEP>Neutral Features": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Class Distribution<SEP>Neutral Features"
+  },
+  "KL divergence<SEP>true distribution": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "KL divergence<SEP>true distribution"
+  },
+  "Figure 2 (b)<SEP>GE-FL": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Figure 2 (b)<SEP>GE-FL"
+  },
+  "Movie Dataset<SEP>Our methods": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Movie Dataset<SEP>Our methods"
+  },
+  "KL divergence<SEP>Reference class distribution": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "KL divergence<SEP>Reference class distribution"
+  },
+  "Figure 3 (a)<SEP>GE-FL": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Figure 3 (a)<SEP>GE-FL"
+  },
+  "Figure 2 (b)<SEP>KL Divergence": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Figure 2 (b)<SEP>KL Divergence"
+  },
+  "KL divergence<SEP>True class distribution": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "KL divergence<SEP>True class distribution"
+  },
+  "Figure 3 (b)<SEP>Our methods": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Figure 3 (b)<SEP>Our methods"
+  },
+  "Figure 4<SEP>GE-FL": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Figure 4<SEP>GE-FL"
+  },
+  "Figure 3 (a)<SEP>Our methods": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Figure 3 (a)<SEP>Our methods"
+  },
+  "Figure 3 (b)<SEP>KL Divergence": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Figure 3 (b)<SEP>KL Divergence"
+  },
+  "LDA<SEP>Labeled Features": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "LDA<SEP>Labeled Features"
+  },
+  "Figure 4<SEP>Our methods": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Figure 4<SEP>Our methods"
+  },
+  "Figure 3 (a)<SEP>Neutral Features": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Figure 3 (a)<SEP>Neutral Features"
+  },
+  "GE-FL<SEP>Table 1": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "GE-FL<SEP>Table 1"
+  },
+  "LDA<SEP>Our methods": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "LDA<SEP>Our methods"
+  },
+  "Maximum Entropy<SEP>Table 1": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Maximum Entropy<SEP>Table 1"
+  },
+  "Class Balance<SEP>LDA": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Class Balance<SEP>LDA"
+  },
+  "Bias Problem<SEP>Our methods": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Bias Problem<SEP>Our methods"
+  },
+  "Neutral Features<SEP>Table 1": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Neutral Features<SEP>Table 1"
+  },
+  "Figure 3 (a)<SEP>Maximum Entropy": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Figure 3 (a)<SEP>Maximum Entropy"
+  },
+  "Liu et al.<SEP>Prior Knowledge": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Liu et al.<SEP>Prior Knowledge"
+  },
+  "Class Balance<SEP>GE-FL": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Class Balance<SEP>GE-FL"
+  },
+  "Chang et al.<SEP>Constraint-Driven Learning": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Chang et al.<SEP>Constraint-Driven Learning"
+  },
+  "KL Divergence<SEP>Table 1": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "KL Divergence<SEP>Table 1"
+  },
+  "Daumé<SEP>Self Training Method": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Daumé<SEP>Self Training Method"
+  },
+  "Generalized Expectation Criteria<SEP>MaCallum et al.": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Generalized Expectation Criteria<SEP>MaCallum et al."
+  },
+  "Graça et al.<SEP>Posterior Regularization": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Graça et al.<SEP>Posterior Regularization"
+  },
+  "Druck et al.<SEP>Labeled Features": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Druck et al.<SEP>Labeled Features"
+  },
+  "Altendorf et al.<SEP>Monotonicity Constraints": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Altendorf et al.<SEP>Monotonicity Constraints"
+  },
+  "Figure 3 (a)<SEP>KL Divergence": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Figure 3 (a)<SEP>KL Divergence"
+  },
+  "Learning<SEP>Prior Knowledge": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Learning<SEP>Prior Knowledge"
+  },
+  "Labeled Features<SEP>Model": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Labeled Features<SEP>Model"
+  },
+  "Movie Dataset<SEP>Positive Documents": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Movie Dataset<SEP>Positive Documents"
+  },
+  "Class Distribution<SEP>Positive Class": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Class Distribution<SEP>Positive Class"
+  },
+  "KL Divergence<SEP>True Class Distribution": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "KL Divergence<SEP>True Class Distribution"
+  },
+  "Maximum Entropy<SEP>Uniform Distribution": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Maximum Entropy<SEP>Uniform Distribution"
+  },
+  "Movie Dataset<SEP>Negative Documents": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Movie Dataset<SEP>Negative Documents"
+  },
+  "Control Group<SEP>Our methods": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Control Group<SEP>Our methods"
+  },
+  "Class Distribution<SEP>Negative Class": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Class Distribution<SEP>Negative Class"
+  },
+  "Auxiliary Constraints<SEP>Posterior Regularization": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Auxiliary Constraints<SEP>Posterior Regularization"
+  },
+  "Objective Function<SEP>Prior Knowledge": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Objective Function<SEP>Prior Knowledge"
+  },
+  "Instance Annotation<SEP>LDA": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Instance Annotation<SEP>LDA"
+  },
+  "Altendorf et al.<SEP>Sparse Data": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "Altendorf et al.<SEP>Sparse Data"
+  },
+  "General Domain Knowledge<SEP>LDA": {
+    "chunk_ids": [
+      "doc-8883a5d4e790630b007c233701f21e64-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212123,
+    "update_time": 1785212123,
+    "_id": "General Domain Knowledge<SEP>LDA"
+  },
+  "CoNLL<SEP>German": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "CoNLL<SEP>German"
+  },
+  "English<SEP>titovcrosslingual": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "English<SEP>titovcrosslingual"
+  },
+  "CoNLL annotations<SEP>SRs": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "CoNLL annotations<SEP>SRs"
+  },
+  "German<SEP>titovcrosslingual": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "German<SEP>titovcrosslingual"
+  },
+  "PRs<SEP>garg2012unsupervised": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "PRs<SEP>garg2012unsupervised"
+  },
+  "Europarl<SEP>German": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Europarl<SEP>German"
+  },
+  "SRs<SEP>garg2012unsupervised": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "SRs<SEP>garg2012unsupervised"
+  },
+  "CoNLL annotations<SEP>PRs": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "CoNLL annotations<SEP>PRs"
+  },
+  "German<SEP>TABREF27": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "German<SEP>TABREF27"
+  },
+  "English<SEP>Europarl": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "English<SEP>Europarl"
+  },
+  "SECREF25<SEP>argument identification": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "SECREF25<SEP>argument identification"
+  },
+  "German<SEP>monolingual model": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "German<SEP>monolingual model"
+  },
+  "CoNLL<SEP>English": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "CoNLL<SEP>English"
+  },
+  "English<SEP>TABREF27": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "English<SEP>TABREF27"
+  },
+  "Baseline<SEP>CoNLL": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Baseline<SEP>CoNLL"
+  },
+  "German<SEP>multilingual Bayesian model": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "German<SEP>multilingual Bayesian model"
+  },
+  "English<SEP>monolingual model": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "English<SEP>monolingual model"
+  },
+  "alignment model<SEP>multilingual SRI": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "alignment model<SEP>multilingual SRI"
+  },
+  "SRI<SEP>multilingual": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "SRI<SEP>multilingual"
+  },
+  "German<SEP>multilingual model": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "German<SEP>multilingual model"
+  },
+  "labeled data<SEP>resource poor language": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "labeled data<SEP>resource poor language"
+  },
+  "English<SEP>syntactic parsers": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "English<SEP>syntactic parsers"
+  },
+  "Europarl<SEP>target language": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Europarl<SEP>target language"
+  },
+  "CoNLL<SEP>source language": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "CoNLL<SEP>source language"
+  },
+  "TABREF28<SEP>target languages": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "TABREF28<SEP>target languages"
+  },
+  "English<SEP>argument identification": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "English<SEP>argument identification"
+  },
+  "cross-lingual information<SEP>unsupervised setting": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "cross-lingual information<SEP>unsupervised setting"
+  },
+  "parameter estimates<SEP>target language": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "parameter estimates<SEP>target language"
+  },
+  "monolingual model<SEP>semi-supervised setting": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "monolingual model<SEP>semi-supervised setting"
+  },
+  "role annotations<SEP>source language": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "role annotations<SEP>source language"
+  },
+  "CoNLL<SEP>supervised sentences": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "CoNLL<SEP>supervised sentences"
+  },
+  "English<SEP>multilingual model": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "English<SEP>multilingual model"
+  },
+  "Sampling<SEP>unsupervised sentences": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Sampling<SEP>unsupervised sentences"
+  },
+  "semi-supervised model<SEP>supervised baseline": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003",
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004"
+    ],
+    "count": 2,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "semi-supervised model<SEP>supervised baseline"
+  },
+  "role labels<SEP>supervised sentences": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "role labels<SEP>supervised sentences"
+  },
+  "manually labeling<SEP>sentences": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "manually labeling<SEP>sentences"
+  },
+  "Monolingual Model<SEP>Multilingual Model": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001",
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 2,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Monolingual Model<SEP>Multilingual Model"
+  },
+  "CoNLL<SEP>unsupervised sentences": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-003"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "CoNLL<SEP>unsupervised sentences"
+  },
+  "Crosslingual Latent Variables (CLVs)<SEP>Multilingual Model": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Crosslingual Latent Variables (CLVs)<SEP>Multilingual Model"
+  },
+  "Dirichlet-multinomial conjugacy<SEP>Multilingual Model": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Dirichlet-multinomial conjugacy<SEP>Multilingual Model"
+  },
+  "Crosslingual Latent Variables (CLVs)<SEP>Predicate-tuple": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Crosslingual Latent Variables (CLVs)<SEP>Predicate-tuple"
+  },
+  "MAP Estimate<SEP>Monolingual Model": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "MAP Estimate<SEP>Monolingual Model"
+  },
+  "Bayesian SRL model<SEP>Multilingual Model": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Bayesian SRL model<SEP>Multilingual Model"
+  },
+  "Chinese Restaurant Process (CRP)<SEP>Crosslingual Latent Variables (CLVs)": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Chinese Restaurant Process (CRP)<SEP>Crosslingual Latent Variables (CLVs)"
+  },
+  "Other<SEP>Titovcrosslingual": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Other<SEP>Titovcrosslingual"
+  },
+  "Annotation Projection<SEP>Multilingual Model": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Annotation Projection<SEP>Multilingual Model"
+  },
+  "Monolingual SRL<SEP>SRs": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Monolingual SRL<SEP>SRs"
+  },
+  "Lang2011unsupervised<SEP>Other": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Lang2011unsupervised<SEP>Other"
+  },
+  "Crosslingual Latent Variables (CLVs)<SEP>Monolingual Model": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Crosslingual Latent Variables (CLVs)<SEP>Monolingual Model"
+  },
+  "Gibbs Sampling<SEP>Multilingual Model": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Gibbs Sampling<SEP>Multilingual Model"
+  },
+  "CLV<SEP>Predicate-tuple": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "CLV<SEP>Predicate-tuple"
+  },
+  "MAP Estimate<SEP>Multilingual Model": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "MAP Estimate<SEP>Multilingual Model"
+  },
+  "Gibbs Sampling<SEP>Monolingual Model": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Gibbs Sampling<SEP>Monolingual Model"
+  },
+  "CLV<SEP>Role Labels": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "CLV<SEP>Role Labels"
+  },
+  "Multilingual Model<SEP>Parallel Corpus": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Multilingual Model<SEP>Parallel Corpus"
+  },
+  "BIBREF9<SEP>Monolingual Model": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001",
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 2,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "BIBREF9<SEP>Monolingual Model"
+  },
+  "BIBREF3<SEP>Multilingual Model": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "BIBREF3<SEP>Multilingual Model"
+  },
+  "BIBREF8<SEP>Monolingual Model": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001",
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 2,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "BIBREF8<SEP>Monolingual Model"
+  },
+  "CLV<SEP>Multilingual Model": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "CLV<SEP>Multilingual Model"
+  },
+  "BIBREF10<SEP>Monolingual Model": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001",
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 2,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "BIBREF10<SEP>Monolingual Model"
+  },
+  "Chinese Restaurant Process (CRP)<SEP>Multilingual Model": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Chinese Restaurant Process (CRP)<SEP>Multilingual Model"
+  },
+  "Annotation Projection<SEP>Target Language": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Annotation Projection<SEP>Target Language"
+  },
+  "Equation UID11<SEP>Multilingual Model": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Equation UID11<SEP>Multilingual Model"
+  },
+  "Figure FIGREF7<SEP>Multilingual Model": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Figure FIGREF7<SEP>Multilingual Model"
+  },
+  "Figure FIGREF16<SEP>Multilingual Model": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Figure FIGREF16<SEP>Multilingual Model"
+  },
+  "Gibbs Sampling<SEP>Hidden Variables": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Gibbs Sampling<SEP>Hidden Variables"
+  },
+  "Multilingual Model<SEP>Source Language": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Multilingual Model<SEP>Source Language"
+  },
+  "MAP Estimate<SEP>Model Parameters": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "MAP Estimate<SEP>Model Parameters"
+  },
+  "Multilingual Model<SEP>Target Language": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Multilingual Model<SEP>Target Language"
+  },
+  "Model Parameters<SEP>Monolingual Model": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Model Parameters<SEP>Monolingual Model"
+  },
+  "Inference<SEP>Multilingual Model": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Inference<SEP>Multilingual Model"
+  },
+  "Monolingual Model<SEP>Role Labels": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Monolingual Model<SEP>Role Labels"
+  },
+  "BIBREF11<SEP>CLV": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "BIBREF11<SEP>CLV"
+  },
+  "Monolingual Model<SEP>Titovcrosslingual": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Monolingual Model<SEP>Titovcrosslingual"
+  },
+  "Multilingual Model<SEP>Role Labels": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Multilingual Model<SEP>Role Labels"
+  },
+  "Inference<SEP>Predicate": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Inference<SEP>Predicate"
+  },
+  "Lang2011unsupervised<SEP>Monolingual Model": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Lang2011unsupervised<SEP>Monolingual Model"
+  },
+  "Monolingual SRL<SEP>Multilingual Model": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Monolingual SRL<SEP>Multilingual Model"
+  },
+  "Inference<SEP>Voice": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Inference<SEP>Voice"
+  },
+  "CLV<SEP>INLINEFORM0": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "CLV<SEP>INLINEFORM0"
+  },
+  "Equation UID11<SEP>Monolingual Model": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Equation UID11<SEP>Monolingual Model"
+  },
+  "Multilingual Model<SEP>semi-supervised learning": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Multilingual Model<SEP>semi-supervised learning"
+  },
+  "Inference<SEP>Syntactic Features": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Inference<SEP>Syntactic Features"
+  },
+  "CLV<SEP>INLINEFORM1": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "CLV<SEP>INLINEFORM1"
+  },
+  "Multilingual Model<SEP>Predicate": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Multilingual Model<SEP>Predicate"
+  },
+  "CLV<SEP>INLINEFORM2": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "CLV<SEP>INLINEFORM2"
+  },
+  "CLV<SEP>INLINEFORM3": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "CLV<SEP>INLINEFORM3"
+  },
+  "INLINEFORM12<SEP>Monolingual Model": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "INLINEFORM12<SEP>Monolingual Model"
+  },
+  "CLV<SEP>INLINEFORM4": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "CLV<SEP>INLINEFORM4"
+  },
+  "Multilingual Model<SEP>languages": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Multilingual Model<SEP>languages"
+  },
+  "CLV<SEP>INLINEFORM5": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "CLV<SEP>INLINEFORM5"
+  },
+  "Multilingual Model<SEP>semi-supervised learning settings": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Multilingual Model<SEP>semi-supervised learning settings"
+  },
+  "Source Language<SEP>Target Language": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Source Language<SEP>Target Language"
+  },
+  "CLV<SEP>INLINEFORM6": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "CLV<SEP>INLINEFORM6"
+  },
+  "DISPLAYFORM0<SEP>Monolingual Model": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "DISPLAYFORM0<SEP>Monolingual Model"
+  },
+  "INLINEFORM2<SEP>Multilingual Model": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "INLINEFORM2<SEP>Multilingual Model"
+  },
+  "CLV<SEP>INLINEFORM7": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "CLV<SEP>INLINEFORM7"
+  },
+  "Arguments<SEP>Titovcrosslingual": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Arguments<SEP>Titovcrosslingual"
+  },
+  "DISPLAYFORM0<SEP>Multilingual Model": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "DISPLAYFORM0<SEP>Multilingual Model"
+  },
+  "Monolingual Model<SEP>Parameters": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Monolingual Model<SEP>Parameters"
+  },
+  "CLV<SEP>INLINEFORM8": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "CLV<SEP>INLINEFORM8"
+  },
+  "Arguments<SEP>Lang2011unsupervised": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Arguments<SEP>Lang2011unsupervised"
+  },
+  "seen predicates<SEP>supervised sentences": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "seen predicates<SEP>supervised sentences"
+  },
+  "CLV<SEP>INLINEFORM11": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "CLV<SEP>INLINEFORM11"
+  },
+  "Monolingual Model<SEP>Training Instances": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Monolingual Model<SEP>Training Instances"
+  },
+  "alignments<SEP>multilingual model": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "alignments<SEP>multilingual model"
+  },
+  "INLINEFORM0<SEP>supervised sentences": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "INLINEFORM0<SEP>supervised sentences"
+  },
+  "CLV<SEP>INLINEFORM15": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "CLV<SEP>INLINEFORM15"
+  },
+  "crosslingual unsupervised SRL<SEP>titovcrosslingual": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "crosslingual unsupervised SRL<SEP>titovcrosslingual"
+  },
+  "naseem2009multilingual<SEP>superlingual latent variables": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "naseem2009multilingual<SEP>superlingual latent variables"
+  },
+  "German<SEP>supervised sentences": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "German<SEP>supervised sentences"
+  },
+  "pado2009cross<SEP>semantic role annotations": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "pado2009cross<SEP>semantic role annotations"
+  },
+  "furstenau2009graph<SEP>graph alignment method": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "furstenau2009graph<SEP>graph alignment method"
+  },
+  "domain-general corpus<SEP>swier2004unsupervised": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "domain-general corpus<SEP>swier2004unsupervised"
+  },
+  "SRL<SEP>naseem2009multilingual": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "SRL<SEP>naseem2009multilingual"
+  },
+  "English<SEP>supervised sentences": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "English<SEP>supervised sentences"
+  },
+  "Bayesian model<SEP>garg2012unsupervised": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Bayesian model<SEP>garg2012unsupervised"
+  },
+  "swier2004unsupervised<SEP>verbs": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "swier2004unsupervised<SEP>verbs"
+  },
+  "generative model<SEP>grenager2006unsupervised": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "generative model<SEP>grenager2006unsupervised"
+  },
+  "BIBREF18<SEP>iterative split-merge algorithm": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "BIBREF18<SEP>iterative split-merge algorithm"
+  },
+  "performance<SEP>supervised sentences": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "performance<SEP>supervised sentences"
+  },
+  "Bayesian model<SEP>titov2012bayesian": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Bayesian model<SEP>titov2012bayesian"
+  },
+  "BIBREF1<SEP>graph-partitioning based approach": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "BIBREF1<SEP>graph-partitioning based approach"
+  },
+  "marquez2008semantic<SEP>supervised SRL systems": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "marquez2008semantic<SEP>supervised SRL systems"
+  },
+  "grenager2006unsupervised<SEP>unsupervised learning": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "grenager2006unsupervised<SEP>unsupervised learning"
+  },
+  "Bayesian model<SEP>semantic role induction (SRI)": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Bayesian model<SEP>semantic role induction (SRI)"
+  },
+  "crosslingual latent variables<SEP>parallel corpora": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "crosslingual latent variables<SEP>parallel corpora"
+  },
+  "SRI<SEP>unlabeled data": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "SRI<SEP>unlabeled data"
+  },
+  "parallel sentences<SEP>word alignments": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "parallel sentences<SEP>word alignments"
+  },
+  "annotating data<SEP>performance gains": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "annotating data<SEP>performance gains"
+  },
+  "Bayesian model<SEP>training scenarios": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Bayesian model<SEP>training scenarios"
+  },
+  "crosslingual latent variables<SEP>monolingual models": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "crosslingual latent variables<SEP>monolingual models"
+  },
+  "Swiss NSF grant 200021_125137<SEP>This work": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Swiss NSF grant 200021_125137<SEP>This work"
+  },
+  "Cross-lingual Variational Learning<SEP>Monolingual models": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Cross-lingual Variational Learning<SEP>Monolingual models"
+  },
+  "Induced cluster<SEP>Purity": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Induced cluster<SEP>Purity"
+  },
+  "Collocation<SEP>Gold role": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Collocation<SEP>Gold role"
+  },
+  "F1<SEP>Purity, Collocation": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "F1<SEP>Purity, Collocation"
+  },
+  "Baseline<SEP>Syntactic function": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Baseline<SEP>Syntactic function"
+  },
+  "EC FP7 grant PARLANCE<SEP>This work": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-004"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "EC FP7 grant PARLANCE<SEP>This work"
+  },
+  "Annotation Projection<SEP>titovcrosslingual": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Annotation Projection<SEP>titovcrosslingual"
+  },
+  "Global role ordering probability<SEP>Monolingual model": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Global role ordering probability<SEP>Monolingual model"
+  },
+  "Argument-Keys<SEP>Role": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Argument-Keys<SEP>Role"
+  },
+  "CoNLL 2009 corpus<SEP>English": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "CoNLL 2009 corpus<SEP>English"
+  },
+  "Europarl corpus<SEP>German": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Europarl corpus<SEP>German"
+  },
+  "English sentences<SEP>MaltParser": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "English sentences<SEP>MaltParser"
+  },
+  "German sentences<SEP>LTH parser": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "German sentences<SEP>LTH parser"
+  },
+  "English-German parallel Europarl corpus<SEP>GIZA++": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "English-German parallel Europarl corpus<SEP>GIZA++"
+  },
+  "Monolingual model<SEP>titovcrosslingual": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Monolingual model<SEP>titovcrosslingual"
+  },
+  "CoNLL 2009 corpus<SEP>German": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "CoNLL 2009 corpus<SEP>German"
+  },
+  "English<SEP>Europarl corpus": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "English<SEP>Europarl corpus"
+  },
+  "LTH system<SEP>argument identification": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "LTH system<SEP>argument identification"
+  },
+  "Argument identification<SEP>titovcrosslingual": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Argument identification<SEP>titovcrosslingual"
+  },
+  "EN-DE parallel Europarl corpus<SEP>intersecting alignments": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "EN-DE parallel Europarl corpus<SEP>intersecting alignments"
+  },
+  "Head-words<SEP>Semantic arguments": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Head-words<SEP>Semantic arguments"
+  },
+  "CoNLL annotations<SEP>semantic roles": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "CoNLL annotations<SEP>semantic roles"
+  },
+  "Argument identification<SEP>CoNLL 2009 EN data": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Argument identification<SEP>CoNLL 2009 EN data"
+  },
+  "Cross-lingual parameters<SEP>Monolingual models": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Cross-lingual parameters<SEP>Monolingual models"
+  },
+  "Cross-lingual unsupervised SRL<SEP>TITOVcrosslingual": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Cross-lingual unsupervised SRL<SEP>TITOVcrosslingual"
+  },
+  "Argument identification<SEP>CoNLL 2009 DE data": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Argument identification<SEP>CoNLL 2009 DE data"
+  },
+  "Model<SEP>semantic roles": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Model<SEP>semantic roles"
+  },
+  "CLVs<SEP>Monolingual models": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "CLVs<SEP>Monolingual models"
+  },
+  "Penalty term<SEP>TITOVcrosslingual": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Penalty term<SEP>TITOVcrosslingual"
+  },
+  "Latent variables<SEP>Our model": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Latent variables<SEP>Our model"
+  },
+  "Global role ordering probability<SEP>Monolingual model (BIBREF3)": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Global role ordering probability<SEP>Monolingual model (BIBREF3)"
+  },
+  "Annotation projection<SEP>TITOVcrosslingual": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Annotation projection<SEP>TITOVcrosslingual"
+  },
+  "Monolingual inference<SEP>Penalty term": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Monolingual inference<SEP>Penalty term"
+  },
+  "Baseline<SEP>semantic roles": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Baseline<SEP>semantic roles"
+  },
+  "English-German section<SEP>Europarl corpus": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "English-German section<SEP>Europarl corpus"
+  },
+  "English<SEP>MaltParser": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "English<SEP>MaltParser"
+  },
+  "Hard clustering<SEP>TITOVcrosslingual": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Hard clustering<SEP>TITOVcrosslingual"
+  },
+  "German<SEP>LTH parser": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "German<SEP>LTH parser"
+  },
+  "Non-auxiliary verbs<SEP>Predicates": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Non-auxiliary verbs<SEP>Predicates"
+  },
+  "English<SEP>Predicate instances": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "English<SEP>Predicate instances"
+  },
+  "Monolingual model (BIBREF3)<SEP>TITOVcrosslingual": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Monolingual model (BIBREF3)<SEP>TITOVcrosslingual"
+  },
+  "German<SEP>Predicate instances": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "German<SEP>Predicate instances"
+  },
+  "Arguments<SEP>English": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Arguments<SEP>English"
+  },
+  "CoNLL data<SEP>Predicates": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "CoNLL data<SEP>Predicates"
+  },
+  "EN-DE parallel Europarl corpus<SEP>Word alignments": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "EN-DE parallel Europarl corpus<SEP>Word alignments"
+  },
+  "Alignments<SEP>two directions": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Alignments<SEP>two directions"
+  },
+  "Argument identification<SEP>TITOVcrosslingual": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Argument identification<SEP>TITOVcrosslingual"
+  },
+  "Aligned<SEP>Semantic arguments": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Aligned<SEP>Semantic arguments"
+  },
+  "Bayesian Model<SEP>Unsupervised Semantic Role Induction": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Bayesian Model<SEP>Unsupervised Semantic Role Induction"
+  },
+  "Arguments<SEP>German": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Arguments<SEP>German"
+  },
+  "Joint Bayesian Model<SEP>Latent Variables": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Joint Bayesian Model<SEP>Latent Variables"
+  },
+  "Natural Language Processing<SEP>Semantic Role Labeling": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Natural Language Processing<SEP>Semantic Role Labeling"
+  },
+  "Bayesian Model<SEP>Parallel Corpora": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Bayesian Model<SEP>Parallel Corpora"
+  },
+  "Inference Procedure<SEP>Joint Bayesian Model": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Inference Procedure<SEP>Joint Bayesian Model"
+  },
+  "Information Extraction<SEP>Semantic Role Labeling": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Information Extraction<SEP>Semantic Role Labeling"
+  },
+  "Manually Annotated Corpora<SEP>Supervised Systems": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Manually Annotated Corpora<SEP>Supervised Systems"
+  },
+  "Parallel Text<SEP>Unsupervised SRL": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Parallel Text<SEP>Unsupervised SRL"
+  },
+  "Bayesian Model<SEP>Joint Bayesian Model": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Bayesian Model<SEP>Joint Bayesian Model"
+  },
+  "Question Answering<SEP>Semantic Role Labeling": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Question Answering<SEP>Semantic Role Labeling"
+  },
+  "Unsupervised SRL<SEP>Word Alignment": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Unsupervised SRL<SEP>Word Alignment"
+  },
+  "Languages<SEP>Parallel Text": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Languages<SEP>Parallel Text"
+  },
+  "German<SEP>Joint Bayesian Model": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "German<SEP>Joint Bayesian Model"
+  },
+  "Predicate-Argument Structure<SEP>Semantic Role Labeling": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Predicate-Argument Structure<SEP>Semantic Role Labeling"
+  },
+  "Joint Bayesian Model<SEP>Word Alignments": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Joint Bayesian Model<SEP>Word Alignments"
+  },
+  "Multilingual Model<SEP>Unsupervised SRL": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Multilingual Model<SEP>Unsupervised SRL"
+  },
+  "Predicate-Argument Structure<SEP>PropBank": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Predicate-Argument Structure<SEP>PropBank"
+  },
+  "Joint Bayesian Model<SEP>Role Correspondences": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Joint Bayesian Model<SEP>Role Correspondences"
+  },
+  "Labeled Data<SEP>Multilingual Model": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Labeled Data<SEP>Multilingual Model"
+  },
+  "Unsupervised SRL Pipeline<SEP>Unsupervised Semantic Role Induction": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Unsupervised SRL Pipeline<SEP>Unsupervised Semantic Role Induction"
+  },
+  "Monolingual Model<SEP>garg2012unsupervised": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Monolingual Model<SEP>garg2012unsupervised"
+  },
+  "Joint Bayesian Model<SEP>Monolingual Semantic Role Induction Model": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Joint Bayesian Model<SEP>Monolingual Semantic Role Induction Model"
+  },
+  "Multilingual Model<SEP>Unlabeled Data": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Multilingual Model<SEP>Unlabeled Data"
+  },
+  "Monolingual Model<SEP>Predicate": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Monolingual Model<SEP>Predicate"
+  },
+  "Primary Roles<SEP>Role Ordering": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Primary Roles<SEP>Role Ordering"
+  },
+  "Crosslingual Latent Variables<SEP>Joint Bayesian Model": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Crosslingual Latent Variables<SEP>Joint Bayesian Model"
+  },
+  "Intervals<SEP>Primary Roles": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Intervals<SEP>Primary Roles"
+  },
+  "Crosslingual Latent Variables<SEP>Part-of-Speech Tagging": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Crosslingual Latent Variables<SEP>Part-of-Speech Tagging"
+  },
+  "Modifier Role<SEP>Secondary Roles": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Modifier Role<SEP>Secondary Roles"
+  },
+  "Monolingual Model<SEP>Primary Roles": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Monolingual Model<SEP>Primary Roles"
+  },
+  "Crosslingual Latent Variables<SEP>Multilingual Model": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Crosslingual Latent Variables<SEP>Multilingual Model"
+  },
+  "Intervals<SEP>Secondary Roles": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Intervals<SEP>Secondary Roles"
+  },
+  "Generative Process<SEP>Multinomial Distributions": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Generative Process<SEP>Multinomial Distributions"
+  },
+  "Core Role<SEP>Primary Roles": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Core Role<SEP>Primary Roles"
+  },
+  "Multilingual Model<SEP>Word Alignments": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Multilingual Model<SEP>Word Alignments"
+  },
+  "Monolingual Model<SEP>Secondary Roles": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Monolingual Model<SEP>Secondary Roles"
+  },
+  "Dirichlet Priors<SEP>Multinomial Distributions": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Dirichlet Priors<SEP>Multinomial Distributions"
+  },
+  "Binomial Distributions<SEP>Generative Process": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Binomial Distributions<SEP>Generative Process"
+  },
+  "Multilingual Model<SEP>Role Correspondences": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Multilingual Model<SEP>Role Correspondences"
+  },
+  "Monolingual Model<SEP>Role Ordering": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Monolingual Model<SEP>Role Ordering"
+  },
+  "Role Repetition<SEP>Supervised SRL": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Role Repetition<SEP>Supervised SRL"
+  },
+  "Beta Priors<SEP>Binomial Distributions": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Beta Priors<SEP>Binomial Distributions"
+  },
+  "PropBank<SEP>Semantic Role Labeling": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "PropBank<SEP>Semantic Role Labeling"
+  },
+  "Manually Annotated Corpora<SEP>Unsupervised SRL": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Manually Annotated Corpora<SEP>Unsupervised SRL"
+  },
+  "BIBREF0<SEP>Predicate-Argument Structure": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "BIBREF0<SEP>Predicate-Argument Structure"
+  },
+  "Role Ordering<SEP>Supervised SRL": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Role Ordering<SEP>Supervised SRL"
+  },
+  "Monolingual Model<SEP>Role Repetition": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Monolingual Model<SEP>Role Repetition"
+  },
+  "BIBREF1<SEP>Unsupervised SRL": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "BIBREF1<SEP>Unsupervised SRL"
+  },
+  "German translation<SEP>sentence INLINEFORM0": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "German translation<SEP>sentence INLINEFORM0"
+  },
+  "BIBREF2<SEP>Unsupervised SRL": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "BIBREF2<SEP>Unsupervised SRL"
+  },
+  "A0<SEP>Mike": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "A0<SEP>Mike"
+  },
+  "A1<SEP>a book": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "A1<SEP>a book"
+  },
+  "BIBREF3<SEP>Unsupervised SRL": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "BIBREF3<SEP>Unsupervised SRL"
+  },
+  "BIBREF0<SEP>PropBank": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "BIBREF0<SEP>PropBank"
+  },
+  "geschrieben<SEP>written": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "geschrieben<SEP>written"
+  },
+  "Buch<SEP>book": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Buch<SEP>book"
+  },
+  "BIBREF4<SEP>Unsupervised SRL": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "BIBREF4<SEP>Unsupervised SRL"
+  },
+  "BIBREF3<SEP>Joint Bayesian Model": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "BIBREF3<SEP>Joint Bayesian Model"
+  },
+  "A1<SEP>Buch": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "A1<SEP>Buch"
+  },
+  "BIBREF7<SEP>Unsupervised SRL Pipeline": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "BIBREF7<SEP>Unsupervised SRL Pipeline"
+  },
+  "BIBREF5<SEP>Unsupervised SRL": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "BIBREF5<SEP>Unsupervised SRL"
+  },
+  "BIBREF4<SEP>Multilingual Unsupervised Part-of-Speech Tagging Model": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "BIBREF4<SEP>Multilingual Unsupervised Part-of-Speech Tagging Model"
+  },
+  "Primary Roles<SEP>Secondary Roles": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Primary Roles<SEP>Secondary Roles"
+  },
+  "BIBREF8<SEP>Unsupervised SRL Pipeline": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "BIBREF8<SEP>Unsupervised SRL Pipeline"
+  },
+  "BIBREF6<SEP>Unsupervised SRL": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "BIBREF6<SEP>Unsupervised SRL"
+  },
+  "SRs<SEP>Secondary Roles": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "SRs<SEP>Secondary Roles"
+  },
+  "PRs<SEP>Primary Roles": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "PRs<SEP>Primary Roles"
+  },
+  "Core Role<SEP>Monolingual Model": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Core Role<SEP>Monolingual Model"
+  },
+  "Intervals<SEP>SRs": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Intervals<SEP>SRs"
+  },
+  "Primary Roles<SEP>ordering": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Primary Roles<SEP>ordering"
+  },
+  "Latent Variables<SEP>Multilingual Model": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Latent Variables<SEP>Multilingual Model"
+  },
+  "Modifier Role<SEP>Monolingual Model": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Modifier Role<SEP>Monolingual Model"
+  },
+  "Multilingual Model<SEP>Role Agreement": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Multilingual Model<SEP>Role Agreement"
+  },
+  "BIBREF3<SEP>Monolingual Model": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "BIBREF3<SEP>Monolingual Model"
+  },
+  "PRs<SEP>ordering": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "PRs<SEP>ordering"
+  },
+  "Unsupervised SRL Pipeline<SEP>step 4": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Unsupervised SRL Pipeline<SEP>step 4"
+  },
+  "Multilingual Model<SEP>Performance": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Multilingual Model<SEP>Performance"
+  },
+  "Generative process<SEP>Multinomial distributions": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Generative process<SEP>Multinomial distributions"
+  },
+  "Multilingual Model<SEP>Part-of-Speech Tagging": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Multilingual Model<SEP>Part-of-Speech Tagging"
+  },
+  "Ordering<SEP>Supervised SRL": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Ordering<SEP>Supervised SRL"
+  },
+  "Dirichlet priors<SEP>Multinomial distributions": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Dirichlet priors<SEP>Multinomial distributions"
+  },
+  "Binomial distributions<SEP>Generative process": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Binomial distributions<SEP>Generative process"
+  },
+  "Multilingual Model<SEP>SRL": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Multilingual Model<SEP>SRL"
+  },
+  "Repetition<SEP>Supervised SRL": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Repetition<SEP>Supervised SRL"
+  },
+  "Beta priors<SEP>Binomial distributions": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Beta priors<SEP>Binomial distributions"
+  },
+  "Annotation Effort<SEP>Multilingual Model": {
+    "chunk_ids": [
+      "doc-8be4503c1206a1d3f8a4068a05c69328-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1785212169,
+    "update_time": 1785212169,
+    "_id": "Annotation Effort<SEP>Multilingual Model"
+  }
+}

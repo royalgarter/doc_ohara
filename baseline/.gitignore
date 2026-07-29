@@ -1,0 +1,6 @@
+*/.venv/
+*/.env
+*/results_*.json
+*/*.log
+lightrag/rag_storage_multihop/
+lightrag/rag_storage_qasper/

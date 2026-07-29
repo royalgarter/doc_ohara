@@ -115,6 +115,39 @@ Reposition paper_00 as the architecture paper: scale critique (§2), RAG-pattern
 
 ---
 
+## Peer-review fixable items (from CRITICS.md, no new experiments)
+
+- [ ] Abstract wording: reword "purifies results" → focus on abstention capability not ranking purification; normalize "parity" usage across sections.
+- [ ] Table 2 degenerate cell: mark BM25-only P-hit (4.3%) inline as degenerate, not footnote-only.
+- [ ] Strip "in our point of view" (6+ instances) → direct claims / "we argue."
+- [ ] Add raw counts (n/N) next to key percentages (45.6% abstention, 91.5% P-hit, etc) — pull from existing eval JSON logs.
+- [ ] QASPER tuning disclosure: confirm from `eval/matrix_*.json` / grid search script whether tuning ran on the same 150 reported questions (no dev split) — state explicitly in §5.1 if so.
+- [ ] Cost claim caveat: note $12/1k docs is extrapolated from single 200-doc run.
+- [ ] Scaling claim caveat: note viz benchmark is a single trial pair (713→12,323 nodes), not averaged.
+- [ ] Decay λ constants: add one-line justification or flag as hand-tuned heuristic.
+- [ ] LaTeX: merge split `equation*` blocks for relation set R in §3.
+
+## Baseline comparison plan (#8 — GraphRAG/LightRAG/HippoRAG head-to-head)
+
+Prior decision (line 35 above) was to cite published numbers instead of re-running baselines — reviewer critique says that's insufficient for the capability-superiority claim in Table 1. Revised plan below runs actual baselines cheaply.
+
+**Most economic datasets: reuse what's already ingested.** QASPER (200 docs, already paid $2.41) and MultiHop-RAG (609 docs, already paid ~$4.50) are both small, already have gold answers/evidence, and are the same corpora as the OHARA numbers — no apples-to-oranges risk. Don't introduce a third dataset; that adds cost without strengthening the comparison.
+
+**Which 2-3 baselines, cheapest first:**
+1. **LightRAG** — cheapest to run. Lightweight indexing (dual-level retrieval, no heavy community summarization step), reference implementation is a pip-installable single-file-ish pipeline. Lowest LLM-call overhead of the three.
+2. **HippoRAG** — moderate cost. Uses OpenIE extraction + PPR at query time, but no expensive community-summarization stage either. Reference repo runs against custom corpora directly.
+3. **GraphRAG** (Microsoft) — most expensive. Community detection + hierarchical summarization at index time is LLM-call-heavy (multiple passes per doc). Do this one last / only if budget allows; consider running on QASPER only (smaller corpus, 200 vs 609 docs) to cap cost.
+
+**Execution order (cheapest → most expensive):**
+1. LightRAG on QASPER (200 docs) — smoke test cost/quality first before committing to MultiHop.
+2. LightRAG on MultiHop-RAG (609 docs) if QASPER run looks sane.
+3. HippoRAG on QASPER, then MultiHop if budget allows.
+4. GraphRAG on QASPER only (skip MultiHop — 609 docs × multi-pass summarization likely blows past remaining budget).
+
+**Reuse existing harness**: `tests/eval/run_matrix.js` query sets (150 QASPER, 500 MultiHop) already exist — just need adapter to point retrieval calls at each baseline's query API instead of OHARA's, then score with same Hits@k/MRR/MAP functions already in the harness.
+
+**Budget guess**: LightRAG ~$2-4/corpus, HippoRAG ~$3-5/corpus (OpenIE extraction pass), GraphRAG ~$8-15 for QASPER alone (community summarization is the expensive part). Total for all 3 systems × QASPER, + LightRAG/HippoRAG × MultiHop: roughly $25-40. Set a hard stop after LightRAG+HippoRAG if budget's tight — those two alone already answer the reviewer's objection; GraphRAG is nice-to-have.
+
 ## Cheap model endpoints (notes)
 
 ```sh
