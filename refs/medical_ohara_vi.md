@@ -47,9 +47,3 @@ Những phần là việc mới cần triển khai:
 4. Tái dùng 3 tầng Principal/Integrity/Explorer không đổi làm lớp đầu ra "Retrieval-Only + provenance" theo FDA. Đây là phần draft của thầy yêu cầu mà OHARA đã giải quyết sẵn.
 5. Đánh giá xem gõ edge nhân quả có giảm đo được việc truy xuất chẩn đoán cũ hoặc đã bị bác bỏ (ý tưởng "rebuttal edge") so với cách chỉ dùng temporal-decay hiện tại hay không.
 6. Sau khi có kết quả v1, mới cân nhắc mở rộng: căn chỉnh ảnh Med-VLM, ingest DICOM/PACS, hình thức hóa hình học Minkowski đầy đủ, RL tối ưu trigger retrieval, phân rã đa agent (Radiology/Pathology/Oncology/ICU/Pharmacy). Đây nên là milestone bài báo/luận án riêng, không gộp vào v1.
-
-## 4. Câu hỏi cần chốt trước khi bắt đầu
-
-- Thời gian chờ license UMLS có kịp deadline nộp bài không.
-- Thầy có cần khung Minkowski/tương đối cụ thể vì lý do tường thuật/tính mới, hay causal-DAG với conflict-resolution đơn giản hơn cũng chấp nhận được. Điều này quyết định formalism toán học có đáng công viết hay không.
-- Xác nhận việc xin quyền truy cập MIMIC-IV (PhysioNet credentialing) có hoàn tất kịp thời gian không.
