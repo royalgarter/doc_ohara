@@ -19,7 +19,7 @@
 \maketitle
 
 \begin{abstract}
-Flat-chunk retrieval-augmented generation (RAG) processes content without providing a coherent spatial or temporal dimension for human cognition. In our point of view, effective knowledge bases must reduce cognitive complexity and imitate the way human beings understand structural relationships. We propose OHARA, a framework structured around a \emph{Space-Time Graph} that unifies document structural hierarchy, temporal decay, and cross-document entity pivots into a single substrate. The offline framework maps document components into a 3D sunburst-tunnel visualization (time $\to$ Z-axis, ontology $\to$ sunburst cross-section, document structure $\to$ radial discs), while the online workflow executes an eight-phase hybrid retrieval sequence fusing lexical, dense vector, ontology, entity, structural, and cross-document candidate signals. Evaluated across QASPER (200 academic papers) and MultiHop-RAG (609 news articles) corpora, our tuned pipeline achieves ranking parity with single dense retrieval while establishing a corroboration-gated Principal tier. This tier purifies results by abstaining on 45.6\% of unanswerable queries compared to 0.0\% for standard top-$k$ filtering, holding a 91.5\% Principal-hit rate on answerable queries. The offline ingest pipeline builds the full semantic graph at roughly \$12 per 1{,}000 documents, and the visual rendering scales sub-linearly to 12{,}323 nodes. We report these empirical findings honestly, view temporal decay bounds pragmatically, and suggest that OHARA establishes a foundation for seeable and auditable knowledge management.
+Flat-chunk retrieval-augmented generation (RAG) processes content without providing a coherent spatial or temporal dimension for human cognition. Effective knowledge bases must reduce cognitive complexity and imitate the way human beings understand structural relationships. We propose OHARA, a framework structured around a \emph{Space-Time Graph} that unifies document structural hierarchy, temporal decay, and cross-document entity pivots into a single substrate. The offline framework maps document components into a 3D sunburst-tunnel visualization (time $\to$ Z-axis, ontology $\to$ sunburst cross-section, document structure $\to$ radial discs), while the online workflow executes an eight-phase hybrid retrieval sequence fusing lexical, dense vector, ontology, entity, structural, and cross-document candidate signals. Evaluated across QASPER (200 academic papers) and MultiHop-RAG (609 news articles) corpora, our tuned pipeline reaches ranking parity with single dense retrieval on QASPER and a marginal MRR gain on MultiHop-RAG (0.812 vs.\ 0.811), while establishing a corroboration-gated Principal tier. This tier abstains on 45.6\% of unanswerable queries (57/125) compared to 0.0\% for standard top-$k$ filtering, holding a 91.5\% Principal-hit rate on answerable queries -- an abstention-behavior gain, not a ranking-quality one: removing the constraint moves Hits@10/MRR by under 0.5 points. We additionally run LightRAG, reconfigured to OHARA's exact models, as a head-to-head baseline on both corpora. The offline ingest pipeline builds the full semantic graph at roughly \$12 per 1{,}000 documents (single-corpus estimate), and the visual rendering scales sub-linearly to 12{,}323 nodes across five measured points. We report these empirical findings honestly, including small-sample caveats and a tuned-on-test risk in the QASPER weight search, and suggest that OHARA establishes a foundation for seeable and auditable knowledge management.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -30,13 +30,14 @@ retrieval-augmented generation, knowledge graph, information visualization, onto
 
 Flat-chunk RAG pipelines segment documents into linear chunk sequences, stripping away macro-level structural context and temporal dimensions. This design forces large language models and human users to navigate context walls, compounding memory degradation effects \cite{liu2024lost}. Over years, retrieval-augmented generation has expanded into diverse graph-structured frameworks \cite{gao2023ragsurvey}, with graph-based variants surveyed as an emerging subfield \cite{peng2024graphrag_survey}. However, current architectures often over-complicate graph construction without addressing how human cognition processes spatial and temporal hierarchies. OHARA targets structured domains such as research papers, legal filings, and technical manuals by providing a unified Space-Time Graph.
 
-In our point of view, an ideal retrieval framework should imitate the way human beings understand organized corpora: mapping high-level concepts down to granular text segments. We explicitly structure our contribution to balance retrieval efficiency with transparent inspection.
+An ideal retrieval framework should imitate the way human beings understand organized corpora: mapping high-level concepts down to granular text segments. We explicitly structure our contribution to balance retrieval efficiency with transparent inspection.
 
 \textbf{Contributions.} 
 - \textbf{3D Sunburst-Tunnel Visualization Component:} A visualization framework mapping temporal evolution to the Z-axis, ontology classifications to a polar sunburst plane, internal document structure to radial discs, and decay class to temporal reach.
 - \textbf{Space-Time Graph Substrate:} A data model unifying structural hierarchy, temporal decay, and cross-document entity pivots to represent context at the level of human knowledge concepts.
 - \textbf{Tiered Hybrid Retrieval Engine:} An eight-phase retrieval sequence designed to extract, filter, normalize, and evaluate candidate signals, achieving ranking parity with dense vector retrieval while providing explicit provenance.
-- \textbf{Corroboration-Gated Abstention:} A gating mechanism operating on a threshold of $\geq$2 independent signal sources. The Principal tier abstains on 45.6\% of unanswerable queries on MultiHop-RAG versus 0.0\% for plain top-$k$ cutoffs, retaining 91.5\% accuracy on answerable candidates.
+- \textbf{Corroboration-Gated Abstention:} A gating mechanism operating on a threshold of $\geq$2 independent signal sources. The Principal tier abstains on 45.6\% of unanswerable queries (57/125) on MultiHop-RAG versus 0.0\% for plain top-$k$ cutoffs, retaining 91.5\% accuracy on answerable candidates; this is an abstention-behavior effect, distinct from ranking quality, which the constraint changes by under 0.5 points.
+- \textbf{Empirical Baseline Comparison:} We run LightRAG, reconfigured to OHARA's exact Gemini models, head-to-head on both QASPER and MultiHop-RAG -- addressing the absence of direct empirical comparison against cited graph-RAG systems.
 - \textbf{SUMO-Grounded Semantic Layer:} An ontology mapping pipeline that anchors visualization coordinates and optimizes tag-expansion candidate retrieval.
 
 In contrast to systems focused solely on ranking metrics, we suggest that knowledge bases must prioritize auditability and human-centric spatial navigation. OHARA does not claim graph-augmented retrieval outranks dense vector baselines; our evaluation (Sec.~\ref{sec:eval}) shows the hybrid pipeline matches the best single signal while rendering a navigable coordinate map.
@@ -99,7 +100,7 @@ To reduce computational overhead during query execution, candidate selection fol
 \texttt{END Workflow}
 \end{quote}
 
-In our point of view, this pre-filtering stage reduces candidate evaluation complexity by $\sim$50--60$\times$ at standard corpus densities (16 sections, 44 paragraphs per document), allowing rapid computation prior to fine-grained structural descent.
+This pre-filtering stage reduces candidate evaluation complexity by $\sim$50--60$\times$ at standard corpus densities (16 sections, 44 paragraphs per document), allowing rapid computation prior to fine-grained structural descent.
 
 \section{Multi-Phase Hybrid Retrieval Engine}
 
@@ -130,7 +131,7 @@ The ingestion workflow is split into two distinct execution halves:
 
 \textbf{Second Part: Semantic Purification \& Deduplication.} Extracted SUMO tags undergo a three-stage validation against a 22{,}700-entry index (exact, case-insensitive, alias lookup). Entities are normalized and deduplicated across documents. Jaccard similarity thresholds trigger cross-document edge creation, enriched with LLM-generated narrative summaries.
 
-At scale, ingesting 200 QASPER papers consumed 6.2M prompt and 4.5M output tokens ($\sim$53k tokens/doc), totaling \$2.41 ($\sim$\$12 per 1{,}000 documents). Content-hash caching guarantees idempotent re-ingest, ensuring rapid computation and near-zero cost upon retry. Forced re-ingest of partial documents duplicated structural edges (23k duplicates across 13k pairs), indicating idempotency holds at chunk level rather than edge level.
+At scale, ingesting 200 QASPER papers consumed 6.2M prompt and 4.5M output tokens ($\sim$53k tokens/doc), totaling \$2.41 ($\sim$\$12 per 1{,}000 documents). This is a single-run estimate from one corpus; the MultiHop-RAG run (Sec.~\ref{sec:eval}) gives a second point at a different per-document token rate, but two runs on two corpora do not bound variance across document types or sizes. Content-hash caching guarantees idempotent re-ingest, ensuring rapid computation and near-zero cost upon retry. Forced re-ingest of partial documents duplicated structural edges (23k duplicates across 13k pairs), indicating idempotency holds at chunk level rather than edge level.
 
 \section{Space-Time Graph Visualization}
 
@@ -141,7 +142,7 @@ To map macro corpus organization to micro document details, the interactive 3D v
 
 Entities reside at the centroid of mentioning documents, pushed outward by a fixed offset. Semi-transparent decay auras (5/2.5/1/0.4 disc-spans for \textsc{evergreen}/\textsc{scholarly}/\textsc{current}/\textsc{ephemeral}) display temporal reach spatially.
 
-Rendering performance relies on Three.js \texttt{InstancedMesh} batching (one draw call per shape bucket). Benchmarked on headless WebGL rendering from 713 to 12{,}323 nodes, scene rebuild latency grew from 1.5\,s to 2.3\,s while JS heap usage expanded from 52\,MB to 80\,MB (a 17$\times$ node increase causing $\sim$1.7$\times$/$\sim$1.5$\times$ memory and compute growth). This confirms computational scalability is bounded by visual density rather than geometry generation. Fig.~\ref{fig:ui} presents the operational application interface, and Fig.~\ref{fig:viz} illustrates multi-angle visual tunnel projections.
+Rendering performance relies on Three.js \texttt{InstancedMesh} batching (one draw call per shape bucket). Benchmarked on headless WebGL rendering from 713 to 12{,}323 nodes, scene rebuild latency grew from 1.5\,s to 2.3\,s while JS heap usage expanded from 52\,MB to 80\,MB (a 17$\times$ node increase causing $\sim$1.7$\times$/$\sim$1.5$\times$ memory and compute growth). This confirms computational scalability is bounded by visual density rather than geometry generation, though the claim rests on five single-run samples rather than repeated trials, so no variance is reported. Fig.~\ref{fig:ui} presents the operational application interface, and Fig.~\ref{fig:viz} illustrates multi-angle visual tunnel projections.
 
 \begin{figure}[t]
 \centering
@@ -160,7 +161,7 @@ We evaluate OHARA across two corpora: QASPER (200 academic papers, 150 answerabl
 \subsection{QASPER Retrieval Quality}
 \label{sec:eval71}
 
-Table~\ref{tab:qasper} outlines retrieval configurations. Lexical-only BM25 underperforms vector-only retrieval (25.3\% vs.\ 33.3\% Hits@10) due to cross-document term collisions across 229 documents. The default fusion pipeline (30.0\% Hits@10) trails vector-only because uncalibrated lexical noise overrides semantic signals. Tuning fusion parameters via grid search selects (0.6 BM25, 1.0 Vector), recovering parity on Hits@10 and reaching 0.179 MRR@10.
+Table~\ref{tab:qasper} outlines retrieval configurations. Lexical-only BM25 underperforms vector-only retrieval (25.3\% vs.\ 33.3\% Hits@10) due to cross-document term collisions across 229 documents. The default fusion pipeline (30.0\% Hits@10) trails vector-only because uncalibrated lexical noise overrides semantic signals. Tuning fusion parameters via a 6-point grid search over a 75-query subset selects (0.6 BM25, 1.0 Vector), then re-run on the full 150 queries -- the same 150 questions reported here, with no held-out split, so this parity figure carries some tuned-on-test risk. Recovering parity on Hits@10 (33.3\%\,=\,33.3\%) and reaching 0.179 MRR@10, the unchanged transfer of these weights to MultiHop-RAG (Sec.~\ref{sec:eval71}, Finding 1) is mitigating evidence against overfitting rather than independent proof.
 
 Decomposing failures against an within-document oracle demonstrates that $\sim$42\% of corpus-wide errors occur during initial macro document location rather than micro paragraph selection. Once the target document is correctly located, paragraph selection succeeds for roughly two-thirds of queries (oracle Hits@10 64.4\%).
 
@@ -189,11 +190,11 @@ LightRAG (Gemini)$^\dagger$ & -- & 34.7\%$^\ddagger$ & -- & -- \\
 
 \subsection{MultiHop-RAG Retrieval Quality and Abstention}
 
-Parameters tuned on QASPER transfer directly to MultiHop-RAG (Table~\ref{tab:multihop}), reaching Hits@10 and MRR parity while improving MAP (0.556 vs.\ 0.538). Empirical evaluation highlights three key insights:
+Parameters tuned on QASPER transfer directly to MultiHop-RAG (Table~\ref{tab:multihop}), reaching Hits@10 and MRR parity while improving MAP (0.556 vs.\ 0.538). We also extended the LightRAG+Gemini baseline (Section~\ref{sec:eval71}) to the full 608-document MultiHop-RAG corpus, reaching 68.0\% answer-string recall (340/500 queries) under the same unranked-context caveat as the QASPER baseline -- directional evidence, not a controlled comparison to our document-level Hits@10. Empirical evaluation highlights three key insights:
 
 - \textbf{Finding 1 (Parameter Transfer):} Fusion weights generalize across distinct domains, confirming that initial performance gaps stemmed from lexical weight bias rather than pipeline architecture.
-- \textbf{Finding 2 (Corroboration Abstention):} Corroboration gating provides explicit precision gains. The constrained Principal tier abstains on 45.6\% of unanswerable queries compared to 0.0\% for plain top-$k$ cutoffs, maintaining a 91.5\% Principal-hit rate on answerable queries.
-- \textbf{Finding 3 (Temporal Decay Boundaries):} Disabling decay scoring slightly improves MRR on temporal query slices (0.749 vs 0.736). In our point of view, temporal decay acts as a guard-railed recency prior rather than a universal ranking mechanism, as benchmark queries test event ordering rather than publication recency.
+- \textbf{Finding 2 (Corroboration Abstention):} Corroboration gating changes abstention behavior, not ranking quality. The constrained Principal tier abstains on 45.6\% of unanswerable queries (57/125, roughly $\pm$8--9pp at typical confidence given n=125) compared to 0.0\% for plain top-$k$ cutoffs, maintaining a 91.5\% Principal-hit rate on answerable queries. Disabling the constraint moves Hits@10/MRR by under 0.5 points (Table~\ref{tab:multihop}, row $-$Corrob.) -- the entire measured effect is on abstention, not on filtering noisy ranks.
+- \textbf{Finding 3 (Temporal Decay Boundaries):} Disabling decay scoring slightly improves MRR on temporal query slices (0.749 vs 0.736). Temporal decay acts as a guard-railed recency prior rather than a universal ranking mechanism, as benchmark queries test event ordering rather than publication recency.
 
 End-to-end generation checks (\texttt{gemini-2.5-flash-lite}) yield 54\% accuracy for tuned fusion versus 57\% for vector-only retrieval. Context omission accounts for 41\% of failures rather than LLM hallucination.
 
@@ -207,15 +208,16 @@ End-to-end generation checks (\texttt{gemini-2.5-flash-lite}) yield 54\% accurac
 \toprule
 Config & H@10 & MRR@10 & P-hit & Null abst. \\
 \midrule
-BM25-only & 94.4\% & 0.727 & 4.3\% & 96.8\%* \\
+BM25-only & 94.4\% & 0.727 & 4.3\%* & 96.8\%* \\
 Vector-only & \textbf{98.4\%} & 0.811 & \textbf{92.5\%} & 13.6\% \\
 Full (default) & 96.5\% & 0.791 & 91.5\% & \textbf{45.6\%} \\
 $-$ Corrob. & 96.8\% & 0.795 & 92.0\%† & 0.0\% \\
 Full (tuned) & \textbf{98.4\%} & \textbf{0.812} & 92.0\% & 31.2\% \\
+LightRAG (Gemini)$^\ddagger$ & 68.0\%$^\S$ & -- & -- & -- \\
 \bottomrule
 \end{tabular}
 \vspace{2pt}
-\footnotesize{*Degenerate: near-empty Principal tier, not discrimination. †Proxied as top-5.}
+\footnotesize{*BM25-only's 4.3\% P-hit reflects a near-empty Principal tier (few candidates ever corroborate); its 96.8\% abstention is a direct consequence of that emptiness, not discrimination -- read both asterisked cells together, not as independent signals. †Proxied as top-5. $^\ddagger$Same LightRAG+Gemini baseline as Table~\ref{tab:qasper}, run on the full 608-document MultiHop-RAG corpus (500 queries). $^\S$Not H@10: LightRAG's unranked context blob has no document ids, so we score answer-string presence (does the gold short answer appear in the context) instead of doc-level ranking -- a looser, non-comparable metric to this table's other columns.}
 \end{table}
 
 \section{Discussion}
@@ -242,7 +244,7 @@ We believe this is just a beginning toward auditable, spatial-temporal knowledge
 
 \section{Conclusion}
 
-OHARA's Space-Time Graph unifies structural hierarchy, temporal decay, and ontology pivots into a single navigable substrate. The framework delivers retrieval performance at parity with dense vector baselines while establishing a corroboration-gated Principal tier that abstains on 45.6\% of unanswerable queries. Offline ingestion builds the complete semantic graph at $\sim$\$12 per 1{,}000 documents, and 3D rendering scales sub-linearly. In our point of view, these findings demonstrate that knowledge bases can be designed to be both humanly seeable and quantitatively auditable.
+OHARA's Space-Time Graph unifies structural hierarchy, temporal decay, and ontology pivots into a single navigable substrate. The framework delivers retrieval performance at parity with dense vector baselines while establishing a corroboration-gated Principal tier that abstains on 45.6\% of unanswerable queries. Offline ingestion builds the complete semantic graph at $\sim$\$12 per 1{,}000 documents, and 3D rendering scales sub-linearly. These findings demonstrate that knowledge bases can be designed to be both humanly seeable and quantitatively auditable.
 
 \section*{Acknowledgments}
 This research is supported by research funding from University of Science, Vietnam National University -- Ho Chi Minh City.

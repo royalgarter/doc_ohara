@@ -18,35 +18,35 @@ OHARA là một framework Space-Time Graph phục vụ truy xuất và trực qu
 
 ## 2. Phần nào của OHARA phù hợp với Y tế
 
-Ý tưởng gốc: (6 agent lâm sàng: Radiology, Pathology, Oncology, ICU, Pharmacy, Treatment Recommendation, dùng RAG + Medical KG + Tool Calling để thành CDSS đầy đủ) có quy mô luận án/sản phẩm, không phải một bài báo. 
+Đề xuất ý tưởng gốc — gồm 6 agent lâm sàng (Radiology, Pathology, Oncology, ICU, Pharmacy, Treatment Recommendation), kết hợp RAG với Medical Knowledge Graph và Tool Calling để hình thành một hệ hỗ trợ ra quyết định lâm sàng (CDSS) đầy đủ — có quy mô tương đương một luận án hoặc một sản phẩm hoàn chỉnh, vượt ngoài phạm vi của một bài báo khoa học đơn lẻ.
 
-Ý tưởng Draft: (Minkowski spacetime graph + Med-VLM + MMed-RAG + RL) đúng về kiến trúc nhưng gộp 4 bài toán nghiên cứu riêng biệt (causal graph, đa phương thức, retrieval, RL) vào một sản phẩm.
+Đề xuất bản draft — kết hợp Minkowski spacetime graph, Med-VLM, MMed-RAG và RL — đúng đắn về mặt kiến trúc, tuy nhiên gộp chung bốn bài toán nghiên cứu độc lập (đồ thị nhân quả, xử lý đa phương thức, retrieval, học tăng cường) vào cùng một sản phẩm, làm tăng đáng kể độ phức tạp triển khai.
 
-Những phần OHARA có sẵn và fit trực tiếp vào bài toán Y tế:
+**Các thành phần sẵn có của OHARA phù hợp trực tiếp với bài toán Y tế:**
 
-- $\tau$ (ánh xạ thời gian) và $\delta$ (lớp suy giảm) ứng với vị trí worldline bệnh nhân và tốc độ tiến triển bệnh. Có thể thay "vận tốc β" kiểu Minkowski bằng cơ chế decay-class có sẵn, không cần xây mới.
-- 7 loại quan hệ trong $R$ là nền để mở rộng thêm quan hệ nhân quả, cùng pattern gõ edge đã dùng cho `similar_to`, `related_to`.
-- Ontology SUMO đóng đúng vai trò "tag-expansion candidate retrieval" mà UMLS/RadLex cần cho Y tế, chỉ cần đổi nguồn ontology.
-- 3 tầng Principal, Integrity, Explorer cùng cơ chế gating xác nhận chéo tái dùng nguyên trạng, không cần thiết kế mới. Đây chính là ràng buộc FDA "Retrieval-Only, provenance-pointer, không tự chẩn đoán" mà draft của thầy yêu cầu. Con số 45.6% từ chối trên câu hỏi không có đáp án đúng là hành vi FDA SaMD Class II muốn có.
-- Engine fusion 8 pha (BM25, vector, ontology, entity, structural) tái dùng không đổi cho truy xuất văn bản EHR như clinical notes, discharge summaries.
-- Trực quan hóa 3D Space-Time đổi trục Z thành timeline bệnh nhân thực, đĩa xuyên tâm thành cấu trúc encounter/note theo từng bệnh nhân thay vì theo tài liệu.
+- Cặp thành phần $\tau$ (ánh xạ thời gian) và $\delta$ (lớp suy giảm) tương ứng với vị trí trên worldline bệnh nhân và tốc độ tiến triển bệnh lý. Có thể sử dụng cơ chế decay-class sẵn có để thay thế khái niệm "vận tốc β" trong mô hình Minkowski, không cần xây dựng mới.
+- 7 loại quan hệ trong tập $R$ là nền tảng sẵn có để mở rộng thêm các quan hệ nhân quả, theo cùng pattern định nghĩa edge đã áp dụng cho `similar_to` và `related_to`.
+- Ontology SUMO đảm nhiệm đúng vai trò "tag-expansion candidate retrieval" mà UMLS/RadLex cần trong lĩnh vực Y tế; chỉ cần thay đổi nguồn ontology tương ứng.
+- Ba tầng Principal, Integrity, Explorer cùng cơ chế gating xác nhận chéo có thể được tái sử dụng nguyên trạng, không cần thiết kế lại. Đây chính là cơ chế đáp ứng yêu cầu của FDA về "Retrieval-Only, có provenance-pointer, không tự đưa ra chẩn đoán" mà bản draft đề xuất. Tỷ lệ từ chối 45,6% trên các câu hỏi không có đáp án xác định phù hợp với hành vi mà tiêu chuẩn FDA SaMD Class II yêu cầu.
+- Engine fusion 8 pha (BM25, vector, ontology, entity, structural) có thể tái sử dụng không thay đổi cho việc truy xuất văn bản EHR như clinical notes và discharge summaries.
+- Module trực quan hóa 3D Space-Time có thể điều chỉnh: trục Z chuyển thành timeline thực của bệnh nhân, các đĩa xuyên tâm chuyển thành cấu trúc encounter/note theo từng bệnh nhân thay vì theo tài liệu.
 
-Những phần là việc mới cần triển khai:
+**Các hạng mục cần triển khai mới:**
 
-- Phân loại edge nhân quả (time-like vs space-like). Có thể bắt đầu bằng heuristic rule-based (thứ tự thời gian cộng prior nhân quả theo mã bệnh, ví dụ thuốc dẫn tới thay đổi chỉ số xét nghiệm trong cửa sổ thời gian lâm sàng) thay vì công thức Minkowski đầy đủ. Nên hoãn phần hình thức hóa vật lý trừ khi reviewer yêu cầu cụ thể, vì nó tăng tính chặt chẽ trình bày nhưng chưa chắc tăng độ chính xác retrieval.
-- Tích hợp UMLS/RadLex cần license UMLS (tài khoản UTS, ký thỏa thuận, thời gian chờ không nhỏ) trước khi làm bất kỳ việc mapping ontology nào. Đây là dependency cần giải quyết trước tiên.
-- Truy cập dữ liệu EHR/PACS hiện chưa có dataset trong tay. Hướng khả thi là dùng MIMIC-IV (EHR có cấu trúc, gần chuẩn FHIR) làm corpus v1, vì public và quy trình credentialing đã quen thuộc (khóa CITI training của PhysioNet). MIMIC-CXR (ảnh) hoãn sang phase 2.
-- Med-VLM alignment (MedCLIP, DCFormer, Med3DVLM) là modal hoàn toàn mới, không overlap với pipeline OHARA hiện tại. Loại khỏi phạm vi v1.
-- RL cho trigger retrieval (Med-RwR) là thành phần mới, OHARA hiện chưa có RL nào. Loại khỏi phạm vi v1.
+- Phân loại edge theo tính chất nhân quả (time-like và space-like). Có thể khởi đầu bằng phương pháp heuristic dựa trên luật (kết hợp thứ tự thời gian với prior nhân quả theo mã bệnh, ví dụ: việc dùng thuốc dẫn đến thay đổi chỉ số xét nghiệm trong một cửa sổ thời gian lâm sàng nhất định), thay vì áp dụng công thức Minkowski đầy đủ ngay từ đầu. Nên tạm hoãn phần hình thức hóa vật lý trừ khi có yêu cầu cụ thể từ hội đồng phản biện, vì phần này tăng tính chặt chẽ về mặt trình bày nhưng chưa chắc cải thiện độ chính xác retrieval.
+- Việc tích hợp UMLS/RadLex đòi hỏi giấy phép sử dụng UMLS (đăng ký tài khoản UTS, ký thỏa thuận sử dụng, thời gian chờ xét duyệt không nhỏ) — đây là điều kiện tiên quyết cần giải quyết trước khi thực hiện bất kỳ công việc ánh xạ ontology nào.
+- Hiện chưa có sẵn bộ dữ liệu EHR/PACS. Hướng khả thi là sử dụng MIMIC-IV (dữ liệu EHR có cấu trúc, gần với chuẩn FHIR) làm corpus cho phiên bản v1, do đây là bộ dữ liệu công khai với quy trình xin cấp quyền truy cập đã được chuẩn hóa (chứng chỉ CITI training của PhysioNet). MIMIC-CXR (dữ liệu ảnh) nên được triển khai ở giai đoạn 2.
+- Việc căn chỉnh Med-VLM (MedCLIP, DCFormer, Med3DVLM) thuộc về một phương thức dữ liệu hoàn toàn mới, không có điểm giao với pipeline hiện tại của OHARA — nên loại khỏi phạm vi phiên bản v1.
+- Cơ chế RL cho việc kích hoạt retrieval (Med-RwR) là một thành phần hoàn toàn mới; OHARA hiện chưa tích hợp bất kỳ cơ chế học tăng cường nào — nên loại khỏi phạm vi phiên bản v1.
 
 ## 3. Các bước chuyển đổi thành ứng dụng Y tế
 
-1. Ingest note/timeline lâm sàng MIMIC-IV vào cấu trúc Space-Time Graph hiện có. Tái dùng pipeline ingest, chỉ đổi tagger SUMO thành UMLS concept extractor.
-2. Thêm 2 loại edge mới vào $R$: `precedes_causally` (time-like, nhân quả) và `co_occurs_independent` (space-like, độc lập), dùng rule-based prior thời gian/mã bệnh, chưa cần metric Minkowski đầy đủ.
-3. Tái dùng engine retrieval 8 pha không đổi cho truy xuất note/timeline bệnh nhân.
-4. Tái dùng 3 tầng Principal/Integrity/Explorer không đổi làm lớp đầu ra "Retrieval-Only + provenance" theo FDA. Đây là phần draft của thầy yêu cầu mà OHARA đã giải quyết sẵn.
-5. Đánh giá xem gõ edge nhân quả có giảm đo được việc truy xuất chẩn đoán cũ hoặc đã bị bác bỏ (ý tưởng "rebuttal edge") so với cách chỉ dùng temporal-decay hiện tại hay không.
-6. Sau khi có kết quả v1, mới cân nhắc mở rộng: căn chỉnh ảnh Med-VLM, ingest DICOM/PACS, hình thức hóa hình học Minkowski đầy đủ, RL tối ưu trigger retrieval, phân rã đa agent (Radiology/Pathology/Oncology/ICU/Pharmacy). Đây nên là milestone bài báo/luận án riêng, không gộp vào v1.
+1. Thực hiện ingest các ghi chú lâm sàng và timeline từ bộ dữ liệu MIMIC-IV vào cấu trúc Space-Time Graph hiện có, tái sử dụng pipeline ingest sẵn có, chỉ thay thế tagger SUMO bằng bộ trích xuất khái niệm UMLS.
+2. Bổ sung hai loại edge mới vào tập $R$: `precedes_causally` (quan hệ time-like, mang tính nhân quả) và `co_occurs_independent` (quan hệ space-like, độc lập), sử dụng prior dựa trên luật kết hợp thứ tự thời gian và mã bệnh, chưa cần áp dụng metric Minkowski đầy đủ.
+3. Tái sử dụng nguyên trạng engine retrieval 8 pha cho việc truy xuất ghi chú và timeline bệnh nhân.
+4. Tái sử dụng nguyên trạng ba tầng Principal/Integrity/Explorer làm lớp đầu ra "Retrieval-Only kèm provenance" theo yêu cầu của FDA — đây là hạng mục mà bản draft đề xuất yêu cầu và OHARA đã có sẵn giải pháp.
+5. Đánh giá liệu việc bổ sung edge nhân quả có giúp giảm khả năng truy xuất các chẩn đoán đã lỗi thời hoặc đã bị bác bỏ (theo hướng tiếp cận "rebuttal edge") so với việc chỉ sử dụng cơ chế temporal-decay hiện có hay không.
+6. Sau khi có kết quả từ phiên bản v1, mới xem xét mở rộng sang: căn chỉnh ảnh Med-VLM, ingest dữ liệu DICOM/PACS, hình thức hóa đầy đủ hình học Minkowski, tối ưu hóa cơ chế kích hoạt retrieval bằng RL, và phân rã thành hệ đa agent (Radiology/Pathology/Oncology/ICU/Pharmacy). Các hạng mục này nên được triển khai như những milestone nghiên cứu độc lập, không gộp chung vào phiên bản v1.
 
 ## 4. Benchmark ban đầu: OHARA so với framework RAG khác
 

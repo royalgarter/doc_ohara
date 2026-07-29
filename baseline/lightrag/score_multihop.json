@@ -1,0 +1,3016 @@
+{
+  "dataset": "multihop",
+  "system": "lightrag+gemini",
+  "n_queries": 500,
+  "hits": 340,
+  "hit_rate": 0.68,
+  "by_type": {
+    "unknown": {
+      "n": 500,
+      "hits": 340,
+      "hit_rate": 0.68
+    }
+  },
+  "per_query": [
+    {
+      "id": "mh_0001",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Google"
+    },
+    {
+      "id": "mh_0002",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Sam Bankman-Fried"
+    },
+    {
+      "id": "mh_0003",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Amazon"
+    },
+    {
+      "id": "mh_0004",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Sam Bankman-Fried"
+    },
+    {
+      "id": "mh_0005",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "OpenAI"
+    },
+    {
+      "id": "mh_0006",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Caesars Sportsbook"
+    },
+    {
+      "id": "mh_0007",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Sam Bankman-Fried"
+    },
+    {
+      "id": "mh_0008",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Bettors"
+    },
+    {
+      "id": "mh_0009",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Taylor Swift"
+    },
+    {
+      "id": "mh_0010",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Google"
+    },
+    {
+      "id": "mh_0011",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Sam Bankman-Fried"
+    },
+    {
+      "id": "mh_0012",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Google"
+    },
+    {
+      "id": "mh_0013",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Tyreek Hill"
+    },
+    {
+      "id": "mh_0014",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Google"
+    },
+    {
+      "id": "mh_0015",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Sam Bankman-Fried"
+    },
+    {
+      "id": "mh_0016",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Sam Bankman-Fried"
+    },
+    {
+      "id": "mh_0017",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Sam Bankman-Fried"
+    },
+    {
+      "id": "mh_0018",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Sportsbooks"
+    },
+    {
+      "id": "mh_0019",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Sam Bankman-Fried"
+    },
+    {
+      "id": "mh_0020",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "ChatGPT"
+    },
+    {
+      "id": "mh_0021",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Sam Bankman-Fried"
+    },
+    {
+      "id": "mh_0022",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Uber"
+    },
+    {
+      "id": "mh_0023",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Sam Altman"
+    },
+    {
+      "id": "mh_0024",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Tyreek Hill"
+    },
+    {
+      "id": "mh_0025",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Sam Bankman-Fried"
+    },
+    {
+      "id": "mh_0026",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Sam Bankman-Fried"
+    },
+    {
+      "id": "mh_0027",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Sam Bankman-Fried"
+    },
+    {
+      "id": "mh_0028",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Tyreek Hill"
+    },
+    {
+      "id": "mh_0029",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Sam Bankman-Fried"
+    },
+    {
+      "id": "mh_0030",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Sportsbooks"
+    },
+    {
+      "id": "mh_0031",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Amazon"
+    },
+    {
+      "id": "mh_0032",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Gaza"
+    },
+    {
+      "id": "mh_0033",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Google"
+    },
+    {
+      "id": "mh_0034",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Sam Bankman-Fried"
+    },
+    {
+      "id": "mh_0035",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Google"
+    },
+    {
+      "id": "mh_0036",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Sam Bankman-Fried"
+    },
+    {
+      "id": "mh_0037",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Sam Bankman-Fried"
+    },
+    {
+      "id": "mh_0038",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Sam Bankman-Fried"
+    },
+    {
+      "id": "mh_0039",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Sam Bankman-Fried"
+    },
+    {
+      "id": "mh_0040",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Epic Games"
+    },
+    {
+      "id": "mh_0041",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Google"
+    },
+    {
+      "id": "mh_0042",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Martin Scorsese"
+    },
+    {
+      "id": "mh_0043",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Sam Bankman-Fried"
+    },
+    {
+      "id": "mh_0044",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Israel"
+    },
+    {
+      "id": "mh_0045",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Sam Bankman-Fried"
+    },
+    {
+      "id": "mh_0046",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Google"
+    },
+    {
+      "id": "mh_0047",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "OpenAI"
+    },
+    {
+      "id": "mh_0048",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Sam Bankman-Fried"
+    },
+    {
+      "id": "mh_0049",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Snapchat"
+    },
+    {
+      "id": "mh_0050",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Google"
+    },
+    {
+      "id": "mh_0051",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Google"
+    },
+    {
+      "id": "mh_0052",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Sportsbooks."
+    },
+    {
+      "id": "mh_0053",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Google"
+    },
+    {
+      "id": "mh_0054",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Sam Bankman-Fried"
+    },
+    {
+      "id": "mh_0055",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "OpenAI"
+    },
+    {
+      "id": "mh_0056",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Sam Bankman-Fried"
+    },
+    {
+      "id": "mh_0057",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Sam Bankman-Fried"
+    },
+    {
+      "id": "mh_0058",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Sam Bankman-Fried"
+    },
+    {
+      "id": "mh_0059",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Sam Bankman-Fried"
+    },
+    {
+      "id": "mh_0060",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Sportsbooks"
+    },
+    {
+      "id": "mh_0061",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Sam Bankman-Fried"
+    },
+    {
+      "id": "mh_0062",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Sam Bankman-Fried"
+    },
+    {
+      "id": "mh_0063",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "European Commission"
+    },
+    {
+      "id": "mh_0064",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Lionel Messi"
+    },
+    {
+      "id": "mh_0065",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Google"
+    },
+    {
+      "id": "mh_0066",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Sam Bankman-Fried"
+    },
+    {
+      "id": "mh_0067",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Minnesota Vikings"
+    },
+    {
+      "id": "mh_0068",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Spotify"
+    },
+    {
+      "id": "mh_0069",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Google"
+    },
+    {
+      "id": "mh_0070",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "OpenAI"
+    },
+    {
+      "id": "mh_0071",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Google"
+    },
+    {
+      "id": "mh_0072",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Sam Bankman-Fried"
+    },
+    {
+      "id": "mh_0073",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Sam Bankman-Fried"
+    },
+    {
+      "id": "mh_0074",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Sportsbooks"
+    },
+    {
+      "id": "mh_0075",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Brock Purdy"
+    },
+    {
+      "id": "mh_0076",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Minnesota Vikings"
+    },
+    {
+      "id": "mh_0077",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Sam Bankman-Fried"
+    },
+    {
+      "id": "mh_0078",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Sam Altman"
+    },
+    {
+      "id": "mh_0079",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Sam Altman"
+    },
+    {
+      "id": "mh_0080",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Google"
+    },
+    {
+      "id": "mh_0081",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Sam Bankman-Fried"
+    },
+    {
+      "id": "mh_0082",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Houston Astros"
+    },
+    {
+      "id": "mh_0083",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Google"
+    },
+    {
+      "id": "mh_0084",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Valve"
+    },
+    {
+      "id": "mh_0085",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Sam Bankman-Fried"
+    },
+    {
+      "id": "mh_0086",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Taylor Swift and Travis Kelce"
+    },
+    {
+      "id": "mh_0087",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Google"
+    },
+    {
+      "id": "mh_0088",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Federal Reserve"
+    },
+    {
+      "id": "mh_0089",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Google"
+    },
+    {
+      "id": "mh_0090",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Sportsbooks"
+    },
+    {
+      "id": "mh_0091",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Google"
+    },
+    {
+      "id": "mh_0092",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Google"
+    },
+    {
+      "id": "mh_0093",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Sportsbooks"
+    },
+    {
+      "id": "mh_0094",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Bettors"
+    },
+    {
+      "id": "mh_0095",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "The Federal Reserve"
+    },
+    {
+      "id": "mh_0096",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Google"
+    },
+    {
+      "id": "mh_0097",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Sam Bankman-Fried."
+    },
+    {
+      "id": "mh_0098",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Google"
+    },
+    {
+      "id": "mh_0099",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Valve"
+    },
+    {
+      "id": "mh_0100",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "ChatGPT"
+    },
+    {
+      "id": "mh_0101",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Sam Altman"
+    },
+    {
+      "id": "mh_0102",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Sam Bankman-Fried"
+    },
+    {
+      "id": "mh_0103",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Valve"
+    },
+    {
+      "id": "mh_0104",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Google"
+    },
+    {
+      "id": "mh_0105",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Apple"
+    },
+    {
+      "id": "mh_0106",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Meta"
+    },
+    {
+      "id": "mh_0107",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Sam Bankman-Fried"
+    },
+    {
+      "id": "mh_0108",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Sam Bankman-Fried"
+    },
+    {
+      "id": "mh_0109",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Google"
+    },
+    {
+      "id": "mh_0110",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Sam Bankman-Fried"
+    },
+    {
+      "id": "mh_0111",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Google"
+    },
+    {
+      "id": "mh_0112",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Google"
+    },
+    {
+      "id": "mh_0113",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Google"
+    },
+    {
+      "id": "mh_0114",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Bettors"
+    },
+    {
+      "id": "mh_0115",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Sam Bankman-Fried"
+    },
+    {
+      "id": "mh_0116",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Sam Bankman-Fried"
+    },
+    {
+      "id": "mh_0117",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Sam Bankman-Fried"
+    },
+    {
+      "id": "mh_0118",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "OpenAI"
+    },
+    {
+      "id": "mh_0119",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Sam Bankman-Fried"
+    },
+    {
+      "id": "mh_0120",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Sam Bankman-Fried"
+    },
+    {
+      "id": "mh_0121",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Google"
+    },
+    {
+      "id": "mh_0122",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Sportsbooks"
+    },
+    {
+      "id": "mh_0123",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Google"
+    },
+    {
+      "id": "mh_0124",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Brock Purdy"
+    },
+    {
+      "id": "mh_0125",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Sam Altman"
+    },
+    {
+      "id": "mh_0126",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0127",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0128",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0129",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0130",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0131",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0132",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0133",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Contradictory"
+    },
+    {
+      "id": "mh_0134",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0135",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0136",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0137",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0138",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0139",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0140",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0141",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0142",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0143",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0144",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0145",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0146",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0147",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0148",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0149",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0150",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0151",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0152",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0153",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0154",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0155",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0156",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "True"
+    },
+    {
+      "id": "mh_0157",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0158",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0159",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0160",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Align"
+    },
+    {
+      "id": "mh_0161",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0162",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0163",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0164",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0165",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0166",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0167",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0168",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0169",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0170",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0171",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0172",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0173",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0174",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0175",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0176",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0177",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Different"
+    },
+    {
+      "id": "mh_0178",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0179",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0180",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0181",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0182",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0183",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0184",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0185",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0186",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0187",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0188",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0189",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0190",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0191",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0192",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0193",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0194",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0195",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0196",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0197",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0198",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0199",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0200",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0201",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0202",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0203",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0204",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0205",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0206",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0207",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0208",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0209",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0210",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0211",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0212",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0213",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0214",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0215",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0216",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0217",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0218",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0219",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0220",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0221",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0222",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0223",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0224",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0225",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0226",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0227",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0228",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0229",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0230",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0231",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0232",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0233",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0234",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0235",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0236",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0237",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0238",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0239",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0240",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0241",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0242",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0243",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0244",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0245",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0246",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0247",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0248",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0249",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0250",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0251",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0252",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0253",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0254",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0255",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0256",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0257",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0258",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0259",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0260",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0261",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0262",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0263",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0264",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0265",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0266",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0267",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0268",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0269",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0270",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0271",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0272",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0273",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0274",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0275",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0276",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0277",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0278",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0279",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0280",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0281",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0282",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0283",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0284",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0285",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0286",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0287",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0288",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0289",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0290",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0291",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0292",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0293",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0294",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0295",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0296",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0297",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0298",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0299",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0300",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0301",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0302",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0303",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0304",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0305",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0306",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0307",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0308",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0309",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0310",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0311",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0312",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0313",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0314",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0315",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0316",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0317",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0318",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0319",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0320",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0321",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0322",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0323",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0324",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0325",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0326",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0327",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0328",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0329",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0330",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0331",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0332",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0333",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0334",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0335",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0336",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0337",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0338",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0339",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0340",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0341",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0342",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0343",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0344",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0345",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0346",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0347",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0348",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0349",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0350",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0351",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0352",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0353",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0354",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0355",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0356",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0357",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0358",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0359",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0360",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0361",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0362",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0363",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0364",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0365",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0366",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0367",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0368",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0369",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0370",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0371",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0372",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0373",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0374",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0375",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Insufficient information."
+    },
+    {
+      "id": "mh_0376",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0377",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0378",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0379",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0380",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Agreement"
+    },
+    {
+      "id": "mh_0381",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0382",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0383",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0384",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0385",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0386",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0387",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0388",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Agree"
+    },
+    {
+      "id": "mh_0389",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0390",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0391",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0392",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0393",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0394",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0395",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0396",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0397",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0398",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0399",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0400",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Johnny Cardoso"
+    },
+    {
+      "id": "mh_0401",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0402",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0403",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0404",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0405",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0406",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0407",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0408",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0409",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0410",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0411",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0412",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0413",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0414",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0415",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0416",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Consistent"
+    },
+    {
+      "id": "mh_0417",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0418",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Agreement"
+    },
+    {
+      "id": "mh_0419",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0420",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0421",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0422",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0423",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0424",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0425",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0426",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0427",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "No"
+    },
+    {
+      "id": "mh_0428",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0429",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0430",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0431",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0432",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0433",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0434",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0435",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0436",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0437",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Consistent"
+    },
+    {
+      "id": "mh_0438",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0439",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0440",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Consistent"
+    },
+    {
+      "id": "mh_0441",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0442",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0443",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0444",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0445",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0446",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0447",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Consistent"
+    },
+    {
+      "id": "mh_0448",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0449",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0450",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0451",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0452",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Consistent"
+    },
+    {
+      "id": "mh_0453",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0454",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0455",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0456",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0457",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0458",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0459",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0460",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0461",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0462",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0463",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0464",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0465",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0466",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0467",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0468",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0469",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0470",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0471",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0472",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0473",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0474",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0475",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0476",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0477",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0478",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0479",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0480",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0481",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0482",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0483",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0484",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0485",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0486",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0487",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0488",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0489",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0490",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0491",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0492",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0493",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0494",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0495",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0496",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0497",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "no"
+    },
+    {
+      "id": "mh_0498",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Yes"
+    },
+    {
+      "id": "mh_0499",
+      "hit": true,
+      "question_type": "unknown",
+      "answer": "Agree"
+    },
+    {
+      "id": "mh_0500",
+      "hit": false,
+      "question_type": "unknown",
+      "answer": "Yes"
+    }
+  ]
+}
