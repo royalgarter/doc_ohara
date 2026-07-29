@@ -6,6 +6,50 @@ OHARA (Ontology Historical Atlas Retrieval Architecture) is a document transform
 
 ---
 
+## At a Glance
+
+Flat-chunk RAG loses "lost in the middle" — no spatial or temporal sense of where a fact sits in a corpus. OHARA fixes this by building a **Space-Time Graph**: one substrate that unifies document structure, temporal decay, ontology, and cross-document entity links, then exposes it both as a retrieval engine and as a navigable 3D map.
+
+| Result | Number |
+|---|---|
+| Ranking quality | Parity with best single dense-vector retrieval (Hits@10 33.3% on QASPER, 98.4% on MultiHop-RAG) |
+| Abstention (Principal tier) | Refuses 45.6% of unanswerable queries vs. 0.0% for plain top-k, while keeping 91.5% hit rate on answerable ones |
+| Ingest cost | ~$12 / 1,000 documents, idempotent re-ingest via content-hash cache |
+| Visualization scale | Sub-linear rendering up to 12,323 nodes (Three.js InstancedMesh batching) |
+
+The core claim is not "better ranking" — OHARA explicitly matches, not beats, dense retrieval. The contribution is **auditability**: every result carries structural/temporal/ontological provenance, and the system knows when to say "not enough evidence" instead of hallucinating.
+
+### The 3D Space-Time Map
+
+Z-axis = time, polar plane = SUMO ontology category, radial discs = document structure per document.
+
+<p float="left">
+  <img src="refs/figs/sunburst_top.png" width="45%" alt="Sunburst top-down view, ontology cross-section" />
+  <img src="refs/figs/tunnel_oblique.png" width="45%" alt="Oblique tunnel view, time as depth" />
+</p>
+<p>
+  <img src="refs/figs/disc_closeup.png" width="60%" alt="Close-up of one document disc, section hierarchy as concentric rings" />
+</p>
+
+*Left*: looking down the ontology axis — documents cluster into SUMO category columns (Process, Physical, Object, Proposition). *Right*: camera offset along Z so publication time reads as depth. *Bottom*: one document's section hierarchy unfolded as concentric rings around its root node.
+
+### The Dashboard
+
+<p float="left">
+  <img src="refs/figs/ui_overview.png" width="90%" alt="Full tunnel view, 50 documents, sidebar + legend + corpus stats" />
+</p>
+<p>
+  <img src="refs/figs/ui_detail.png" width="90%" alt="Zoomed single document disc with paragraph inspector panel" />
+</p>
+
+*Top*: full tunnel view at year resolution, colored by document — sidebar lists selected documents, header shows live corpus stats. *Bottom*: zoomed into one document's disc with a paragraph node selected, opening the inspector panel with section outline, extracted text, and metadata.
+
+### Why It's Different
+
+Compared to graph-RAG baselines (GraphRAG, LightRAG, HippoRAG), OHARA is the only one combining: structural hierarchy (DoCO), SUMO ontology grounding, temporal decay scoring, 3D space-time visualization, and tiered (Principal/Integrity/Explorer) explainability — all in one workflow. See `refs/paper_rivf2026.tex` for the full RIVF 2026 submission with methodology and evaluation detail.
+
+---
+
 ## Architecture Overview
 
 ```mermaid
