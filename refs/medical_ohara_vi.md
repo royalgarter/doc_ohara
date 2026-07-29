@@ -16,7 +16,9 @@ OHARA (bài nộp RIVF 2026) là framework Space-Time Graph cho truy xuất và 
 
 ## 2. Phần nào của OHARA phù hợp với Y tế
 
-Ý tưởng gốc của thầy (6 agent lâm sàng: Radiology, Pathology, Oncology, ICU, Pharmacy, Treatment Recommendation, dùng RAG + Medical KG + Tool Calling để thành CDSS đầy đủ) có quy mô luận án/sản phẩm, không phải một bài báo. Hướng draft cụ thể hơn (Minkowski spacetime graph + Med-VLM + MMed-RAG + RL) đúng về kiến trúc nhưng gộp 4 bài toán nghiên cứu riêng biệt (causal graph, đa phương thức, retrieval, RL) vào một sản phẩm.
+Ý tưởng gốc: (6 agent lâm sàng: Radiology, Pathology, Oncology, ICU, Pharmacy, Treatment Recommendation, dùng RAG + Medical KG + Tool Calling để thành CDSS đầy đủ) có quy mô luận án/sản phẩm, không phải một bài báo. 
+
+Ý tưởng Draft: (Minkowski spacetime graph + Med-VLM + MMed-RAG + RL) đúng về kiến trúc nhưng gộp 4 bài toán nghiên cứu riêng biệt (causal graph, đa phương thức, retrieval, RL) vào một sản phẩm.
 
 Những phần OHARA có sẵn và fit trực tiếp vào bài toán Y tế:
 
@@ -27,7 +29,7 @@ Những phần OHARA có sẵn và fit trực tiếp vào bài toán Y tế:
 - Engine fusion 8 pha (BM25, vector, ontology, entity, structural) tái dùng không đổi cho truy xuất văn bản EHR như clinical notes, discharge summaries.
 - Trực quan hóa 3D Space-Time đổi trục Z thành timeline bệnh nhân thực, đĩa xuyên tâm thành cấu trúc encounter/note theo từng bệnh nhân thay vì theo tài liệu.
 
-Những phần là việc mới thật sự, không tái dùng được:
+Những phần là việc mới cần triển khai:
 
 - Phân loại edge nhân quả (time-like vs space-like). Có thể bắt đầu bằng heuristic rule-based (thứ tự thời gian cộng prior nhân quả theo mã bệnh, ví dụ thuốc dẫn tới thay đổi chỉ số xét nghiệm trong cửa sổ thời gian lâm sàng) thay vì công thức Minkowski đầy đủ. Nên hoãn phần hình thức hóa vật lý trừ khi reviewer yêu cầu cụ thể, vì nó tăng tính chặt chẽ trình bày nhưng chưa chắc tăng độ chính xác retrieval.
 - Tích hợp UMLS/RadLex cần license UMLS (tài khoản UTS, ký thỏa thuận, thời gian chờ không nhỏ) trước khi làm bất kỳ việc mapping ontology nào. Đây là dependency cần giải quyết trước tiên.
