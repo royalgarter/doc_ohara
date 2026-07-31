@@ -6,7 +6,7 @@
 
 **1\.** **Thông tin chung**
 
-1.1 Tên nhiệm vụ: …………………………………………………………
+1.1 Tên nhiệm vụ: Nền tảng AI Agent hỗ trợ chẩn đoán và điều trị dựa trên đồ thị tri thức không-thời gian (Space-Time Graph) và truy xuất lai đa tín hiệu
 
 1.2 Mã số (nếu có): …………………………………………………………
 
@@ -36,9 +36,17 @@
 
 *Nêu rõ mục tiêu chung và các mục tiêu cụ thể làm cơ sở xác định nội dung và phương pháp nghiên cứu.*
 
-3.1 Mục tiêu chung: …………………………………………………………
+3.1 Mục tiêu chung:
 
-3.2 Mục tiêu cụ thể: …………………………………………………………
+Xây dựng nền tảng AI Agent hỗ trợ chẩn đoán và điều trị (Clinical Decision Support System - CDSS), vận hành theo nguyên tắc Retrieval-Only có kiểm chứng nguồn gốc (provenance), trên nền một đồ thị tri thức y tế (Medical Knowledge Graph) hợp nhất cấu trúc hồ sơ bệnh án, thời gian tiến triển bệnh, và quan hệ nhân quả lâm sàng, kế thừa và mở rộng trực tiếp từ nền tảng kỹ thuật OHARA đã được xây dựng và đánh giá thực nghiệm.
+
+3.2 Mục tiêu cụ thể:
+
+- Xây dựng Medical Knowledge Graph từ dữ liệu hồ sơ bệnh án điện tử (EHR), mở rộng từ cấu trúc Space-Time Graph 5 thành phần $G=(V,E,\tau,\delta,\sigma)$ sẵn có của OHARA, thay ontology tổng quát (SUMO) bằng ontology y tế chuẩn (UMLS/RadLex) và bổ sung quan hệ nhân quả lâm sàng (time-like/space-like edge).
+- Xây dựng engine truy xuất lai đa tín hiệu (RAG) cho văn bản lâm sàng (ghi chú, tóm tắt xuất viện, kết quả cận lâm sàng), tái sử dụng kiến trúc 8 pha (lexical, dense vector, ontology, entity pivot, cross-document, structural) đã kiểm chứng trên hai bộ dữ liệu chuẩn học thuật.
+- Xây dựng các Clinical AI Agent chuyên khoa (Radiology, Pathology, Oncology, ICU, Pharmacy, Treatment Recommendation) trên nền kiến trúc agent điều phối công cụ động (Tool Calling) đã có, mỗi agent là một cấu hình bộ công cụ và ngữ cảnh riêng.
+- Xây dựng cơ chế phân tầng kết quả có kiểm chứng chéo (Principal/Integrity/Explorer) và khả năng chủ động từ chối trả lời khi bằng chứng chưa đủ, nhằm đảm bảo CDSS không tự đưa ra chẩn đoán/quyết định điều trị vượt phạm vi an toàn (tránh phân loại rủi ro cao theo FDA SaMD Class II).
+- Đánh giá thực nghiệm hệ thống trên bộ dữ liệu MIMIC-IV (hồ sơ EHR chuẩn, công khai) theo các chỉ số chất lượng truy xuất, tỷ lệ từ chối đúng, và hiệu năng agent đa bước.
 
 **4\.** **Nội dung và phương pháp nghiên cứu**
 
@@ -46,7 +54,42 @@
 
 *Đối với nhiệm vụ hợp tác quốc tế cần làm rõ: các nội dung nghiên cứu và triển khai của phía Việt Nam; nội dung phối hợp nghiên cứu với đối tác nước ngoài; nội dung hoàn thiện và làm chủ kết quả*
 
-……..
+**Nội dung 1: Xây dựng Medical Knowledge Graph từ dữ liệu EHR**
+
+Cách tiếp cận: kế thừa cấu trúc Space-Time Graph 5 thành phần $G=(V,E,\tau,\delta,\sigma)$ đã kiểm chứng của OHARA (đồ thị hợp nhất cấu trúc phân cấp tài liệu, suy giảm theo thời gian, và liên kết thực thể xuyên tài liệu).
+
+Phương pháp/kỹ thuật:
+- Ingest ghi chú và timeline lâm sàng từ MIMIC-IV vào cấu trúc đồ thị hiện có, tái sử dụng pipeline ingest (LLM structuring, trích xuất thực thể, chuẩn hóa).
+- Thay bộ gán nhãn ontology tổng quát (SUMO) bằng bộ trích xuất khái niệm UMLS/RadLex.
+- Bổ sung 2 loại quan hệ nhân quả vào tập quan hệ $R$: `precedes_causally` (time-like) và `co_occurs_independent` (space-like), khởi đầu bằng heuristic rule-based (thứ tự thời gian kết hợp prior nhân quả theo mã bệnh), hoãn hình thức hóa toán học đầy đủ (Minkowski) sang giai đoạn sau.
+- $\tau$ (ánh xạ thời gian) và $\delta$ (lớp suy giảm) ánh xạ trực tiếp sang vị trí worldline bệnh nhân và tốc độ tiến triển bệnh.
+
+**Nội dung 2: Xây dựng engine RAG lai đa tín hiệu cho văn bản lâm sàng**
+
+Cách tiếp cận: tái sử dụng không đổi engine truy xuất lai 8 pha đã kiểm chứng thực nghiệm trên QASPER và MultiHop-RAG (Hits@10 tương đương dense-vector retrieval tốt nhất).
+
+Phương pháp/kỹ thuật: fusion có trọng số giữa BM25 (lexical), dense vector embedding, overlap ontology (UMLS/RadLex thay SUMO), entity pivot xuyên tài liệu, và structural traversal trên cấu trúc encounter/note của bệnh nhân.
+
+**Nội dung 3: Xây dựng các Clinical AI Agent chuyên khoa (Tool Calling)**
+
+Cách tiếp cận: mở rộng cơ chế agent điều phối công cụ động (`queryAgent`) đã có của OHARA — tại mỗi bước, mô hình chọn công cụ truy xuất phù hợp dựa trên trạng thái bằng chứng hiện có, dừng khi đủ bằng chứng hoặc đạt giới hạn số vòng lặp.
+
+Phương pháp/kỹ thuật: triển khai theo 3 mức tăng dần độ phức tạp:
+1. Agent retrieval-only: chỉ chọn chiến lược truy xuất, không tự sinh chẩn đoán/khuyến nghị điều trị.
+2. Agent theo vai trò chuyên khoa (Radiology, Pathology, Oncology, ICU, Pharmacy, Treatment Recommendation): mỗi vai trò là một cấu hình bộ công cụ (tool registry) và ngữ cảnh riêng trên cùng kiến trúc agent.
+3. Multi-agent orchestration: điều phối nhiều agent chuyên khoa phối hợp trên cùng một ca bệnh, truyền phát hiện dưới dạng evidence node có nguồn gốc rõ ràng, không phải kết luận cuối cùng.
+
+**Nội dung 4: Cơ chế đảm bảo an toàn CDSS (phân tầng và kiểm chứng chéo)**
+
+Cách tiếp cận: tái sử dụng nguyên trạng cơ chế phân tầng Principal/Integrity/Explorer đã kiểm chứng (từ chối 45,6% câu hỏi không có đáp án so với 0,0% của cutoff top-k thông thường, giữ tỷ lệ đúng 91,5% trên câu hỏi có đáp án).
+
+Phương pháp/kỹ thuật: tầng Principal yêu cầu ≥2 nguồn tín hiệu độc lập và bằng chứng xuyên tài liệu mới được chấp nhận; hệ thống chủ động từ chối trả lời khi bằng chứng chưa đủ, thay vì tự suy diễn — đáp ứng ràng buộc CDSS an toàn (Retrieval-Only, provenance-pointer, tránh phân loại thiết bị y tế rủi ro cao FDA SaMD Class II).
+
+**Nội dung 5: Đánh giá thực nghiệm**
+
+Cách tiếp cận: đo lường trên bộ dữ liệu MIMIC-IV theo phương pháp luận đã áp dụng cho OHARA trên QASPER/MultiHop-RAG (Hits@k, MRR, tỷ lệ Principal-hit, tỷ lệ từ chối đúng trên câu hỏi không có đáp án).
+
+Phương pháp/kỹ thuật: đối chứng với baseline RAG đồ thị hiện có (LightRAG, HippoRAG, cùng cấu hình model nền để cô lập biến số kiến trúc); đánh giá riêng hiệu quả của quan hệ nhân quả (causal edge) trong việc giảm truy xuất chẩn đoán cũ/đã bị bác bỏ so với cơ chế chỉ dùng temporal-decay.
 
 **5\.** **Rủi ro và biện pháp quản lý, kiểm soát**
 
