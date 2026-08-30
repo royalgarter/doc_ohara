@@ -19,7 +19,7 @@
 \maketitle
 
 \begin{abstract}
-Flat-chunk retrieval-augmented generation (RAG) processes content without providing a coherent spatial or temporal dimension for human cognition. Effective knowledge bases must reduce cognitive complexity and imitate the way human beings understand structural relationships. We propose OHARA, a framework structured around a \emph{Space-Time Graph} that unifies document structural hierarchy, temporal decay, and cross-document entity pivots into a single substrate. The offline framework maps document components into a 3D sunburst-tunnel visualization (time $\to$ Z-axis, ontology $\to$ sunburst cross-section, document structure $\to$ radial discs), while the online workflow executes an eight-phase hybrid retrieval sequence fusing lexical, dense vector, ontology, entity, structural, and cross-document candidate signals. Evaluated across QASPER (200 academic papers) and MultiHop-RAG (609 news articles) corpora, our tuned pipeline reaches ranking parity with single dense retrieval on QASPER and a marginal MRR gain on MultiHop-RAG (0.812 vs.\ 0.811), while establishing a corroboration-gated Principal tier. This tier abstains on 45.6\% of unanswerable queries (57/125) compared to 0.0\% for standard top-$k$ filtering, holding a 91.5\% Principal-hit rate on answerable queries -- an abstention-behavior gain, not a ranking-quality one: removing the constraint moves Hits@10/MRR by under 0.5 points. We additionally run LightRAG and GraphRAG, both reconfigured to OHARA's exact models, as head-to-head baselines on both corpora. The offline ingest pipeline builds the full semantic graph at roughly \$12 per 1{,}000 documents (single-corpus estimate), and the visual rendering scales sub-linearly to 12{,}323 nodes across five measured points. We report these empirical findings honestly, including small-sample caveats and a tuned-on-test risk in the QASPER weight search, and suggest that OHARA establishes a foundation for seeable and auditable knowledge management.
+Flat-chunk RAG processes content without a coherent spatial or temporal dimension for human cognition. In our point of view, effective knowledge bases must reduce the hard work of cognitive complexity and imitate the way human beings understand structural relationships. We suggest OHARA, a framework built around a \emph{Space-Time Graph} unifying structural hierarchy, temporal decay, and cross-document entity pivots into one substrate. We partition the architecture into two stages: offline, mapping document components into a 3D sunburst-tunnel visualization (time $\to$ Z-axis, ontology $\to$ sunburst cross-section, structure $\to$ radial discs); and online, executing an eight-phase hybrid retrieval sequence fusing lexical, dense vector, ontology, entity, structural, and cross-document signals. Evaluated on QASPER (200 papers) and MultiHop-RAG (609 articles), our tuned pipeline reaches ranking parity with single dense retrieval on QASPER and a marginal MRR gain on MultiHop-RAG (0.812 vs.\ 0.811). Beside of those, we establish a corroboration-gated Principal tier abstaining on 45.6\% of unanswerable queries (57/125) versus 0.0\% for standard top-$k$ filtering, holding a 91.5\% Principal-hit rate on answerable queries -- an abstention-behavior gain, not a ranking-quality one: removing the constraint moves Hits@10/MRR by under 0.5 points. We also run LightRAG and GraphRAG, reconfigured to OHARA's models, as head-to-head baselines. To ensure rapid computation, offline ingest builds the full semantic graph at roughly \$12 per 1{,}000 documents, and rendering scales sub-linearly to 12{,}323 nodes. We report these findings honestly, including small-sample caveats and a tuned-on-test risk in QASPER weight search, and we believe this is just a beginning toward auditable knowledge management.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -28,9 +28,9 @@ retrieval-augmented generation, knowledge graph, information visualization, onto
 
 \section{Introduction}
 
-Flat-chunk RAG pipelines segment documents into linear chunk sequences, stripping away macro-level structural context and temporal dimensions. This design forces large language models and human users to navigate context walls, compounding memory degradation effects \cite{liu2024lost}. Over years, retrieval-augmented generation has expanded into diverse graph-structured frameworks \cite{gao2023ragsurvey}, with graph-based variants surveyed as an emerging subfield \cite{peng2024graphrag_survey}. However, current architectures often over-complicate graph construction without addressing how human cognition processes spatial and temporal hierarchies. OHARA targets structured domains such as research papers, legal filings, and technical manuals by providing a unified Space-Time Graph.
+Flat-chunk RAG pipelines segment documents into linear chunk sequences, stripping away macro-level structural context and temporal dimensions. This design forces large language models and human users to navigate context walls, compounding memory degradation effects \cite{liu2024lost}. Over years, retrieval-augmented generation has expanded into diverse graph-structured frameworks \cite{gao2023ragsurvey}, with graph-based variants surveyed as an emerging subfield \cite{peng2024graphrag_survey}. In contrast, current architectures often over-complicate graph construction without addressing how human cognition processes spatial and temporal hierarchies. In our point of view, OHARA targets structured domains such as research papers, legal filings, and technical manuals by unifying them under a single Space-Time Graph.
 
-An ideal retrieval framework should imitate the way human beings understand organized corpora: mapping high-level concepts down to granular text segments. We explicitly structure our contribution to balance retrieval efficiency with transparent inspection.
+An ideal retrieval framework should imitate the way human beings understand organized corpora, mapping high-level concepts down to granular text segments. We explicitly structure our contribution to balance retrieval efficiency with transparent inspection, reducing the hard work a reader spends reconstructing context by hand.
 
 \textbf{Contributions.}
 \begin{itemize}
@@ -42,7 +42,7 @@ An ideal retrieval framework should imitate the way human beings understand orga
 \item \textbf{SUMO-Grounded Semantic Layer:} An ontology mapping pipeline that anchors visualization coordinates and optimizes tag-expansion candidate retrieval.
 \end{itemize}
 
-In contrast to systems focused solely on ranking metrics, we suggest that knowledge bases must prioritize auditability and human-centric spatial navigation. OHARA does not claim graph-augmented retrieval outranks dense vector baselines; our evaluation (Sec.~\ref{sec:eval}) shows the hybrid pipeline matches the best single signal while rendering a navigable coordinate map.
+In contrast to systems focused solely on ranking metrics, in our point of view, knowledge bases must prioritize auditability and human-centric spatial navigation. OHARA does not claim graph-augmented retrieval outranks dense vector baselines; our evaluation (Sec.~\ref{sec:eval}) shows the hybrid pipeline matches the best single signal while rendering a navigable coordinate map.
 
 \section{Related Work}
 
@@ -86,7 +86,7 @@ spanning structural tree, semantic cross-cutting, and Jaccard-gated cross-docume
 
 The offline stage assigns temporal mapping $\tau: V_{docs} \to \Theta$ along the visual Z-axis and classifies decay parameters $\delta: V_{docs} \to D$ across four classes (\textsc{evergreen} $\lambda{=}10^{-6}$, \textsc{scholarly} $\lambda{=}10^{-4}$, \textsc{current} $\lambda{=}10^{-2}$, \textsc{ephemeral} $\lambda{=}10^{-1}$). Nodes are promoted to \textsc{evergreen} when the in-degree of \textsc{similar\_to} edges $\geq 5$. Narrative edge enrichment $\sigma$ attaches action verbs, tag sets, and temporal relations to cross-document links. Temporal decay scoring uses $w \cdot e^{-\lambda \Delta t}$ under a five-layer protection mechanism (no temporal intent, Principal-tier immunity, high-BM25 immunity, weak-candidate-only, and date-range coverage boost).
 
-To reduce computational overhead during query execution, candidate selection follows a coarse-to-fine pre-filtering workflow:
+To reduce the hard work of computational overhead during query execution, candidate selection follows a coarse-to-fine pre-filtering workflow:
 
 \begin{quote}
 \small
@@ -106,7 +106,7 @@ This pre-filtering stage reduces candidate evaluation complexity by $\sim$50--60
 
 \section{Multi-Phase Hybrid Retrieval Engine}
 
-The online retrieval engine executes an eight-phase candidate processing sequence:
+The online retrieval engine executes an eight-phase candidate processing sequence to extract, filter, and normalize signals:
 \begin{itemize}
 \item \textbf{Phase 0 (Fingerprinting):} Classify query mode, extract SUMO tags, entity hints, and temporal constraints for phrase-length inputs.
 \item \textbf{Phase 0b (TOC Selection):} Execute LLM traversal over seed document tables of contents to establish structural entry points.
@@ -120,7 +120,7 @@ The online retrieval engine executes an eight-phase candidate processing sequenc
 
 Phase 4 fuses max-normalized phase scores via weighted summation (base weights: BM25 1.0, vector 0.5, SUMO 0.4, entity 0.6, cross-doc 0.4, structural 0.3) scaled by query mode multipliers, integrating guarded temporal contributions.
 
-Candidates are categorized into explicit functional tiers to imitate human verification patterns:
+Candidates are categorized into explicit functional tiers to imitate the way human beings verify evidence:
 \begin{itemize}
 \item \textbf{Principal Tier:} Candidates requiring $\geq$2 independent signal contributions (typically \texttt{bm25}$\cap$\texttt{vector}), score above the 75th percentile threshold, and carry cross-document evidence.
 \item \textbf{Integrity Tier:} Direct structural or cross-document neighbors attached to Principal nodes.
@@ -131,7 +131,7 @@ In contrast to standard top-$k$ cutoffs, we suggest that multi-signal corroborat
 
 \section{Ingest Pipeline}
 
-The ingestion workflow is split into two distinct execution halves:
+The ingestion workflow is explicitly split into two distinct execution halves:
 
 \textbf{First Part: Offline Parsing \& Structuring.} Input formats (PDF, EPUB, DOCX) are parsed via LiteParse and converted into DoCO node hierarchies using content-hash-cached LLM processing (\texttt{gemini-2.5-flash-lite}, concurrency 4).
 
@@ -152,7 +152,7 @@ To map macro corpus organization to micro document details, the interactive 3D v
 
 Entities reside at the centroid of mentioning documents, pushed outward by a fixed offset. Semi-transparent decay auras (5/2.5/1/0.4 disc-spans for \textsc{evergreen}/\textsc{scholarly}/\textsc{current}/\textsc{ephemeral}) display temporal reach spatially.
 
-Rendering performance relies on Three.js \texttt{InstancedMesh} batching (one draw call per shape bucket). Benchmarked on headless WebGL rendering from 713 to 12{,}323 nodes, scene rebuild latency grew from 1.5\,s to 2.3\,s while JS heap usage expanded from 52\,MB to 80\,MB (a 17$\times$ node increase causing $\sim$1.7$\times$/$\sim$1.5$\times$ memory and compute growth). This confirms computational scalability is bounded by visual density rather than geometry generation, though the claim rests on five single-run samples rather than repeated trials, so no variance is reported. Fig.~\ref{fig:ui} presents the operational application interface, and Fig.~\ref{fig:viz} illustrates multi-angle visual tunnel projections.
+Rendering performance relies on Three.js \texttt{InstancedMesh} batching (one draw call per shape bucket) to reduce the hard work of geometry generation. Benchmarked on headless WebGL rendering from 713 to 12{,}323 nodes, scene rebuild latency grew from 1.5\,s to 2.3\,s while JS heap usage expanded from 52\,MB to 80\,MB (a 17$\times$ node increase causing $\sim$1.7$\times$/$\sim$1.5$\times$ memory and compute growth). This confirms computational scalability is bounded by visual density rather than geometry generation, though the claim rests on five single-run samples rather than repeated trials, so no variance is reported. Fig.~\ref{fig:ui} presents the operational application interface, and Fig.~\ref{fig:viz} illustrates multi-angle visual tunnel projections.
 
 \begin{figure}[t]
 \centering
