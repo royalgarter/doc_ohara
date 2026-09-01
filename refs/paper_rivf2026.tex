@@ -28,9 +28,9 @@ retrieval-augmented generation, knowledge graph, information visualization, onto
 
 \section{Introduction}
 
-Flat-chunk RAG pipelines segment documents into linear chunk sequences, stripping away macro-level structural context and temporal dimensions. This design forces large language models and human users to navigate context walls, compounding memory degradation effects \cite{liu2024lost}. Over years, retrieval-augmented generation has expanded into diverse graph-structured frameworks \cite{gao2023ragsurvey}, with graph-based variants surveyed as an emerging subfield \cite{peng2024graphrag_survey}. However, current architectures often over-complicate graph construction without addressing how human cognition processes spatial and temporal hierarchies. OHARA targets structured domains such as research papers, legal filings, and technical manuals by providing a unified Space-Time Graph.
+Flat-chunk RAG pipelines segment documents into linear chunk sequences, stripping away macro-level structural context and temporal dimensions. This design forces large language models and human users to navigate context walls, compounding memory degradation effects \cite{liu2024lost}. Over years, retrieval-augmented generation has expanded into diverse graph-structured frameworks \cite{gao2023ragsurvey}, with graph-based variants surveyed as an emerging subfield \cite{peng2024graphrag_survey}. Current architectures, by contrast, often over-complicate graph construction without addressing how human cognition processes spatial and temporal hierarchies. OHARA targets structured domains such as research papers, legal filings, and technical manuals by unifying them under a single Space-Time Graph.
 
-An ideal retrieval framework should imitate the way human beings understand organized corpora: mapping high-level concepts down to granular text segments. We explicitly structure our contribution to balance retrieval efficiency with transparent inspection.
+An ideal retrieval framework should imitate the way human beings understand organized corpora, mapping high-level concepts down to granular text segments. We explicitly structure our contribution to balance retrieval efficiency with transparent inspection, cutting the work a reader spends reconstructing context by hand.
 
 \textbf{Contributions.}
 \begin{itemize}
@@ -46,7 +46,7 @@ Systems focused solely on ranking metrics miss this: knowledge bases also need a
 
 \section{Related Work}
 
-Graph-based RAG architectures (GraphRAG \cite{edge2024graphrag}, LightRAG \cite{guo2024lightrag}, HippoRAG \cite{gutierrez2024hipporag}) extract entity-relation subgraphs to link cross-document concepts. Beside of those, explainable retrieval systems (Self-RAG \cite{asai2023selfrag}, Corrective RAG \cite{yan2024crag}) filter candidates to provide output provenance. However, these frameworks discard explicit document structural hierarchies and lack integrated temporal coordinate systems.
+Graph-based RAG architectures (GraphRAG \cite{edge2024graphrag}, LightRAG \cite{guo2024lightrag}, HippoRAG \cite{gutierrez2024hipporag}) extract entity-relation subgraphs to link cross-document concepts. Besides these, explainable retrieval systems (Self-RAG \cite{asai2023selfrag}, Corrective RAG \cite{yan2024crag}) filter candidates to provide output provenance. However, these frameworks discard explicit document structural hierarchies and lack integrated temporal coordinate systems.
 
 Over years, 2D radial space-filling techniques \cite{stasko2000focus} have successfully visualized complex structural hierarchies. Existing 3D temporal graph visualizers, by contrast, fail to integrate ontology cross-sections with temporal tunnel axes. Table~\ref{tab:related} shows the capability boundaries: OHARA bridges structural hierarchy, ontology grounding, temporal scoring, and spatial visual mapping within a single optimized workflow.
 
@@ -106,7 +106,7 @@ This pre-filtering stage reduces candidate evaluation complexity by $\sim$50--60
 
 \section{Multi-Phase Hybrid Retrieval Engine}
 
-The online retrieval engine executes an eight-phase candidate processing sequence:
+The online retrieval engine executes an eight-phase candidate processing sequence to extract, filter, and normalize signals:
 \begin{itemize}
 \item \textbf{Phase 0 (Fingerprinting):} Classify query mode, extract SUMO tags, entity hints, and temporal constraints for phrase-length inputs.
 \item \textbf{Phase 0b (TOC Selection):} Execute LLM traversal over seed document tables of contents to establish structural entry points.
@@ -120,7 +120,7 @@ The online retrieval engine executes an eight-phase candidate processing sequenc
 
 Phase 4 fuses max-normalized phase scores via weighted summation (base weights: BM25 1.0, vector 0.5, SUMO 0.4, entity 0.6, cross-doc 0.4, structural 0.3) scaled by query mode multipliers, integrating guarded temporal contributions.
 
-Candidates are categorized into explicit functional tiers to imitate human verification patterns:
+Candidates are categorized into explicit functional tiers to imitate the way human beings verify evidence:
 \begin{itemize}
 \item \textbf{Principal Tier:} Candidates requiring $\geq$2 independent signal contributions (typically \texttt{bm25}$\cap$\texttt{vector}), score above the 75th percentile threshold, and carry cross-document evidence.
 \item \textbf{Integrity Tier:} Direct structural or cross-document neighbors attached to Principal nodes.
@@ -131,7 +131,7 @@ Unlike standard top-$k$ cutoffs, multi-signal corroboration lets the system abst
 
 \section{Ingest Pipeline}
 
-The ingestion workflow is split into two distinct execution halves:
+The ingestion workflow is explicitly split into two distinct execution halves:
 
 \textbf{First Part: Offline Parsing \& Structuring.} Input formats (PDF, EPUB, DOCX) are parsed via LiteParse and converted into DoCO node hierarchies using content-hash-cached LLM processing (\texttt{gemini-2.5-flash-lite}, concurrency 4).
 
@@ -152,7 +152,7 @@ To map macro corpus organization to micro document details, the interactive 3D v
 
 Entities reside at the centroid of mentioning documents, pushed outward by a fixed offset. Semi-transparent decay auras (5/2.5/1/0.4 disc-spans for \textsc{evergreen}/\textsc{scholarly}/\textsc{current}/\textsc{ephemeral}) display temporal reach spatially.
 
-Rendering performance relies on Three.js \texttt{InstancedMesh} batching (one draw call per shape bucket). Benchmarked on headless WebGL rendering from 713 to 12{,}323 nodes, scene rebuild latency grew from 1.5\,s to 2.3\,s while JS heap usage expanded from 52\,MB to 80\,MB (a 17$\times$ node increase causing $\sim$1.7$\times$/$\sim$1.5$\times$ memory and compute growth). This confirms computational scalability is bounded by visual density rather than geometry generation, though the claim rests on five single-run samples rather than repeated trials, so no variance is reported. Fig.~\ref{fig:ui} presents the operational application interface, and Fig.~\ref{fig:viz} illustrates multi-angle visual tunnel projections.
+Rendering performance relies on Three.js \texttt{InstancedMesh} batching (one draw call per shape bucket) to cut geometry-generation overhead. Benchmarked on headless WebGL rendering from 713 to 12{,}323 nodes, scene rebuild latency grew from 1.5\,s to 2.3\,s while JS heap usage expanded from 52\,MB to 80\,MB (a 17$\times$ node increase causing $\sim$1.7$\times$/$\sim$1.5$\times$ memory and compute growth). This confirms computational scalability is bounded by visual density rather than geometry generation, though the claim rests on five single-run samples rather than repeated trials, so no variance is reported. Fig.~\ref{fig:ui} presents the operational application interface, and Fig.~\ref{fig:viz} illustrates multi-angle visual tunnel projections.
 
 \begin{figure}[t]
 \centering
